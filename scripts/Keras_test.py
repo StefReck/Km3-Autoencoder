@@ -7,19 +7,62 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from compare_hists import *
+from os import fsync
 
+""" 
+    on batch end params:
+do_validation
+verbose
+metrics
+batch_size
+steps
+epochs
+samples
+{'do_validation': True, 'verbose': 0, 'metrics': ['loss', 'val_loss'], 'batch_size': 10, 'steps': None, 'epochs': 2, 'samples': 270}
 
-class NBatchLogger(Callback):
+    logs
+{'batch': 1, 'size': 10, 'loss': 1.9699528}
+"""
+
+class NBatchLogger_Recent(Callback):
+    #Gibt lOSS aus alle :display batches, gemittelt über die letzten :display batches
     def __init__(self, display):
         self.seen = 0
         self.display = display
+        self.average = 0
 
     def on_batch_end(self, batch, logs={}):
         self.seen += logs.get('size', 0)
-        if self.seen % self.display == 0:
-            # you can access loss, accuracy in self.params['metrics']
-            print('\n{}/{} - loss ....\n'.format(self.seen, self.params['nb_sample']))
+        self.average += logs.get('loss')
+        if self.seen % (self.display*logs.get('size', 0)) == 0:
+            averaged_loss = self.average / (self.display)
+            print ('\nSample {0}/{1} - Batch Loss: {2}'.format(self.seen,self.params['samples'], averaged_loss))
+            self.average = 0
+            
+class NBatchLogger_Epoch(Callback):
+    #Gibt lOSS aus alle display batches, gemittelt über alle batches dieser epoche (das ist das was unter der verbose bar steht)
+    def __init__(self, display, logfile):
+        self.seen = 0
+        self.display = display
+        self.average = 0
+        self.logfile = logfile
 
+    def on_batch_end(self, batch, logs={}):
+        self.seen += logs.get('size', 0)
+        self.average += logs.get('loss')
+        if self.seen % (self.display*logs.get('size', 0)) == 0:
+            averaged_loss = self.average * logs.get('size', 0) / (self.seen)
+            print ('\nSample {0}/{1} - Batch Loss: {2}'.format(self.seen,self.params['samples'], averaged_loss))
+            self.logfile.write('\nSample {0}/{1} - Batch Loss: {2}'.format(self.seen,self.params['samples'], averaged_loss))
+            self.logfile.flush()
+            fsync(self.logfile.fileno())
+            
+    def on_epoch_begin(self, epoch, logs={}):
+        print ("Epoch",epoch)
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.seen = 0
+        self.average  = 0
 
 def setup_simple_model():
     global model
@@ -102,10 +145,17 @@ xyz_labels = np.array(file["y"])
 #setup_conv_model()
 setup_conv_model_API()
 
-# Output batch loss every 1000 batches
-out_batch = NBatchLogger(display=1000)
+# Output batch loss every n batches
+#out_batch = NBatchLogger(display=10)
 
-history = autoencoder.fit(xyz_hists[0:300], xyz_hists[0:300], verbose=0, callbacks=[out_batch], epochs=10, batch_size=32, validation_split=0.1)
+
+with open('Logfile.txt', 'w') as text_file:
+
+    Testlog = NBatchLogger_Recent(display=1)
+    Testlog2 = NBatchLogger_Epoch(display=2, logfile=text_file)
+
+    history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=0, callbacks=[Testlog2], epochs=3, batch_size=10)
+
 
 def plot_history():
     plt.plot(history.history["loss"], label="loss")
