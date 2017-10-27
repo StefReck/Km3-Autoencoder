@@ -40,8 +40,11 @@ train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
 test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
 
 train_file=data_path+train_data
+#this gets killed, maybe too long
+
+train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
 file=h5py.File(train_file, 'r')
-xyz_hists = np.array(file["x"]).reshape((3283375,11,13,18,1))
+xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
 
 
 
