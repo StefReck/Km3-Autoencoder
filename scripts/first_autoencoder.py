@@ -8,7 +8,6 @@ import h5py
 
 def setup_conv_model_API():
     #Wie der autoencoder im sequential style, nur mit API
-    global autoencoder
     
     inputs = Input(shape=(11,13,18,1))
     x = Conv3D(filters=16, kernel_size=(2,2,3), padding='valid', activation='relu')(inputs)
@@ -32,21 +31,25 @@ def setup_conv_model_API():
     #Output 11x13x18 x 1
     
     autoencoder = Model(inputs, decoded)
-    autoencoder.compile(optimizer='adadelta', loss='mse')
+    return autoencoder
 
     
-    
+
 data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
 train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
 test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
 
-file=h5py.File('Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5', 'r')
+train_file=data_path+train_data
+file=h5py.File(train_file, 'r')
 xyz_hists = np.array(file["x"]).reshape((3283375,11,13,18,1))
-   
 
 
-setup_conv_model_API()
 
-history = autoencoder.fit(data_path+train_data, data_path+train_data, epochs=10, batch_size=32)
+autoencoder = setup_conv_model_API()
+autoencoder.compile(optimizer='adam', loss='mse')
 
+
+history = autoencoder.fit(xyz_hists, xyz_hists, epochs=10, batch_size=32)
+
+autoencoder.save('autoencoder_test.h5')
 

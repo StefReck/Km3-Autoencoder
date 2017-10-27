@@ -19,7 +19,9 @@ cd ${FASTTMP}/$PBS_JOBID
 cp ${PBS_O_WORKDIR}/inputfile .
 
 
+module load python/3.5-anaconda
 
+#content of env_cnn.sh
 # load conda virtualenv
 source activate /home/hpc/capn/mppi013h/python_conda_environment/neuralnets
 # required:
