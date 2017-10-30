@@ -52,7 +52,7 @@ autoencoder = setup_conv_model_API()
 autoencoder.compile(optimizer='adam', loss='mse')
 
 
-history = autoencoder.fit(xyz_hists, xyz_hists, epochs=10, batch_size=32)
+history = autoencoder.fit(xyz_hists, xyz_hists, epochs=100, batch_size=32)
 
-autoencoder.save('autoencoder_test.h5')
+autoencoder.save('/home/woody/capn/mppi013h/Km3-Autoencoder/models/autoencoder_test.h5')
 
