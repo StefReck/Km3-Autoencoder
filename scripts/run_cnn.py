@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import h5py
 import numpy as np
+from Loggers import *
 
 """
 train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
@@ -8,13 +9,13 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
     """
     epoch += 1
-    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, n_events=None, tb_logger=tb_logger)
+    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, n_events=None, tb_logger=tb_logger, save_path=save_path)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole
     evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None)
@@ -24,7 +25,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
 
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, n_events=None, tb_logger=False):
+              shuffle, swap_4d_channels, save_path, n_events=None, tb_logger=False):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -53,12 +54,15 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         print ('Training in epoch', epoch, 'on file ', i, ',', f)
 
         if n_events is not None: f_size = n_events  # for testing
-
-        model.fit_generator(
+        
+        
+        with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
+            BatchLogger = NBatchLogger_Epoch(display=10, logfile=log_file)
+            model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
-            steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=1, max_queue_size=10,
-            validation_data=validation_data, validation_steps=validation_steps, callbacks=callbacks)
-        model.save("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
+                steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=1, max_queue_size=10,
+                validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
+            model.save(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
         
         
@@ -148,6 +152,20 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, f_s
         
         
         
+#Kopiert von utilities/input utilities:
+def h5_get_number_of_rows(h5_filepath):
+    """
+    Gets the total number of rows of the first dataset of a .h5 file. Hence, all datasets should have the same number of rows!
+    :param string h5_filepath: filepath of the .h5 file.
+    :return: int number_of_rows: number of rows of the .h5 file in the first dataset.
+    """
+    f = h5py.File(h5_filepath, 'r')
+    #Bug?
+    #number_of_rows = f[f.keys()[0]].shape[0]
+    number_of_rows = f["x"].shape[0]
+    f.close()
+
+    return number_of_rows
         
         
         
