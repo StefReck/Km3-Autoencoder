@@ -54,7 +54,7 @@ train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA11
 """
 #fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
 train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
-teset_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
+test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
 
 #Setup network:
 autoencoder = setup_conv_model_API()
