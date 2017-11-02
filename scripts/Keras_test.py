@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Activation, Conv3D, MaxPooling3D, UpSampling3D, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.callbacks import Callback
 import numpy as np
@@ -75,6 +75,21 @@ def setup_conv_model_API():
     autoencoder = Model(inputs, decoded)
     autoencoder.compile(optimizer='adadelta', loss='mse')
 
+def encoded_conv_model_API():
+    #Erste Hälfte des conv_model_API autoencoder, um zu testen, wie import funktioniert.
+    
+    inputs = Input(shape=(11,13,18,1))
+    x = Conv3D(filters=16, kernel_size=(2,2,3), padding='valid', activation='relu', trainable=False)(inputs)
+    #10x12x16 x 16
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x)
+    #5x6x8 x 16
+    x = Conv3D(filters=8, kernel_size=(3,3,3), padding='valid', activation='relu', trainable=False )(x)
+    #3x4x6 x 8
+    encoded = Conv3D(filters=4, kernel_size=(2,3,3), padding='valid', activation='relu', trainable=False )(x)
+    #2x2x4 x 4
+
+    autoencoder = Model(inputs, encoded)
+    return autoencoder
     
     
 data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
@@ -89,18 +104,30 @@ xyz_labels = np.array(file["y"])
 
 #setup_simple_model()
 #setup_conv_model()
-setup_conv_model_API()
+#setup_conv_model_API()
 
 # Output batch loss every n batches
 #out_batch = NBatchLogger(display=10)
 
+
+autoencoder=load_model("../models/trained_autoencoder_test_epoch1.h5")
+encoder=encoded_conv_model_API()
+encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
+encoder.compile(optimizer='adam', loss='mse')
+
+weights=[]
+weights2=[]
+for layer in autoencoder.layers:
+    weights.append(layer.get_weights())
+for layer in encoder.layers:
+    weights2.append(layer.get_weights())
 
 with open('Logfile.txt', 'w') as text_file:
 
     Testlog = NBatchLogger_Recent(display=1)
     Testlog2 = NBatchLogger_Epoch(display=1, logfile=text_file)
 
-    history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=1, callbacks=[Testlog2], epochs=2, batch_size=10)
+    #history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=1, callbacks=[Testlog2], epochs=2, batch_size=10)
 
 
 def plot_history():

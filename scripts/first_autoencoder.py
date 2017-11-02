@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Model
-from keras.layers import Input, Conv3D, UpSampling3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Conv3D, UpSampling3D, Conv3DTranspose, AveragePooling3D, Dense, Reshape, Flatten
 import numpy as np
 import h5py
 from run_cnn import *
@@ -33,6 +33,39 @@ def setup_conv_model_API():
     autoencoder = Model(inputs, decoded)
     return autoencoder
 
+def setup_vgg_like():
+    #a vgg-like autoencoder, witht lots of convolutional layers
+    
+    inputs = Input(shape=(11,13,18,1))
+    
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal')(inputs)
+    x = Conv3D(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu', kernel_initializer='he_normal')(x)
+    #10x12x16 x 32
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x)
+    #5x6x8 x 64
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+    x = Conv3D(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu', kernel_initializer='he_normal' )(x)
+    #4x4x6 x 64
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x)
+    #2x2x3 x 64
+
+    #2x2x3 x 64
+    x = UpSampling3D((2, 2, 2))(x)
+    #4x4x6 x 64
+    x = Conv3DTranspose(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu' )(x)
+    #5x6x8 x 64
+    x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+    x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+    x = UpSampling3D((2, 2, 2))(x)
+    #10x12x16 x 64
+    x = Conv3DTranspose(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu' )(x)
+    #11x13x18 x 32
+    x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+    decoded = Conv3DTranspose(filters=1, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+    #Output 11x13x18 x 1
+    autoencoder = Model(inputs, decoded)
+    return autoencoder
     
 #Path to training and testing datafiles on HPC
 data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
@@ -57,15 +90,15 @@ train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
 test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
 
 #Setup network:
-autoencoder = setup_conv_model_API()
+autoencoder = setup_vgg_like()
 autoencoder.compile(optimizer='adam', loss='mse')
 
 #Train network, write logfile, save network, evaluate network
-train_and_test_model(model=autoencoder, modelname="autoencoder_test", train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
+train_and_test_model(model=autoencoder, modelname="autoencoder_vgg_0", train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
                          shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None, save_path=home_path)
 
 
 
-#history = autoencoder.fit(xyz_hists[0:320], xyz_hists[0:320], epochs=1, batch_size=32)
-#autoencoder.save('/home/woody/capn/mppi013h/Km3-Autoencoder/models/autoencoder_test.h5')
+
+
 

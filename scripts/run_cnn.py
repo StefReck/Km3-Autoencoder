@@ -57,7 +57,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         
         
         with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
-            BatchLogger = NBatchLogger_Epoch(display=10, logfile=log_file)
+            BatchLogger = NBatchLogger_Epoch(display=100, logfile=log_file)
             model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=1, max_queue_size=10,
