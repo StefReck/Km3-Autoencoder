@@ -42,7 +42,7 @@ train_file=data_path+train_data
 test_file=data_path+test_data
 
 #Path to the Km3_net-Autoencoder folder on HPC:
-home_path="/home/woody/capn/mppi013h/Km3-Autoencoder"
+home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
 
 #For debug testing on my laptop these are overwritten:
