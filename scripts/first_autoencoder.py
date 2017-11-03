@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Input, Conv3D, UpSampling3D, Conv3DTranspose, AveragePooling3D, Dense, Reshape, Flatten
 import numpy as np
 import h5py
@@ -67,15 +67,35 @@ def setup_vgg_like():
     autoencoder = Model(inputs, decoded)
     return autoencoder
     
+
+
+#Define starting epoch and name of model
+#This is also used to identify saved models
+epoch=1
+modelname="autoencoder_vgg_0"
+
+#How many additinal epochs the network will be trained for by executing this script:
+runs=2
+
+
+
 #Path to training and testing datafiles on HPC
 data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
 train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
 test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
+zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
 train_file=data_path+train_data
 test_file=data_path+test_data
+zero_center_file=data_path+zero_center_data
+
 
 #Path to the Km3_net-Autoencoder folder on HPC:
 home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
+
+
+#fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
+train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
+test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
 
 
 #For debug testing on my laptop these are overwritten:
@@ -85,16 +105,20 @@ train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA11
 #file=h5py.File(train_file, 'r')
 #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
 """
-#fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
-train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
-test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
 
 #Setup network:
-autoencoder = setup_vgg_like()
-autoencoder.compile(optimizer='adam', loss='mse')
+#Create new one if epoch=0, or load saved one if epoch>0
+if epoch == 0:
+    model = setup_vgg_like()
+    #Default: keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    model.compile(optimizer='adam', loss='mse')
+else:
+    model = load_model(home_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
 
-#Train network, write logfile, save network, evaluate network
-train_and_test_model(model=autoencoder, modelname="autoencoder_vgg_0", train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
+#Execute training
+for current_epoch in range(epoch,epoch+runs):
+    #Train network, write logfile, save network, evaluate network
+    train_and_test_model(model=autoencoder, modelname=modelname, train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=current_epoch,
                          shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None, save_path=home_path)
 
 

@@ -110,17 +110,15 @@ xyz_labels = np.array(file["y"])
 #out_batch = NBatchLogger(display=10)
 
 
-autoencoder=load_model("../models/trained_autoencoder_test_epoch1.h5")
-encoder=encoded_conv_model_API()
-encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
-encoder.compile(optimizer='adam', loss='mse')
+autoencoder=load_model("../models/trained_autoencoder_vgg_0_epoch1.h5")
+#encoder=encoded_conv_model_API()
+#encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
+#encoder.compile(optimizer='adam', loss='mse')
 
-weights=[]
-weights2=[]
-for layer in autoencoder.layers:
-    weights.append(layer.get_weights())
-for layer in encoder.layers:
-    weights2.append(layer.get_weights())
+for i in range(5):
+    compare_events(i,autoencoder)
+
+
 
 with open('Logfile.txt', 'w') as text_file:
 
@@ -143,6 +141,8 @@ def plot_history():
 def compare_events(no, model):
     original = xyz_hists[no].reshape(11,13,18)
     prediction = model.predict_on_batch(xyz_hists[no:(no+1)]).reshape(11,13,18)
+    loss = model.evaluate(x=xyz_hists[no:(no+1)], y=xyz_hists[no:(no+1)])
+    print("Loss: ",loss)
     compare_hists(original, prediction)
 
 """
