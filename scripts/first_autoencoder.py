@@ -118,7 +118,7 @@ else:
 #Execute training
 for current_epoch in range(epoch,epoch+runs):
     #Train network, write logfile, save network, evaluate network
-    train_and_test_model(model=autoencoder, modelname=modelname, train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=current_epoch,
+    train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=current_epoch,
                          shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None, save_path=home_path)
 
 
