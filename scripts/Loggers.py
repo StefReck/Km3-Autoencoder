@@ -42,20 +42,23 @@ class NBatchLogger_Epoch(Callback):
         self.average  = 0
 
 
-
-#Veraltet:
 class NBatchLogger_Recent(Callback):
     #Gibt lOSS aus über alle :display batches, gemittelt über die letzten :display batches
-    def __init__(self, display):
+    def __init__(self, display, logfile):
         self.seen = 0
         self.display = display
         self.average = 0
-
+        self.logfile = logfile
+        self.logfile.write("#Batch\tLoss")
+                           
     def on_batch_end(self, batch, logs={}):
-        self.seen += logs.get('size', 0)
+        self.seen += 1
         self.average += logs.get('loss')
-        if self.seen % (self.display*logs.get('size', 0)) == 0:
+        if self.seen % (self.display) == 0:
             averaged_loss = self.average / (self.display)
-            print ('\nSample {0}/{1} - Batch Loss: {2}'.format(self.seen,self.params['samples'], averaged_loss))
+            print('\n{0}\t{1}'.format(self.seen, averaged_loss))
+            self.logfile.write('\n{0}\t{1}'.format(self.seen, averaged_loss))
+            self.logfile.flush()
+            fsync(self.logfile.fileno())
             self.average = 0
 

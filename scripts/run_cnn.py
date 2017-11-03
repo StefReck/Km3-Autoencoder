@@ -17,8 +17,8 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     epoch += 1
     fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, n_events=None, tb_logger=tb_logger, save_path=save_path)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
-    #evaluate model evaluated und printet es in der konsole
-    evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None)
+    #evaluate model evaluated und printet es in der konsole und in file
+    evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, save_path=save_path, modelname=modelname, epoch=epoch)
 
     return epoch
 
@@ -66,7 +66,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, save_path, modelname, epoch, n_events=None,):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -87,6 +87,9 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean),
             steps=int(f_size / batchsize), max_queue_size=10)
     print ('Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')')
+    
+    with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_test.txt', 'w') as test_file:
+        test_file.write('Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')')
         
         
         

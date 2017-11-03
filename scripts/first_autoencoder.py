@@ -5,6 +5,8 @@ from keras.layers import Input, Conv3D, UpSampling3D, Conv3DTranspose, AveragePo
 import numpy as np
 import h5py
 from run_cnn import *
+import os.path
+import sys
 
 def setup_conv_model_API():
     #Wie der autoencoder im sequential style, nur mit API
@@ -93,18 +95,26 @@ zero_center_file=data_path+zero_center_data
 home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
 
-#fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
-train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
-test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
-
 
 #For debug testing on my laptop these are overwritten:
 """
 home_path="../"
 train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+test_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
 #file=h5py.File(train_file, 'r')
 #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
 """
+
+
+#fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
+train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
+test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
+
+
+proposed_model_filename = home_path+"models/trained_" + modelname + '_epoch' + str(epoch+1) + '.h5'
+if(os.path.isfile(proposed_model_filename)):
+    sys.exit(proposed_model_filename+ "exists already!")
+
 
 #Setup network:
 #Create new one if epoch=0, or load saved one if epoch>0

@@ -104,28 +104,22 @@ xyz_labels = np.array(file["y"])
 
 #setup_simple_model()
 #setup_conv_model()
-#setup_conv_model_API()
-
-# Output batch loss every n batches
-#out_batch = NBatchLogger(display=10)
+setup_conv_model_API()
 
 
-autoencoder=load_model("../models/trained_autoencoder_vgg_0_epoch1.h5")
+#autoencoder=load_model("../models/trained_autoencoder_vgg_0_epoch1.h5")
 #encoder=encoded_conv_model_API()
 #encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
 #encoder.compile(optimizer='adam', loss='mse')
-
-for i in range(5):
-    compare_events(i,autoencoder)
 
 
 
 with open('Logfile.txt', 'w') as text_file:
 
-    Testlog = NBatchLogger_Recent(display=1)
-    Testlog2 = NBatchLogger_Epoch(display=1, logfile=text_file)
+    Testlog = NBatchLogger_Recent(display=1, logfile=text_file)
+    #Testlog = NBatchLogger_Epoch(display=1, logfile=text_file)
 
-    #history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=1, callbacks=[Testlog2], epochs=2, batch_size=10)
+    history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=1, callbacks=[Testlog], epochs=2, batch_size=10)
 
 
 def plot_history():
