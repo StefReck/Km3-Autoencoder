@@ -85,7 +85,6 @@ def make_3d_plots(hist_org, hist_pred):
     fig.tight_layout()
     plt.show()
 
-
 def compare_hists(hist_org, hist_pred):
     make_3d_plots(reshape_3d_to_3d(hist_org), reshape_3d_to_3d(hist_pred))
 

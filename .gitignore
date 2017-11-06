@@ -1,4 +1,5 @@
 *~
 scripts/Daten/*
+scripts/__pycache__
 models/*
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Activation, Conv3D, MaxPooling3D, UpSampling3D, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Flatten, Activation, Conv3D, MaxPooling3D, UpSampling3D, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
@@ -104,23 +104,19 @@ xyz_labels = np.array(file["y"])
 
 #setup_simple_model()
 #setup_conv_model()
-setup_conv_model_API()
+#setup_conv_model_API()
 
-
-#autoencoder=load_model("../models/trained_autoencoder_vgg_0_epoch1.h5")
 #encoder=encoded_conv_model_API()
 #encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
 #encoder.compile(optimizer='adam', loss='mse')
 
 
-
+"""
 with open('Logfile.txt', 'w') as text_file:
-
     Testlog = NBatchLogger_Recent(display=1, logfile=text_file)
-    #Testlog = NBatchLogger_Epoch(display=1, logfile=text_file)
-
+    Testlog = NBatchLogger_Epoch(display=1, logfile=text_file)
     history = autoencoder.fit(xyz_hists[0:100], xyz_hists[0:100], verbose=1, callbacks=[Testlog], epochs=2, batch_size=10)
-
+"""
 
 def plot_history():
     plt.plot(history.history["loss"], label="loss")
@@ -138,6 +134,79 @@ def compare_events(no, model):
     loss = model.evaluate(x=xyz_hists[no:(no+1)], y=xyz_hists[no:(no+1)])
     print("Loss: ",loss)
     compare_hists(original, prediction)
+
+
+def plot_some_comparisons(model):
+    for i in range(5):
+        compare_events(i,model)
+    
+#autoencoder=load_model("../models/trained_autoencoder_vgg_0_epoch3.h5")
+
+#plot_some_comparisons(autoencoder)
+#compare_events(0,autoencoder)
+
+
+def setup_vgg_like(make_autoencoder, modelpath_and_name=None):
+    #a vgg-like autoencoder, witht lots of convolutional layers
+    #If make_autoencoder==False only the first part of the autoencoder (encoder part) will be generated
+    #These layers are frozen then
+    #The weights of the original model can be imported then by using load_weights('xxx.h5', by_name=True)
+    
+    #modelpath_and_name is used to load the encoder part for supervised training, 
+    #and only needed if make_autoencoder==False
+    
+    inputs = Input(shape=(11,13,18,1))
+    
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder)(inputs)
+    x = Conv3D(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder)(x)
+    #10x12x16 x 32
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x)
+    #5x6x8 x 64
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
+    x = Conv3D(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
+    #4x4x6 x 64
+    encoded = AveragePooling3D((2, 2, 2), padding='valid')(x)
+    #2x2x3 x 64
+
+    if make_autoencoder == True:
+        #The Decoder part:
+        
+        #2x2x3 x 64
+        x = UpSampling3D((2, 2, 2))(encoded)
+        #4x4x6 x 64
+        x = Conv3DTranspose(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu' )(x)
+        #5x6x8 x 64
+        x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+        x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal' )(x)
+        x = UpSampling3D((2, 2, 2))(x)
+        #10x12x16 x 64
+        x = Conv3DTranspose(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu' )(x)
+        #11x13x18 x 32
+        x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+        decoded = Conv3DTranspose(filters=1, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal')(x)
+        #Output 11x13x18 x 1
+        autoencoder = Model(inputs, decoded)
+        return autoencoder
+    
+    elif make_autoencoder == False:
+        #Replacement for the decoder part for supervised training:
+        
+        encoder= Model(inputs=inputs, outputs=encoded)
+        encoder.load_weights(modelpath_and_name, by_name=True)
+        
+        x = Flatten()(encoded)
+        x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
+        x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
+        nb_classes=1
+        outputs = Dense(nb_classes, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
+        
+model = setup_vgg_like(make_autoencoder=False, modelpath_and_name="../models/trained_autoencoder_vgg_0_epoch3.h5")
+
+layer.get_weights()
 
 """
 train_on_batch(self, x, y, class_weight=None, sample_weight=None)
