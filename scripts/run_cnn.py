@@ -9,23 +9,23 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
     """
     epoch += 1
-    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, n_events=None, tb_logger=tb_logger, save_path=save_path)
+    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
-    evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, save_path=save_path, modelname=modelname, epoch=epoch)
+    evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, save_path=save_path, is_autoencoder=is_autoencoder, modelname=modelname, epoch=epoch)
 
     return epoch
 
 
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, save_path, n_events=None, tb_logger=False):
+              shuffle, swap_4d_channels, save_path, is_autoencoder, n_events=None, tb_logger=False):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -57,16 +57,21 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         
         
         with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
-            BatchLogger = NBatchLogger_Epoch(display=100, logfile=log_file)
+            
+            if is_autoencoder == True:
+                BatchLogger = NBatchLogger_Recent(display=100, logfile=log_file)
+            else:
+                BatchLogger = NBatchLogger_Recent_Acc(display=100, logfile=log_file)
+                
             model.fit_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=0, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, save_path, modelname, epoch, n_events=None,):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, save_path, modelname, epoch, is_autoencoder, n_events=None,):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -84,7 +89,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         if n_events is not None: f_size = n_events  # for testing
 
         evaluation = model.evaluate_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean),
             steps=int(f_size / batchsize), max_queue_size=10)
     print ('Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')')
     
@@ -93,9 +98,8 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         
         
         
-#Copied from utilities/cnn_utilities:
-    
-def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
+#Copied from cnn_utilities and modified:
+def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
     """
     Generator that returns batches of images ('xs') and labels ('ys') from a h5 file.
     :param string filepath: Full filepath of the input h5 file, e.g. '/path/to/file/file.h5'.
@@ -139,20 +143,120 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, f_s
             y_values = f['y'][n_entries:n_entries+batchsize]
             y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
             
-            #Erstmal rausgenommen für autoencoder, denn bei mir sind die labels auch xs
-            ys = 0 #np.zeros((batchsize, class_type[0]), dtype=np.float32)
-            # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
-            """
-            for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
-                ys[c] = encode_targets(y_val, class_type)
-            """
             # we have read one more batch from this file
             n_entries += batchsize
-
-            output = (xs, xs) if yield_mc_info is False else (xs, xs) + (y_values,)
-            yield output
+            
+            #Modified for autoencoder:
+            if is_autoencoder == True:
+                output = (xs, xs)
+                yield output
+                
+            else:
+                ys = np.zeros((batchsize, class_type[0]), dtype=np.float32)
+                # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
+                for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
+                    ys[c] = encode_targets(y_val, class_type)
+                output = (xs, ys) if yield_mc_info is False else (xs, ys) + (y_values,)
+                yield output
+            
         f.close() # this line of code is actually not reached if steps=f_size/batchsize
         
+        
+#Copied unchanged from cnn_utilities
+def encode_targets(y_val, class_type):
+    """
+    Encodes the labels (classes) of the images.
+    :param ndarray(ndim=1) y_val: Array that contains ALL event class information for one event.
+           ---------------------------------------------------------------------------------------------------------------------------
+           Current content: [event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, dir_x/y/z -> 5/6/7, time -> 8]
+           ---------------------------------------------------------------------------------------------------------------------------
+    :param (int, str) class_type: Tuple with the umber of output classes and a string identifier to specify the exact output classes.
+                                  I.e. (2, 'muon-CC_to_elec-CC')
+    :return: ndarray(ndim=1) train_y: Array that contains the encoded class label information of the input event.
+    """
+    def get_class_up_down_categorical(dir_z, n_neurons):
+        """
+        Converts the zenith information (dir_z) to a binary up/down value.
+        :param float32 dir_z: z-direction of the event_track (which contains dir_z).
+        :param int n_neurons: defines the number of neurons in the last cnn layer that should be used with the categorical array.
+        :return ndarray(ndim=1) y_cat_up_down: categorical y ('label') array which can be fed to a NN.
+                                               E.g. [0],[1] for n=1 or [0,1], [1,0] for n=2
+        """
+        # analyze the track info to determine the class number
+        up_down_class_value = int(np.sign(dir_z)) # returns -1 if dir_z < 0, 0 if dir_z==0, 1 if dir_z > 0
+
+        if up_down_class_value == 0:
+            print ('Warning: Found an event with dir_z==0. Setting the up-down class randomly.')
+            #TODO maybe [0.5, 0.5], but does it make sense with cat_crossentropy?
+            up_down_class_value = np.random.randint(2)
+
+        if up_down_class_value == -1: up_down_class_value = 0 # Bring -1,1 values to 0,1
+
+        y_cat_up_down = np.zeros(n_neurons, dtype='float32')
+
+        if n_neurons == 1:
+            y_cat_up_down[0] = up_down_class_value # 1 or 0 for up/down
+        else:
+            y_cat_up_down[up_down_class_value] = 1 # [0,1] or [1,0] for up/down
+
+        return y_cat_up_down
+
+
+    def convert_particle_class_to_categorical(particle_type, is_cc, num_classes=4):
+        """
+        Converts the possible particle types (elec/muon/tau , NC/CC) to a categorical type that can be used as tensorflow input y
+        :param int particle_type: Specifies the particle type, i.e. elec/muon/tau (12, 14, 16). Negative values for antiparticles.
+        :param int is_cc: Specifies the interaction channel. 0 = NC, 1 = CC.
+        :param int num_classes: Specifies the total number of classes that will be discriminated later on by the CNN. I.e. 2 = elec_NC, muon_CC.
+        :return: ndarray(ndim=1) categorical: returns the categorical event type. I.e. (particle_type=14, is_cc=1) -> [0,0,1,0] for num_classes=4.
+        """
+        if num_classes == 4:
+            particle_type_dict = {(12, 0): 0, (12, 1): 1, (14, 1): 2, (16, 1): 3}  # 0: elec_NC, 1: elec_CC, 2: muon_CC, 3: tau_CC
+        else:
+            raise ValueError('A number of classes !=4 is currently not supported!')
+
+        category = int(particle_type_dict[(abs(particle_type), is_cc)])
+        categorical = np.zeros(num_classes, dtype='int8') # TODO try bool
+        categorical[category] = 1
+
+        return categorical
+
+
+    if class_type[1] == 'muon-CC_to_elec-NC':
+        categorical_type = convert_particle_class_to_categorical(y_val[1], y_val[3], num_classes=4)
+        train_y = np.zeros(class_type[0], dtype='float32') # 1 ([0], [1]) or 2 ([0,1], [1,0]) neurons
+
+        if class_type[0] == 1: # 1 neuron
+            if categorical_type[2] != 0:
+                train_y[0] = categorical_type[2] # =0 if elec-NC, =1 if muon-CC
+
+        else: # 2 neurons
+            assert class_type[0] == 2
+            train_y[0] = categorical_type[0]
+            train_y[1] = categorical_type[2]
+
+    elif class_type[1] == 'muon-CC_to_elec-CC':
+        categorical_type = convert_particle_class_to_categorical(y_val[1], y_val[3], num_classes=4)
+        train_y = np.zeros(class_type[0], dtype='float32')
+
+        if class_type[0] == 1: # 1 neuron
+            if categorical_type[2] != 0:
+                train_y[0] = categorical_type[2] # =0 if elec-CC, =1 if muon-CC
+
+        else: # 2 neurons
+            assert class_type[0] == 2
+            train_y[0] = categorical_type[1]
+            train_y[1] = categorical_type[2]
+
+    elif class_type[1] == 'up_down':
+        #supports both 1 or 2 neurons at the cnn softmax end
+        train_y = get_class_up_down_categorical(y_val[7], class_type[0])
+
+    else:
+        print ("Class type " + str(class_type) + " not supported!")
+        return y_val
+
+    return train_y
         
         
 #Kopiert von utilities/input utilities:

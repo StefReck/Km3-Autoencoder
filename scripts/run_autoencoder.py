@@ -14,22 +14,31 @@ from model_definitions import *
 import os.path
 import sys
 
-
-#How many additinal epochs the network will be trained for by executing this script:
-runs=2
-
-#Wheter this is self-supervised autoencoder training or supervised encoder training
-autoencoder_stage=True
-
-#If autoencoder_stage==False, encoder_epoch is used to identify a possibly
-#existing supervised-trained encoder-stage network
-encoder_epoch=0
-
-#Define starting epoch and name of autoencoder model
-epoch=1
-
 #Tag for the model used; Identifies both autoencoder and encoder
 modeltag="vgg_0"
+
+#How many additinal epochs the network will be trained for by executing this script:
+runs=1
+
+#Type of training/network
+# 0: autoencoder
+# 1: encoder+ from autoencoder w/ frozen layers
+# 2: encoder+ from scratch, completely unfrozen
+autoencoder_stage=1
+
+#Define starting epoch of autoencoder model
+epoch=3
+
+
+#If in encoder stage, encoder_epoch is used to identify a possibly
+#existing supervised-trained encoder network
+encoder_epoch=0
+#Define what the supervised encoder network is trained for, and how many neurons are in the output
+#This also defines the name of the saved model
+class_type = (2, 'up_down')
+
+
+
 
 
 
@@ -74,13 +83,13 @@ def check_for_file(proposed_filename):
 #Setup network:
     
 #Autoencoder self-supervised training:
-if autoencoder_stage==True:
+if autoencoder_stage==0:
     modelname = modeltag + "_autoencoder"
     
     if epoch == 0:
         #Create a new autoencoder network
         
-        model = setup_vgg_like(make_autoencoder=True)
+        model = setup_vgg_like(autoencoder_stage=0)
         #Default: keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
         model.compile(optimizer='adam', loss='mse')
         
@@ -99,39 +108,76 @@ if autoencoder_stage==True:
         train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                              batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=current_epoch,
                              shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None,
-                             save_path=home_path)
+                             save_path=home_path, is_autoencoder=True)
 
         
 #Encoder supervised training:
-elif autoencoder_stage==False:
+elif autoencoder_stage==1:
     #Load an existing autoencoder network, modify and train it supervised
-    modelname = modeltag + "_supervised"
     
-    if epoch == 0:
-        #Create a new enocder network:
+    #name of the autoencoder model file that the encoder part is taken from:
+    autoencoder_model = home_path+"models/trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
+    
+    #name of the supervised model:
+    modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1]
+    
+    if encoder_epoch == 0:
+        #Create a new encoder network:
         
-        model = setup_vgg_like(make_autoencoder=False, 
-                               modelpath_and_name=home_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+        model = setup_vgg_like(autoencoder_stage=1, modelpath_and_name=autoencoder_model)
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
     else:
         #Load an existing trained encoder network and train that
     
-        model = load_model(home_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+        model = load_model(home_path+"models/trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
     
     
     #Execute training
-    for current_epoch in range(epoch,epoch+runs):
+    for current_epoch in range(encoder_epoch,encoder_epoch+runs):
         #Does the model we are about to save exist already?
         check_for_file(home_path+"models/trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
         
         #Train network, write logfile, save network, evaluate network
         train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                             batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=current_epoch,
+                             batchsize=32, n_bins=(11,13,18,1), class_type=class_type, xs_mean=None, epoch=current_epoch,
                              shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None,
-                             save_path=home_path)
+                             save_path=home_path, is_autoencoder=False)
 
 
+
+#Encoder supervised training with completely unfrozen model:
+elif autoencoder_stage==2:
+    #Load an existing autoencoder network, modify and train it supervised
+    
+    #name of the autoencoder model file that the encoder part is taken from:
+    autoencoder_model = home_path+"models/trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
+    
+    #name of the supervised model:
+    modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1]
+    
+    if encoder_epoch == 0:
+        #Create a new encoder network:
+        
+        model = setup_vgg_like(autoencoder_stage=2, modelpath_and_name=autoencoder_model)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    
+    else:
+        #Load an existing trained encoder network and train that
+    
+        model = load_model(home_path+"models/trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+    
+    
+    #Execute training
+    for current_epoch in range(encoder_epoch,encoder_epoch+runs):
+        #Does the model we are about to save exist already?
+        check_for_file(home_path+"models/trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
+        
+        #Train network, write logfile, save network, evaluate network
+        train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+                             batchsize=32, n_bins=(11,13,18,1), class_type=class_type, xs_mean=None, epoch=current_epoch,
+                             shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None,
+                             save_path=home_path, is_autoencoder=False)
 
 
 

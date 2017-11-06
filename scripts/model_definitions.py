@@ -8,30 +8,43 @@ from keras.models import Model
 from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 
 
-def setup_vgg_like(make_autoencoder, modelpath_and_name=None):
+def setup_vgg_like(autoencoder_stage, modelpath_and_name=None):
     #a vgg-like autoencoder, witht lots of convolutional layers
-    #If make_autoencoder==False only the first part of the autoencoder (encoder part) will be generated
+    
+    #autoencoder_stage: Type of training/network
+    # 0: autoencoder
+    # 1: encoder+ from autoencoder w/ frozen layers
+    # 2: encoder+ from scratch, completely unfrozen
+    
+    #If autoencoder_stage==1 only the first part of the autoencoder (encoder part) will be generated
     #These layers are frozen then
     #The weights of the original model can be imported then by using load_weights('xxx.h5', by_name=True)
     
     #modelpath_and_name is used to load the encoder part for supervised training, 
     #and only needed if make_autoencoder==False
     
+    if autoencoder_stage == 1:
+        #Freeze encoder layers
+        train=False
+    else:
+        train=True
+    
+    
     inputs = Input(shape=(11,13,18,1))
     
-    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder)(inputs)
-    x = Conv3D(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder)(x)
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=train)(inputs)
+    x = Conv3D(filters=32, kernel_size=(2,2,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=train)(x)
     #10x12x16 x 32
     x = AveragePooling3D((2, 2, 2), padding='valid')(x)
     #5x6x8 x 64
-    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
-    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
-    x = Conv3D(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=make_autoencoder )(x)
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=train )(x)
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=train )(x)
+    x = Conv3D(filters=64, kernel_size=(2,3,3), padding='valid', activation='relu', kernel_initializer='he_normal', trainable=train )(x)
     #4x4x6 x 64
     encoded = AveragePooling3D((2, 2, 2), padding='valid')(x)
     #2x2x3 x 64
 
-    if make_autoencoder == True:
+    if autoencoder_stage == 0:
         #The Decoder part:
         
         #2x2x3 x 64
@@ -51,17 +64,18 @@ def setup_vgg_like(make_autoencoder, modelpath_and_name=None):
         autoencoder = Model(inputs, decoded)
         return autoencoder
     
-    elif make_autoencoder == False:
+    else:
         #Replacement for the decoder part for supervised training:
         
-        encoder= Model(inputs=inputs, outputs=encoded)
-        encoder.load_weights(modelpath_and_name, by_name=True)
+        if autoencoder_stage == 1:
+            #Load weights of encoder part from existing autoencoder
+            encoder= Model(inputs=inputs, outputs=encoded)
+            encoder.load_weights(modelpath_and_name, by_name=True)
         
         x = Flatten()(encoded)
         x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
         x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
-        nb_classes=1
-        outputs = Dense(nb_classes, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
