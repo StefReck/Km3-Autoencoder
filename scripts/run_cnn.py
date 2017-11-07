@@ -2,6 +2,7 @@
 import h5py
 import numpy as np
 from Loggers import *
+from keras import backend as K
 
 """
 train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
@@ -15,12 +16,21 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
     """
     epoch += 1
+    if epoch > 1 and lr_decay > 0:
+        lr *= 1 - float(lr_decay)
+        K.set_value(model.optimizer.lr, lr)
+        print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
+
     fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
-    evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, save_path=save_path, is_autoencoder=is_autoencoder, modelname=modelname, epoch=epoch)
+    return_message = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
 
-    return epoch
+    with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_test.txt', 'w') as test_file:
+        test_file.write('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
+        test_file.write(return_message)
+
+    return epoch, lr
 
 
 
@@ -71,7 +81,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, save_path, modelname, epoch, is_autoencoder, n_events=None,):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, n_events=None,):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -91,12 +101,10 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         evaluation = model.evaluate_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean),
             steps=int(f_size / batchsize), max_queue_size=10)
-    print ('Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')')
-    
-    with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_test.txt', 'w') as test_file:
-        test_file.write('Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')')
-        
-        
+    return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
+    print (return_message)
+    return return_message
+
         
 #Copied from cnn_utilities and modified:
 def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
@@ -275,7 +283,39 @@ def h5_get_number_of_rows(h5_filepath):
     return number_of_rows
         
         
-        
+#Kopiert von cnn_utilities
+#Not used currently, only np.load(...)
+def load_zero_center_data(train_files, batchsize, n_bins, n_gpu, swap_4d_channels=None):
+    """
+    Gets the xs_mean array that can be used for zero-centering.
+    The array is either loaded from a previously saved file or it is calculated on the fly.
+    Currently only works for a single input training file!
+    :param list((train_filepath, train_filesize)) train_files: list of tuples that contains the trainfiles and their number of rows.
+    :param int batchsize: Batchsize that is being used in the data.
+    :param tuple n_bins: Number of bins for each dimension (x,y,z,t) in the tran_file.
+    :param int n_gpu: Number of gpu's, used for calculating the available RAM space in get_mean_image().
+    :param None/str swap_4d_channels: For 4D data. Specifies if the columns in the xs_mean array should be swapped.
+    :return: ndarray xs_mean: mean_image of the x dataset. Can be used for zero-centering later on.
+    """
+    if len(train_files) > 1:
+        warnings.warn('More than 1 train file for zero-centering is currently not supported! '
+                      'Only the first file is used for calculating the xs_mean_array.')
+
+    filepath = train_files[0][0]
+
+    if os.path.isfile(filepath + '_zero_center_mean.npy') is True:
+        print ('Loading an existing xs_mean_array in order to zero_center the data!')
+        xs_mean = np.load(filepath + '_zero_center_mean.npy')
+    else:
+        print ('Calculating the xs_mean_array in order to zero_center the data!')
+        dimensions = get_dimensions_encoding(n_bins, batchsize)
+        xs_mean = get_mean_image(filepath, dimensions, n_gpu)
+
+    if swap_4d_channels is not None:
+        swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
+        xs_mean[:, swap_4d_channels_dict['yzt-x']] = xs_mean[:, [0,1,2,3]]
+
+return xs_mean
         
         
         
