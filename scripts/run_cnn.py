@@ -10,7 +10,7 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
@@ -21,7 +21,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         K.set_value(model.optimizer.lr, lr)
         print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
 
-    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path)
+    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     return_message = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
@@ -35,7 +35,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
 
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, save_path, is_autoencoder, n_events=None, tb_logger=False):
+              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, n_events=None, tb_logger=False):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -75,7 +75,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
                 
             model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
-                steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=0, max_queue_size=10,
+                steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
@@ -125,9 +125,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                           Currently available: 'yzt-x' -> [3,1,2,0] from [0,1,2,3]
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
-    n_bins_x, n_bins_y, n_bins_z, n_bins_t = n_bins[0], n_bins[1], n_bins[2], n_bins[3]
-    #For xyz 3D Data:
-    dimensions = (batchsize, n_bins_x, n_bins_y, n_bins_z, 1)
+    dimensions = get_dimensions_encoding(n_bins, batchsize)
 
     while 1:
         f = h5py.File(filepath, "r")
@@ -169,6 +167,59 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
         f.close() # this line of code is actually not reached if steps=f_size/batchsize
         
+#Copied, removed print
+def get_dimensions_encoding(n_bins, batchsize):
+    """
+    Returns a dimensions tuple for 2,3 and 4 dimensional data.
+    :param int batchsize: Batchsize that is used in generate_batches_from_hdf5_file().
+    :param tuple n_bins: Declares the number of bins for each dimension (x,y,z).
+                        If a dimension is equal to 1, it means that the dimension should be left out.
+    :return: tuple dimensions: 2D, 3D or 4D dimensions tuple (integers).
+    """
+    n_bins_x, n_bins_y, n_bins_z, n_bins_t = n_bins[0], n_bins[1], n_bins[2], n_bins[3]
+    if n_bins_x == 1:
+        if n_bins_y == 1:
+            #print 'Using 2D projected data without dimensions x and y'
+            dimensions = (batchsize, n_bins_z, n_bins_t, 1)
+        elif n_bins_z == 1:
+            #print 'Using 2D projected data without dimensions x and z'
+            dimensions = (batchsize, n_bins_y, n_bins_t, 1)
+        elif n_bins_t == 1:
+            #print 'Using 2D projected data without dimensions x and t'
+            dimensions = (batchsize, n_bins_y, n_bins_z, 1)
+        else:
+            #print 'Using 3D projected data without dimension x'
+            dimensions = (batchsize, n_bins_y, n_bins_z, n_bins_t, 1)
+
+    elif n_bins_y == 1:
+        if n_bins_z == 1:
+            #print 'Using 2D projected data without dimensions y and z'
+            dimensions = (batchsize, n_bins_x, n_bins_t, 1)
+        elif n_bins_t == 1:
+            #print 'Using 2D projected data without dimensions y and t'
+            dimensions = (batchsize, n_bins_x, n_bins_z, 1)
+        else:
+            #print 'Using 3D projected data without dimension y'
+            dimensions = (batchsize, n_bins_x, n_bins_z, n_bins_t, 1)
+
+    elif n_bins_z == 1:
+        if n_bins_t == 1:
+            #print 'Using 2D projected data without dimensions z and t'
+            dimensions = (batchsize, n_bins_x, n_bins_y, 1)
+        else:
+            #print 'Using 3D projected data without dimension z'
+            dimensions = (batchsize, n_bins_x, n_bins_y, n_bins_t, 1)
+
+    elif n_bins_t == 1:
+        #print 'Using 3D projected data without dimension t'
+        dimensions = (batchsize, n_bins_x, n_bins_y, n_bins_z, 1)
+
+    else:
+        #print 'Using full 4D data'
+        dimensions = (batchsize, n_bins_x, n_bins_y, n_bins_z, n_bins_t)
+
+    return dimensions
+
         
 #Copied unchanged from cnn_utilities
 def encode_targets(y_val, class_type):
@@ -315,7 +366,7 @@ def load_zero_center_data(train_files, batchsize, n_bins, n_gpu, swap_4d_channel
         swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
         xs_mean[:, swap_4d_channels_dict['yzt-x']] = xs_mean[:, [0,1,2,3]]
 
-return xs_mean
+    return xs_mean
         
         
         

@@ -16,7 +16,7 @@ import os.path
 import sys
 
 #Tag for the model used; Identifies both autoencoder and encoder
-modeltag="vgg_1"
+modeltag="vgg_1_xzt"
 
 #How many additinal epochs the network will be trained for by executing this script:
 runs=1
@@ -28,10 +28,10 @@ runs=1
 autoencoder_stage=2
 
 #Define starting epoch of autoencoder model
-autoencoder_epoch=3
+autoencoder_epoch=0
 
 
-#If in encoder stage, encoder_epoch is used to identify a possibly
+#If in encoder stage (1 or 2), encoder_epoch is used to identify a possibly
 #existing supervised-trained encoder network
 encoder_epoch=0
 #Define what the supervised encoder network is trained for, and how many neurons are in the output
@@ -41,22 +41,39 @@ class_type = (2, 'up_down')
 #Wheter to use a precalculated zero-center image or not
 zero_center = True
 
+#Verbose bar during training?
+#0: silent, 1:verbose, 2: one log line per epoch
+verbose=0
 
 
+#Path to training and testing datafiles on HPC for xyz
+"""
+data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
+train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
+test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
+zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
+"""
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center):
-    #Path to training and testing datafiles on HPC
-    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
-    train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
-    test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
-    zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
-    train_file=data_path+train_data
-    test_file=data_path+test_data
-    zero_center_file=data_path+zero_center_data
+#for xzt
+data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated"
+train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+
+
+train_file=data_path+train_data
+test_file=data_path+test_data
+zero_center_file=data_path+zero_center_data
+
+#Path to my Km3_net-Autoencoder folder on HPC:
+home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
+
+
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose):
     
-    #Path to my Km3_net-Autoencoder folder on HPC:
-    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
-    
+    # x  y  z  t
+    # 11 13 18 50
+    n_bins = (11,18,50,1)
     
     #For debug testing on my laptop these are overwritten:
     """
@@ -112,9 +129,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=xs_mean, epoch=current_epoch,
+                                 batchsize=32, n_bins=n_bins, class_type=None, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=home_path, is_autoencoder=True)
+                                 save_path=home_path, is_autoencoder=True, verbose=verbose)
     
             
     #Encoder supervised training:
@@ -146,9 +163,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #Train network, write logfile, save network, evaluate network
             train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=(11,13,18,1), class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=home_path, is_autoencoder=False)
+                                 save_path=home_path, is_autoencoder=False, verbose=verbose)
     
     
     
@@ -181,9 +198,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #Train network, write logfile, save network, evaluate network
             train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=(11,13,18,1), class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=home_path, is_autoencoder=False)
+                                 save_path=home_path, is_autoencoder=False, verbose=verbose)
     
 
 execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center)
