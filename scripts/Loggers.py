@@ -108,7 +108,7 @@ class NBatchLogger_Recent_Acc(Callback):
         self.averageAcc += logs.get("acc")
         if self.seen % (self.display) == 0:
             averaged_loss = self.averageLoss / (self.display)
-            averaged_acc = self.averageAcc / (self.seen)
+            averaged_acc = self.averageAcc / (self.display)
             self.logfile.write('\n{0}\t{1}\t{2}'.format(self.seen, averaged_loss, averaged_acc))
             self.logfile.flush()
             fsync(self.logfile.fileno())

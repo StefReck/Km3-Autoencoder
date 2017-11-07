@@ -24,7 +24,7 @@ runs=1
 # 0: autoencoder
 # 1: encoder+ from autoencoder w/ frozen layers
 # 2: encoder+ from scratch, completely unfrozen
-autoencoder_stage=1
+autoencoder_stage=2
 
 #Define starting epoch of autoencoder model
 epoch=3
@@ -154,7 +154,7 @@ elif autoencoder_stage==2:
     autoencoder_model = home_path+"models/trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
     
     #name of the supervised model:
-    modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1]
+    modelname = modeltag + "_supervised_" + class_type[1]
     
     if encoder_epoch == 0:
         #Create a new encoder network:
