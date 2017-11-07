@@ -14,6 +14,7 @@ from run_cnn import *
 from model_definitions import *
 import os.path
 import sys
+import argparse
 
 #Tag for the model used; Identifies both autoencoder and encoder
 modeltag="vgg_1_xzt"
@@ -30,7 +31,6 @@ autoencoder_stage=2
 #Define starting epoch of autoencoder model
 autoencoder_epoch=0
 
-
 #If in encoder stage (1 or 2), encoder_epoch is used to identify a possibly
 #existing supervised-trained encoder network
 encoder_epoch=0
@@ -44,6 +44,23 @@ zero_center = True
 #Verbose bar during training?
 #0: silent, 1:verbose, 2: one log line per epoch
 verbose=0
+
+# x  y  z  t
+# 11 13 18 50
+n_bins = (11,18,50,1)
+
+
+#Naming scheme for models
+"""
+Autoencoder
+"trained_" + modeltag + "_supervised_" + class_type[1] + "_epoch" + encoder_epoch + ".h5" 
+
+Encoder+
+"trained_" + modeltag + "_autoencoder_" + class_type[1] + "_epoch" + encoder_epoch + ".h5"
+
+Encoder+ new
+"trained_" + modeltag + "_autoencoder_" + autoencoder_epoch + "_supervised_" + class_type[1] + "_epoch" + encoder_epoch + ".h5" 
+"""
 
 
 #Path to training and testing datafiles on HPC for xyz
@@ -65,15 +82,33 @@ train_file=data_path+train_data
 test_file=data_path+test_data
 zero_center_file=data_path+zero_center_data
 
-#Path to my Km3_net-Autoencoder folder on HPC:
-home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
-
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose):
+# "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
+def parse_input():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('modeltag', type=str, help='an integer for the accumulator')
+    parser.add_argument('runs', type=int)
+    parser.add_argument("autoencoder_stage", type=str)
+    parser.add_argument("autoencoder_epoch", type=int)
+    parser.add_argument("encoder_epoch", type=int)
+    parser.add_argument("class_type_bins", type=int)
+    parser.add_argument("class_type_name", type=str)
+    parser.add_argument("zero_center", type=bool)
+    parser.add_argument("verbose", type=int)    
+    parser.add_argument("n_bins", nargs=4, type=int)    
     
-    # x  y  z  t
-    # 11 13 18 50
-    n_bins = (11,18,50,1)
+    args = parser.parse_args()
+    params = vars(args)
+    
+    modeltag = params["modeltag"]
+    
+    return modeltag
+
+
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins):
+    
+    #Path to my Km3_net-Autoencoder folder on HPC:
+    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
     #For debug testing on my laptop these are overwritten:
     """
@@ -203,5 +238,5 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                                  save_path=home_path, is_autoencoder=False, verbose=verbose)
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center)
+#execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, n_bins)
 
