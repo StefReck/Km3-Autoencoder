@@ -110,7 +110,7 @@ zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_cent
 """
 
 #for xzt
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated"
+data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
 train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
 test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
 zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
@@ -119,8 +119,6 @@ zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_cent
 train_file=data_path+train_data
 test_file=data_path+test_data
 zero_center_file=data_path+zero_center_data
-
-print(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, n_bins)
 
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate):
