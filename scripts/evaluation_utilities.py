@@ -4,6 +4,7 @@
 Utility code for the evaluation of a network's performance after training.
 Copied, added is_autoencoder
 xrange -> range (python 3)
+steps -> int(steps)
 """
 
 import h5py
@@ -22,12 +23,12 @@ test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
 zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-modelident="trained_vgg_0_autoencoder_epoch3_supervised_up_down_epoch2.h5"
+modelident="trained_vgg_1_xzt_supervised_up_down_epoch2.h5"
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Plot properties:
-title_of_plot='Classification for muon-CC_and_elec-CC_3-100GeV'
+title_of_plot='Classification for up-dwon 3-100GeV unfrozen encoder+'
 save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_plot.pdf"
 
 
@@ -60,7 +61,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     steps = samples/batchsize
 
     arr_energy_correct = None
-    for s in range(steps):
+    for s in range(int(steps)):
         if s % 100 == 0:
             print ('Predicting in step ' + str(s))
         xs, y_true, mc_info = next(generator)
@@ -305,7 +306,7 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 
-arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xsmean=zero_center_file, batchsize = 32, swap_4d_channels=False, samples=None)
+arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=zero_center_file, batchsize = 32, swap_4d_channels=None, samples=None)
 make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot,
                                                       filename=save_to)
 make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
