@@ -16,6 +16,41 @@ import os.path
 import sys
 import argparse
 
+
+# start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
+def parse_input():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('modeltag', type=str, help='an integer for the accumulator')
+    parser.add_argument('runs', type=int)
+    parser.add_argument("autoencoder_stage", type=int)
+    parser.add_argument("autoencoder_epoch", type=int)
+    parser.add_argument("encoder_epoch", type=int)
+    parser.add_argument("class_type_bins", type=int)
+    parser.add_argument("class_type_name", type=str)
+    parser.add_argument("zero_center", type=bool)
+    parser.add_argument("verbose", type=int)    
+    parser.add_argument("n_bins", nargs=4, type=int)
+    parser.add_argument("learning_rate", type=float)    
+    
+    args = parser.parse_args()
+    params = vars(args)
+
+    return params
+
+params = parse_input()
+modeltag = params["modeltag"]
+runs=params["runs"]
+autoencoder_stage=params["autoencoder_stage"]
+autoencoder_epoch=params["autoencoder_epoch"]
+encoder_epoch=params["encoder_epoch"]
+class_type = (params["class_type_bins"], params["class_type_name"])
+zero_center = params["zero_center"]
+verbose=params["verbose"]
+n_bins = params["n_bins"]
+learning_rate = params["learning_rate"]
+
+
+"""
 #Tag for the model used; Identifies both autoencoder and encoder
 modeltag="vgg_1_xzt"
 
@@ -49,6 +84,9 @@ verbose=0
 # 11 13 18 50
 n_bins = (11,18,50,1)
 
+#Learning rate, usually 0.00059
+learning_rate = 0.00059
+"""
 
 #Naming scheme for models
 """
@@ -82,30 +120,10 @@ train_file=data_path+train_data
 test_file=data_path+test_data
 zero_center_file=data_path+zero_center_data
 
-
-# "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
-def parse_input():
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('modeltag', type=str, help='an integer for the accumulator')
-    parser.add_argument('runs', type=int)
-    parser.add_argument("autoencoder_stage", type=str)
-    parser.add_argument("autoencoder_epoch", type=int)
-    parser.add_argument("encoder_epoch", type=int)
-    parser.add_argument("class_type_bins", type=int)
-    parser.add_argument("class_type_name", type=str)
-    parser.add_argument("zero_center", type=bool)
-    parser.add_argument("verbose", type=int)    
-    parser.add_argument("n_bins", nargs=4, type=int)    
-    
-    args = parser.parse_args()
-    params = vars(args)
-    
-    modeltag = params["modeltag"]
-    
-    return modeltag
+print(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, n_bins)
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate):
     
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
@@ -119,7 +137,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
     """
     #Optimizer used in all the networks:
-    lr = 0.00059 # 0.01 default for SGD, 0.001 for Adam
+    lr = learning_rate #0.00059 # 0.01 default for SGD, 0.001 for Adam
     lr_decay = 0.05 # % decay for each epoch, e.g. if 0.1 -> lr_new = lr*(1-0.1)=0.9*lr
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
@@ -238,5 +256,5 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                                  save_path=home_path, is_autoencoder=False, verbose=verbose)
     
 
-#execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, n_bins)
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate)
 
