@@ -4,9 +4,12 @@ Make 3D Scatter Histogram from 11x13x18 np array, and compare to another one.
 Can either plot single histogramms, or two side by side in one plot.
 """
 
+from keras.models import load_model
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import h5py
 
 
 def reshape_3d_to_3d(hist_data):
@@ -17,7 +20,7 @@ def reshape_3d_to_3d(hist_data):
     for i in range(len(n_bins)):
         tot_bin_no=tot_bin_no*n_bins[i]
         
-    grid=np.zeros((4,tot_bin_no)).astype('int')
+    grid=np.zeros((4,tot_bin_no))
     i=0
     for x in range( n_bins[0] ):
         for y in range( n_bins[1] ):
@@ -33,8 +36,9 @@ def reshape_3d_to_3d(hist_data):
 def make_3d_plot(grid):
     #input format: [x,y,z,val]
     #maximale count zahl pro bin
-    max_value=max(l for l in grid.flatten())
-    fraction=grid[3]/max_value
+    max_value=np.amax(grid)
+    min_value=np.amin(grid)
+    fraction=(grid[3]-min_value)/max_value
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -50,19 +54,17 @@ def make_3d_plot(grid):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-    plt.show()
 
-def make_3d_plots(hist_org, hist_pred):
+def make_3d_plots_xyz(hist_org, hist_pred, suptitle=None):
     #Plot original and predicted histogram side by side in one plot
     #input format: [x,y,z,val]
-    #maximale count zahl pro bin
-
 
     fig = plt.figure(figsize=(10,5))
     
     ax1 = fig.add_subplot(121, projection='3d', aspect='equal')
-    max_value1=max(l for l in hist_org.flatten())
-    fraction1=hist_org[3]/max_value1
+    max_value1= np.amax(hist_org)
+    min_value1 = np.amin(hist_org) #min value is usually 0, but who knows if the autoencoder screwed up
+    fraction1=(hist_org[3]-min_value1)/max_value1
     plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1)
     cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
     cbar1.set_label('Hits', rotation=270, labelpad=0.1)
@@ -72,8 +74,9 @@ def make_3d_plots(hist_org, hist_pred):
     ax1.set_title("Original")
     
     ax2 = fig.add_subplot(122, projection='3d', aspect='equal')
-    max_value2=max(l for l in hist_pred.flatten())
-    fraction2=hist_pred[3]/max_value2
+    max_value2=np.amax(hist_pred)
+    min_value2=np.amin(hist_pred)
+    fraction2=(hist_pred[3]-min_value2)/max_value2
     plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2)
     cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
     cbar2.set_label('Hits', rotation=270, labelpad=0.1)
@@ -81,12 +84,130 @@ def make_3d_plots(hist_org, hist_pred):
     ax2.set_ylabel('Y')
     ax2.set_zlabel('Z')
     ax2.set_title("Prediction")
+    
+    if suptitle is not None: fig.suptitle(suptitle)
 
     fig.tight_layout()
-    plt.show()
+    
+def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
+    #Plot original and predicted histogram side by side in one plot
+    #input format: [x,z,t,val]
+    #maximale count zahl pro bin
 
-def compare_hists(hist_org, hist_pred):
-    make_3d_plots(reshape_3d_to_3d(hist_org), reshape_3d_to_3d(hist_pred))
+
+    fig = plt.figure(figsize=(8,5))
+    
+    ax1 = fig.add_subplot(121, projection='3d', aspect='equal')
+    max_value1= np.amax(hist_org)
+    min_value1 = np.amin(hist_org)
+    fraction1=(hist_org[3]-min_value1)/max_value1
+    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1)
+    cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
+    cbar1.set_label('Hits', rotation=270, labelpad=0.15)
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Z')
+    ax1.set_zlabel('T')
+    ax1.set_title("Original")
+    
+    ax2 = fig.add_subplot(122, projection='3d', aspect='equal')
+    max_value2=np.amax(hist_pred)
+    min_value2=np.amin(hist_pred)
+    fraction2=(hist_pred[3]-min_value2)/max_value2
+    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2)
+    cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
+    cbar2.set_label('Hits', rotation=270, labelpad=0.15)
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Z')
+    ax2.set_zlabel('T')
+    ax2.set_title("Prediction")
+    
+    if suptitle is not None: fig.suptitle(suptitle)
+    fig.tight_layout()   
+
+
+def compare_hists_xyz(hist_org, hist_pred, suptitle=None):
+    make_3d_plots_xyz(reshape_3d_to_3d(hist_org), reshape_3d_to_3d(hist_pred), suptitle)
+    plt.show() 
+    
+def compare_hists_xzt(hist_org, hist_pred, suptitle=None):
+    make_3d_plots_xzt(reshape_3d_to_3d(hist_org), reshape_3d_to_3d(hist_pred), suptitle)
+    plt.show() 
 
 def plot_hist(hist):
     make_3d_plot(reshape_3d_to_3d(hist))
+    plt.show() 
+
+def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot_file ):
+    
+    #Open files
+    file=h5py.File(test_file , 'r')
+    zero_center_image = np.load(zero_center_file)
+    autoencoder=load_model(model_file)
+    
+    # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
+    labels = file["y"][which]
+    hists = file["x"][which]
+    
+    #Get some hists from the file
+    hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
+    #0 center them
+    centered_hists = np.subtract(hists, zero_center_image)
+    #Predict on 0 centered data
+    hists_pred_centered=autoencoder.predict_on_batch(centered_hists).reshape(centered_hists.shape)
+    losses=[]
+    for i in range(len(centered_hists)):
+        losses.append(autoencoder.evaluate(x=centered_hists[i:i+1], y=centered_hists[i:i+1]))
+    #Remove centering again, so that empty bins (always 0) dont clutter the view
+    hists_pred = np.add(hists_pred_centered, zero_center_image)
+    
+    #Some infos for the title
+    ids = labels[:,0].astype(int)
+    energies = labels[:,2].astype(int)
+
+    #test_file is a .h5 file on which the predictions are done
+    #center_file is the zero center image
+    with PdfPages(plot_file) as pp:
+        for i,hist in enumerate(hists):
+            suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + "     Loss: " + str(losses[i])
+            make_3d_plots_xzt(reshape_3d_to_3d(hist), reshape_3d_to_3d(hists_pred[i]), suptitle)
+            pp.savefig()
+  
+
+
+if __name__ == '__main__':
+    #The Model which is used for predictions
+    model_path="Models/"
+    model_name="trained_vgg_0_autoencoder_epoch3.h5"
+    
+    #Events to compare
+    which = [0,1,2,3,4]
+    
+    #Path to data to predict on (for xzt)
+    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+    test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+    zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+    #Path to my Km3_net-Autoencoder folder on HPC:
+    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
+    
+    plot_path = home_path + "results/plots/"
+    plot_name = model_name[:-3]+"_compare_plot.pdf"
+    test_file = data_path + test_data
+    zero_center_file= data_path + zero_center_data
+    plot_file = plot_path + plot_name
+    model_file = home_path + model_path + model_name
+    
+    
+    #Debug:
+    """
+    model_file="../Models/trained_vgg_0_autoencoder_epoch3.h5"
+    test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
+    zero_center_file = "Daten/train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
+    plot_file = ""+plot_name
+    """
+
+    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file)
+
+
+
+
+
