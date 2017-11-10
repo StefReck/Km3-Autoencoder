@@ -26,7 +26,7 @@ print(res)
 
 """
 inputs=Input(shape=(2,2,2,1))
-x = MaxUnpooling3D(inputs)
+x = MaxUnpooling3D(inputs,(2,2,1))
 model = Model(inputs=inputs, outputs=x)
 
 mat=np.linspace(1,8,8).reshape((1,2,2,2,1))
