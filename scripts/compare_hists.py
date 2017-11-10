@@ -3,7 +3,8 @@
 Make 3D Scatter Histogram from 11x13x18 np array, and compare to another one.
 Can either plot single histogramms, or two side by side in one plot.
 """
-
+import matplotlib
+matplotlib.use('Agg') #dont open plotting windows
 from keras.models import load_model
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -178,11 +179,11 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
 
 if __name__ == '__main__':
     #The Model which is used for predictions
-    model_path="Models/"
-    model_name="trained_vgg_0_autoencoder_epoch3.h5"
+    model_path="models/"
+    model_name="trained_vgg_1_xzt_autoencoder_epoch2.h5"
     
     #Events to compare
-    which = [0,1]
+    which = [0,1,2,3,4,5]
     
     #Path to data to predict on (for xzt)
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
@@ -200,12 +201,12 @@ if __name__ == '__main__':
     
     
     #Debug:
-    
+    """
     model_file="../Models/trained_vgg_0_autoencoder_epoch3.h5"
     test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
     zero_center_file = "Daten/train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
     plot_file = ""+plot_name
-    
+    """
 
     save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file)
 
