@@ -167,10 +167,12 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
     #test_file is a .h5 file on which the predictions are done
     #center_file is the zero center image
     with PdfPages(plot_file) as pp:
+        pp.attach_note(test_file)
         for i,hist in enumerate(hists):
             suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + "     Loss: " + str(losses[i])
             make_3d_plots_xzt(reshape_3d_to_3d(hist), reshape_3d_to_3d(hists_pred[i]), suptitle)
             pp.savefig()
+            plt.close()
   
 
 
@@ -180,7 +182,7 @@ if __name__ == '__main__':
     model_name="trained_vgg_0_autoencoder_epoch3.h5"
     
     #Events to compare
-    which = [0,1,2,3,4]
+    which = [0,1]
     
     #Path to data to predict on (for xzt)
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
@@ -198,12 +200,12 @@ if __name__ == '__main__':
     
     
     #Debug:
-    """
+    
     model_file="../Models/trained_vgg_0_autoencoder_epoch3.h5"
     test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
     zero_center_file = "Daten/train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
     plot_file = ""+plot_name
-    """
+    
 
     save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file)
 

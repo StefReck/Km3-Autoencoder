@@ -2,40 +2,37 @@
 
 from keras import initializers
 from keras.models import Sequential, Model
-from keras.layers import Dense, Activation, Conv3D, Conv2D, Conv2DTranspose, Conv3DTranspose, MaxPooling2D, UpSampling2D, Input, Lambda
+from keras.layers import Dense, Lambda, Input, Activation, Conv3D, Conv2D, Conv2DTranspose, Conv3DTranspose, MaxPooling2D, UpSampling2D, Input, Lambda
 import numpy as np
 import matplotlib.pyplot as plt
 from keras import backend as K
 
+from util.custom_layers import MaxUnpooling3D
 
-def MaxUnpooling2D(InputTensor):
-    #[1,2],[3,4]
-    shape=K.int_shape(InputTensor)
-    #(2,2)
-    length=shape[0] #4
-    resh = K.reshape(InputTensor, (4,1 ))
-    #
-    padding = K.zeros((4,1))
-    padded=K.concatenate((resh,padding), axis=1)
-    
-    out = K.reshape(padded, (2,4 ))
-    
-    empty=K.zeros((2,4))
-    padded2=K.concatenate((out,empty), axis=0)
-    
-    return padded2
 
-inputs=K.ones(shape=(2,2))
-print("Input:\n",K.eval(inputs))
-print("\nShape: ",K.eval(inputs).shape, "\n")
-x = MaxUnpooling2D(inputs)
-print("Output:\n",K.eval(x))
-print("\nShape: ",K.eval(x).shape, "\n")
 
-def out_shape(input_shape):
-    shape=list(input_shape)
-    shape[-1] *= 2
-    return tuple(shape)
+
+
+#2D Model
+"""
+inputs=Input(shape=(2,2,1))
+x = Lambda(MaxUnpooling2D,MaxUnpooling2D_output_shape)(inputs)
+model = Model(inputs=inputs, outputs=x)
+
+mat=np.linspace(1,8,8).reshape((2,2,2,1))
+res=model.predict(mat)
+print(res)
+
+
+"""
+inputs=Input(shape=(2,2,2,1))
+x = MaxUnpooling3D(inputs)
+model = Model(inputs=inputs, outputs=x)
+
+mat=np.linspace(1,8,8).reshape((1,2,2,2,1))
+res=model.predict(mat)
+print(res)
+
 
 """
 inputs = Input(shape=(5,1))

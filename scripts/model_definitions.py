@@ -30,7 +30,6 @@ def setup_vgg_like(autoencoder_stage, modelpath_and_name=None):
     else:
         train=True
     
-    
     inputs = Input(shape=(11,13,18,1))
     
     x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', activation='relu', kernel_initializer='he_normal', trainable=train)(inputs)
