@@ -44,7 +44,7 @@ def MaxUnpooling2D(Input_Tensor):
 
 
 def MaxUnpooling3D(Input_Tensor, Kernel_size=(2,2,2)):
-    def MaxUnpooling3D_func(InputTensor):
+    def MaxUnpooling3D_func(InputTensor, size):
         #in: b,o,n,m,c
         #out: b,2o,2n,2m,c
         #(batch_size, dim1, dim2, dim3, channels)
@@ -54,21 +54,21 @@ def MaxUnpooling3D(Input_Tensor, Kernel_size=(2,2,2)):
         
         out=Input_Tensor
         
-        if Kernel_size[2]==2:
+        if size[2]==2:
             #Add zeros to contracted dim
             padded=K.concatenate((out,K.zeros_like(out)), axis=4) #b,o,n,m,2*c
             #Reshape so that ncols is spaced with zeros
-            out = K.reshape(padded, (batchsize,inshape[0],inshape[1],inshape[2]*Kernel_size[2],chan)) #b,o,n,2*m,c
+            out = K.reshape(padded, (batchsize,inshape[0],inshape[1],inshape[2]*size[2],chan)) #b,o,n,2*m,c
         
-        if Kernel_size[1]==2:
+        if size[1]==2:
             #Space nrows the same way
             padded=K.concatenate((out,K.zeros_like(out)), axis=3) # b,n,2*2*m,c
-            out=K.reshape(padded, (batchsize,inshape[0],inshape[1]*Kernel_size[1],inshape[2]*Kernel_size[2],chan)) # b,o,2*n,2*m,c
+            out=K.reshape(padded, (batchsize,inshape[0],inshape[1]*size[1],inshape[2]*size[2],chan)) # b,o,2*n,2*m,c
         
-        if Kernel_size[0]==2:
+        if size[0]==2:
             #Space nrows the same way
             padded=K.concatenate((out,K.zeros_like(out)), axis=2) # b,o,2*2*n,2*m,c
-            out=K.reshape(padded, (batchsize,inshape[0]*Kernel_size[0],inshape[1]*Kernel_size[1],inshape[2]*Kernel_size[2],chan)) # b,2*o,2*n,2*m,c
+            out=K.reshape(padded, (batchsize,inshape[0]*size[0],inshape[1]*size[1],inshape[2]*size[2],chan)) # b,2*o,2*n,2*m,c
         
         return out
 
@@ -79,7 +79,10 @@ def MaxUnpooling3D(Input_Tensor, Kernel_size=(2,2,2)):
         shape[3] *= Kernel_size[2]
         return tuple(shape)
     
-    Output_Tensor = Lambda(MaxUnpooling3D_func,MaxUnpooling3D_output_shape)(Input_Tensor)
+    #Output_Tensor = Lambda(MaxUnpooling3D_func,MaxUnpooling3D_output_shape)(Input_Tensor)
+    Output_Tensor = Lambda(MaxUnpooling3D_func, MaxUnpooling3D_output_shape, arguments={"size":Kernel_size})(Input_Tensor)
+    
+
     return Output_Tensor
 
 
