@@ -478,11 +478,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
 #For testing purposes
 #model = setup_model("vgg_1_xzt_max", 0)
 
-inputs = Input(shape=(11,13,18,1))
-x = MaxUnpooling3D(inputs,(1,1,2))
-model = Model(inputs=inputs, outputs=x)
-model.compile(optimizer="adam", loss='mse')
-model.save('test.h5')
+
 
 
 

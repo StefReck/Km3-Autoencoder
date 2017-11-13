@@ -52,7 +52,7 @@ def MaxUnpooling3D(Input_Tensor, Kernel_size=(2,2,2)):
         inshape=(K.shape(InputTensor)[1],K.shape(InputTensor)[2], K.shape(InputTensor)[3])
         chan=K.shape(InputTensor)[4] #nchannels
         
-        out=Input_Tensor
+        out=InputTensor
         
         if size[2]==2:
             #Add zeros to contracted dim
