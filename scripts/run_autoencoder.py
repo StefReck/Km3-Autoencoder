@@ -101,27 +101,27 @@ Encoder+ new
 """
 
 
-#Path to training and testing datafiles on HPC for xyz
-"""
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
-train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
-test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
-zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
-"""
-
-#for xzt
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
-train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
-test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-
-
-train_file=data_path+train_data
-test_file=data_path+test_data
-zero_center_file=data_path+zero_center_data
-
-
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate):
+    
+    #Path to training and testing datafiles on HPC for xyz
+    """
+    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
+    train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
+    test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
+    zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
+    """
+    
+    #for xzt
+    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+    train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+    test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+    zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+    
+    
+    train_file=data_path+train_data
+    test_file=data_path+test_data
+    zero_center_file=data_path+zero_center_data
+    
     
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
