@@ -29,7 +29,7 @@ n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Plot properties:
 title_of_plot='Classification for up-dwon 3-100GeV unfrozen encoder+'
-save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_plot.pdf"
+save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_Acc_plot.pdf"
 
 
 
@@ -55,9 +55,9 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     :return: ndarray arr_energy_correct: Array that contains the energy, correct, particle_type, is_cc and y_pred info for each event.
     """
     # TODO only works for a single test_file till now
-    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels) # f_size=samples prob not necessary
-
     if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=samples , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels) # f_size=samples prob not necessary
+
     steps = samples/batchsize
 
     arr_energy_correct = None
@@ -307,8 +307,8 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=zero_center_file, batchsize = 32, swap_4d_channels=None, samples=None)
-make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot,
-                                                      filename=save_to)
-make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
+#make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot, filename=save_to)
+make_energy_to_accuracy_plot(arr_energy_correct, title="Supervised Unfrozen Encoder", filepath=save_to)
+#make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
 
 
