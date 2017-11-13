@@ -56,9 +56,9 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     :return: ndarray arr_energy_correct: Array that contains the energy, correct, particle_type, is_cc and y_pred info for each event.
     """
     # TODO only works for a single test_file till now
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels) # f_size=samples prob not necessary
+    
     if samples is None: samples = len(h5py.File(f, 'r')['y'])
-    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=samples , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels) # f_size=samples prob not necessary
-
     steps = samples/batchsize
 
     arr_energy_correct = None
@@ -80,7 +80,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
         arr_energy_correct_temp = np.concatenate([energy[:, ax], correct[:, ax], particle_type[:, ax], is_cc[:, ax], y_pred], axis=1)
 
         if arr_energy_correct is None:
-            arr_energy_correct = np.zeros((steps * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
+            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
     return arr_energy_correct
