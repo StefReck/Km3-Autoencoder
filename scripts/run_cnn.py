@@ -28,9 +28,11 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
 
     with open(save_path+"models/trained_" + modelname + '_test.txt', 'a') as test_file:
-        if len(evaluation)==2:
+        if is_autoencoder==False:
+            #loss and accuracy
             test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation[0], evaluation[1]))
         else:
+            #For autoencoders: only loss
             test_file.write('\n{0}\t{1}\t{2}'.format(epoch, lr, evaluation))
             
 

@@ -476,8 +476,9 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
 
     
 #For testing purposes
-#model = setup_model("setup_vgg_1_xzt_max", 0)
-
+model = setup_model("vgg_1_xzt_max", 0)
+model.compile(optimizer="adam", loss='mse')
+model.save('test.h5')
 
 #Outdated:
 def setup_conv_model_API():
