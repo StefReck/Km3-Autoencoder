@@ -468,7 +468,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_1(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_1_xzt":
         model = setup_vgg_1_xzt(autoencoder_stage, modelpath_and_name)
-    elif model_tag == "setup_vgg_1_xzt_max":
+    elif model_tag == "vgg_1_xzt_max":
         model = setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name)
     else:
         raise Exception('Model tag not available')

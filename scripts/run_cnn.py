@@ -25,13 +25,14 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
     #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
-    return_message = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
+    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
 
-    with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_test.txt', 'w') as test_file:
-        test_file.write('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
-        test_file.write(return_message)
-
-    return epoch, lr
+    with open(save_path+"models/trained_" + modelname + '_test.txt', 'a') as test_file:
+        if len(evaluation)==2:
+            test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation[0], evaluation[1]))
+        else:
+            test_file.write('\n{0}\t{1}\t{2}'.format(epoch, lr, evaluation))
+            
 
 
 
@@ -104,7 +105,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
             steps=int(f_size / batchsize), max_queue_size=10)
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
     print (return_message)
-    return return_message
+    return evaluation
 
         
 #Copied from cnn_utilities and modified:

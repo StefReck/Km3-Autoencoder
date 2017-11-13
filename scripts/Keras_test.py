@@ -204,9 +204,8 @@ def setup_vgg_like(make_autoencoder, modelpath_and_name=None):
         model = Model(inputs=inputs, outputs=outputs)
         return model
         
-model = setup_vgg_like(make_autoencoder=False, modelpath_and_name="../models/trained_autoencoder_vgg_0_epoch3.h5")
-
-layer.get_weights()
+model = setup_vgg_like(make_autoencoder=False, modelpath_and_name="../models/trained_vgg_0_autoencoder_epoch3.h5")
+model.compile(optimizer='adam', loss='mse')
 
 """
 train_on_batch(self, x, y, class_weight=None, sample_weight=None)

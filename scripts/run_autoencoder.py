@@ -167,6 +167,17 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
             model.compile(optimizer=adam, loss='mse')
             
+            #For a new autoencoder: Create header for test file
+            with open(home_path+"models/trained_" + modelname + '_test.txt', 'w') as test_file:
+                metrics = str(model.metrics_names)
+                if len(metrics)==1:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                elif len(metrics)==2:
+                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                else:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+            
+            
         else:
             #Load an existing trained autoencoder network and train that
             
@@ -200,6 +211,17 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            
+            #For a new encoder: Create header for test file
+            with open(home_path+"models/trained_" + modelname + '_test.txt', 'w') as test_file:
+                metrics = str(model.metrics_names)
+                if len(metrics)==1:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                elif len(metrics)==2:
+                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                else:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+            
         
         else:
             #Load an existing trained encoder network and train that
@@ -235,6 +257,18 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             model = setup_model(model_tag=modeltag, autoencoder_stage=2, modelpath_and_name=autoencoder_model)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            
+            #For a new encoder: Create header for test file
+            with open(home_path+"models/trained_" + modelname + '_test.txt', 'w') as test_file:
+                metrics = str(model.metrics_names)
+                if len(metrics)==1:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                elif len(metrics)==2:
+                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                else:
+                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+            
+            
         
         else:
             #Load an existing trained encoder network and train that
