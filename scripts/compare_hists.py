@@ -147,11 +147,11 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
     file=h5py.File(test_file , 'r')
     zero_center_image = np.load(zero_center_file)
     
-    #autoencoder=load_model(model_file)
+    autoencoder=load_model(model_file)
     #if lambda layers are present:    
-    autoencoder=setup_model("vgg_1_xzt_max", 0)
-    autoencoder.load_weights(model_file, by_name=True)
-    autoencoder.compile(optimizer="adam", loss='mse')
+    #autoencoder=setup_model("vgg_1_xzt_max", 0)
+    #autoencoder.load_weights(model_file, by_name=True)
+    #autoencoder.compile(optimizer="adam", loss='mse')
 
     # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     labels = file["y"][which]
@@ -188,7 +188,7 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
 if __name__ == '__main__':
     #The Model which is used for predictions
     model_path="models/"
-    model_name="trained_vgg_1_xzt_max_autoencoder_epoch8.h5"
+    model_name="trained_vgg_1_xzt_autoencoder_epoch20.h5"
     
     #Events to compare
     which = [0,1,2,3,4,5]
