@@ -331,7 +331,7 @@ def setup_vgg_1_xzt(autoencoder_stage, modelpath_and_name=None):
 
 def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
     #like vgg_1_xzt but with Max/Unmaxpooling
-    #format 11x18x50
+    #format 11x18x50    (=9900)
     
     #autoencoder_stage: Type of training/network
     # 0: autoencoder
@@ -394,7 +394,7 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
     
     #4x6x10
     encoded = MaxPooling3D((2, 2, 2), padding='valid')(x)
-    #2x3x5
+    #2x3x5 x 64    (=1920 = 19.4 % org size)
 
     if autoencoder_stage == 0:
         #The Decoder part:
@@ -476,7 +476,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
 
     
 #For testing purposes
-#model = setup_model("vgg_1_xzt_max", 0)
+"""
+model = setup_model("vgg_1_xzt_max", 0)
+from numpy import prod
+shape=0
+for depth,layer in enumerate(model.layers):
+    if shape != layer.output_shape[1:]:
+        shape=layer.output_shape[1:]
+        print(depth, prod(shape), shape)
+"""
 
 
 

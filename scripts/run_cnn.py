@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import h5py
 import numpy as np
-from Loggers import *
+from util.Loggers import *
 from keras import backend as K
 import warnings
 
@@ -34,6 +34,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         else:
             #For autoencoders: only loss
             test_file.write('\n{0}\t{1}\t{2}'.format(epoch, lr, evaluation))
+    return lr
             
 
 
@@ -73,9 +74,9 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
             
             if is_autoencoder == True:
-                BatchLogger = NBatchLogger_Recent(display=100, logfile=log_file)
+                BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
             else:
-                BatchLogger = NBatchLogger_Recent_Acc(display=100, logfile=log_file)
+                BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
                 
             model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),

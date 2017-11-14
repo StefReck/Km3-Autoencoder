@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from compare_hists import *
-from Loggers import *
+from util.Loggers import *
 
 
 def setup_simple_model():

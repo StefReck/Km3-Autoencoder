@@ -190,7 +190,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             check_for_file(home_path+"models/trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             
             #Train network, write logfile, save network, evaluate network, save evaluation to file
-            train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                                  batchsize=32, n_bins=n_bins, class_type=None, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                                  save_path=home_path, is_autoencoder=True, verbose=verbose)
@@ -235,7 +235,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             check_for_file(home_path+"models/trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             
             #Train network, write logfile, save network, evaluate network
-            train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                                  batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                                  save_path=home_path, is_autoencoder=False, verbose=verbose)
@@ -282,7 +282,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             check_for_file(home_path+"models/trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             
             #Train network, write logfile, save network, evaluate network
-            train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                                  batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                                  save_path=home_path, is_autoencoder=False, verbose=verbose)
