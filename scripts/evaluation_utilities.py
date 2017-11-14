@@ -29,7 +29,7 @@ n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Plot properties:
 title_of_plot='Classification for up-dwon 3-100GeV unfrozen encoder+'
-save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_Acc_plot.pdf"
+save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_Acc_plot"
 
 
 
@@ -140,7 +140,7 @@ def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range
     plt.title(title)
     plt.grid(True)
 
-    plt.savefig(filepath)
+    plt.savefig(filepath+".pdf")
 
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
@@ -308,6 +308,7 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
+np.save("/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
 #make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot, filename=save_to)
 make_energy_to_accuracy_plot(arr_energy_correct, title="Supervised Unfrozen Encoder", filepath=save_to)
 #make_prob_hists(arr_energy_correct[:, ], modelname=modelident)

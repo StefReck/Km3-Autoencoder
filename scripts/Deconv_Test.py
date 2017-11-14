@@ -8,10 +8,48 @@ import matplotlib.pyplot as plt
 from keras import backend as K
 
 from util.custom_layers import MaxUnpooling3D
-from compare_hists import *
+from compare_hists import reshape_3d_to_3d
 import h5py
 
 
+def make_3d_plots_xyz(hist_org, hist_pred, title1, title2, suptitle=None):
+    #Plot original and predicted histogram side by side in one plot
+    #input format: [x,y,z,val]
+
+    fig = plt.figure(figsize=(10,5))
+    
+    ax1 = fig.add_subplot(121, projection='3d', aspect='equal')
+    max_value1= np.amax(hist_org)
+    min_value1 = np.amin(hist_org) #min value is usually 0, but who knows if the autoencoder screwed up
+    fraction1=(hist_org[3]-min_value1)/max_value1
+    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=True)
+    cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
+    cbar1.set_label('Hits', rotation=270, labelpad=0.1)
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_zlabel('Z')
+    ax1.set_title(title1)
+    
+    ax2 = fig.add_subplot(122, projection='3d', aspect='equal')
+    max_value2=np.amax(hist_pred)
+    min_value2=np.amin(hist_pred)
+    fraction2=(hist_pred[3]-min_value2)/max_value2
+    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=True)
+    cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
+    cbar2.set_label('Hits', rotation=270, labelpad=0.1)
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
+    ax2.set_zlabel('Z')
+    ax2.set_title(title2)
+    
+    if suptitle is not None: fig.suptitle(suptitle)
+
+    fig.tight_layout()
+
+def compare_hists_xyz(hist_org, hist_pred, name, suptitle=None):
+    make_3d_plots_xyz(reshape_3d_to_3d(hist_org), reshape_3d_to_3d(hist_pred), title1="MaxPooling", title2="AveragePooling", suptitle=suptitle)
+    plt.savefig(name) 
+    plt.close()
 
 
 #2D Model
@@ -26,6 +64,16 @@ print(res)
 
 
 """
+
+test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
+file=h5py.File(test_file , 'r')
+which=[3]
+hists = file["x"][which].reshape((1,11,13,18,1))
+# event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
+labels=file["y"][which]
+
+
+
 inputs=Input(shape=(11,13,18,1))
 
 x = MaxPooling3D(padding="same")(inputs)
@@ -45,31 +93,38 @@ out3 = MaxUnpooling3D(x3,(2,2,2))
 model3 = Model(inputs=inputs, outputs=out3)
 
 
-test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
-file=h5py.File(test_file , 'r')
-which=[3]
-hists = file["x"][which].reshape((1,11,13,18,1))
-# event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
-labels=file["y"][which]
-
 res=model.predict(hists)
 
 get_layer_1_output = K.function([model.layers[0].input], [model.layers[1].output])
 layer_1_output = get_layer_1_output([hists])[0]
 get_layer_2_output = K.function([model.layers[0].input], [model.layers[2].output])
 layer_2_output = get_layer_2_output([hists])[0]
+get_layer_3_output = K.function([model.layers[0].input], [model.layers[3].output])
+layer_3_output = get_layer_3_output([hists])[0]
+get_layer_4_output = K.function([model.layers[0].input], [model.layers[4].output])
+layer_4_output = get_layer_4_output([hists])[0]
+
 
 get_layer_1_output_2 = K.function([model2.layers[0].input], [model2.layers[1].output])
 layer_1_output_2 = get_layer_1_output_2([hists])[0]
+get_layer_2_output_2 = K.function([model2.layers[0].input], [model2.layers[2].output])
+layer_2_output_2 = get_layer_2_output_2([hists])[0]
+get_layer_3_output_2 = K.function([model2.layers[0].input], [model2.layers[3].output])
+layer_3_output_2 = get_layer_3_output_2([hists])[0]
+get_layer_4_output_2 = K.function([model2.layers[0].input], [model2.layers[4].output])
+layer_4_output_2 = get_layer_4_output_2([hists])[0]
+
 
 #plot_hist(hists[0])
 #plot_hist(layer_1_output[0])
 #plot_hist(res[0])
 
-compare_hists_xzt(hists[0], res[0], suptitle="Max Pooling")
-compare_hists_xzt(hists[0], model2.predict(hists)[0], suptitle="Average Pooling")
-plot_hist(layer_1_output[0])
-plot_hist(layer_2_output[0])
+compare_hists_xyz(hists[0], hists[0],name="comp0.pdf", suptitle="Input")
+compare_hists_xyz(layer_1_output[0], layer_1_output_2[0], name="comp1.pdf", suptitle="One Pooling")
+compare_hists_xyz(layer_2_output[0], layer_2_output_2[0], name="comp2.pdf",suptitle="Two Poolings")
+compare_hists_xyz(layer_3_output[0], layer_3_output_2[0], name="comp3.pdf",suptitle="One UnPooling")
+compare_hists_xyz(layer_4_output[0], layer_4_output_2[0], name="comp4.pdf",suptitle="Two UnPoolings")
+
 #compare_hists_xzt(hists[0], model3.predict(hists)[0], suptitle="C Average Pooling")
 
 #compare_hists_xzt(hists[0], layer_1_output[0], suptitle="Max Pooling Intermediate Layer")

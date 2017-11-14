@@ -352,7 +352,7 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
         train=True
         
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-    
+    print("Loading model vgg_1_xzt_max")
     inputs = Input(shape=(11,18,50,1))
     
     
@@ -398,7 +398,7 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
 
     if autoencoder_stage == 0:
         #The Decoder part:
-        
+        print("Loading Decoder")
         #2x3x5 x 64
         x = MaxUnpooling3D(encoded)
         #4x6x10
@@ -446,9 +446,10 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
     
     else:
         #Replacement for the decoder part for supervised training:
-        
+        print("Loading dense")
         if autoencoder_stage == 1:
             #Load weights of encoder part from existing autoencoder
+            print("Loading weights of existing autoencoder", modelpath_and_name)
             encoder= Model(inputs=inputs, outputs=encoded)
             encoder.load_weights(modelpath_and_name, by_name=True)
         
@@ -458,6 +459,7 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
+        print(model.summary())
         return model
     
     
@@ -476,8 +478,9 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
 
     
 #For testing purposes
+
+#model = setup_model("vgg_1_xzt", 0)
 """
-model = setup_model("vgg_1_xzt_max", 0)
 from numpy import prod
 shape=0
 for depth,layer in enumerate(model.layers):
