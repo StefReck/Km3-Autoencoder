@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import h5py
 
+#if MaxUnpooling is present: Load model manually:
+from model_definitions import *
+
 
 def reshape_3d_to_3d(hist_data):
     #input: 11x13x18
@@ -102,7 +105,7 @@ def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
     max_value1= np.amax(hist_org)
     min_value1 = np.amin(hist_org)
     fraction1=(hist_org[3]-min_value1)/max_value1
-    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1)
+    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=True)
     cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
     cbar1.set_label('Hits', rotation=270, labelpad=0.15)
     ax1.set_xlabel('X')
@@ -114,7 +117,7 @@ def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
     max_value2=np.amax(hist_pred)
     min_value2=np.amin(hist_pred)
     fraction2=(hist_pred[3]-min_value2)/max_value2
-    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2)
+    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=True)
     cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
     cbar2.set_label('Hits', rotation=270, labelpad=0.15)
     ax2.set_xlabel('X')
@@ -143,8 +146,13 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
     #Open files
     file=h5py.File(test_file , 'r')
     zero_center_image = np.load(zero_center_file)
-    autoencoder=load_model(model_file)
     
+    #autoencoder=load_model(model_file)
+    #if lambda layers are present:    
+    autoencoder=setup_model("vgg_1_xzt_max", 0)
+    autoencoder.load_weights(model_file, by_name=True)
+    autoencoder.compile(optimizer="adam", loss='mse')
+
     # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     labels = file["y"][which]
     hists = file["x"][which]
@@ -180,7 +188,7 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
 if __name__ == '__main__':
     #The Model which is used for predictions
     model_path="models/"
-    model_name="trained_vgg_1_xzt_autoencoder_epoch2.h5"
+    model_name="trained_vgg_1_xzt_max_autoencoder_epoch8.h5"
     
     #Events to compare
     which = [0,1,2,3,4,5]
