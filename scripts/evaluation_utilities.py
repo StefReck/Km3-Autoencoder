@@ -64,7 +64,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     arr_energy_correct = None
     for s in range(int(steps)):
         if s % 100 == 0:
-            print ('Predicting in step ' + str(s))
+            print ('Predicting in step ' + str(s) + "/" + str(steps))
         xs, y_true, mc_info = next(generator)
         y_pred = model.predict_on_batch(xs)
 
@@ -308,9 +308,9 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
-np.save("/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
+np.save(arr_energy_correct, "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
 #make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot, filename=save_to)
-make_energy_to_accuracy_plot(arr_energy_correct, title="Supervised Unfrozen Encoder", filepath=save_to)
+make_energy_to_accuracy_plot(arr_energy_correct, title=title_of_plot, filepath=save_to)
 #make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
 
 
