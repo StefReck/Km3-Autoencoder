@@ -4,7 +4,7 @@ import numpy as np
 from keras import backend as K
 import warnings
 
-from Loggers import *
+from util.Loggers import *
 
 """
 train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,

@@ -15,7 +15,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-from run_cnn import generate_batches_from_hdf5_file
+from util.run_cnn import generate_batches_from_hdf5_file
 
 
 
@@ -123,6 +123,51 @@ def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range
 
     plt.savefig(filepath+".pdf")
 
+def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, title, filepath, plot_range=(3, 100)):
+    """
+    Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
+    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
+    :param str title: Title of the mpl step plot.
+    :param str filepath: Filepath of the resulting plot.
+    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
+    """
+    # Calculate accuracy in energy range
+    energy = arr_energy_correct[:, 0]
+    correct = arr_energy_correct[:, 1]
+
+    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=98, range=plot_range) #häufigkeit von richtigen energien
+    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
+    
+    #2
+    energy2 = arr_energy_correct2[:, 0]
+    correct2 = arr_energy_correct2[:, 1]
+
+    hist_1d_energy2 = np.histogram(energy2, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct2 = np.histogram(arr_energy_correct2[correct2 == 1, 0], bins=98, range=plot_range) #häufigkeit von richtigen energien
+    hist_1d_energy_accuracy_bins2 = np.divide(hist_1d_energy_correct2[0], hist_1d_energy2[0], dtype=np.float32) #rel häufigkeit von richtigen energien
+    
+    # For making it work with matplotlib step plot
+    bin_edges = hist_1d_energy[1]
+    bin_edges_centered = bin_edges[:-1] + 0.5
+
+    plt.step(bin_edges_centered, hist_1d_energy_accuracy_bins, where='mid', label="VGG")
+    plt.step(bin_edges_centered, hist_1d_energy_accuracy_bins2, where='mid', label="Encoder")
+    
+    x_ticks_major = np.arange(0, 101, 10)
+    plt.xticks(x_ticks_major)
+    plt.minorticks_on()
+
+    plt.legend()
+    plt.xlabel('Energy [GeV]')
+    plt.ylabel('Accuracy')
+    plt.ylim((0, 1))
+    plt.title(title)
+    plt.grid(True)
+
+    plt.savefig(filepath+"_comp.pdf")
+    return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
+    
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
     """
