@@ -23,11 +23,11 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
 
     fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
-    #fit_model speichert model ab unter ("models/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+    #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
 
-    with open(save_path+"models/trained_" + modelname + '_test.txt', 'a') as test_file:
+    with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
             #loss and accuracy
             test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation[0], evaluation[1]))
@@ -71,7 +71,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         if n_events is not None: f_size = n_events  # for testing
         
         
-        with open(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
+        with open(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
             
             if is_autoencoder == True:
                 BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
@@ -82,7 +82,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
-            model.save(save_path+"models/trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
+            model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
         
         
