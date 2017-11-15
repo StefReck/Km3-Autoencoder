@@ -6,6 +6,7 @@ from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+
 from compare_hists import *
 from util.Loggers import *
 
