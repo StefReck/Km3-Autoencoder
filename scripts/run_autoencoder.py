@@ -10,12 +10,12 @@ from keras.models import load_model
 from keras import optimizers
 import numpy as np
 import h5py
-from run_cnn import *
-from model_definitions import *
 import os
 import sys
 import argparse
 
+from util.run_cnn import *
+from model_definitions import *
 
 # start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
 def parse_input():
@@ -84,8 +84,8 @@ verbose=0
 # 11 13 18 50
 n_bins = (11,18,50,1)
 
-#Learning rate, usually 0.00059
-learning_rate = 0.00059
+#Learning rate, usually 0.001
+learning_rate = 0.001
 """
 
 #Naming scheme for models

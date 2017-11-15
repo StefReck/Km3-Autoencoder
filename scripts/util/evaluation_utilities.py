@@ -13,31 +13,11 @@ import keras as ks
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from keras.models import load_model
+
 
 from run_cnn import generate_batches_from_hdf5_file
 
-#for xzt
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
-test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-#Model info:
-modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-modelident="trained_vgg_1_xzt_autoencoder_epoch22_supervised_up_down_epoch4.h5"
-#Info about model
-n_bins = (11,18,50,1)
-class_type = (2, 'up_down')
-#Plot properties:
-title_of_plot='Classification for up-dwon 3-100GeV frozen encoder'
-save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_Acc_plot"
 
-
-
-test_file=data_path+test_data
-zero_center_file=data_path+zero_center_data
-xs_mean = np.load(zero_center_file)
-modelname = modelpath + modelident
-model = load_model(modelname)
 
 #------------- Functions used in evaluating the performance of model -------------#
 
@@ -64,7 +44,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     arr_energy_correct = None
     for s in range(int(steps)):
         if s % 100 == 0:
-            print ('Predicting in step ' + str(s))
+            print ('Predicting in step ' + str(s) + "/" + str(steps))
         xs, y_true, mc_info = next(generator)
         y_pred = model.predict_on_batch(xs)
 
@@ -120,15 +100,16 @@ def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range
     energy = arr_energy_correct[:, 0]
     correct = arr_energy_correct[:, 1]
 
-    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range)
-    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=98, range=plot_range)
+    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=98, range=plot_range) #häufigkeit von richtigen energien
 
     bin_edges = hist_1d_energy[1]
-    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32)
+    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
     # For making it work with matplotlib step plot
-    hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
+    #hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
+    bin_edges_centered = bin_edges[:-1] + 0.5
 
-    plt_bar_1d_energy_accuracy = plt.step(bin_edges, hist_1d_energy_accuracy_bins_leading_zero, where='pre')
+    plt_bar_1d_energy_accuracy = plt.step(bin_edges_centered, hist_1d_energy_accuracy_bins, where='mid')
 
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
@@ -307,10 +288,5 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 
-arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
-#np.save(arr_energy_correct, "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
-#make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot, filename=save_to)
-make_energy_to_accuracy_plot(arr_energy_correct, title=title_of_plot, filepath=save_to)
-#make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
 
 

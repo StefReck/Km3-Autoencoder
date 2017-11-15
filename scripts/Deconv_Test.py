@@ -6,10 +6,11 @@ from keras.layers import Dense, Lambda, Input, Activation, Conv3D, Conv2D, Conv2
 import numpy as np
 import matplotlib.pyplot as plt
 from keras import backend as K
+import h5py
 
 from util.custom_layers import MaxUnpooling3D
 from compare_hists import reshape_3d_to_3d
-import h5py
+
 
 
 def make_3d_plots_xyz(hist_org, hist_pred, title1, title2, suptitle=None):
