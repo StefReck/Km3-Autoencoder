@@ -23,12 +23,12 @@ test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
 zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-modelident="trained_vgg_1_xzt_supervised_up_down_epoch6.h5"
+modelident="trained_vgg_1_xzt_autoencoder_epoch22_supervised_up_down_epoch4.h5"
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Plot properties:
-title_of_plot='Classification for up-dwon 3-100GeV unfrozen encoder+'
+title_of_plot='Classification for up-dwon 3-100GeV frozen encoder'
 save_to = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "_Acc_plot"
 
 
@@ -308,9 +308,9 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 arr_energy_correct = make_performance_array_energy_correct(model, test_file, n_bins, class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
-np.save("/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
+#np.save(arr_energy_correct, "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/" + modelident[:-3] + "arr_e_cor.npy")
 #make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct, title=title_of_plot, filename=save_to)
-make_energy_to_accuracy_plot(arr_energy_correct, title="Supervised Unfrozen Encoder", filepath=save_to)
+make_energy_to_accuracy_plot(arr_energy_correct, title=title_of_plot, filepath=save_to)
 #make_prob_hists(arr_energy_correct[:, ], modelname=modelident)
 
 
