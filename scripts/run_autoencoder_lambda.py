@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+FOR MODELS WITH LAMBDA LAYERS IN THE DECODER STAGE because they are bugged!
 This script starts or resumes the training of an autoencoder or an encoder that is 
 defined in model_definitions.
 It also contatins the adress of the training files and the epoch
@@ -187,11 +188,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         else:
             #Load an existing trained autoencoder network and train that
             
-            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+            #model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5')
             #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
-            #model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
-            #model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
-            #model.compile(optimizer="adam", loss='mse')
+            model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
+            model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
+            model.compile(optimizer=adam, loss='mse')
         
         
         #Execute training
