@@ -201,6 +201,7 @@ def setup_vgg_1(autoencoder_stage, modelpath_and_name=None):
 def setup_vgg_1_xzt(autoencoder_stage, modelpath_and_name=None):
     #enhanced version of vgg_0, with zero_center compatibility and batch normalization
     #format 11x18x50
+    #713k params
     
     #autoencoder_stage: Type of training/network
     # 0: autoencoder
@@ -598,7 +599,134 @@ def setup_vgg_1_xzt_dense(autoencoder_stage, modelpath_and_name=None):
         model = Model(inputs=inputs, outputs=outputs)
         return model
     
+def setup_vgg_1_xzt_stride(autoencoder_stage, modelpath_and_name=None):
+    #like vgg1xzt, but with stride>1 instead of pooling
+    #format 11x18x50
+    #750k params
     
+    #autoencoder_stage: Type of training/network
+    # 0: autoencoder
+    # 1: encoder+ from autoencoder w/ frozen layers
+    # 2: encoder+ from scratch, completely unfrozen
+    
+    #If autoencoder_stage==1 only the first part of the autoencoder (encoder part) will be generated
+    #These layers are frozen then
+    #The weights of the original model can be imported then by using load_weights('xxx.h5', by_name=True)
+    
+    #modelpath_and_name is used to load the encoder part for supervised training, 
+    #and only needed if make_autoencoder==False
+    
+    if autoencoder_stage == 1:
+        #Freeze encoder layers
+        train=False
+    else:
+        train=True
+        
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    
+    inputs = Input(shape=(11,18,50,1))
+    
+    
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', kernel_initializer='he_normal', use_bias=False, trainable=train)(inputs)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    
+    #11x18x50
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='same', strides=(1,1,2), kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    #11x18x25
+    
+    x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x)
+    x = Conv3D(filters=32, kernel_size=(3,3,3), padding='valid', kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    #10x16x24
+    
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', strides=(2,2,2), kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    #5x8x12
+    
+    x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x)
+    #6x8x12
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='valid', kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    x = Activation('relu', trainable=train)(x)
+    #4x6x10
+    
+    x = Conv3D(filters=64, kernel_size=(3,3,3), padding='same', strides=(2,2,2), kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=train)(x)
+    encoded = Activation('relu', trainable=train)(x)
+    #2x3x5
+
+
+    if autoencoder_stage == 0:
+        #The Decoder part:
+        
+        #2x3x5 x 64
+        
+        x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', strides=(2,2,2), kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        #4x6x10
+        
+        x = ZeroPadding3D(((1,2),(2,2),(2,2)))(x)
+        #7x10x14
+        x = Conv3D(filters=64, kernel_size=(3,3,3), padding='valid', kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        #5x8x12
+    
+        x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', strides=(2,2,2), kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        #10x16x24
+        
+        x = ZeroPadding3D(((1,2),(2,2),(1,2)))(x)
+        #13x20x27
+        x = Conv3D(filters=32, kernel_size=(3,3,3), padding='valid', kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        #11x18x25
+        
+        x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', strides=(1,1,2), kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        #11x18x50
+        
+        x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        
+        x = Conv3DTranspose(filters=32, kernel_size=(3,3,3), padding='same', kernel_initializer='he_normal', use_bias=False)(x)
+        x = BatchNormalization(axis=channel_axis)(x)
+        x = Activation('relu')(x)
+        
+        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        #Output 11x13x18 x 1
+        autoencoder = Model(inputs, decoded)
+        return autoencoder
+    
+    else:
+        #Replacement for the decoder part for supervised training:
+        
+        if autoencoder_stage == 1:
+            #Load weights of encoder part from existing autoencoder
+            encoder= Model(inputs=inputs, outputs=encoded)
+            encoder.load_weights(modelpath_and_name, by_name=True)
+        
+        x = Flatten()(encoded)
+        x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
+        x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
     
     
     
@@ -613,22 +741,24 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_1_xzt_dense":
         model = setup_vgg_1_xzt_dense(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_1_xzt_stride":
+        model = setup_vgg_1_xzt_stride(autoencoder_stage, modelpath_and_name)
     else:
-        raise Exception('Model tag not available')
+        raise Exception('Model tag not available: '+ model_tag)
     return model
 
     
 #For testing purposes
-
-#model = setup_model("vgg_1_xzt", 0)
-#model2 = setup_model("vgg_1_xzt_dense", 0)
+#model = setup_model("vgg_1_xzt_stride", 0)
+#model2 = setup_model("vgg_1_xzt", 0)
 """
 from numpy import prod
-shape=0
-for depth,layer in enumerate(model.layers):
-    if shape != layer.output_shape[1:]:
+def summ_model(model):
+    shape=0
+    print("Depth\tSize\tShape")
+    for depth,layer in enumerate(model.layers):
         shape=layer.output_shape[1:]
-        print(depth, prod(shape), shape)
+        print(depth, "\t", prod(shape),"\t", shape)
 """
 
 

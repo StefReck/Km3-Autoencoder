@@ -12,7 +12,6 @@ from util.custom_layers import MaxUnpooling3D
 from compare_hists import reshape_3d_to_3d
 
 
-
 def make_3d_plots_xyz(hist_org, hist_pred, title1, title2, suptitle=None):
     #Plot original and predicted histogram side by side in one plot
     #input format: [x,y,z,val]

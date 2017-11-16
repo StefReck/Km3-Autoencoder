@@ -88,6 +88,30 @@ def check_if_prediction_is_correct(y_pred, y_true):
 
 #------------- Functions used in making Matplotlib plots -------------#
 
+def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100)):
+    """
+    Makes data for a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
+    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
+    :param str title: Title of the mpl step plot.
+    :param str filepath: Filepath of the resulting plot.
+    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
+    """
+    # Calculate accuracy in energy range
+    energy = arr_energy_correct[:, 0]
+    correct = arr_energy_correct[:, 1]
+
+    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=98, range=plot_range) #häufigkeit von richtigen energien
+
+    bin_edges = hist_1d_energy[1]
+    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
+    # For making it work with matplotlib step plot
+    #hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
+    bin_edges_centered = bin_edges[:-1] + 0.5
+    
+    return [bin_edges_centered, hist_1d_energy_accuracy_bins]
+
+
 def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range=(3, 100)):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
@@ -168,6 +192,30 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
+def make_energy_to_accuracy_plot_comp_data(hist_data_1, hist_data_2, label_1, label_2, title, filepath):
+    """
+    Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
+    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
+    :param str title: Title of the mpl step plot.
+    :param str filepath: Filepath of the resulting plot.
+    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
+    """
+
+    plt.step(hist_data_1[0], hist_data_1[1], where='mid', label=label_1)
+    plt.step(hist_data_2[0], hist_data_2[1], where='mid', label=label_2)
+    
+    x_ticks_major = np.arange(0, 101, 10)
+    plt.xticks(x_ticks_major)
+    plt.minorticks_on()
+
+    plt.legend()
+    plt.xlabel('Energy [GeV]')
+    plt.ylabel('Accuracy')
+    plt.ylim((0, 1))
+    plt.title(title)
+    plt.grid(True)
+
+    plt.savefig(filepath+"_comp.pdf")
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
     """
