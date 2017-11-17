@@ -160,7 +160,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             #Modified for autoencoder:
             if is_autoencoder == True:
-                output = (xs, xs)
+                output = (xs, xs) if yield_mc_info is False else (xs, xs) + (y_values,)
                 yield output
                 
             else:

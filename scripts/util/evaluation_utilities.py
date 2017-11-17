@@ -43,8 +43,8 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
 
     arr_energy_correct = None
     for s in range(int(steps)):
-        if s % 100 == 0:
-            print ('Predicting in step ' + str(s) + "/" + str(steps))
+        if s % 300 == 0:
+            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, y_true, mc_info = next(generator)
         y_pred = model.predict_on_batch(xs)
 
@@ -82,6 +82,63 @@ def check_if_prediction_is_correct(y_pred, y_true):
 
     correct = np.equal(class_pred, class_true)
     return correct
+
+def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels, samples=None):
+    """
+    Creates an energy_correct array based on test_data that specifies for every event the loss of the autoencoder.
+    :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
+    :param str f: Filepath of the file that is used for making predctions.
+    :param tuple n_bins: The number of bins for each dimension (x,y,z,t) in the testfile.
+    :param (int, str) class_type: The number of output classes and a string identifier to specify the exact output classes.
+                                  I.e. (2, 'muon-CC_to_elec-CC')
+    :param int batchsize: Batchsize that should be used for predicting.
+    :param ndarray xs_mean: mean_image of the x dataset if zero-centering is enabled.
+    :param None/str swap_4d_channels: For 4D data input (3.5D models). Specifies, if the channels for the 3.5D net should be swapped in the generator.
+    :param None/int samples: Number of events that should be predicted. If samples=None, the whole file will be used.
+    :return: ndarray arr_energy_correct: Array that contains the energy, correct, particle_type, is_cc and y_pred info for each event.
+    """
+    # TODO only works for a single test_file till now
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=True, yield_mc_info=True, swap_col=swap_4d_channels) # f_size=samples prob not necessary
+    
+    if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    steps = samples/batchsize
+    
+    arr_energy_correct = None
+    for s in range(int(steps)):
+        if s % 300 == 0:
+            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
+        xs, xs_2, mc_info  = next(generator)
+        loss = model.test_on_batch(xs)
+
+        # check if the predictions were correct
+        energy = mc_info[:, 2]
+        particle_type = mc_info[:, 1]
+        is_cc = mc_info[:, 3]
+
+        ax = np.newaxis
+
+        # make a temporary energy_correct array for this batch
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], loss], axis=1)
+
+        if arr_energy_correct is None:
+            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
+        arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
+
+
+    plot_range=(3, 100)
+    # Calculate loss in energy range
+    energy = arr_energy_correct[:, 0]
+    losses = arr_energy_correct[:, 3]
+
+    #hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_losses = np.histogram(losses, bins=98, range=plot_range) #häufigkeit von losses
+    hist_1d_energy_loss_bins = hist_1d_energy_losses[0]
+    bin_edges = hist_1d_energy_losses[1]
+    # For making it work with matplotlib step plot
+    bin_edges_centered = bin_edges[:-1] + 0.5
+    
+    return [bin_edges_centered, hist_1d_energy_loss_bins]
+
 
 #------------- Functions used in evaluating the performance of model -------------#
 
@@ -192,7 +249,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_1, hist_data_2, label_1, label_2, title, filepath):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -200,9 +257,8 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_1, hist_data_2, label_1, la
     :param str filepath: Filepath of the resulting plot.
     :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
     """
-
-    plt.step(hist_data_1[0], hist_data_1[1], where='mid', label=label_1)
-    plt.step(hist_data_2[0], hist_data_2[1], where='mid', label=label_2)
+    for i, hist in enumerate(hist_data_array):
+        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
     
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
@@ -215,7 +271,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_1, hist_data_2, label_1, la
     plt.title(title)
     plt.grid(True)
 
-    plt.savefig(filepath+"_comp.pdf")
+    plt.savefig(filepath)
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
     """

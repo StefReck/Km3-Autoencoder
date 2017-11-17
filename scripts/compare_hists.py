@@ -16,9 +16,10 @@ import h5py
 from model_definitions import *
 
 
-def reshape_3d_to_3d(hist_data):
+def reshape_3d_to_3d(hist_data, filter_small=0):
     #input: 11x13x18
     #output: [ [x],[y],[z],[val] ]
+    #all values with abs<filter_small are removed
     n_bins=hist_data.shape
     tot_bin_no=1
     for i in range(len(n_bins)):
@@ -35,6 +36,11 @@ def reshape_3d_to_3d(hist_data):
                 grid[2][i]=z
                 grid[3][i]=val
                 i=i+1
+                
+    if filter_small>0:
+        bigs = abs(grid[3])>filter_small
+        grid=grid[:,bigs]
+        
     return grid
 
 def make_3d_plot(grid):
@@ -141,8 +147,8 @@ def plot_hist(hist):
     make_3d_plot(reshape_3d_to_3d(hist))
     plt.show() 
 
-def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot_file ):
-    
+def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot_file, min_counts=0 ):
+    #Only bins with abs. more then min_counts are plotted
     #Open files
     file=h5py.File(test_file , 'r')
     zero_center_image = np.load(zero_center_file)
@@ -179,7 +185,7 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
         pp.attach_note(test_file)
         for i,hist in enumerate(hists):
             suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + "     Loss: " + str(losses[i])
-            make_3d_plots_xzt(reshape_3d_to_3d(hist), reshape_3d_to_3d(hists_pred[i]), suptitle)
+            make_3d_plots_xzt(reshape_3d_to_3d(hist, min_counts), reshape_3d_to_3d(hists_pred[i], min_counts), suptitle)
             pp.savefig()
             plt.close()
   
@@ -216,7 +222,7 @@ if __name__ == '__main__':
     plot_file = ""+plot_name
     """
 
-    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file)
+    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=0.3)
 
 
 
