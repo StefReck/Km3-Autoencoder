@@ -23,7 +23,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         K.set_value(model.optimizer.lr, lr)
         print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
 
-    fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
+    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
@@ -31,10 +31,10 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
             #loss and accuracy
-            test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation[0], evaluation[1]))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}'.format(epoch, lr, evaluation[0], training_hist[0], evaluation[1], training_hist[1]))
         else:
             #For autoencoders: only loss
-            test_file.write('\n{0}\t{1}\t{2}'.format(epoch, lr, evaluation))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation, training_hist))
     return lr
             
 
@@ -63,6 +63,8 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
 
     validation_data, validation_steps, callbacks = None, None, None
 
+    history = None
+
     for i, (f, f_size) in enumerate(train_files):  # process all h5 files, full epoch
         if epoch > 1 and shuffle is True: # just for convenience, we don't want to wait before the first epoch each time
             print ('Shuffling file ', f, ' before training in epoch ', epoch)
@@ -79,12 +81,13 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
             else:
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
                 
-            model.fit_generator(
+            history = model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
+    return history
         
         
 def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, n_events=None,):

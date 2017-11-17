@@ -180,11 +180,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
                 metrics = str(model.metrics_names)
                 if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
                 elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
                 else:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+                    raise("Metrics has length",len(metrics))
             
             
         else:
@@ -229,11 +229,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
                 metrics = str(model.metrics_names)
                 if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
                 elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
                 else:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+                    raise("Metrics has length",len(metrics))
             
         
         else:
@@ -278,11 +278,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
                 metrics = str(model.metrics_names)
                 if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics[0]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
                 elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\t{2}\t{3}'.format("Epoch", "LR", metrics[0], metrics[1]))
+                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
                 else:
-                    test_file.write('\n{0}\t{1}\t{2}'.format("Epoch", "LR", metrics))
+                    raise("Metrics has length",len(metrics))
             
             
         

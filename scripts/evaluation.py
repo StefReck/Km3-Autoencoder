@@ -54,7 +54,7 @@ def make_and_save_hist_data(modelpath, modelidents, modelnames, test_file, n_bin
     for i, modelident in enumerate(modelidents):
         model = load_model(modelpath + modelident)
         print("Making energy_coorect_array of ", modelnames[i])
-        arr_energy_correct = make_performance_array_energy_correct(model=model, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
+        arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
         #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
         hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100))
         #save to file
@@ -69,7 +69,7 @@ def make_and_save_hist_data_autoencoder(modelpath, modelidents, modelnames, test
     for i, modelident in enumerate(modelidents):
         model = load_model(modelpath + modelident)
         print("Making and saving energy_loss_array of autoencoder ", modelnames[i])
-        hist_data = make_autoencoder_array_energy_data(model=model, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
+        hist_data = make_autoencoder_array_energy_data(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
         #save to file
         with open("/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelnames[i] + "_hist_data.txt", "wb") as dump_file:
             pickle.dump(hist_data, dump_file)
