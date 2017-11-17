@@ -108,17 +108,18 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
         if s % 300 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, xs_2, mc_info  = next(generator)
-        loss = model.test_on_batch(xs)
+        y_pred = model.predict_on_batch(xs) #(32, 11, 18, 50, 1) 
 
-        # check if the predictions were correct
-        energy = mc_info[:, 2]
+        # calculate mean squared error between original image and autoencoded one
+        mse = ((xs - y_pred) ** 2).mean(axis=(1,2,3,4))
+        energy = mc_info[:, 2] # (32,)
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
 
         ax = np.newaxis
 
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], loss], axis=1)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], mse], axis=1)
 
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
@@ -249,7 +250,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy"):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -266,7 +267,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
 
     plt.legend()
     plt.xlabel('Energy [GeV]')
-    plt.ylabel('Accuracy')
+    plt.ylabel(y_label)
     plt.ylim((0, 1))
     plt.title(title)
     plt.grid(True)

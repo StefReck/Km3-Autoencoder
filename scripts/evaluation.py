@@ -18,15 +18,15 @@ Can also open saved ones to plot all of those histgramms to one plot.
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 #list of modelidents to work
-modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_supervised_up_down_epoch6.h5",
-               "vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch22_supervised_up_down_epoch18.h5")
-label_array=["VGG","Encoder"]
+modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43.h5",
+               "vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch22.h5")
+label_array=["Epoch 43","Epoch 22"]
 
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Plot properties:
-title_of_plot='Comparison of up/down classification'
+title_of_plot='Loss of autoencoder (xzt Data)'
 
 
 modelnames=[] # a tuple of eg "vgg_1_xzt_supervised_up_down_epoch6"
@@ -69,7 +69,7 @@ def make_and_save_hist_data_autoencoder(modelpath, modelidents, modelnames, test
     for i, modelident in enumerate(modelidents):
         model = load_model(modelpath + modelident)
         print("Making and saving energy_loss_array of autoencoder ", modelnames[i])
-        hist_data = make_autoencoder_array_energy_data(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
+        hist_data = make_autoencoder_energy_data(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, swap_4d_channels=None, samples=None)
         #save to file
         with open("/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelnames[i] + "_hist_data.txt", "wb") as dump_file:
             pickle.dump(hist_data, dump_file)
@@ -93,7 +93,7 @@ hist_data_array = make_and_save_hist_data(modelpath=modelpath, modelidents=model
 #for saved hist data:
 #hist_data_array = open_hist_data[modelnames]
 # make plot of multiple data:
-make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as) 
+make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, ylabel="Loss (mse)") 
 
 
 
