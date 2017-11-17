@@ -119,7 +119,7 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
         ax = np.newaxis
 
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], mse], axis=1)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], mse[:,ax]], axis=1)
 
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)

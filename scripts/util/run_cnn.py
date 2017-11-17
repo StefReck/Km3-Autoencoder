@@ -31,7 +31,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
             #loss and accuracy
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}'.format(epoch, lr, evaluation[0], training_hist.history["loss"], evaluation[1], training_hist.history["accuracy"]))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}'.format(epoch, lr, evaluation[0], training_hist.history["loss"], evaluation[1], training_hist.history["acc"]))
         else:
             #For autoencoders: only loss
             test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation, training_hist.history["loss"]))

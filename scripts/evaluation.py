@@ -87,9 +87,9 @@ def open_hist_data(modelnames):
     return hist_data_array
 
 #for supervised networks:
-hist_data_array = make_and_save_hist_data(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
+#hist_data_array = make_and_save_hist_data(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
 #for autoencoders:
-#hist_data_array = make_and_save_hist_data_autoencoder(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
+hist_data_array = make_and_save_hist_data_autoencoder(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
 #for saved hist data:
 #hist_data_array = open_hist_data[modelnames]
 # make plot of multiple data:
