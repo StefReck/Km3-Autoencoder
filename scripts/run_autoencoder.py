@@ -30,7 +30,8 @@ def parse_input():
     parser.add_argument("zero_center", type=bool)
     parser.add_argument("verbose", type=int)    
     parser.add_argument("n_bins", nargs=4, type=int)
-    parser.add_argument("learning_rate", type=float)    
+    parser.add_argument("learning_rate", type=float)   
+    parser.add_argument("learning_rate_decay", default=0.05, type=float)
     
     args = parser.parse_args()
     params = vars(args)
@@ -48,7 +49,7 @@ zero_center = params["zero_center"]
 verbose=params["verbose"]
 n_bins = params["n_bins"]
 learning_rate = params["learning_rate"]
-
+learning_rate_decay = params["learning_rate_decay"]
 
 """
 #Tag for the model used; Identifies both autoencoder and encoder
@@ -101,7 +102,7 @@ Encoder+ new
 """
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05):
     
     #Path to training and testing datafiles on HPC for xyz
     """
@@ -142,7 +143,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Optimizer used in all the networks:
     lr = learning_rate # 0.01 default for SGD, 0.001 for Adam
-    lr_decay = 0.05 # % decay for each epoch, e.g. if 0.1 -> lr_new = lr*(1-0.1)=0.9*lr
+    lr_decay = learning_rate_decay # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     adam = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=0.1,   decay=0.0)
@@ -304,5 +305,5 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                                  save_path=model_folder, is_autoencoder=False, verbose=verbose)
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate)
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay)
 
