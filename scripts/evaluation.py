@@ -20,20 +20,18 @@ Can also open saved ones to plot all of those histgramms to one plot.
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 #list of modelidents to work
-modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_supervised_up_down_epoch6.h5",
-               "vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch22_supervised_up_down_epoch18.h5",
-               "vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43_supervised_up_down_epoch13.h5")
-label_array=["VGG-like","Encoder (AE Epoch 22)", "Encoder (AE Epoch 43)"]
-y_label_of_plot="Accuracy"
+modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43.h5")
+label_array=["Autoencoder Epoch 43"]
+y_label_of_plot="Loss"
 
 #Plot properties:
-title_of_plot='Up-Down-Classification with AveragePooling/Upsampling on xzt-Data'
+title_of_plot='MSE Loss of Autoencoder on xzt-Data'
 
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 #Which ones are autoencoders? Only relevant for generating new data
-is_autoencoder_array = (0,0,0)
+is_autoencoder_array = (1)
 
 
 
@@ -76,7 +74,6 @@ def make_and_save_hist_data_autoencoder(modelpath, modelident, modelname, test_f
     #save to file
     with open("/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_hist_data.txt", "wb") as dump_file:
         pickle.dump(hist_data, dump_file)
-    hist_data_array.append(hist_data)
     return hist_data
 
 def open_hist_data(modelname):
@@ -84,7 +81,6 @@ def open_hist_data(modelname):
     #load again
     with open("/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_hist_data.txt", "rb") as dump_file:
         hist_data = pickle.load(dump_file)
-    hist_data_array.append(hist_data)
     return hist_data
 
 def make_or_load_files(modelnames , modelidents=None, modelpath=None, test_file=None, n_bins=None, class_type=None, xs_mean=None, is_autoencoder_array=None):
@@ -92,7 +88,7 @@ def make_or_load_files(modelnames , modelidents=None, modelpath=None, test_file=
     for i,modelname in enumerate(modelnames):
         name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_hist_data.txt"
         if os.path.isfile(name_of_file)==True:
-            hist_data_array.append(open_hist_data(name_of_file))
+            hist_data_array.append(open_hist_data(modelname))
         else:
             if is_autoencoder_array[i]==0:
                 hist_data = make_and_save_hist_data(modelpath, modelidents[i], modelname, test_file, n_bins, class_type, xs_mean)
@@ -111,7 +107,7 @@ hist_data_array = make_or_load_files(modelnames , modelidents, modelpath, test_f
 #for saved hist data:
 #hist_data_array = open_hist_data[modelnames]
 # make plot of multiple data:
-make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, ylabel=y_label_of_plot) 
+make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
 
 
 

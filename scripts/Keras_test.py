@@ -103,7 +103,7 @@ xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
 xyz_labels = np.array(file["y"])    
 
 
-#setup_simple_model()
+setup_simple_model()
 #setup_conv_model()
 #setup_conv_model_API()
 
@@ -111,6 +111,10 @@ xyz_labels = np.array(file["y"])
 #encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
 #encoder.compile(optimizer='adam', loss='mse')
 
+test = np.ones((100,100))
+ta=np.ones((100))
+hist_fit = model.fit(test, ta, verbose=1, epochs=2, batch_size=10)
+hist_eval = model.evaluate(x=test, y=ta)
 
 """
 with open('Logfile.txt', 'w') as text_file:
@@ -205,8 +209,8 @@ def setup_vgg_like(make_autoencoder, modelpath_and_name=None):
         model = Model(inputs=inputs, outputs=outputs)
         return model
         
-model = setup_vgg_like(make_autoencoder=False, modelpath_and_name="../models/trained_vgg_0_autoencoder_epoch3.h5")
-model.compile(optimizer='adam', loss='mse')
+#model = setup_vgg_like(make_autoencoder=False, modelpath_and_name="../models/trained_vgg_0_autoencoder_epoch3.h5")
+#model.compile(optimizer='adam', loss='mse')
 
 """
 train_on_batch(self, x, y, class_weight=None, sample_weight=None)
