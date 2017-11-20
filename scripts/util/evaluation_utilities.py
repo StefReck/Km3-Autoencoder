@@ -111,34 +111,33 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
         y_pred = model.predict_on_batch(xs) #(32, 11, 18, 50, 1) 
 
         # calculate mean squared error between original image and autoencoded one
-        mse = ((xs - y_pred) ** 2).mean(axis=(1,2,3,4))
+        mse = ((xs - y_pred) ** 2).mean(axis=(1,2,3,4)) #(32,)
         energy = mc_info[:, 2] # (32,)
-        particle_type = mc_info[:, 1]
-        is_cc = mc_info[:, 3]
 
         ax = np.newaxis
 
-        # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], particle_type[:, ax], is_cc[:, ax], mse[:,ax]], axis=1)
+        # make a temporary energy_correct array for this batch, (32, 4)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:,ax]], axis=1)
 
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
 
-    plot_range=(3, 100)
+    #sort array by  ascending energy
+    #arr_energy_correct[arr_energy_correct[:,0].argsort()]
     # Calculate loss in energy range
     energy = arr_energy_correct[:, 0]
-    losses = arr_energy_correct[:, 3]
-
-    #hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
-    hist_1d_energy_losses = np.histogram(losses, bins=98, range=plot_range) #häufigkeit von losses
-    hist_1d_energy_loss_bins = hist_1d_energy_losses[0]
-    bin_edges = hist_1d_energy_losses[1]
-    # For making it work with matplotlib step plot
-    bin_edges_centered = bin_edges[:-1] + 0.5
+    losses = arr_energy_correct[:, 1]
     
-    return [bin_edges_centered, hist_1d_energy_loss_bins]
+    bins=np.linspace(3,100,98)
+    hist_energy_losses=np.zeros((len(bins)-1))
+    bin_indices = np.digitize(energy,bins) #in which bin the lines belong, e.g. [1,1,2,2,2,...], 1-->bin 3-4
+    for bin_no in range(min(bin_indices), max(bin_indices)+1):
+        hist_energy_losses[bin_no-1] = np.mean(losses[bin_indices==bin_no])
+    hist_1d_energy_loss_bins_centered = np.linspace(3.5,99.5,97)
+
+    return [hist_1d_energy_loss_bins_centered, hist_energy_losses]
 
 
 #------------- Functions used in evaluating the performance of model -------------#
@@ -269,6 +268,30 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
     plt.ylim((0, 1))
+    plt.title(title)
+    plt.grid(True)
+
+    plt.savefig(filepath)
+    
+def make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Loss"):
+    """
+    Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
+    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
+    :param str title: Title of the mpl step plot.
+    :param str filepath: Filepath of the resulting plot.
+    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
+    """
+    for i, hist in enumerate(hist_data_array):
+        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
+    
+    x_ticks_major = np.arange(0, 101, 10)
+    plt.xticks(x_ticks_major)
+    plt.minorticks_on()
+
+    plt.legend()
+    plt.xlabel('Energy [GeV]')
+    plt.ylabel(y_label)
+    #plt.ylim((0, 0.2))
     plt.title(title)
     plt.grid(True)
 

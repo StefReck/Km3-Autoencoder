@@ -19,19 +19,21 @@ Can also open saved ones to plot all of those histgramms to one plot.
 
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-#list of modelidents to work
-modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43.h5")
-label_array=["Autoencoder Epoch 43"]
+#list of modelidents to work (has to be an array, so add , at the end if only one file)
+modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43.h5",)
+is_autoencoder_array = (1,) #Which ones are autoencoders? Only relevant for generating new data
+label_array=["Autoencoder Epoch 43",]
+
 y_label_of_plot="Loss"
 
 #Plot properties:
 title_of_plot='MSE Loss of Autoencoder on xzt-Data'
+save_plot_as = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/vgg_1_xzt_autoencoder_epoch_43_loss.pdf"
 
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
-#Which ones are autoencoders? Only relevant for generating new data
-is_autoencoder_array = (1)
+
 
 
 
@@ -39,8 +41,7 @@ modelnames=[] # a tuple of eg "vgg_1_xzt_supervised_up_down_epoch6" (created fro
 for modelident in modelidents:
     modelnames.append(modelident.split("trained_")[1][:-3])
 
-#title_of_plot='Classification for up-dwon 3-100GeV unfrozen encoder+'
-save_plot_as = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/vgg_1_xzt_AvgPooling_Acc_Comp.pdf"
+
 
 
 #Test data files:
