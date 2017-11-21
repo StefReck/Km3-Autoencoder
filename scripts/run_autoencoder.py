@@ -189,7 +189,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #For a new autoencoder: Create header for test file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
                 metrics = model.metrics_names #["loss"]
-                test_file.write('{0}\t{1}\tTest {2}\tTrain {3}\tTime'.format("Epoch", "LR", metrics[0]))
+                test_file.write('{0}\t{1}\tTest {2}\tTrain {3}\tTime'.format("Epoch", "LR", metrics[0], metrics[0]))
             
             
         else:

@@ -637,7 +637,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     
 #For testing purposes
 #model = setup_model("vgg_1_xzt_stride", 0)
-model2 = setup_model("vgg_2_dropout", 2)
+#model2 = setup_model("vgg_2_dropout", 2)
 #model3 = setup_model("vgg_1_xzt_stride", 0)
 #model.compile(optimizer=adam, loss='mse')
 
