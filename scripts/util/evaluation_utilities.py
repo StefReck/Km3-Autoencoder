@@ -129,8 +129,6 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
     # Calculate loss in energy range
     energy = arr_energy_correct[:, 0]
     losses = arr_energy_correct[:, 1]
-    np.save("test_output.npy", [energy,losses])
-    raise("")
     
     bins=np.linspace(3,100,98)
     hist_energy_losses=np.zeros((len(bins)-1))
@@ -138,6 +136,10 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
     for bin_no in range(min(bin_indices), max(bin_indices)+1):
         hist_energy_losses[bin_no-1] = np.mean(losses[bin_indices==bin_no])
     hist_1d_energy_loss_bins_centered = np.linspace(3.5,99.5,97)
+    
+    #How many events are in each bin:
+    #events_in_bin=np.bincount(bin_indices)
+    #plt.step(bins[1:],events_in_bin[1:], where="mid")
 
     return [hist_1d_energy_loss_bins_centered, hist_energy_losses]
 

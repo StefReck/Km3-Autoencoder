@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Flatten, Activation, Conv3D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Flatten, BatchNormalization, Activation, Conv3D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
@@ -122,7 +122,19 @@ def test_model():
     autoencoder = Model(inputs, x)
     return autoencoder
 
+def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis):
+    x = Conv3D(filters=filters, kernel_size=kernel_size, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable)(inp)
+    x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
+    out = Activation('relu', trainable=trainable)(x)
+    return out
 
+inputs=Input(shape=(10,10,10,1))
+x=conv_block(inputs, 2, (3,3,3), "same", True, 1)
+x=conv_block(x, filters=2, kernel_size=(3,3,3), padding="same", trainable=True, channel_axis=1)
+x=conv_block(x, 2, (3,3,3), "same", True, 1)
+model = Model(inputs,x)
+
+raise("")
 model=test_model()
 model.summary()
 model.compile("adam", "mse")
