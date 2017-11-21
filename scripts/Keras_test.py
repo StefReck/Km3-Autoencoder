@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Flatten, Activation, Conv3D, MaxPooling3D, UpSampling3D, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Flatten, Activation, Conv3D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
@@ -92,7 +92,44 @@ def encoded_conv_model_API():
     autoencoder = Model(inputs, encoded)
     return autoencoder
     
+def test_model():
+    inputs = Input(shape=(5,5,1))
+    x = Conv2D(filters=1, strides=1, kernel_size=(3,3), padding='same', activation='relu')(inputs)
+    #2,2
+    x = Conv2DTranspose(filters=1, strides=1, kernel_size=(3,3), padding='same', activation='relu')(x)
+    #12,14,18
+
+    #stride 1/valid             stride 1/same = 1pad --> 13,15,20
+    #11,13,18                   
+    #9,11,16                    11,13,18
+    #11,13,18
     
+    #stride 2/valid
+    #11,13,18
+    #5,6,8
+    #11,13,17       !x2 + 1
+    
+    #stride 2/same = 1pad --> 13,15,20
+    #11,13,18
+    #6,7,9
+    #12,14,18       !x2
+    
+    #same,valid: 11,6,13
+    #same,same:  11,6,12
+    #same, 01valid: 11,6,7,15
+    #same, 01same: 11,6,7,14
+    
+    autoencoder = Model(inputs, x)
+    return autoencoder
+
+
+model=test_model()
+model.summary()
+model.compile("adam", "mse")
+tests=np.ones((3,5,5,1))
+res=model.predict_on_batch(tests)
+hist = model.fit(tests,tests, epochs=2)
+
 data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
 train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
 test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
@@ -103,7 +140,8 @@ xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
 xyz_labels = np.array(file["y"])    
 
 
-setup_simple_model()
+
+#setup_simple_model()
 #setup_conv_model()
 #setup_conv_model_API()
 
@@ -111,10 +149,7 @@ setup_simple_model()
 #encoder.load_weights('../models/trained_autoencoder_test_epoch1.h5', by_name=True)
 #encoder.compile(optimizer='adam', loss='mse')
 
-test = np.ones((100,100))
-ta=np.ones((100))
-hist_fit = model.fit(test, ta, verbose=1, epochs=2, batch_size=10)
-hist_eval = model.evaluate(x=test, y=ta)
+
 
 """
 with open('Logfile.txt', 'w') as text_file:

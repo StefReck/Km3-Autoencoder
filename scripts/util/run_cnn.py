@@ -3,6 +3,7 @@ import h5py
 import numpy as np
 from keras import backend as K
 import warnings
+from datetime import datetime
 
 from util.Loggers import *
 
@@ -23,22 +24,23 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         K.set_value(model.optimizer.lr, lr)
         print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
 
+    start_time = datetime.now().strftime('%H:%M:%S')
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
+    end_time = datetime.now().strftime('%H:%M:%S')
+    
     evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
             #loss and accuracy
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}'.format(epoch, lr, evaluation[0], training_hist.history["loss"], evaluation[1], training_hist.history["acc"]))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}'.format(epoch, lr, evaluation[0], training_hist.history["loss"][0], evaluation[1], training_hist.history["acc"][0], start_time+"_to_"+end_time ))
         else:
             #For autoencoders: only loss
-            test_file.write('\n{0}\t{1}\t{2}\t{3}'.format(epoch, lr, evaluation, training_hist.history["loss"]))
+            #history object looks like this: training_hist.history = {'loss': [0.9533379077911377, 0.9494166374206543]} for 2 epochs, this trains only one
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}'.format(epoch, lr, evaluation, training_hist.history["loss"][0], start_time+"_to_"+end_time ))
     return lr
-            
-
-
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
               shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, n_events=None, tb_logger=False):

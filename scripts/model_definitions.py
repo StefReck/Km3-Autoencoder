@@ -461,7 +461,6 @@ def setup_vgg_1_xzt_max(autoencoder_stage, modelpath_and_name=None):
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
-        print(model.summary())
         return model
     
     
@@ -750,7 +749,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     
 #For testing purposes
 #model = setup_model("vgg_1_xzt_stride", 0)
-#model2 = setup_model("vgg_1_xzt", 0)
+#model = setup_model("vgg_1_xzt", 0)
+#model.compile(optimizer=adam, loss='mse')
 """
 from numpy import prod
 def summ_model(model):

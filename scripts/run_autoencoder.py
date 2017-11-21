@@ -6,6 +6,7 @@ defined in model_definitions.
 It also contatins the adress of the training files and the epoch
 """
 
+
 from keras.models import load_model
 from keras import optimizers
 import numpy as np
@@ -16,6 +17,7 @@ import argparse
 
 from util.run_cnn import *
 from model_definitions import *
+
 
 # start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
 def parse_input():
@@ -144,6 +146,16 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Optimizer used in all the networks:
     lr = learning_rate # 0.01 default for SGD, 0.001 for Adam
     lr_decay = learning_rate_decay # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
+    
+    #if lr is negative, take its absolute as the starting lr and apply the decays that happend during the
+    #previous epochs; The lr gets decayed once when train_and_test_model is called (so epoch-1 here)
+    if lr<0:
+        if autoencoder_stage==0  and epoch>0:
+            lr=abs(lr*(1-float(lr_decay))**(epoch-1))
+            
+        elif (autoencoder_stage==1 or autoencoder_stage==2)  and encoder_epoch>0:
+            lr=abs(lr*(1-float(lr_decay))**(encoder_epoch-1))
+    
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     adam = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=0.1,   decay=0.0)
@@ -176,13 +188,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #For a new autoencoder: Create header for test file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
-                metrics = str(model.metrics_names)
-                if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
-                elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
-                else:
-                    raise("Metrics has length",len(metrics))
+                metrics = model.metrics_names #["loss"]
+                test_file.write('{0}\t{1}\tTest {2}\tTrain {3}\tTime'.format("Epoch", "LR", metrics[0]))
             
             
         else:
@@ -194,7 +201,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
             #model.compile(optimizer="adam", loss='mse')
         
-        
+        model.summary()
         #Execute training
         for current_epoch in range(epoch,epoch+runs):
             #Does the model we are about to save exist already?
@@ -225,24 +232,16 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #For a new encoder: Create header for test file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
-                metrics = str(model.metrics_names)
-                if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
-                elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
-                else:
-                    raise("Metrics has length",len(metrics))
+                metrics = model.metrics_names #['loss', 'acc']
+                test_file.write('{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}\tTime'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
             
         
         else:
             #Load an existing trained encoder network and train that
-        
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
-            #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
-            #model=setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=None)
-            #model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
-            #model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+
         
+        model.summary()
         #Execute training
         for current_epoch in range(encoder_epoch,encoder_epoch+runs):
             #Does the model we are about to save exist already?
@@ -274,25 +273,17 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
             #For a new encoder: Create header for test file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
-                metrics = str(model.metrics_names)
-                if len(metrics)==1:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}'.format("Epoch", "LR", metrics[0]))
-                elif len(metrics)==2:
-                    test_file.write('\n{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
-                else:
-                    raise("Metrics has length",len(metrics))
+                metrics = model.metrics_names #['loss', 'acc']
+                test_file.write('{0}\t{1}\tTest {2}\tTrain {3}\tTest {4}\tTrain {5}\tTime'.format("Epoch", "LR", metrics[0], metrics[0],metrics[1],metrics[1]))
             
             
         
         else:
             #Load an existing trained encoder network and train that
-        
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
-            #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
-            #model=setup_model(model_tag=modeltag, autoencoder_stage=2, modelpath_and_name=None)
-            #model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
-            #model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+
         
+        model.summary()
         #Execute training
         for current_epoch in range(encoder_epoch,encoder_epoch+runs):
             #Does the model we are about to save exist already?

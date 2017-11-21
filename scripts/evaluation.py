@@ -20,7 +20,7 @@ Can also open saved ones to plot all of those histgramms to one plot.
 #Model info:
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 #list of modelidents to work (has to be an array, so add , at the end if only one file)
-modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch43.h5",)
+modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch40.h5",)
 is_autoencoder_array = (1,) #Which ones are autoencoders? Only relevant for generating new data
 label_array=["Autoencoder Epoch 43",]
 
@@ -108,8 +108,8 @@ hist_data_array = make_or_load_files(modelnames , modelidents, modelpath, test_f
 #for saved hist data:
 #hist_data_array = open_hist_data[modelnames]
 # make plot of multiple data:
-make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
-
+#make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
+#make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
 
 
 

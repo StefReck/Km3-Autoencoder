@@ -125,10 +125,12 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
 
 
     #sort array by  ascending energy
-    #arr_energy_correct[arr_energy_correct[:,0].argsort()]
+    arr_energy_correct[arr_energy_correct[:,0].argsort()]
     # Calculate loss in energy range
     energy = arr_energy_correct[:, 0]
     losses = arr_energy_correct[:, 1]
+    np.save("test_output.npy", [energy,losses])
+    raise("")
     
     bins=np.linspace(3,100,98)
     hist_energy_losses=np.zeros((len(bins)-1))
