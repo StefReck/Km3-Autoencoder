@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Contains Definitions of setup_vgg_2, setup_vgg_2_max, setup_vgg_2_stride
+Contains Definitions of setup_vgg_2, setup_vgg_2_max, setup_vgg_2_stride, setup_vgg_2_dropout
 
-Enhanced version of vgg_0, with zero_center compatibility and batch normalization
+Vgg-like autoencoder-networks with 7+7 convolutional layers w/ batch norm; ca 720k free params
 Input Format: 11x18x50 (XZT DATA)
 
 autoencoder_stage: Type of training/network
@@ -19,7 +19,7 @@ and only needed if make_autoencoder==False
     
 """
 from keras.models import Model
-from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Cropping3D, Conv3DTranspose, Reshape, AveragePooling3D
+from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras import backend as K
 
 from util.custom_layers import MaxUnpooling3D
