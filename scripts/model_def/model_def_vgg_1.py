@@ -471,7 +471,7 @@ def setup_vgg_1_xzt_stride(autoencoder_stage, modelpath_and_name=None):
         #The Decoder part:
         
         #2x3x5 x 64
-        
+        #Originally, this layer connected to BN and not to Activation
         x = Conv3DTranspose(filters=64, kernel_size=(3,3,3), padding='same', strides=(2,2,2), kernel_initializer='he_normal', use_bias=False)(encoded)
         x = BatchNormalization(axis=channel_axis)(x)
         x = Activation('relu')(x)

@@ -5,7 +5,7 @@ Functions that return models are defined in this file
 """
 from model_def.model_def_vgg_1 import setup_vgg_1, setup_vgg_1_xzt, setup_vgg_1_xzt_max, setup_vgg_1_xzt_stride
 from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup_vgg_2_max, setup_vgg_2_stride
-from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride
+from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     if model_tag == "vgg_1":
@@ -34,11 +34,12 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_3_max(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_3_stride":
         model = setup_vgg_3_stride(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_3_stride_noRelu":
+        model = setup_vgg_3_stride_noRelu(autoencoder_stage, modelpath_and_name)
         
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
-
     
 """
 import numpy as np

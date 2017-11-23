@@ -3,6 +3,7 @@
 Contains Definitions of setup_vgg_3, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_dropout
 
 Vgg-like autoencoder-networks with 7+7 convolutional layers w/ batch norm; ca 720k free params
+Just like vvg_2, but only size 3 Kernels this time
 Input Format: 11x18x50 (XZT DATA)
 
 autoencoder_stage: Type of training/network
@@ -222,6 +223,58 @@ def setup_vgg_3_stride(autoencoder_stage, modelpath_and_name=None):
     x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
     x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
     encoded=conv_block(x, filters=64, kernel_size=(3,3,3), padding="valid", strides=(2,2,2), trainable=train, channel_axis=channel_axis) #2x3x5
+    
+    if autoencoder_stage == 0:  #The Decoder part:
+        #2x3x5 x 64
+        x=convT_block(encoded, filters=64, kernel_size=(3,3,3), padding="valid", strides=(2,2,2), channel_axis=channel_axis) #5x7x11
+        x = ZeroPadding3D(((0,0),(0,1),(0,1)))(x) #5x8x12
+        x=convT_block(x, filters=64, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
+        x=convT_block(x, filters=64, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
+        
+        x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="valid", strides=(2,2,2), channel_axis=channel_axis) #11x17x25
+        x = ZeroPadding3D(((0,0),(0,1),(0,0)))(x) #11,18,25
+        x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x25
+        
+        x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="same", strides=(1,1,2), channel_axis=channel_axis) #11x18x50
+        x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x50
+        
+        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        #Output 11x13x18 x 1
+        autoencoder = Model(inputs, decoded)
+        return autoencoder
+    else: #Replacement for the decoder part for supervised training:
+        if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
+            encoder= Model(inputs=inputs, outputs=encoded)
+            encoder.load_weights(modelpath_and_name, by_name=True)
+        x = Flatten()(encoded)
+        x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
+        x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
+    
+def setup_vgg_3_stride_noRelu(autoencoder_stage, modelpath_and_name=None):
+    #832k params
+    train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    
+    inputs = Input(shape=(11,18,50,1))
+    x=conv_block(inputs, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
+    
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", strides=(1,1,2), trainable=train, channel_axis=channel_axis) #11x18x25
+    x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x) #12,18,26
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #10x16x24
+    
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", strides=(2,2,2), trainable=train, channel_axis=channel_axis) #5x8x12
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
+    x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
+    
+    encoded=conv_block(x, filters=64, kernel_size=(3,3,3), padding="valid", strides=(2,2,2), trainable=train, channel_axis=channel_axis) #2x3x5
+    
+    x = Conv3D(filters=64, kernel_size=(3,3,3), strides=(2,2,2), padding="valid", kernel_initializer='he_normal', use_bias=False, trainable=train)(x)
+    encoded = BatchNormalization(axis=channel_axis, trainable=train)(x)
     
     if autoencoder_stage == 0:  #The Decoder part:
         #2x3x5 x 64

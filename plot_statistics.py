@@ -18,7 +18,7 @@ for modelident in test_files:
 def make_dicts_from_files(test_files):
     dict_array=[]
     for test_file in test_files:
-        with open(test_file) as f:
+        with open("models/"+test_file) as f:
             k = list(zip(*(line.strip().split('\t') for line in f)))
         data = {}
         for column in k:
@@ -39,13 +39,12 @@ def make_test_train_plot(epochs, test, train, label):
 
 dict_array = make_dicts_from_files(test_files)
 
-for i,test_file in enumerate(test_files):
-    data_dict = dict_array[i]
+for i,data_dict in enumerate(dict_array):
     make_test_train_plot(data_dict["Epoch"], data_dict["Test loss"], data_dict["Train loss"], modelnames[i])
     
-    plt.legend()
-    plt.xlabel('Epoch')
-    plt.ylabel("Loss")
-    plt.title("Progress")
-    plt.grid(True)
-    plt.show()
+plt.legend()
+plt.xlabel('Epoch')
+plt.ylabel("Loss")
+plt.title("Progress")
+plt.grid(True)
+plt.show()
