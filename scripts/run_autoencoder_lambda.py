@@ -201,7 +201,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
             model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
             model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
-            model.compile(optimizer="adam", loss='mse')
+            model.compile(optimizer=adam, loss='mse')
         
         model.summary()
         #Execute training

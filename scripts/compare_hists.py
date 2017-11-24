@@ -37,9 +37,10 @@ def reshape_3d_to_3d(hist_data, filter_small=0):
                 grid[3][i]=val
                 i=i+1
                 
-    if filter_small>0:
+    if filter_small>=0:
         bigs = abs(grid[3])>filter_small
-        grid=grid[:,bigs]
+        #grid=grid[:,bigs] #Bug?
+        grid[3] = np.multiply(grid[3],bigs)
         
     return grid
 
