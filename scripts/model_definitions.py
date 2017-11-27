@@ -5,7 +5,7 @@ Functions that return models are defined in this file
 """
 from model_def.model_def_vgg_1 import setup_vgg_1, setup_vgg_1_xzt, setup_vgg_1_xzt_max, setup_vgg_1_xzt_stride
 from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup_vgg_2_max, setup_vgg_2_stride
-from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu
+from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     if model_tag == "vgg_1":
@@ -26,8 +26,12 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     elif model_tag == "vgg_2_stride":
         model = setup_vgg_2_stride(autoencoder_stage, modelpath_and_name)
     
-    elif model_tag == "vgg_3":
+    elif model_tag == "vgg_3" or model_tag=="vgg_3_eps":
         model = setup_vgg_3(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_3_small":
+        model = setup_vgg_3_small(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_3_verysmall":
+        model = setup_vgg_3_verysmall(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_3_dropout":
         model = setup_vgg_3_dropout(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_3_max":
@@ -39,8 +43,10 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         
     else:
         raise Exception('Model tag not available: '+ model_tag)
+    model.summary()
     return model
-    
+
+
 """
 import numpy as np
 import matplotlib.pyplot as plt

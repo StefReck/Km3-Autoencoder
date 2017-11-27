@@ -39,8 +39,8 @@ def reshape_3d_to_3d(hist_data, filter_small=0):
                 
     if filter_small>=0:
         bigs = abs(grid[3])>filter_small
-        #grid=grid[:,bigs] #Bug?
-        grid[3] = np.multiply(grid[3],bigs)
+        grid=grid[:,bigs] #Bug?
+        #grid[3] = np.multiply(grid[3],bigs)
         
     return grid
 
@@ -112,24 +112,31 @@ def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
     max_value1= np.amax(hist_org)
     min_value1 = np.amin(hist_org)
     fraction1=(hist_org[3]-min_value1)/max_value1
-    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=True)
+    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=False)
     cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
     cbar1.set_label('Hits', rotation=270, labelpad=0.15)
     ax1.set_xlabel('X')
+    ax1.set_xlim([0,11])
     ax1.set_ylabel('Z')
+    ax1.set_ylim([0,18])
     ax1.set_zlabel('T')
+    ax1.set_zlim([0,50])
     ax1.set_title("Original")
     
     ax2 = fig.add_subplot(122, projection='3d', aspect='equal')
     max_value2=np.amax(hist_pred)
     min_value2=np.amin(hist_pred)
     fraction2=(hist_pred[3]-min_value2)/max_value2
-    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=True)
+    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=False)
     cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
     cbar2.set_label('Hits', rotation=270, labelpad=0.15)
-    ax2.set_xlabel('X')
+    ax2.set_xlabel("X")
+    ax2.set_xlim([0,11])
     ax2.set_ylabel('Z')
+    ax2.set_ylim([0,18])
     ax2.set_zlabel('T')
+    ax2.set_zlim([0,50])
+
     ax2.set_title("Prediction")
     
     if suptitle is not None: fig.suptitle(suptitle)
@@ -194,8 +201,8 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
 
 if __name__ == '__main__':
     #The Model which is used for predictions
-    model_path="models/"
-    model_name="trained_vgg_1_xzt_autoencoder_epoch20.h5"
+    model_path="models/vgg_3_eps/"
+    model_name="trained_vgg_3_eps_autoencoder_epoch20.h5"
     
     #Events to compare
     which = [0,1,2,3,4,5]

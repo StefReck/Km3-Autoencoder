@@ -5,16 +5,27 @@ import numpy as np
 
 hd = True
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
+#Autoencoders:
 test_files = ["vgg_3/trained_vgg_3_autoencoder_test.txt", 
               "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_test.txt",
               "vgg_3_max/trained_vgg_3_max_autoencoder_test.txt",
               "vgg_3_stride/trained_vgg_3_stride_autoencoder_test.txt",
-              "vgg_3_stride_noRelu/trained_vgg_3_stride_noRelu_autoencoder_test.txt"]
+              "vgg_3_stride_noRelu/trained_vgg_3_stride_noRelu_autoencoder_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+              "vgg_3_small/trained_vgg_3_small_autoencoder_test.txt"]
 
-test_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
+#Unfrozen
+xtest_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
               "vgg_3_dropout/trained_vgg_3_dropout_supervised_up_down_test.txt",
               "vgg_3_max/trained_vgg_3_max_supervised_up_down_test.txt",
-              "vgg_3_stride/trained_vgg_3_stride_supervised_up_down_test.txt",]
+              "vgg_3_stride/trained_vgg_3_stride_supervised_up_down_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_supervised_up_down_test.txt",]
+
+#Encoders Epoch 10
+xtest_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_max/trained_vgg_3_max_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_stride/trained_vgg_3_stride_autoencoder_epoch10_supervised_up_down_test.txt", ]
 
 #For debugging
 #test_files = ["trained_vgg_3_autoencoder_test.txt", "trained_vgg_3_dropout_autoencoder_test.txt"]
