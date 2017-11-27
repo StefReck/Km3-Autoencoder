@@ -8,6 +8,13 @@ from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup
 from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
+    #model tags can have version numbers, e.g. vgg_1-different_lr
+    #for this, load model without the version number
+    splitted_tag = model_tag.split("-")
+    model_tag = splitted_tag[0]
+    if len(splitted_tag)==2:
+        print("Creating model "+model_tag+" in version "+splitted_tag[1])
+    
     if model_tag == "vgg_1":
         model = setup_vgg_1(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_1_xzt":
@@ -43,7 +50,6 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         
     else:
         raise Exception('Model tag not available: '+ model_tag)
-    model.summary()
     return model
 
 

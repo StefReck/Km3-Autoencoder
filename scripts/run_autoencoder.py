@@ -32,8 +32,10 @@ def parse_input():
     parser.add_argument("zero_center", type=bool)
     parser.add_argument("verbose", type=int)    
     parser.add_argument("n_bins", nargs=4, type=int)
-    parser.add_argument("learning_rate", type=float)   
+    parser.add_argument("learning_rate", type=float)
     parser.add_argument("learning_rate_decay", default=0.05, type=float)
+    parser.add_argument("epsilon", default=0.1, type=float) #adam default: 1e-08
+    parser.add_argument("lambda_comp", default=False, type=bool)
     
     args = parser.parse_args()
     params = vars(args)
@@ -52,6 +54,8 @@ verbose=params["verbose"]
 n_bins = params["n_bins"]
 learning_rate = params["learning_rate"]
 learning_rate_decay = params["learning_rate_decay"]
+epsilon = params["epsilon"]
+lambda_comp = params["lambda_comp"]
 
 """
 #Tag for the model used; Identifies both autoencoder and encoder
@@ -104,7 +108,7 @@ Encoder+ new
 """
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False):
     
     #Path to training and testing datafiles on HPC for xyz
     """
@@ -160,7 +164,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    adam = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=0.1,   decay=0.0)
+    adam = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=epsilon,   decay=0.0)
     
     #fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
     train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
@@ -178,10 +182,19 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Setup network:
         
-    #Autoencoder self-supervised training:
+    #Autoencoder self-supervised training. Epoch is the autoencoder epoch, enc_epoch not relevant for this stage
     if autoencoder_stage==0:
         modelname = modeltag + "_autoencoder"
         
+        #automatically look for latest epoch
+        if epoch == -1:
+            epoch=0
+            while True:
+                if os.path.isfile(model_folder + "trained_" + modelname + '_epoch' + str(epoch+1) + '.h5')==True:
+                    epoch+=1
+                else:
+                    break
+                    
         if epoch == 0:
             #Create a new autoencoder network
             
@@ -196,12 +209,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
         else:
             #Load an existing trained autoencoder network and train that
-            
-            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5')
-            #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
-            #model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
-            #model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
-            #model.compile(optimizer="adam", loss='mse')
+            if lambda_comp==False:
+                model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+            elif lambda_comp==True:
+                #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
+                model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
+                model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
+                model.compile(optimizer=adam, loss='mse')
         
         model.summary()
         #Execute training
@@ -217,14 +231,21 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
             
     #Encoder supervised training:
+    #Load the encoder part of an autoencoder, import weights from trained model, freeze it and add dense layers
     elif autoencoder_stage==1:
-        #Load an existing autoencoder network, modify and train it supervised
-        
         #name of the autoencoder model file that the encoder part is taken from:
         autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
-        
         #name of the supervised model:
         modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1]
+        
+        #automatically look for latest encoder epoch
+        if encoder_epoch == -1:
+            encoder_epoch=0
+            while True:
+                if os.path.isfile(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                    encoder_epoch+=1
+                else:
+                    break
         
         if encoder_epoch == 0:
             #Create a new encoder network:
@@ -257,27 +278,30 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     
     
-    #Encoder supervised training with completely unfrozen model:
+    #Unfrozen Encoder supervised training with completely unfrozen model:
     elif autoencoder_stage==2:
-        #Load an existing autoencoder network, modify and train it supervised
-        
-        #name of the autoencoder model file that the encoder part is taken from:
-        autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
-        
         #name of the supervised model:
         modelname = modeltag + "_supervised_" + class_type[1]
+        
+        #automatically look for latest encoder epoch
+        if encoder_epoch == -1:
+            encoder_epoch=0
+            while True:
+                if os.path.isfile(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                    encoder_epoch+=1
+                else:
+                    break
         
         if encoder_epoch == 0:
             #Create a new encoder network:
             
-            model = setup_model(model_tag=modeltag, autoencoder_stage=2, modelpath_and_name=autoencoder_model)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=2)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             
             #For a new encoder: Create header for test file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
                 metrics = model.metrics_names #['loss', 'acc']
                 test_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
-            
             
         
         else:
@@ -298,5 +322,5 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                                  save_path=model_folder, is_autoencoder=False, verbose=verbose)
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay)
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp)
 
