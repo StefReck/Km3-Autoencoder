@@ -34,7 +34,7 @@ def parse_input():
     parser.add_argument("n_bins", nargs=4, type=int)
     parser.add_argument("learning_rate", type=float)
     parser.add_argument("learning_rate_decay", default=0.05, type=float)
-    parser.add_argument("epsilon", default=0.1, type=int) #exponent of epsilon, adam default: 1e-08
+    parser.add_argument("epsilon", default=-1, type=int) #exponent of epsilon, adam default: 1e-08
     parser.add_argument("lambda_comp", default=False, type=bool)
     
     args = parser.parse_args()

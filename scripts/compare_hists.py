@@ -112,7 +112,7 @@ def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
     max_value1= np.amax(hist_org)
     min_value1 = np.amin(hist_org)
     fraction1=(hist_org[3]-min_value1)/max_value1
-    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=False)
+    plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=8*36*fraction1, rasterized=True)
     cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1)
     cbar1.set_label('Hits', rotation=270, labelpad=0.15)
     ax1.set_xlabel('X')
@@ -127,7 +127,7 @@ def make_3d_plots_xzt(hist_org, hist_pred, suptitle=None):
     max_value2=np.amax(hist_pred)
     min_value2=np.amin(hist_pred)
     fraction2=(hist_pred[3]-min_value2)/max_value2
-    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=False)
+    plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=8*36*fraction2, rasterized=True)
     cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1)
     cbar2.set_label('Hits', rotation=270, labelpad=0.15)
     ax2.set_xlabel("X")
@@ -155,17 +155,19 @@ def plot_hist(hist):
     make_3d_plot(reshape_3d_to_3d(hist))
     plt.show() 
 
-def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot_file, min_counts=0 ):
+def save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=0, lambda_comp_model_tag=None):
     #Only bins with abs. more then min_counts are plotted
     #Open files
     file=h5py.File(test_file , 'r')
     zero_center_image = np.load(zero_center_file)
     
-    autoencoder=load_model(model_file)
-    #if lambda layers are present:    
-    #autoencoder=setup_model("vgg_1_xzt_max", 0)
-    #autoencoder.load_weights(model_file, by_name=True)
-    #autoencoder.compile(optimizer="adam", loss='mse')
+    if lambda_comp_model_tag == None:
+        autoencoder=load_model(model_file)
+    else:
+        #if lambda layers are present:    
+        autoencoder=setup_model(lambda_comp_model_tag, 0)
+        autoencoder.load_weights(model_file, by_name=True)
+        autoencoder.compile(optimizer="adam", loss='mse')
 
     # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     labels = file["y"][which]
@@ -190,7 +192,7 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
     #test_file is a .h5 file on which the predictions are done
     #center_file is the zero center image
     with PdfPages(plot_file) as pp:
-        pp.attach_note(test_file)
+        #pp.attach_note(test_file)
         for i,hist in enumerate(hists):
             suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + "     Loss: " + str(losses[i])
             make_3d_plots_xzt(reshape_3d_to_3d(hist, min_counts), reshape_3d_to_3d(hists_pred[i], min_counts), suptitle)
@@ -201,11 +203,14 @@ def save_some_plots_to_pdf( model_file, test_file, zero_center_file, which, plot
 
 if __name__ == '__main__':
     #The Model which is used for predictions
-    model_path="models/vgg_3_eps/"
-    model_name="trained_vgg_3_eps_autoencoder_epoch20.h5"
+    model_path="models/vgg_3_max/"
+    model_name="trained_vgg_3_max_autoencoder_epoch10.h5"
     
     #Events to compare
     which = [0,1,2,3,4,5]
+    
+    #if lambda layers are present: Give model tag to load model manually; else None
+    lambda_comp_model_tag = None #"vgg_3"
     
     #Path to data to predict on (for xzt)
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
@@ -230,7 +235,7 @@ if __name__ == '__main__':
     plot_file = ""+plot_name
     """
 
-    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=0.3)
+    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=0.3, lambda_comp_model_tag=lambda_comp_model_tag)
 
 
 
