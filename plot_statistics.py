@@ -12,7 +12,8 @@ test_files = ["vgg_3/trained_vgg_3_autoencoder_test.txt",
               "vgg_3_stride/trained_vgg_3_stride_autoencoder_test.txt",
               "vgg_3_stride_noRelu/trained_vgg_3_stride_noRelu_autoencoder_test.txt",
               "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
-              "vgg_3_small/trained_vgg_3_small_autoencoder_test.txt"]
+              "vgg_3_small/trained_vgg_3_small_autoencoder_test.txt",
+              "vgg_3_verysmall/trained_vgg_3_verysmall_autoencoder_test.txt",]
 
 #Unfrozen
 xtest_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
@@ -22,7 +23,7 @@ xtest_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
               "vgg_3_eps/trained_vgg_3_eps_supervised_up_down_test.txt",]
 
 #Encoders Epoch 10
-xtest_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.txt",
+test_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.txt",
               "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_epoch10_supervised_up_down_test.txt",
               "vgg_3_max/trained_vgg_3_max_autoencoder_epoch10_supervised_up_down_test.txt",
               "vgg_3_stride/trained_vgg_3_stride_autoencoder_epoch10_supervised_up_down_test.txt", ]
