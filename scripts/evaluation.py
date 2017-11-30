@@ -12,37 +12,31 @@ import os
 from util.evaluation_utilities import *
 
 """
-Take all models in the modelident array and make binned accuracy histogramm data and save.
-Autoencoder loss has to be done seperately.
-Can also open saved ones to plot all of those histgramms to one plot.
+Specify trained models, either AE or supervised, and calculate their loss or acc on test data.
+This data is then binned and automatically dumped. Instead of recalculating, it is loaded automatically.
+Can also plot it.
 """
 
 #Model info:
-modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-#list of modelidents to work (has to be an array, so add , at the end if only one file)
+#list of modelidents to work on (has to be an array, so add , at the end if only one file)
 modelidents = ("vgg_1_xzt/trained_vgg_1_xzt_autoencoder_epoch40.h5",)
 is_autoencoder_array = (1,) #Which ones are autoencoders? Only relevant for generating new data
-label_array=["Autoencoder Epoch 43",]
 
-y_label_of_plot="Loss"
 
-#Plot properties:
+#Plot properties: All in the array are plotted in one figure, with own label each
 title_of_plot='MSE Loss of Autoencoder on xzt-Data'
-save_plot_as = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/vgg_1_xzt_autoencoder_epoch_43_loss.pdf"
+label_array=["Autoencoder Epoch 40",]
+plot_file_name = "vgg_1_xzt_autoencoder_epoch_43_loss.pdf" #in the results/plots folder
+#Which plot to generate:
+#loss, acc, None
+plot_type = "loss"
+
+
+
 
 #Info about model
 n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
-
-
-
-
-modelnames=[] # a tuple of eg "vgg_1_xzt_supervised_up_down_epoch6" (created from trained_vgg_1_xzt_supervised_up_down_epoch6.h5)
-for modelident in modelidents:
-    modelnames.append(modelident.split("trained_")[1][:-3])
-
-
-
 
 #Test data files:
 #for xzt
@@ -50,12 +44,25 @@ data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projecti
 test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
 zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
 
+
+
+
+
+modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+
+modelnames=[] # a tuple of eg "vgg_1_xzt_supervised_up_down_epoch6" (created from trained_vgg_1_xzt_supervised_up_down_epoch6.h5)
+for modelident in modelidents:
+    modelnames.append(modelident.split("trained_")[1][:-3])
+
 test_file=data_path+test_data
+save_plot_as = plot_path + plot_file_name
+
 zero_center_file=data_path+zero_center_data
 xs_mean = np.load(zero_center_file)
 
-
-
+#Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
+#results/data folder, so that it has not to be generated again
 def make_and_save_hist_data(modelpath, modelident, modelname, test_file, n_bins, class_type, xs_mean):
     model = load_model(modelpath + modelident)
     print("Making energy_coorect_array of ", modelname)
@@ -68,6 +75,7 @@ def make_and_save_hist_data(modelpath, modelident, modelname, test_file, n_bins,
         pickle.dump(hist_data, dump_file)
     return hist_data
 
+#Loss of an AE as a function of energy, rest like above
 def make_and_save_hist_data_autoencoder(modelpath, modelident, modelname, test_file, n_bins, class_type, xs_mean):
     model = load_model(modelpath + modelident)
     print("Making and saving energy_loss_array of autoencoder ", modelname)
@@ -77,6 +85,7 @@ def make_and_save_hist_data_autoencoder(modelpath, modelident, modelname, test_f
         pickle.dump(hist_data, dump_file)
     return hist_data
 
+#open dumped histogramm data, that was generated from the above two functions
 def open_hist_data(modelname):
     print("Opening existing hist_data of ", modelname)
     #load again
@@ -98,19 +107,29 @@ def make_or_load_files(modelnames , modelidents=None, modelpath=None, test_file=
             hist_data_array.append(hist_data)
     return hist_data_array
 
+#generate or load data automatically:
 hist_data_array = make_or_load_files(modelnames , modelidents, modelpath, test_file, n_bins, class_type, xs_mean, is_autoencoder_array)
 
-
+#generate data manually:
 #for supervised networks:
 #hist_data_array = make_and_save_hist_data(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
 #for autoencoders:
 #hist_data_array = make_and_save_hist_data_autoencoder(modelpath=modelpath, modelidents=modelidents, modelnames=modelnames, test_file=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean)
-#for saved hist data:
-#hist_data_array = open_hist_data[modelnames]
-# make plot of multiple data:
-#make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
-#make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
 
+#Load data manually:
+#hist_data_array = open_hist_data[modelnames]
+
+#make plot of multiple data:
+if plot_type == "acc":
+    y_label_of_plot="Accuracy"
+    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
+elif plot_type == "loss":
+    y_label_of_plot="Loss"
+    make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
+elif plot_type == None:
+    pass
+else:
+    print("Plot type", plot_type, "not supported. Not generating plots.")
 
 
 #For an array of data:

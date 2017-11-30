@@ -6,6 +6,8 @@ from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+from keras import backend as K
+from matplotlib.backends.backend_pdf import PdfPages
 
 from compare_hists import *
 from util.Loggers import *
@@ -128,28 +130,111 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis):
     out = Activation('relu', trainable=trainable)(x)
     return out
 
-inputs=Input(shape=(10,10,10,1))
-x=conv_block(inputs, 2, (3,3,3), "same", True, 1)
-x=conv_block(x, filters=2, kernel_size=(3,3,3), padding="same", trainable=True, channel_axis=1)
-x=conv_block(x, 2, (3,3,3), "same", True, 1)
-model = Model(inputs,x)
 
-raise("")
-model=test_model()
-model.summary()
-model.compile("adam", "mse")
-tests=np.ones((3,5,5,1))
-res=model.predict_on_batch(tests)
-hist = model.fit(tests,tests, epochs=2)
+data = "Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5"
+zero_center = "Daten/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
 
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
-train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
-test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
+model_eps = "Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10.h5"
+model = "Daten/xzt/trained_vgg_3_autoencoder_epoch10_supervised_up_down_epoch10.h5"
 
-file=h5py.File('Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5', 'r')
-xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
+model_sup = "Daten/xzt/trained_vgg_3_supervised_up_down_epoch3.h5"
+autoencoder_model = "Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
+which_events = [0]
+
+
+file=h5py.File(data , 'r')
+zero_center_image = np.load(zero_center)
 # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
-xyz_labels = np.array(file["y"])    
+labels = file["y"][which_events] 
+hists = file["x"][which_events]
+#Get some hists from the file
+hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
+#0 center them
+centered_hists = np.subtract(hists, zero_center_image)
+
+
+encoder = load_model(model)
+encoder_eps = load_model(model_eps)
+encoder_sup = load_model(model_sup)
+autoencoder = load_model(autoencoder_model)
+
+#Predict on 0 centered data
+pred=encoder.predict_on_batch(centered_hists)
+pred_eps=encoder_eps.predict_on_batch(centered_hists)
+
+
+def get_out_from_layer(layer_no, model):
+    get_layer_1_output = K.function([model.layers[0].input, K.learning_phase()], [model.layers[layer_no].output])
+    layer_1_output = get_layer_1_output([centered_hists,0])[0]
+    return layer_1_output
+
+
+def make_histogramms_of_layer(layer_no, model_1, model_2=None, title_1="Epsilon = 0.1", title_2="Epsilon = E-8"):
+    #histogram of activations
+    enc_feat=get_out_from_layer(layer_no, model_1)
+    enc_eps_feat=get_out_from_layer(layer_no, model_2) if model_2 is not None else None
+    
+    plt.figure()
+    
+    if model_2 is not None:
+        plt.subplot(121)
+        plt.title(title_1)
+        plt.hist(enc_feat.flatten(), 100)
+        
+        plt.subplot(122)
+        plt.title(title_2)
+        plt.hist(enc_eps_feat.flatten(), 100)
+        
+        plt.suptitle(model_1.layers[layer_no].name)
+    
+    else:
+        plt.title(model_1.layers[layer_no].name)
+        plt.hist(enc_feat.flatten(), 100)
+        
+    plt.tight_layout()
+
+def make_weights_histogramms_of_layer(layer_no, model_1, model_2):
+    #histogram of weights #layer -8
+    weights = []
+    for w in model_1.layers[layer_no].get_weights():
+        weights.extend(w.flatten())
+    weights_eps = []
+    for w in model_2.layers[layer_no].get_weights():
+        weights_eps.extend(w.flatten())
+
+    plt.subplot(121)
+    plt.title("Epsilon = 0.1")
+    plt.hist(weights, 100)
+    plt.subplot(122)
+    plt.title("Epsilon = E-8")
+    plt.hist(weights_eps, 100)
+    plt.suptitle(model_1.layers[layer_no].name)
+
+
+def make_complete_prop(model_1, save_path, model_2=None):
+    with PdfPages(save_path) as pp:
+        for i in range(0,len(model_1.layers)):
+            make_histogramms_of_layer(i, model_1, model_2)
+            pp.savefig()
+            plt.close()
+
+
+#make_complete_prop(model_1 = encoder, model_2=encoder_eps, save_path="vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10_activation_1_event.pdf")
+#make_histogramms_of_layer(-7, encoder, encoder_sup, "Frozen Encoder Epsilon = 0.1", "Unfrozen encoder")
+make_complete_prop(autoencoder, "trained_vgg_3_eps_autoencoder_epoch10_layer_outputs.pdf")
+
+#K.get_value(model.optimizer.lr)
+
+
+#for i in range(-5,-6,-1):
+#    make_histogramms_of_layer(i)
+#make_weights_histogramms_of_layer()
+
+
+#file=h5py.File('Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5', 'r')
+#xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
+# event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
+#xyz_labels = np.array(file["y"])    
 
 
 

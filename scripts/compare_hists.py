@@ -209,6 +209,9 @@ if __name__ == '__main__':
     #Events to compare
     which = [0,1,2,3,4,5]
     
+    #minimum number of counts in a bin for it to be displayed in the histogramms
+    min_counts=0.3
+    
     #if lambda layers are present: Give model tag to load model manually; else None
     lambda_comp_model_tag = None #"vgg_3"
     
@@ -235,7 +238,7 @@ if __name__ == '__main__':
     plot_file = ""+plot_name
     """
 
-    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=0.3, lambda_comp_model_tag=lambda_comp_model_tag)
+    save_some_plots_to_pdf(model_file, test_file, zero_center_file, which, plot_file, min_counts=min_counts, lambda_comp_model_tag=lambda_comp_model_tag)
 
 
 
