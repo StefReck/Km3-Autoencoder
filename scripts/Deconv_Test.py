@@ -64,6 +64,53 @@ print(res)
 
 
 """
+def make_updown_array():
+    datafile = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+    file = h5py.File(datafile, "r")
+    labels=file["y"]
+    energy = labels[:,2]
+    dir_z = labels[:,7]
+    
+    down_going_events=energy[dir_z>0]
+    tot_events = len(energy)
+    
+    average= float(len(down_going_events))/len(energy)
+    print("Total percentage of down-going events: ", average)
+    
+    plot_range=(3,100)
+    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct = np.histogram(down_going_events, bins=98, range=plot_range) #häufigkeit von richtigen energien
+    
+    bin_edges = hist_1d_energy[1]
+    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
+    # For making it work with matplotlib step plot
+    #hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
+    bin_edges_centered = bin_edges[:-1] + 0.5
+    return [bin_edges_centered, hist_1d_energy_accuracy_bins, average]
+
+#bin_edges_centered, hist_1d_energy_accuracy_bins, average = make_up_down_array()
+bin_edges_centered, hist_1d_energy_accuracy_bins = np.load("Daten/xzt_test_data_updown.npy")
+
+#The average percentage
+average=0.5367258059801829
+plt.axhline(average, color="orange", ls="--")
+plt_bar_1d_energy_accuracy = plt.step(bin_edges_centered, hist_1d_energy_accuracy_bins, where='mid')
+
+x_ticks_major = np.arange(0, 101, 10)
+plt.xticks(x_ticks_major)
+plt.yticks(np.arange(0.4,0.6,0.02))
+plt.minorticks_on()
+
+plt.xlabel('Energy [GeV]')
+plt.ylabel('Fraction')
+plt.ylim((0.4, 0.6))
+plt.title("Fraction of down-going events in xzt simulated test data")
+plt.grid(True)
+plt.text(11, average+0.005, "Total avg.: "+str(average*100)[:5]+" %", color="orange", fontsize=10, bbox=dict(facecolor='white', color="white", alpha=0.5))
+
+plt.show()
+
+
 
 test_file = 'Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5'
 file=h5py.File(test_file , 'r')
@@ -72,58 +119,6 @@ hists = file["x"][which].reshape((1,11,13,18,1))
 # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
 labels=file["y"][which]
 
-
-
-inputs=Input(shape=(11,13,18,1))
-
-x = MaxPooling3D(padding="same")(inputs)
-x = MaxPooling3D(padding="same")(x)
-x = MaxUnpooling3D(x,(2,2,2))
-out = MaxUnpooling3D(x,(2,2,2))
-model = Model(inputs=inputs, outputs=out)
-
-x2 = AveragePooling3D(padding="same")(inputs)
-x2 = AveragePooling3D(padding="same")(x2)
-x2 = UpSampling3D((2,2,2))(x2)
-out2 = UpSampling3D((2,2,2))(x2)
-model2 = Model(inputs=inputs, outputs=out2)
-
-x3 = AveragePooling3D()(inputs)
-out3 = MaxUnpooling3D(x3,(2,2,2))
-model3 = Model(inputs=inputs, outputs=out3)
-
-
-res=model.predict(hists)
-
-get_layer_1_output = K.function([model.layers[0].input], [model.layers[1].output])
-layer_1_output = get_layer_1_output([hists])[0]
-get_layer_2_output = K.function([model.layers[0].input], [model.layers[2].output])
-layer_2_output = get_layer_2_output([hists])[0]
-get_layer_3_output = K.function([model.layers[0].input], [model.layers[3].output])
-layer_3_output = get_layer_3_output([hists])[0]
-get_layer_4_output = K.function([model.layers[0].input], [model.layers[4].output])
-layer_4_output = get_layer_4_output([hists])[0]
-
-
-get_layer_1_output_2 = K.function([model2.layers[0].input], [model2.layers[1].output])
-layer_1_output_2 = get_layer_1_output_2([hists])[0]
-get_layer_2_output_2 = K.function([model2.layers[0].input], [model2.layers[2].output])
-layer_2_output_2 = get_layer_2_output_2([hists])[0]
-get_layer_3_output_2 = K.function([model2.layers[0].input], [model2.layers[3].output])
-layer_3_output_2 = get_layer_3_output_2([hists])[0]
-get_layer_4_output_2 = K.function([model2.layers[0].input], [model2.layers[4].output])
-layer_4_output_2 = get_layer_4_output_2([hists])[0]
-
-
-#plot_hist(hists[0])
-#plot_hist(layer_1_output[0])
-#plot_hist(res[0])
-
-compare_hists_xyz(hists[0], hists[0],name="comp0.pdf", suptitle="Input")
-compare_hists_xyz(layer_1_output[0], layer_1_output_2[0], name="comp1.pdf", suptitle="One Pooling")
-compare_hists_xyz(layer_2_output[0], layer_2_output_2[0], name="comp2.pdf",suptitle="Two Poolings")
-compare_hists_xyz(layer_3_output[0], layer_3_output_2[0], name="comp3.pdf",suptitle="One UnPooling")
-compare_hists_xyz(layer_4_output[0], layer_4_output_2[0], name="comp4.pdf",suptitle="Two UnPoolings")
 
 #compare_hists_xzt(hists[0], model3.predict(hists)[0], suptitle="C Average Pooling")
 

@@ -105,8 +105,8 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
 def test_model():
     
     inputs = Input(shape=(5,5,5,1))
-    x = conv_block(inputs, 1, (2,2,2), "same", True, -1, ac_reg_penalty=0.01)
-    x = conv_block(inputs, 1, (2,2,2), "same", True, -1, ac_reg_penalty=0)
+    x = Conv3D(filters=2, kernel_size=(3,3,3), padding='valid', activation='relu', trainable=False )(inputs)
+    x = conv_block(x, 1, (2,2,2), "same", True, -1, ac_reg_penalty=0.01)
     #12,14,18
 
     #stride 1/valid             stride 1/same = 1pad --> 13,15,20

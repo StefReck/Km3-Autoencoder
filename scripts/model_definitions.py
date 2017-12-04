@@ -87,13 +87,17 @@ def plot_model_output_size(model_array):
     plt.show()
 
 #For testing purposes
-model1 = setup_model("vgg_2_stride", 0)
-model2 = setup_model("vgg_3_stride", 0)
+model = setup_model("vgg_3", 0)
 #model3 = setup_model("vgg_1_xzt_stride", 0)
 
-
-model_array=[model1,model2]
-plot_model_output_size(model_array)
+plot_model_output_size([model,])
+tot_neu=0
+for layer in model.layers:
+    if "conv3d" in layer.name:
+        size = np.prod(layer.output_shape[1:])
+        tot_neu+=size
+        print(layer.name, tot_neu)
+print(tot_neu)
 """
 
 """
