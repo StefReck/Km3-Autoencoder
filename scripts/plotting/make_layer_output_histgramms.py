@@ -12,22 +12,43 @@ from keras import backend as K
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+#Models:
+homepath = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
+model_name="models/vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10.h5"
+save_plot_as=homepath+"results/plots/vgg_3-sgdlr01_autoencoder_epoch10_layer_histogram.pdf"
+model=load_model(homepath+model_name)
+
 
 #Data from which to take the events
-data = "Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5"
+#for xzt
+data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+#train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+data=data_path+test_data
+zero_center = data_path+zero_center_data
+    
+
 #Which event(s) should be taken from the file to make the histogramms
 which_events = [0]
 
+
+
+#On Laptop:
+"""
+data = "Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5"
 zero_center = "Daten/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
 
-#Models:
 model_eps = "Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10.h5"
 model = "Daten/xzt/trained_vgg_3_autoencoder_epoch10_supervised_up_down_epoch10.h5"
-
 model_sup = "Daten/xzt/trained_vgg_3_supervised_up_down_epoch3.h5"
 autoencoder_model = "Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
 
-
+encoder = load_model(model)
+encoder_eps = load_model(model_eps)
+encoder_sup = load_model(model_sup)
+autoencoder = load_model(autoencoder_model)
+"""
 
 
 file=h5py.File(data , 'r')
@@ -41,10 +62,6 @@ hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
 centered_hists = np.subtract(hists, zero_center_image)
 
 
-encoder = load_model(model)
-encoder_eps = load_model(model_eps)
-encoder_sup = load_model(model_sup)
-autoencoder = load_model(autoencoder_model)
 
 #Predict on 0 centered data
 #pred=encoder.predict_on_batch(centered_hists)
@@ -108,4 +125,4 @@ def make_complete_prop(model_1, save_path, model_2=None, title_1="Epsilon = 0.1"
 
 #make_complete_prop(model_1 = encoder, model_2=encoder_eps, title_1="Epsilon = 0.1", title_2 = "Epsilon = E-8", save_path="vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10_activation_1_event.pdf")
 #make_histogramms_of_layer(-7, encoder, encoder_sup, "Frozen Encoder Epsilon = 0.1", "Unfrozen encoder")
-make_complete_prop(load_model("Daten/xzt/trained_vgg_3_eps_autoencoder_epoch11_supervised_up_down_epoch7.h5"), "trained_vgg_3_eps_autoencoder_epoch11_supervised_up_down_epoch7_layer_outputs.pdf")
+make_complete_prop(model, save_plot_as)
