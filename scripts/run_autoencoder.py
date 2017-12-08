@@ -22,7 +22,7 @@ from model_definitions import *
 # start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
 def parse_input():
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('modeltag', type=str, help='an integer for the accumulator')
+    parser.add_argument('modeltag', type=str, help='e.g vgg_3-sgd; -XXX indicates version number and is ommited when looking up model by modeltag')
     parser.add_argument('runs', type=int)
     parser.add_argument("autoencoder_stage", type=int)
     parser.add_argument("autoencoder_epoch", type=int)
@@ -37,6 +37,7 @@ def parse_input():
     parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
     parser.add_argument("lambda_comp", default=False, type=bool)
     parser.add_argument("optimizer", type=str)
+    parser.add_argument("encoder_version", default="", nargs="?", type=str, help="e.g. -LeLu; Str added to the supervised file names to allow multiple runs on the same model.")
     
     args = parser.parse_args()
     params = vars(args)
@@ -58,6 +59,7 @@ learning_rate_decay = params["learning_rate_decay"]
 epsilon = params["epsilon"]
 lambda_comp = params["lambda_comp"]
 use_opti = params["optimizer"]
+encoder_version=params["encoder_version"]
 
 """
 #Tag for the model used; Identifies both autoencoder and encoder
@@ -110,7 +112,7 @@ Encoder+ new
 """
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False, use_opti=use_opti):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False, use_opti=use_opti, encoder_version=encoder_version):
     
     #Path to training and testing datafiles on HPC for xyz
     """
@@ -119,7 +121,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
     zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
     """
-    
+    raise("aaa:", encoder_version)
     #for xzt
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
     train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
@@ -260,7 +262,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #name of the autoencoder model file that the encoder part is taken from:
         autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
         #name of the supervised model:
-        modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1]
+        modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1] + encoder_version
         
         if encoder_epoch == 0:
             #Create a new encoder network:
@@ -296,7 +298,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Unfrozen Encoder supervised training with completely unfrozen model:
     elif autoencoder_stage==2:
         #name of the supervised model:
-        modelname = modeltag + "_supervised_" + class_type[1]
+        modelname = modeltag + "_supervised_" + class_type[1] + encoder_version
         
         if encoder_epoch == 0:
             #Create a new encoder network:
@@ -328,5 +330,5 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                                  save_path=model_folder, is_autoencoder=False, verbose=verbose)
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti)
-
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version)
+#execute_training("vgg", 1, 0, -1, -1, "up-down", True, 1, n_bins=(11,13,18), learning_rate=0.01, learning_rate_decay=0.05, epsilon=0, lambda_comp=False, use_opti="sgd")

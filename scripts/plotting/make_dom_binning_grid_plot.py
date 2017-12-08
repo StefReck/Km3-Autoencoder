@@ -10,7 +10,7 @@ z_layer_no=5 #number of z layer to plot xy from, bottom to top
 geo_file = "../Daten/ORCA_Geo_115lines.txt"
 n_bins=(11,13,18)
 
-x_bin_offset=-2 #-2,0 ist gut!
+x_bin_offset=0 #-2,0 ist gut!
 y_bin_offset=0
 #[id,x,y,z]
 geo = np.loadtxt(geo_file)
@@ -75,7 +75,7 @@ def scan_for_optimum(x_one_layer, y_one_layer, n_bins, geo):
             print (result_matrix[:,i,j], end="")
         print("")
 
-scan_for_optimum(x_red,y_red, n_bins, geo)
+#scan_for_optimum(x_red,y_red, n_bins, geo)
 
 def plot_3d(x,y,z):
     fig = plt.figure()
@@ -94,10 +94,10 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     hist_xy = np.histogram2d(x_one_layer, y_one_layer, bins=(x_bin_edges, y_bin_edges))[0]
     print(calculate_bin_stats(x_one_layer, y_one_layer, x_bin_edges, y_bin_edges))
     
-    max_doms_inside=hist_xy.max() #2
-    min_doms_inside=hist_xy.min() #0
+    #max_doms_inside=hist_xy.max() #2
+    #min_doms_inside=hist_xy.min() #0
     
-    fig = plt.figure(figsize=(n_bins[0],n_bins[1]))
+    fig = plt.figure(figsize=(8,13))
     ax = fig.add_subplot(111)
     
     for x_bin_edge in x_bin_edges:
@@ -108,8 +108,9 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     for bin_no_x, x_bin_edge in enumerate(x_bin_edges[:-1]):
         for bin_no_y, y_bin_edge in enumerate(y_bin_edges[:-1]):
             alpha_max=0.3
-            doms_inside = hist_xy[bin_no_x,bin_no_y] * alpha_max
-            alpha = (doms_inside-min_doms_inside)/max_doms_inside
+            doms_inside = hist_xy[bin_no_x,bin_no_y]
+            alpha = doms_inside * alpha_max / 2
+            #alpha = (doms_inside-min_doms_inside) * alpha_max/max_doms_inside
             ax.add_patch(Rectangle([x_bin_edge, y_bin_edge], box_length_x, box_length_y, fc="blue", alpha=alpha, zorder=-2))
             
             
@@ -118,6 +119,7 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     ax.set_xlabel('X (m)')
     ax.minorticks_on()
     ax.set_ylabel('Y (m)')
+    ax.set_aspect("equal")
     
     new_tick_locations_x = x_bin_edges[:-1] + 0.5*box_length_x
     ax2 = ax.twiny()
@@ -125,6 +127,7 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     ax2.set_xticks(new_tick_locations_x)
     ax2.set_xticklabels(np.arange(1,n_bins[0]+1,1))
     ax2.set_xlabel("x bin no.")
+    ax2.set_aspect("equal")
     
     new_tick_locations_y = y_bin_edges[:-1] + 0.5*box_length_y
     ax3 = ax.twinx()
@@ -132,6 +135,7 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     ax3.set_yticks(new_tick_locations_y)
     ax3.set_yticklabels(np.arange(1,n_bins[1]+1,1))
     ax3.set_ylabel("y bin no.")
+    ax3.set_aspect("equal")
     
     legend = ax.legend(loc="lower right")
     legend.get_frame().set_alpha(1)

@@ -15,7 +15,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 #Models:
 homepath = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
 model_name="models/vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10.h5"
-save_plot_as=homepath+"results/plots/vgg_3-sgdlr01_autoencoder_epoch10_layer_histogram.pdf"
+
+save_plot_as=homepath+model_name[:-3]
 model=load_model(homepath+model_name)
 
 
@@ -97,32 +98,34 @@ def make_histogramms_of_layer(layer_no, model_1, model_2=None, title_1="Epsilon 
         
     plt.tight_layout()
 
-def make_weights_histogramms_of_layer(layer_no, model_1, model_2):
+def make_weights_histogramms_of_layer(layer_no, model_1):
     #histogram of weights
     weights = []
     for w in model_1.layers[layer_no].get_weights():
         weights.extend(w.flatten())
-    weights_eps = []
-    for w in model_2.layers[layer_no].get_weights():
-        weights_eps.extend(w.flatten())
 
-    plt.subplot(121)
-    plt.title("Epsilon = 0.1")
     plt.hist(weights, 100)
-    plt.subplot(122)
-    plt.title("Epsilon = E-8")
-    plt.hist(weights_eps, 100)
-    plt.suptitle(model_1.layers[layer_no].name)
+    plt.title(model_1.layers[layer_no].name)
 
 #Go through whole model and make histogramm of output of every layer
 #Can plot one model with auto title, or two side by side, each with its own title and auto suptitle
 def make_complete_prop(model_1, save_path, model_2=None, title_1="Epsilon = 0.1", title_2 = "Epsilon = E-8"):
     with PdfPages(save_path) as pp:
         for i in range(0,len(model_1.layers)):
+            print("Generating output histogram of layer ",i, "of ", len(model_1.layers))
             make_histogramms_of_layer(i, model_1, model_2, title_1, title_2)
             pp.savefig()
             plt.close()
 
+def make_complete_prop_weights(model_1, save_path):
+    with PdfPages(save_path) as pp:
+        for i in range(0,len(model_1.layers)):
+            print("Generating weights histogram of layer ",i, "of ", len(model_1.layers))
+            make_weights_histogramms_of_layer(i, model_1)
+            pp.savefig()
+            plt.close()
+            
 #make_complete_prop(model_1 = encoder, model_2=encoder_eps, title_1="Epsilon = 0.1", title_2 = "Epsilon = E-8", save_path="vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10_activation_1_event.pdf")
 #make_histogramms_of_layer(-7, encoder, encoder_sup, "Frozen Encoder Epsilon = 0.1", "Unfrozen encoder")
-make_complete_prop(model, save_plot_as)
+make_complete_prop(model, save_plot_as+"_layer_output.pdf")
+make_complete_prop(model, save_plot_as+"_weights.pdf")
