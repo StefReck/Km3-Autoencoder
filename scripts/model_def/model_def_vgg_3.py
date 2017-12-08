@@ -99,7 +99,7 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
     
 def setup_vgg_3_reg(autoencoder_stage, modelpath_and_name=None):
     #832k params with an activity l2 penalty
-    ac_reg_penalty = 1e-9
+    ac_reg_penalty = 1e-8 if autoencoder_stage is not 1 else 0
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
