@@ -14,8 +14,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 #Models:
 homepath = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
-model_name="models/vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10.h5"
-save_plot_as=homepath+"results/plots/vgg_3-sgdlr01_autoencoder_epoch10_layer_histogram.pdf"
+model_name="models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch11_supervised_up_down_epoch19.h5"
+save_plot_as=homepath+model_name[:-3]+"_layer_histogram.pdf"
 model=load_model(homepath+model_name)
 
 
