@@ -121,7 +121,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
     zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
     """
-    raise("aaa:", encoder_version)
     #for xzt
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
     train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
@@ -167,14 +166,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     elif autoencoder_stage==1 and encoder_epoch == -1:
         encoder_epoch=0
         while True:
-            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1] + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
                 encoder_epoch+=1
             else:
                 break
     elif autoencoder_stage==2 and encoder_epoch == -1:
         encoder_epoch=0
         while True:
-            if os.path.isfile(model_folder + "trained_" + modeltag + "_supervised_" + class_type[1] + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_supervised_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
                 encoder_epoch+=1
             else:
                 break
