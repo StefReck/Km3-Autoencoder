@@ -7,7 +7,7 @@ hd = True
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
 #Autoencoders:
 test_files = ["vgg_3/trained_vgg_3_autoencoder_test.txt", 
-              "vgg_3_reg-e9/trained_vgg_3_reg-e9_autoencoder_test.txt",
+              #"vgg_3_reg-e9/trained_vgg_3_reg-e9_autoencoder_test.txt",
               "vgg_3-eps4/trained_vgg_3-eps4_autoencoder_test.txt",
               #"vgg_3_dropout/trained_vgg_3_dropout_autoencoder_test.txt",
               #"vgg_3_max/trained_vgg_3_max_autoencoder_test.txt",
@@ -30,6 +30,12 @@ xtest_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.
               "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_epoch10_supervised_up_down_test.txt",
               "vgg_3_max/trained_vgg_3_max_autoencoder_epoch10_supervised_up_down_test.txt",
               "vgg_3_stride/trained_vgg_3_stride_autoencoder_epoch10_supervised_up_down_test.txt", ]
+
+#sgdlr01 encoders
+test_files = ["vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch2_supervised_up_down_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch5_supervised_up_down_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10_supervised_up_down_test.txt",]
+              
 
 #For debugging
 #test_files = ["trained_vgg_3_autoencoder_test.txt", "trained_vgg_3_dropout_autoencoder_test.txt"]
