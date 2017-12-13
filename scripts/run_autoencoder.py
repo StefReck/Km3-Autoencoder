@@ -189,7 +189,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         else:
             lr=abs(lr)
     
-    #Optimizer to be used. If an epsilon is specified, adam is used with epsilon=10**(given epsilon). If epsilon is given as 0, SGD is used.
+    #Optimizer to be used. If an epsilon is specified, adam is used with epsilon=10**(given epsilon).
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     if use_opti == "adam" or use_opti=="Adam":
@@ -214,23 +214,23 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     xs_mean = np.load(zero_center_file) if zero_center is True else None
     
     
+    
+    
+    
     #Setup network:
-        
     #Autoencoder self-supervised training. Epoch is the autoencoder epoch, enc_epoch not relevant for this stage
     if autoencoder_stage==0:
+        is_autoencoder=True
         modelname = modeltag + "_autoencoder"
                     
         if epoch == 0:
             #Create a new autoencoder network
-            
             model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
             model.compile(optimizer=adam, loss='mse')
-            
-            #For a new autoencoder: Create header for test file
-            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
+            #Create header for new test log file
+            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #["loss"]
-                test_file.write('{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0]))
-            
+                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0]))
             
         else:
             #Load an existing trained autoencoder network and train that
@@ -241,23 +241,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
                 model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
                 model.compile(optimizer=adam, loss='mse')
-        
-        model.summary()
-        #Execute training
-        for current_epoch in range(epoch,epoch+runs):
-            #Does the model we are about to save exist already?
-            check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
-            
-            #Train network, write logfile, save network, evaluate network, save evaluation to file
-            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=n_bins, class_type=None, xs_mean=xs_mean, epoch=current_epoch,
-                                 shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=model_folder, is_autoencoder=True, verbose=verbose)
-    
             
     #Encoder supervised training:
     #Load the encoder part of an autoencoder, import weights from trained model, freeze it and add dense layers
     elif autoencoder_stage==1:
+        is_autoencoder=False
         #name of the autoencoder model file that the encoder part is taken from:
         autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
         #name of the supervised model:
@@ -265,69 +253,63 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
-            
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-            
-            #For a new encoder: Create header for test file
-            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
+            #Create header for new test log file
+            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
-                test_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
+                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
             
-        
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
-
-        
-        model.summary()
-        #Execute training
-        for current_epoch in range(encoder_epoch,encoder_epoch+runs):
-            #Does the model we are about to save exist already?
-            check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
-            
-            #Train network, write logfile, save network, evaluate network
-            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
-                                 shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=model_folder, is_autoencoder=False, verbose=verbose)
-    
     
     
     #Unfrozen Encoder supervised training with completely unfrozen model:
     elif autoencoder_stage==2:
+        is_autoencoder=False
         #name of the supervised model:
         modelname = modeltag + "_supervised_" + class_type[1] + encoder_version
         
         if encoder_epoch == 0:
             #Create a new encoder network:
-            
             model = setup_model(model_tag=modeltag, autoencoder_stage=2)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-            
-            #For a new encoder: Create header for test file
-            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_file:
+            #Create header for new test log file
+            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
-                test_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
+                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
             
-        
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
 
         
-        model.summary()
-        #Execute training
-        for current_epoch in range(encoder_epoch,encoder_epoch+runs):
-            #Does the model we are about to save exist already?
-            check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
-            
-            #Train network, write logfile, save network, evaluate network
-            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
-                                 shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=model_folder, is_autoencoder=False, verbose=verbose)
+        
+        
+        
+    #Which epochs are the ones relevant for current stage
+    if is_autoencoder==True:
+        running_epoch=epoch #Stage 0
+    else:
+        running_epoch=encoder_epoch #Stage 1 and 2
+        
+    model.summary()
+    print("Model: ", modelname)
+    print("Current State of optimizer: \n", model.optimizer.get_config())
+    
+    #Execute Training:
+    for current_epoch in range(running_epoch,running_epoch+runs):
+        #Does the model we are about to save exist already?
+        check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
+        
+        #Train network, write logfile, save network, evaluate network, save evaluation to file
+        lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+                             batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                             shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
+                             save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose)    
+    
+    
     
 
 execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version)
-#execute_training("vgg", 1, 0, -1, -1, "up-down", True, 1, n_bins=(11,13,18), learning_rate=0.01, learning_rate_decay=0.05, epsilon=0, lambda_comp=False, use_opti="sgd")
