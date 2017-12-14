@@ -11,12 +11,27 @@ import numpy as np
 from keras import backend as K
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import argparse
+
+def parse_input():
+    parser = argparse.ArgumentParser(description='Make histograms of models, and save them to the same directory.')
+    parser.add_argument('model', type=str, help='The model of which to do a histogram.')
+
+    args = parser.parse_args()
+    params = vars(args)
+    return params
+
+params = parse_input()
+model_name_and_path = params["model"]
 
 #Models:
-homepath = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
-model_name="models/vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10.h5"
-save_plot_as=homepath+model_name[:-3]
-model=load_model(homepath+model_name)
+#homepath = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
+#model_name="models/vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10.h5"
+#save_plot_as=homepath+model_name[:-3]
+#model=load_model(homepath+model_name)
+
+save_plot_as=model_name_and_path[:-3]
+model=load_model(model_name_and_path)
 
 
 #Data from which to take the events
@@ -127,4 +142,4 @@ def make_complete_prop_weights(model_1, save_path):
 #make_complete_prop(model_1 = encoder, model_2=encoder_eps, title_1="Epsilon = 0.1", title_2 = "Epsilon = E-8", save_path="vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10_activation_1_event.pdf")
 #make_histogramms_of_layer(-7, encoder, encoder_sup, "Frozen Encoder Epsilon = 0.1", "Unfrozen encoder")
 make_complete_prop(model, save_plot_as+"_layer_output.pdf")
-make_complete_prop(model, save_plot_as+"_weights.pdf")
+#make_complete_prop_weights(model, save_plot_as+"_weights.pdf")

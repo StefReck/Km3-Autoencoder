@@ -2,9 +2,20 @@
 
 import h5py
 import numpy as np
+"""
+mctracks/
+    bjorkeny, dir_x, dir_y, dir_z, energy, id, interaction_channel, is_cc, length, pos_x, pos_y, pos_z, time, type, event_id
+
+hits/
+    _indices, channel_id,  dir_x, dir_y, dir_z, dom_id, du, event_id, floor, pos_x, pos_y, pos_z, t0, time, tot, triggered
+
+hits["channel_id"]      0 bis 30
+hits["dom_id"]          1 bis 2070
+
+"""
 
 #Datei die alles enthaelt
-file=h5py.File("Daten\example.h5", "r")
+file=h5py.File("..\Daten\example.h5", "r")
 
 #alle attribute der datei
 for item in file.attrs.keys():
@@ -40,6 +51,7 @@ print("\n Length of hits:", len(hits))
 print("\n Members of hits:")
 for member in hits.keys():
     print(member)
+    
 print("\n")
 #channel id ist id des PM:
 channel_id = np.array(hits["channel_id"])

@@ -3,7 +3,7 @@
 Make 3D Scatter Histogram from 11x13x18 np array, and compare to another one.
 Can either plot single histogramms, or two side by side in one plot.
 """
-import matplotlib
+#import matplotlib
 #matplotlib.use('Agg') #dont open plotting windows
 from keras.models import load_model
 import numpy as np
