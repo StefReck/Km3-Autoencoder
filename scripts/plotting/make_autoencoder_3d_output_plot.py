@@ -3,6 +3,10 @@
 #import matplotlib
 #matplotlib.use('Agg') #dont open plotting windows
 
+
+#TODO Debugging!!!
+
+
 from keras.models import load_model
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D

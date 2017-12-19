@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Flatten, BatchNormalization, Activation, Conv3D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import LeakyReLU
 from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
@@ -103,10 +104,9 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     return x
 
 def test_model():
-    
     inputs = Input(shape=(5,5,5,1))
-    x = Conv3D(filters=2, kernel_size=(3,3,3), padding='valid', activation='relu', trainable=False )(inputs)
-    x = conv_block(x, 1, (2,2,2), "same", True, -1, ac_reg_penalty=0.01)
+    x = Reshape((125,1))(inputs)
+    x = Conv1D(filters=1, kernel_size=1, padding="valid")(x)
     #12,14,18
 
     #stride 1/valid             stride 1/same = 1pad --> 13,15,20
