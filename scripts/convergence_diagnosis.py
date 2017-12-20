@@ -2,6 +2,10 @@
 """
 Create layer output histograms of the last layers of a network, while training.
 """
+
+#import matplotlib
+#matplotlib.use('Agg')
+
 from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras.models import load_model, Model
 from keras import backend as K
@@ -11,14 +15,16 @@ import h5py
 from keras import optimizers
 from matplotlib.backends.backend_pdf import PdfPages
 
-from util.run_cnn import generate_batches_from_hdf5_file
+from util.run_cnn import generate_batches_from_hdf5_file, encode_targets
 
-plot_after_how_many_batches=[1,2,3,10,15,20,25,30,40,50,60,100,200,300,400,500] #0 is automatically plotted
+plot_after_how_many_batches=[1,]#[1,2,3,10,15,20,25,30,40,50,60,100,200,300,400,500] #0 is automatically plotted
 #Which event(s) should be taken from the test file to make the histogramms
-which_events = np.arange(0,100)
+which_events = [0,1,2]#range(0,100)
+
+
 name_of_plots="vgg_3_autoencoder_eps_epoch10_convergence_analysis" #added will be : _withBN.pdf
 
-laptop=False
+laptop=True
 if laptop == True:
     #autoencoder:
     model_name_and_path="Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
@@ -105,10 +111,21 @@ def make_histogramms_of_4_layers(centered_hists, layer_no_array, model_1, suptit
     fig = plt.figure(figsize=(8,8))
     
     for i,layer_no in enumerate(layer_no_array):
-        enc_feat=get_out_from_layer(layer_no, model_1, centered_hists)
-        plt.subplot(221+i)
-        plt.title(title_array[i])
-        plt.hist(enc_feat.flatten(), 100)
+        if layer_no==-1:
+            #Color the bars of the final layer red or green, depending on whether the prediction is right or not
+            enc_feat=get_out_from_layer(layer_no, model_1, centered_hists) #shape: batchsize,2
+            prediction=enc_feat>0.5
+            sample_is_correct = np.equal(prediction[:,0], correct_output[:,0]) #shape: batchsize
+            correct_output_values = enc_feat[sample_is_correct,:]
+            wrong_output_values = enc_feat[np.invert(sample_is_correct),:]
+            plt.subplot(221+i)
+            plt.title(title_array[i])
+            plt.hist([correct_output_values, wrong_output_values], 100, stacked=True, color=["green","red"])
+        else: 
+            enc_feat=get_out_from_layer(layer_no, model_1, centered_hists)
+            plt.subplot(221+i)
+            plt.title(title_array[i])
+            plt.hist(enc_feat.flatten(), 100)
     
     plt.suptitle(suptitle)
     #plt.tight_layout()
@@ -133,6 +150,10 @@ hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
 #0 center them
 centered_hists = np.subtract(hists, zero_center_image)
 
+correct_output = np.zeros((len(which_events), 2), dtype=np.float32)
+# encode the labels such that they are all within the same range (and filter the ones we don't want for now)
+for c, y_val in enumerate(labels): # Could be vectorized with numba, or use dataflow from tensorpack
+    correct_output[c] = encode_targets(y_val, class_type=(2, 'up_down')) #01 if dirz>0, 10 else
 
 model_noBN, model_withBN = model_setup(autoencoder_model=model_name_and_path)
 
@@ -143,19 +164,23 @@ def convergence_analysis(model_noBN, model_withBN, centered_hists, plot_after_ho
     
     fig1, fig2 = generate_plots(model_noBN, model_withBN, centered_hists, suptitles=["Layer outputs without batch normalization (0 batches)", "Layer outputs with batch normalization (0 batches)"])
     figures.append([0,fig1,fig2])
+    plt.close("all")
     
     generator = generate_batches_from_hdf5_file(filepath=data_for_generator, batchsize=32, n_bins=(11,18,50,1), class_type=(2, 'up_down'), is_autoencoder=False)
     i=0
     while i < max(plot_after_how_many_batches):
         x,y = next(generator)
-        history_noBN.append(model_noBN.train_on_batch(x, y))
-        history_withBN.append(model_withBN.train_on_batch(x, y))
-        i+=1
+        temp_hist_noBN = model_noBN.train_on_batch(x, y)
+        temp_hist_withBN = model_withBN.train_on_batch(x, y)
         
+        i+=1
         if i in plot_after_how_many_batches:
+            history_noBN.append(temp_hist_noBN)
+            history_withBN.append(temp_hist_withBN)
+            print("Generating plot after ", i," batches...")
             fig1, fig2 = generate_plots(model_noBN, model_withBN, centered_hists, suptitles=["Layer outputs without batch normalization ("+str(i)+" batches)", "Layer outputs with batch normalization ("+str(i)+" batches)"])
             figures.append([i,fig1,fig2])
-        
+            plt.close("all")
         
     return history_noBN, history_withBN, figures
 
@@ -164,9 +189,8 @@ def save_to_pdf(figures, name_of_plots="Test"):
         with PdfPages(name_of_plots+ "_withBN.pdf") as pp_withBN:
             for tupel in figures:
                 pp_noBN.savefig(tupel[1])
-                plt.close()
                 pp_withBN.savefig(tupel[2])
-                plt.close()
+                plt.close("all")
 
 #figures: [ int number of batches this plot was made after, figure no BN, figure w BN]
 history_noBN, history_withBN, figures = convergence_analysis(model_noBN, model_withBN, centered_hists, plot_after_how_many_batches, data)
