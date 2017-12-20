@@ -12,12 +12,12 @@ from keras import backend as K
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
-from keras import optimizers
+from keras import optimizers, initializers
 from matplotlib.backends.backend_pdf import PdfPages
 
 from util.run_cnn import generate_batches_from_hdf5_file, encode_targets
 
-plot_after_how_many_batches=[1,]#[1,2,3,10,15,20,25,30,40,50,60,100,200,300,400,500] #0 is automatically plotted
+plot_after_how_many_batches=[1,]#[1,2,3,10,15,20,25,30,40,50,60,100,200,300,400,500,1000,2000,3000,4000,5000] #0 is automatically plotted
 #Which event(s) should be taken from the test file to make the histogramms
 which_events = [0,1,2]#range(0,100)
 
@@ -84,10 +84,10 @@ def model_setup(autoencoder_model):
         
         x = Flatten()(encoded)
         if with_batchnorm == True:
-            x = BatchNormalization(axis=channel_axis)(x) 
-        x = Dense(256, activation='relu', kernel_initializer='he_normal')(x) #init: std 0.032 = sqrt(2/1920), mean=0
-        x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+            x = BatchNormalization(axis=channel_axis)(x) #
+        x = Dense(256, activation='relu', kernel_initializer='he_normal', bias_initializer=initializers.constant(0.0))(x) #init: std 0.032 = sqrt(2/1920), mean=0
+        x = Dense(16, activation='relu', kernel_initializer='he_normal', bias_initializer=initializers.constant(0.0))(x)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal', bias_initializer=initializers.constant(0.0))(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -100,6 +100,32 @@ def model_setup(autoencoder_model):
     
     return model_noBN, model_withBN
     
+def check_for_dead_relus(model, how_many_batches, data_for_generator):
+    #Check for some samples if there are Relus that are never firing in the last 3 layers
+    inp = model.input                                           # input placeholder
+    outputs = [layer.output for layer in model.layers[-3:]]          # layer outputs
+    functors = [K.function([inp]+ [K.learning_phase()], [out]) for out in outputs]
+    generator = generate_batches_from_hdf5_file(filepath=data_for_generator, batchsize=32, n_bins=(11,18,50,1), class_type=(2, 'up_down'), is_autoencoder=False)
+    output=[]
+    stats_of_every_neuron = [np.zeros((256)),np.zeros((16)),np.zeros((2))]
+    for batch_no in range(1,1+how_many_batches):
+        print("Starting batch",batch_no, "...")
+        total_number_of_samples = 32*batch_no
+        x,y = next(generator)
+        layer_outs = [func([x, 0]) for func in functors] #3,1,(layerout)
+        for which_layer,layer in enumerate(layer_outs):
+            layer=layer[0]
+            for neuron_no in range(len(layer[-1])):
+                output_from_a_single_neuron = layer[:,neuron_no] #shape: batchsize
+                how_often_was_0_given = np.sum(output_from_a_single_neuron == 0)
+                stats_of_every_neuron[which_layer][neuron_no]+=how_often_was_0_given
+        temp_out=[]
+        for layer in stats_of_every_neuron:
+            temp_out.append(np.sum((layer==total_number_of_samples))/len(layer))
+        #print(temp_out)
+        output.append(temp_out)
+    return output
+
 def make_histogramms_of_4_layers(centered_hists, layer_no_array, model_1, suptitle, title_array):
     #histograms of outputs of 4 layers in a 2x2 plot
     
@@ -120,12 +146,15 @@ def make_histogramms_of_4_layers(centered_hists, layer_no_array, model_1, suptit
             wrong_output_values = enc_feat[np.invert(sample_is_correct),:]
             plt.subplot(221+i)
             plt.title(title_array[i])
-            plt.hist([correct_output_values, wrong_output_values], 100, stacked=True, color=["green","red"])
+            plt.hist([correct_output_values, wrong_output_values], 50, stacked=True, color=["green","red"], range=(0.5,1.0))
         else: 
             enc_feat=get_out_from_layer(layer_no, model_1, centered_hists)
             plt.subplot(221+i)
             plt.title(title_array[i])
-            plt.hist(enc_feat.flatten(), 100)
+            data_to_plot=enc_feat.flatten()
+            if layer_no != -4: 
+                if data_to_plot[data_to_plot!=0].size is not 0: data_to_plot=data_to_plot[data_to_plot!=0] #Remove 0s unless only 0s present
+            plt.hist(data_to_plot, 100)
     
     plt.suptitle(suptitle)
     #plt.tight_layout()
@@ -192,11 +221,15 @@ def save_to_pdf(figures, name_of_plots="Test"):
                 pp_withBN.savefig(tupel[2])
                 plt.close("all")
 
+print ("Dead relus (NoBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
+print ("Dead relus (WithBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
+
 #figures: [ int number of batches this plot was made after, figure no BN, figure w BN]
 history_noBN, history_withBN, figures = convergence_analysis(model_noBN, model_withBN, centered_hists, plot_after_how_many_batches, data)
-print("No BN:", history_noBN)
-print("With BN:", history_withBN)
+#print("No BN:", history_noBN)
+#print("With BN:", history_withBN)
 save_to_pdf(figures, name_of_plots)
 
-
+print ("Dead relus (NoBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
+print ("Dead relus (WithBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
 
