@@ -21,6 +21,7 @@ and only needed if make_autoencoder==False
 """
 from keras.models import Model
 from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D, Reshape
+from keras.layers import Lambda
 from keras import backend as K
 from keras import regularizers
 
@@ -43,8 +44,25 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0):
+    if dropout > 0.0: x = Dropout(dropout)(x)
+    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None)(x)
+    if batchnorm==True: x = BatchNormalization(axis=channel_axis)(x)
+    x = Activation('relu')(x)
+    return x
+
+def zero_center_and_normalize(x):
+    x-=K.mean(x, axis=1, keepdims=True)
+    x=x/K.std(x, axis=1, keepdims=True)
+    return x
+
 def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
     #832k params
+    normalize_before_dense=False
+    batchnorm_before_dense=False
+    dropout_for_dense=0.0
+    batchnorm_for_dense=False
+    
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
@@ -89,9 +107,14 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder= Model(inputs=inputs, outputs=encoded)
             encoder.load_weights(modelpath_and_name, by_name=True)
+            
         x = Flatten()(encoded)
-        x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
-        x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
+        if normalize_before_dense==True: x = Lambda( zero_center_and_normalize )(x)
+        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        #x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
+        #x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)

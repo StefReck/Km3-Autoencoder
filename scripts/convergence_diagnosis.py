@@ -6,7 +6,7 @@ Create layer output histograms of the last layers of a network, while training.
 #import matplotlib
 #matplotlib.use('Agg')
 
-from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Activation, Input, Lambda, Dropout, Dense, Flatten, Conv3D, MaxPooling3D, UpSampling3D,BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras.models import load_model, Model
 from keras import backend as K
 import matplotlib.pyplot as plt
@@ -57,6 +57,12 @@ def model_setup(autoencoder_model):
         x = Activation('relu', trainable=trainable)(x)
         if dropout > 0.0: x = Dropout(dropout)(x)
         return x
+    
+    def zero_center_and_normalize(x):
+        x-=K.mean(x, axis=1, keepdims=True)
+        x=x/K.std(x, axis=1, keepdims=True)
+        return x
+    
     def setup_vgg_3(autoencoder, with_batchnorm):
         #832k params
         train=False
@@ -83,6 +89,7 @@ def model_setup(autoencoder_model):
             layer.set_weights(autoencoder.layers[i].get_weights())
         
         x = Flatten()(encoded)
+        x = Lambda( zero_center_and_normalize )(x)
         if with_batchnorm == True:
             x = BatchNormalization(axis=channel_axis)(x) #
         x = Dense(256, activation='relu', kernel_initializer='he_normal', bias_initializer=initializers.constant(0.0))(x) #init: std 0.032 = sqrt(2/1920), mean=0
@@ -188,7 +195,7 @@ for c, y_val in enumerate(labels): # Could be vectorized with numba, or use data
     correct_output[c] = encode_targets(y_val, class_type=(2, 'up_down')) #01 if dirz>0, 10 else
 
 model_noBN, model_withBN = model_setup(autoencoder_model=model_name_and_path)
-
+raise()
 def convergence_analysis(model_noBN, model_withBN, centered_hists, plot_after_how_many_batches, data_for_generator):
     history_noBN=[]
     history_withBN=[]
