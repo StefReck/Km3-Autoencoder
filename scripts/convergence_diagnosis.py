@@ -149,11 +149,14 @@ def make_histogramms_of_4_layers(centered_hists, layer_no_array, model_1, suptit
             plt.hist([correct_output_values, wrong_output_values], 50, stacked=True, color=["green","red"], range=(0.5,1.0))
         else: 
             enc_feat=get_out_from_layer(layer_no, model_1, centered_hists)
-            plt.subplot(221+i)
+            subax = plt.subplot(221+i)
             plt.title(title_array[i])
             data_to_plot=enc_feat.flatten()
-            if layer_no != -4: 
-                if data_to_plot[data_to_plot!=0].size is not 0: data_to_plot=data_to_plot[data_to_plot!=0] #Remove 0s unless only 0s present
+            if layer_no != -4 and data_to_plot[data_to_plot!=0].size is not 0:
+                number_of_zeros=np.sum(data_to_plot==0)
+                fraction_of_zeros=str(100*number_of_zeros/(len(data_to_plot))).split(".")[0]
+                data_to_plot=data_to_plot[data_to_plot!=0] #Remove 0s unless only 0s present
+                plt.text(0.98, 0.98,"Zero: "+str(number_of_zeros)+" ("+fraction_of_zeros+"%)", horizontalalignment='right', verticalalignment='top', transform=subax.transAxes)
             plt.hist(data_to_plot, 100)
     
     plt.suptitle(suptitle)
@@ -222,7 +225,7 @@ def save_to_pdf(figures, name_of_plots="Test"):
                 plt.close("all")
 
 print ("Dead relus (NoBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
-print ("Dead relus (WithBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
+print ("Dead relus (WithBN)", check_for_dead_relus(model_withBN, 100, data)[-1])
 
 #figures: [ int number of batches this plot was made after, figure no BN, figure w BN]
 history_noBN, history_withBN, figures = convergence_analysis(model_noBN, model_withBN, centered_hists, plot_after_how_many_batches, data)
@@ -231,5 +234,5 @@ history_noBN, history_withBN, figures = convergence_analysis(model_noBN, model_w
 save_to_pdf(figures, name_of_plots)
 
 print ("Dead relus (NoBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
-print ("Dead relus (WithBN)", check_for_dead_relus(model_noBN, 100, data)[-1])
+print ("Dead relus (WithBN)", check_for_dead_relus(model_withBN, 100, data)[-1])
 
