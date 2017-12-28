@@ -56,11 +56,16 @@ def zero_center_and_normalize(x):
     x=x/K.std(x, axis=1, keepdims=True)
     return x
 
+def zero_center(x):
+    x-=K.mean(x, axis=1, keepdims=True)
+    return x
+
 def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
     #832k params
+    zero_center_before_dense=False #should not be used together with normalize
     normalize_before_dense=False
-    batchnorm_before_dense=False
-    dropout_for_dense=0.0
+    batchnorm_before_dense=True
+    dropout_for_dense=0.2
     batchnorm_for_dense=False
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
@@ -110,6 +115,7 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
             
         x = Flatten()(encoded)
         if normalize_before_dense==True: x = Lambda( zero_center_and_normalize )(x)
+        if zero_center_before_dense==True: x = Lambda( zero_center )(x)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
