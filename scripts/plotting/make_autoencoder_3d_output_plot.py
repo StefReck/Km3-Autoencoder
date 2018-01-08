@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-#import matplotlib
-#matplotlib.use('Agg') #dont open plotting windows
-
-
-#TODO Debugging!!!
+import matplotlib
+matplotlib.use('Agg') #dont open plotting windows
 
 
 from keras.models import load_model
