@@ -28,7 +28,7 @@ model_name_and_path="../Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
 
 
 save_plot_as=model_name_and_path[:-3]
-#model=load_model(model_name_and_path)
+model=load_model(model_name_and_path)
 
 #Data from which to take the events
 #for xzt
@@ -41,7 +41,7 @@ zero_center = data_path+zero_center_data
     
 
 #Which event(s) should be taken from the file to make the histogramms
-which_events = [0,10,100,500,1000]
+which_events = [0,]
 
 
 
@@ -117,7 +117,12 @@ def make_histogramms_of_layer_channel(layer_no, model_1):
     plt.figure()
 
     plt.title("Autoencoder adam epsilon e-08     Output of last Batch Normalization")
-    plt.hist(enc_feat, 100, stacked=True, color=cm.rainbow(np.linspace(0,1,enc_feat.shape[-1])))
+    repeats_of_colormap=4
+    color=cm.rainbow(np.linspace(0,1,int(enc_feat.shape[-1]/repeats_of_colormap)))
+    color.shape
+    color=np.tile(color,(repeats_of_colormap,1))
+    color.shape
+    plt.hist(enc_feat, 100, stacked=True, color=color)
     plt.xlabel("Output of neuron")
     plt.ylabel("Number of neurons")
     plt.tight_layout()
@@ -151,7 +156,7 @@ def make_complete_prop_weights(model_1, save_path):
             plt.close()
             
 #make_complete_prop(model_1 = encoder, model_2=encoder_eps, title_1="Epsilon = 0.1", title_2 = "Epsilon = E-8", save_path="vgg_3_eps_autoencoder_epoch10_supervised_up_down_epoch10_activation_1_event.pdf")
-#make_histogramms_of_layer_channel(24, model)
+make_histogramms_of_layer_channel(24, model)
       
         
 #make_complete_prop(model, save_plot_as+"_layer_output.pdf")

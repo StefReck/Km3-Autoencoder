@@ -14,7 +14,6 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 
-
 from util.run_cnn import generate_batches_from_hdf5_file
 
 
@@ -202,7 +201,7 @@ def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range
 
     plt.xlabel('Energy [GeV]')
     plt.ylabel('Accuracy')
-    plt.ylim((0, 1))
+    plt.ylim((0.5, 1))
     plt.title(title)
     plt.grid(True)
 
@@ -246,7 +245,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.legend()
     plt.xlabel('Energy [GeV]')
     plt.ylabel('Accuracy')
-    plt.ylim((0, 1))
+    plt.ylim((0.5, 1))
     plt.title(title)
     plt.grid(True)
 
@@ -271,7 +270,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     plt.legend()
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
-    plt.ylim((0, 1))
+    plt.ylim((0.5, 1))
     plt.title(title)
     plt.grid(True)
 

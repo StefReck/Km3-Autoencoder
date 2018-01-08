@@ -14,7 +14,7 @@ from util.evaluation_utilities import *
 """
 Specify trained models, either AE or supervised, and calculate their loss or acc on test data.
 This data is then binned and automatically dumped. Instead of recalculating, it is loaded automatically.
-Can also plot it.
+Can also plot it and save it to results/plots
 """
 
 #Model info:
@@ -24,7 +24,7 @@ modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch2_supervised_up_down_accdeg
                "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch23.h5",
                "vgg_3/trained_vgg_3_autoencoder_epoch140_supervised_up_down_accdeg_epoch45.h5",)
 #Which ones are autoencoders? Only relevant for generating new data
-is_autoencoder_array = (1,1,1,1) 
+is_autoencoder_array = (0,0,0,0) 
 
 
 #Plot properties: All in the array are plotted in one figure, with own label each
