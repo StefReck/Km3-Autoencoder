@@ -59,12 +59,14 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_4_6c_scale(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_4_8c":
         model = setup_vgg_4_8c(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_4_10c":
+        model = setup_vgg_4_10c(autoencoder_stage, modelpath_and_name)
         
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_4_8c",0)
+#model=setup_model("vgg_4_10c",0)
 #model.summary()
 
 """
