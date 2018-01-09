@@ -54,6 +54,13 @@ xtest_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_d
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_noBN_BN_test.txt",
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
 
+#vgg4 autoencoders
+xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+              "vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
+              "vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+              "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+              "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",]
+
 
 #For debugging
 #test_files = ["trained_vgg_3_autoencoder_test.txt", "trained_vgg_3_dropout_autoencoder_test.txt"]
