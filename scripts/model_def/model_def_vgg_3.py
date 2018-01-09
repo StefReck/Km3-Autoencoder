@@ -69,6 +69,9 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
     batchnorm_for_dense=False
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
+    
+    train=False
+    
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
     inputs = Input(shape=(11,18,50,1))
@@ -117,14 +120,23 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
         if normalize_before_dense==True: x = Lambda( zero_center_and_normalize )(x)
         if zero_center_before_dense==True: x = Lambda( zero_center )(x)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        #x = Dense(256, activation='relu', kernel_initializer='he_normal')(x)
-        #x = Dense(16, activation='relu', kernel_initializer='he_normal')(x)
+        
+        #x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        #x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        
+        #Test with bigger dense setup (1000,1000,500)
+        x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=500, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        
+        
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
+    
+m = setup_vgg_3(2)
+m.summary()
     
 def setup_vgg_3_reg(autoencoder_stage, modelpath_and_name=None):
     #832k params with an activity l2 penalty
