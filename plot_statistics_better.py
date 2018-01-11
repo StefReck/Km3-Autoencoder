@@ -2,7 +2,13 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
+
+
+xlabel="Epoch"
+title="Progress"
+labels_override=["Test1",]
+
 
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
 #Autoencoders:
@@ -59,7 +65,8 @@ xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
               "vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
               "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
-              "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",]
+              "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",]
 
 
 modelnames=[] #e.g. vgg_3_autoencoder
@@ -99,9 +106,9 @@ def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.tx
 
 def make_test_train_plot(epochs, test, train, label, epochs_train, ylabel):
     plt.ylabel(ylabel)
-    test_plot = plt.plot(epochs, test, marker="o")
+    test_plot = plt.plot(epochs, test, marker="o", label=label)
     plt.plot(epochs_train, train, linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6, label="")
-    return test_plot[0].get_color()
+    return test_plot
 
 def generate_data_for_plots(data_dict):
     #array that contains n arrays (n models to plot), each containing [epoch, test value, train value, train epoch, ylabel]
@@ -109,11 +116,12 @@ def generate_data_for_plots(data_dict):
     data_for_all_plots=[]
     for i,data_dict in enumerate(dict_array):
         current_max_epoch = max(tuple(map(int, data_dict["Epoch"])))
+        data_array=[]
         if max_epoch<current_max_epoch:
             max_epoch=current_max_epoch 
             
         if "Test acc" in data_dict:
-            ylabel="Accuracy"
+            ylabel="Accuracy (%)"
             train_epoch_data=[]
             train_acc_data=[]
             for epoch in data_dict["Epoch"]:
@@ -132,42 +140,52 @@ def generate_data_for_plots(data_dict):
             data_array=[data_dict["Epoch"], data_dict["Test loss"], train_loss_data, modelnames[i], train_epoch_data, ylabel]
         
         data_for_all_plots.append(data_array)
-    return data_for_all_plots, max_epoch
+    return np.array(data_for_all_plots), max_epoch
 
-fig, ax=plt.subplots()
-#Train and Test legend entries
-plt.plot([], [], color="grey", label="Test", marker="o")
-plt.plot([], [], linestyle="-", color="grey", alpha=0.5, lw=0.6, label="Train")
-handles, labels = ax.get_legend_handles_labels()
 
-debug=False
+
+debug=True
 if debug==False:
     #Generate data from files
     dict_array = make_dicts_from_files(test_files)
     data_for_plots, max_epoch=generate_data_for_plots(dict_array)
 else:
-    #debug:
     # Epoch, test, train, label, trainepoch, ylabel
-    data_for_plots, max_epoch=[[np.linspace(0,9,10), np.linspace(0,9,10)*0.1, np.linspace(0,9,10)*0.1 + 1, "Test", np.linspace(0,9,10), "loss" ], ], 10
+    data_for_plots, max_epoch=[[np.linspace(0,9,10), np.linspace(0,9,10)*0.1, np.linspace(0,9,10)*0.1 + 1, "Test", np.linspace(0,9,10), "Loss" ], ], 10
+    data_for_plots=np.array(data_for_plots*2)
+    
+fig, ax=plt.subplots()
+plt.ylabel(data_for_plots[0][5])
 
+label_array = data_for_plots[:,3]
+if len(labels_override) == len(label_array):
+    label_array=labels_override
+else:
+    print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+
+handles1=[]
 #plot the data in one plot
-handle_array=[]
-for data_of_model in data_for_plots*2:
-    color=make_test_train_plot(data_of_model[0], data_of_model[1],data_of_model[2],data_of_model[3],data_of_model[4],data_of_model[5],)
-    patch = mpatches.Patch(color=color, label=data_of_model[5])
-    handle_array.append(patch)
+for i,data_of_model in enumerate(data_for_plots):
+    test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o")
+    ax.plot(data_of_model[4], data_of_model[2], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
+    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
+    handles1.append(handle_for_legend)
 
+#lhandles, llabels = ax.get_legend_handles_labels()
+legend1 = plt.legend(handles=handles1, loc=1)
 
+test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
+train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=0.6, label='Train')
+legend2 = plt.legend(handles=[test_line,train_line], loc="lower right")
 
+ax.add_artist(legend1)
+ax.add_artist(legend2)
 
 plt.xlim((0.2,max_epoch))
 #plt.xticks( np.linspace(1,max_epoch,max_epoch) )
-plt.legend(handles=handle_array+handles)
 
-#legend=plt.legend(handles=handle_array+[handles,], labels+['Epoch of autoencoder', ])
-
-plt.xlabel('Epoch')
-plt.title("Progress")
+plt.xlabel(xlabel)
+plt.title(title)
 plt.grid(True)
 plt.show()
 

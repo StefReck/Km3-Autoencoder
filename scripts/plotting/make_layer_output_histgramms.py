@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+import matplotlib
 from keras.models import load_model, Model
 import h5py
 import numpy as np
@@ -40,10 +40,6 @@ data=data_path+test_data
 zero_center = data_path+zero_center_data
     
 
-#Which event(s) should be taken from the file to make the histogramms
-which_events = [0,]
-
-
 
 #On Laptop:
 data = "../Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5"
@@ -60,7 +56,8 @@ encoder_sup = load_model(model_sup)
 autoencoder = load_model(autoencoder_model)
 """
 
-
+#Which event(s) should be taken from the file to make the histogramms
+which_events = [0,]
 
 
 file=h5py.File(data , 'r')
@@ -115,16 +112,15 @@ def make_histogramms_of_layer_channel(layer_no, model_1):
     enc_feat=enc_feat.reshape(-1, enc_feat.shape[-1]) #240,64
     
     plt.figure()
-
-    plt.title("Autoencoder adam epsilon e-08     Output of last Batch Normalization")
+    matplotlib.rcParams.update({'font.size': 12})
+    plt.title('Output of last Batch Normalization') #Autoencoder $\epsilon = 10^{-8}$ after Epoch 10: 
     repeats_of_colormap=4
     color=cm.rainbow(np.linspace(0,1,int(enc_feat.shape[-1]/repeats_of_colormap)))
-    color.shape
     color=np.tile(color,(repeats_of_colormap,1))
-    color.shape
-    plt.hist(enc_feat, 100, stacked=True, color=color)
+    plt.hist(enc_feat, 100, stacked=True, color=color, zorder=10)
     plt.xlabel("Output of neuron")
     plt.ylabel("Number of neurons")
+    plt.grid(zorder=0)
     plt.tight_layout()
 
 

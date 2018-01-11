@@ -62,12 +62,10 @@ xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",]
 
 
-#For debugging
-#test_files = ["trained_vgg_3_autoencoder_test.txt", "trained_vgg_3_dropout_autoencoder_test.txt"]
-
 modelnames=[] #e.g. vgg_3_autoencoder
 for modelident in test_files:
     modelnames.append(modelident.split("trained_")[1][:-9])
+    
     
 def make_dicts_from_files(test_files):
     dict_array=[]
