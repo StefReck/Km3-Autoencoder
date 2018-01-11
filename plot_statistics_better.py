@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.lines as mlines
 
+matplotlib.rcParams.update({'font.size': 14})
 
 xlabel="Epoch"
-title="Progress"
-labels_override=["Test1",]
+title="Progress of autoencoders with different optimization strategies"
+labels_override=[r"Adam with $\epsilon = 10^{-1}$","SGD",r"Adam with $\epsilon = 10^{-8}$"]
 
 
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
@@ -144,7 +145,7 @@ def generate_data_for_plots(data_dict):
 
 
 
-debug=True
+debug=False
 if debug==False:
     #Generate data from files
     dict_array = make_dicts_from_files(test_files)
@@ -175,7 +176,7 @@ for i,data_of_model in enumerate(data_for_plots):
 legend1 = plt.legend(handles=handles1, loc=1)
 
 test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
-train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=0.6, label='Train')
+train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=2, label='Train')
 legend2 = plt.legend(handles=[test_line,train_line], loc="lower right")
 
 ax.add_artist(legend1)
@@ -183,6 +184,7 @@ ax.add_artist(legend2)
 
 plt.xlim((0.2,max_epoch))
 #plt.xticks( np.linspace(1,max_epoch,max_epoch) )
+plt.xticks( np.arange(0,max_epoch,10) )
 
 plt.xlabel(xlabel)
 plt.title(title)
