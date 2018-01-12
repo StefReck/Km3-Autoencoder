@@ -35,11 +35,11 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
             #loss and accuracy
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}'.format(epoch , str(evaluation[0])[:15], str(training_hist.history["loss"][0])[:15], str(evaluation[1])[:15], str(training_hist.history["acc"][0])[:15], start_time+"_to_"+end_time, str(lr)[:15] ))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6:.4g}'.format(epoch , str(evaluation[0])[:10], str(training_hist.history["loss"][0])[:10], str(evaluation[1])[:10], str(training_hist.history["acc"][0])[:10], start_time+"_to_"+end_time, K.get_value(model.optimizer.lr) ))
         else:
             #For autoencoders: only loss
             #history object looks like this: training_hist.history = {'loss': [0.9533379077911377, 0.9494166374206543]} for 2 epochs, this trains only one
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}'.format(epoch, str(evaluation)[:15], str(training_hist.history["loss"][0])[:15], start_time+"_to_"+end_time, str(lr)[:15] ))
+            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4:.4g}'.format(epoch, str(evaluation)[:10], str(training_hist.history["loss"][0])[:10], start_time+"_to_"+end_time, K.get_value(model.optimizer.lr) ))
     return lr
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
