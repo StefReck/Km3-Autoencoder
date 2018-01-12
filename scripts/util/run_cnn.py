@@ -22,7 +22,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     if epoch > 1 and lr_decay > 0:
         lr *= 1 - float(lr_decay)
         K.set_value(model.optimizer.lr, lr)
-        print ('Decayed learning rate to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (minus ' + str(lr_decay) + ')')
+        print ('Set LR to' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
 
     start_time = datetime.now().strftime('%H:%M:%S')
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)

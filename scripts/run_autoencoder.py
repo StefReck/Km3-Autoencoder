@@ -9,8 +9,8 @@ It also contatins the adress of the training files and the epoch
 
 from keras.models import load_model
 from keras import optimizers
+from keras import backend as K
 import numpy as np
-import h5py
 import os
 import sys
 import argparse
@@ -285,8 +285,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
 
         
-        
-        
+    #Set LR of loaded model to new lr
+    K.set_value(model.optimizer.lr, lr)
         
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
