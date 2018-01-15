@@ -24,30 +24,31 @@ Saves a single plot for multiple files to the same place where the model is loac
     Plot:     test/model_3d_output_plot.pdf
 """
 
-#TODO add possibility to plot only data in single plot with parser
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Compare original 3d image of an event with the prediciton of an autoencoder. Saves a single plot for multiple files to the same place where the model is loacated at.')
-    parser.add_argument('model', type=str, help='The model that does the predictions. Type None as a str if only xzt data should be plotted. Saved plot will be the same except with ending _3d_output_plot.h5')
-    parser.add_argument('modeltag_lambda_comp', type=str, default=None, nargs="?", help="The modeltag of the model, only if lambda layers are present (which are bugged with load_model). CURRENTLY NOT FUNCTIONAL")
+    parser.add_argument('model', type=str, help='The model that does the predictions. Saved plot will be the same except with ending _3d_output_plot.h5')
+    parser.add_argument('only_data_savename', type=str, default="", nargs="?", help='If given, plot of only data without model comparison of xzt data will be saved to given loation.')
+    
+    #parser.add_argument('modeltag_lambda_comp', type=str, default=None, nargs="?", help="The modeltag of the model, only if lambda layers are present (which are bugged with load_model). CURRENTLY NOT FUNCTIONAL")
   
     args = parser.parse_args()
     params = vars(args)
     return params
 
+
 #Events to compare, each in a seperate page in the pdf
-which = [0,1,2,3,4,5]
+which = range(0,10,1)
 
-#The Model which is used for predictions
-#model_file="/home/woody/capn/mppi013h/Km3-Autoencoder/models/vgg_3_max/trained_vgg_3_max_autoencoder_epoch10.h5"
-#if lambda layers are present: Give model tag to load model manually; else None
-#lambda_comp_model_tag = None #"vgg_3"
 
-debug=True
+
+debug=False
 if debug==False:
     params = parse_input()
     model_file = params["model"]
-    lambda_comp_model_tag = params["modeltag_lambda_comp"]
+    only_data_savename = params["only_data_savename"]
+    
+    lambda_comp_model_tag = None #params["modeltag_lambda_comp"]
 
     #Path to data to predict on (for xzt)
     data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
@@ -55,8 +56,14 @@ if debug==False:
     zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
     test_file = data_path + test_data
     zero_center_file= data_path + zero_center_data
+    
     #Name of output file
-    plot_file = model_file[:-3]+"_3d_output_plot.pdf"
+    if only_data_savename is not "":
+        plot_file = model_file[:-3]+"_3d_output_plot.pdf"
+        compare_histograms=True
+    else:
+        plot_file = only_data_savename
+        compare_histograms=False
     
 else:
     model_file="../Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
@@ -65,7 +72,7 @@ else:
     plot_file = "test.pdf"
     lambda_comp_model_tag = None
     which=[5,]
-    compare_histograms=True
+    compare_histograms=0
 
 
 #minimum number of counts in a bin for it to be displayed in the histogramms
@@ -131,7 +138,7 @@ def size_of_circles(hist):
     return size
 
 
-def make_3d_plots(hist_org, hist_pred, n_bins, suptitle=None):
+def make_3d_plots(hist_org, hist_pred, n_bins, suptitle, figsize):
     #Plot original and predicted histogram side by side in one plot
     #n_bins e.g. (11,18,50)
     #input format: e.g. [x,y,z,val]
@@ -139,7 +146,7 @@ def make_3d_plots(hist_org, hist_pred, n_bins, suptitle=None):
 
     binsize_to_name_dict = {11: "X", 13:"Y", 18:"Z", 50:"T"}
 
-    fig = plt.figure(figsize=(10,6))
+    fig = plt.figure(figsize=figsize)
     
     
     ax1 = fig.add_subplot(121, projection='3d')
@@ -170,19 +177,19 @@ def make_3d_plots(hist_org, hist_pred, n_bins, suptitle=None):
     ax2.set_title("Prediction")
     
     
-    if suptitle is not None: fig.suptitle(suptitle)
+    fig.suptitle(suptitle)
     fig.tight_layout()   
     
     return fig
 
-def make_3d_single_plot(hist_org, n_bins, title):
+def make_3d_single_plot(hist_org, n_bins, title, figsize):
     #Plot original histogram
     #n_bins e.g. (11,18,50)
     #input format: e.g. [x,y,z,val]
     
     binsize_to_name_dict = {11: "X", 13:"Y", 18:"Z", 50:"T"}
 
-    fig = plt.figure(figsize=(6,6))
+    fig = plt.figure(figsize=figsize)
     
     
     ax1 = fig.add_subplot(111, projection='3d')
@@ -229,7 +236,11 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
     
     #Some infos for the title
     ids = labels[:,0].astype(int)
-    energies = labels[:,2].astype(int)
+    energies = np.round(labels[:,2],1)
+
+
+    #proper layout for xzt:
+    figsizes=[(12,7),(6,7)] #[double, single]
 
     #test_file is a .h5 file on which the predictions are done
     #center_file is the zero center image
@@ -237,13 +248,13 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
         #pp.attach_note(test_file)
         for i,hist in enumerate(hists):
             if compare_histograms == True:
-                suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + " GeV     Loss: " + str(losses[i])[:6]
-                fig = make_3d_plots(reshape_3d_to_3d(hist, min_counts), reshape_3d_to_3d(hists_pred[i], min_counts), n_bins, suptitle)
+                suptitle = "Energy: " + str(energies[i]) + " GeV     Loss: " + str(np.round(losses[i],5))
+                fig = make_3d_plots(reshape_3d_to_3d(hist, min_counts), reshape_3d_to_3d(hists_pred[i], min_counts), n_bins, suptitle, figsizes[0])
             else:
-                suptitle = "Event ID " + str(ids[i]) + "    Energy " + str(energies[i]) + " GeV"
-                fig = make_3d_single_plot(reshape_3d_to_3d(hist, min_counts), n_bins, suptitle)
+                suptitle = "Energy: " + str(energies[i]) + " GeV"
+                fig = make_3d_single_plot(reshape_3d_to_3d(hist, min_counts), n_bins, suptitle, figsizes[1])
             pp.savefig(fig)
-            #plt.close(fig)
+            plt.close(fig)
     
 
 

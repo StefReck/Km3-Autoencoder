@@ -47,6 +47,10 @@ def calculate_bin_edges(n_bins, geo):
     y_bin_edges = np.linspace(geo_limits[0][2] - 9.75, geo_limits[1][2] + 9.75, num=n_bins[1] + 1) # Delta y = 19.483
     z_bin_edges = np.linspace(geo_limits[0][3] - 4.665, geo_limits[1][3] + 4.665, num=n_bins[2] + 1) # Delta z = 9.329
 
+    #offset_x, offset_y, scale = [6.19, 0.064, 1.0128]
+    #x_bin_edges = (x_bin_edges + offset_x )*scale
+    #y_bin_edges = (y_bin_edges + offset_y )*scale
+
     #calculate_bin_edges_test(geo, y_bin_edges, z_bin_edges) # test disabled by default. Activate it, if you change the offsets in x/y/z-bin-edges
 
     return x_bin_edges, y_bin_edges, z_bin_edges
@@ -295,9 +299,9 @@ def get_distance_to_edges_minimizer( x, args ):
 #x,y,factor
 offset_array=[[0,0,1], [6.45,-4.25,1], [6.19, 0.064, 1.0128], [-2.2,-0.1,1] ]
 
-show_distance_of_bins(x_red, y_red, x_bin_edges, y_bin_edges, offset_array )
+#show_distance_of_bins(x_red, y_red, x_bin_edges, y_bin_edges, offset_array )
 
-plot_offset=offset_array[3]
+plot_offset=offset_array[0]
 #plot_offset=[best_x, best_y, best_factor]
 plot_2d(plot_offset[2]*(x_bin_edges+plot_offset[0]), plot_offset[2]*(y_bin_edges+plot_offset[1]), x_red, y_red)
 
