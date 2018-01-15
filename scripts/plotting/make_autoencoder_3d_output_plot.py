@@ -3,8 +3,6 @@
 import matplotlib
 matplotlib.use('Agg') #dont open plotting windows
 
-
-from keras.models import load_model
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -42,7 +40,7 @@ which = range(0,10,1)
 
 
 
-debug=False
+debug=0
 if debug==False:
     params = parse_input()
     model_file = params["model"]
@@ -59,6 +57,7 @@ if debug==False:
     
     #Name of output file
     if only_data_savename is not "":
+        from keras.models import load_model
         plot_file = model_file[:-3]+"_3d_output_plot.pdf"
         compare_histograms=True
     else:
@@ -72,7 +71,8 @@ else:
     plot_file = "test.pdf"
     lambda_comp_model_tag = None
     which=[5,]
-    compare_histograms=0
+    from keras.models import load_model
+    compare_histograms=1
 
 
 #minimum number of counts in a bin for it to be displayed in the histogramms
