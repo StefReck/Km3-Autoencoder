@@ -184,7 +184,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if autoencoder_stage==0  and epoch>0:
             lr=abs(lr*(1-float(lr_decay))**(epoch-1))
             
-        elif (autoencoder_stage==1 or autoencoder_stage==2)  and encoder_epoch>0:
+        elif (autoencoder_stage==1 or autoencoder_stage==2 or autoencoder_stage==3)  and encoder_epoch>0:
             lr=abs(lr*(1-float(lr_decay))**(encoder_epoch-1))
         else:
             lr=abs(lr)
@@ -283,6 +283,88 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+    
+    #Training of the supervised network on several different autoencoder epochs
+    #epoch is calculated automatically and not used from user input
+    #encoder epoch as usual
+    #This does not use the same call for executing the training as stage 0,1 and 2
+    elif autoencoder_stage==3:
+        #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
+        how_many_epochs_each_to_train =[5,]+[2,]*29
+        
+        def switch_encoder_weights(encoder_model, autoencoder_model):
+            #Change the weights of the frozen layers (up to the flatten layer) 
+            #of the frozen encoder to that of another autoencoder model
+            changed_layers=0
+            for i,layer in enumerate(encoder_model.layers):
+                if "flatten" not in layer.name:
+                    layer.set_weights(autoencoder_model.layers[i].get_weights())
+                    changed_layers+=1
+                else:
+                    break
+            print("Weights of layers changed:", changed_layers)
+        
+        #Encoder epoch after which to switch the autoencoder model
+        switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
+        #calculate the current autoencoder epoch automatically based on the encoder epoch
+        for ae_epoch,switch in enumerate(switch_autoencoder_model):
+            if encoder_epoch-switch <= 0:
+                autoencoder_epoch=ae_epoch+1
+                break
+        
+        is_autoencoder=False
+        #name of the autoencoder model file that the encoder part is taken from:
+        autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
+        #name of the supervised model:
+        modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
+        
+        if encoder_epoch == 0:
+            #Create a new encoder network:
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=model_folder + "trained_" + modeltag + "_autoencoder_epoch1.h5')
+            model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            #Create header for new test log file
+            with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
+                metrics = model.metrics_names #['loss', 'acc']
+                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
+            
+        else:
+            #Load an existing trained encoder network and train that
+            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+        
+        #Own execution of training
+        #Set LR of loaded model to new lr
+        K.set_value(model.optimizer.lr, lr)
+            
+        #Which epochs are the ones relevant for current stage
+        if is_autoencoder==True:
+            running_epoch=epoch #Stage 0
+        else:
+            running_epoch=encoder_epoch #Stage 1 and 2
+            
+        model.summary()
+        print("Model: ", modelname)
+        print("Current State of optimizer: \n", model.optimizer.get_config())
+        
+        #Execute Training:
+        for current_epoch in range(running_epoch,running_epoch+runs):
+            #Does the model we are about to save exist already?
+            check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
+            
+            #Train network, write logfile, save network, evaluate network, save evaluation to file
+            lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
+                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                                 shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
+                                 save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose)  
+            
+            if current_epoch+1 in switch_autoencoder_model:
+                autoencoder_epoch+=1
+                autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
+                print("Changing weights at epoch ",current_epoch," to ",autoencoder_model)
+                switch_encoder_weights(model, load_model(autoencoder_model))
+                
+        sys.exit()
+    
+        
 
         
     #Set LR of loaded model to new lr
