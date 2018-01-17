@@ -69,12 +69,16 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_4_10c_triple_same_structure(autoencoder_stage, modelpath_and_name) 
     elif model_tag == "vgg_4_7c_less_filters":
         model = setup_vgg_4_7c_less_filters(autoencoder_stage, modelpath_and_name) 
+    elif model_tag == "vgg_4_7c_same_structure":
+        model = setup_vgg_4_7c_same_structure(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_4_15c":
+        model = setup_vgg_4_15c(autoencoder_stage, modelpath_and_name)
 
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_4_7c_less_filters",0)
+#model=setup_model("vgg_4_15c",0)
 #model.summary()
 
 """
