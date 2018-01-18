@@ -216,7 +216,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     
     
-    
+    autoencoder_model=None
     #Setup network:
     #Autoencoder self-supervised training. Epoch is the autoencoder epoch, enc_epoch not relevant for this stage
     if autoencoder_stage==0:
@@ -320,7 +320,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
-            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=model_folder + "trained_" + modeltag + "_autoencoder_epoch1.h5')
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model )
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -344,6 +344,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         model.summary()
         print("Model: ", modelname)
         print("Current State of optimizer: \n", model.optimizer.get_config())
+        print("Train files:", train_tuple)
+        print("Test files:", test_tuple)
+        print("Using autoencoder model:", autoencoder_model)
         
         #Execute Training:
         for current_epoch in range(running_epoch,running_epoch+runs):
@@ -359,7 +362,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             if current_epoch+1 in switch_autoencoder_model:
                 autoencoder_epoch+=1
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-                print("Changing weights at epoch ",current_epoch," to ",autoencoder_model)
+                print("Changing weights after epoch ",current_epoch+1," to ",autoencoder_model)
                 switch_encoder_weights(model, load_model(autoencoder_model))
                 
         sys.exit()
@@ -379,6 +382,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     model.summary()
     print("Model: ", modelname)
     print("Current State of optimizer: \n", model.optimizer.get_config())
+    print("Train files:", train_tuple)
+    print("Test files:", test_tuple)
+    if autoencoder_model is not None: print("Using autoencoder model:", autoencoder_model)
     
     #Execute Training:
     for current_epoch in range(running_epoch,running_epoch+runs):

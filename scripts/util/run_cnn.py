@@ -22,7 +22,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     if epoch > 1 and lr_decay > 0:
         lr *= 1 - float(lr_decay)
         K.set_value(model.optimizer.lr, lr)
-        print ('Set LR to' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
+        print ('Set LR to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
 
     start_time = datetime.now().strftime('%H:%M:%S')
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
@@ -71,7 +71,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         if epoch > 1 and shuffle is True: # just for convenience, we don't want to wait before the first epoch each time
             print ('Shuffling file ', f, ' before training in epoch ', epoch)
             shuffle_h5(f, chunking=(True, batchsize), delete_flag=True)
-        print ('Training in epoch', epoch, 'on file ', i, ',', f)
+        print ('Training in epoch', epoch, 'on train file ', i)
 
         if n_events is not None: f_size = n_events  # for testing
         
@@ -105,7 +105,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     :param None/int n_events: For testing purposes if not the whole .h5 file should be used for evaluating.
     """
     for i, (f, f_size) in enumerate(test_files):
-        print ('Testing on file ', i, ',', f)
+        print ('Testing on test file ', i)
 
         if n_events is not None: f_size = n_events  # for testing
 
