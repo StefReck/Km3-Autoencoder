@@ -765,7 +765,80 @@ def setup_vgg_4_15c(autoencoder_stage, modelpath_and_name=None):
         return model
 
 
-#auto = setup_vgg_4_15c(0)
+def setup_vgg_4_30c(autoencoder_stage, modelpath_and_name=None):
+    #753,969 free params
+    batchnorm_before_dense=True
+    dropout_for_dense=0.2
+    batchnorm_for_dense=False
+    
+    train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    filter_base=[15,28]
+    no_of_conv_layers=[8,10,12,   12,10,8]
+    
+    inputs = Input(shape=(11,18,50,1))
+    x=conv_block(inputs, filters=filter_base[0], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
+    for i in range(no_of_conv_layers[0]-1):
+        x=conv_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
+    x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x25
+    
+    x=conv_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x25
+    x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x) #12,18,26
+    x=conv_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #10x16x24
+    for i in range(no_of_conv_layers[1]-2):
+        x=conv_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x25
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x) #5x8x12
+    
+    x=conv_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
+    x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
+    for i in range(no_of_conv_layers[2]-2):
+        x=conv_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #4x6x10
+    
+    encoded = AveragePooling3D((2, 2, 2), padding='valid')(x) #2x3x5
+    
+    if autoencoder_stage == 0:  #The Decoder part:
+        #2x3x5 x 64
+        x = UpSampling3D((2, 2, 2))(encoded) #4x6x10
+        x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #6x8x12
+        x = ZeroPadding3D(((0,1),(1,1),(1,1)))(x) #7x10x14
+        x=conv_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x12
+        for i in range(no_of_conv_layers[3]-3):
+            x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
+        x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
+        
+        x = UpSampling3D((2, 2, 2))(x) #10x16x24
+        x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #12x18x26
+        x = ZeroPadding3D(((0,1),(1,1),(0,1)))(x) #13,20,27
+        x=conv_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #11x18x25
+        for i in range(no_of_conv_layers[4]-2):
+            x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x25
+            
+        x = UpSampling3D((1, 1, 2))(x) #11x18x50
+        for i in range(no_of_conv_layers[5]):
+            x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x50
+        
+        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        #Output 11x13x18 x 1
+        autoencoder = Model(inputs, decoded)
+        return autoencoder
+    else: #Replacement for the decoder part for supervised training:
+        if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
+            encoder = Model(inputs=inputs, outputs=encoded)
+            autoencoder = load_model(modelpath_and_name)
+            for i,layer in enumerate(encoder.layers):
+                layer.set_weights(autoencoder.layers[i].get_weights())
+            
+        x = Flatten()(encoded)
+        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
+
+#auto = setup_vgg_4_30c(0)
 #auto.summary()
 
 """
