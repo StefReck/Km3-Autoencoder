@@ -177,7 +177,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 encoder_epoch+=1
             else:
                 break
-    
+    elif autoencoder_stage==3 and encoder_epoch == -1:
+        encoder_epoch=0
+        while True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                encoder_epoch+=1
+            else:
+                break
+            
     #if lr is negative, take its absolute as the starting lr and apply the decays that happend during the
     #previous epochs; The lr gets decayed once when train_and_test_model is called (so epoch-1 here)
     if lr<0:
@@ -290,7 +297,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #This does not use the same call for executing the training as stage 0,1 and 2
     elif autoencoder_stage==3:
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
-        how_many_epochs_each_to_train =[5,]+[2,]*29
+        how_many_epochs_each_to_train =[5,]*10+[2,]*100
         
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
