@@ -107,6 +107,7 @@ def test_model():
     inputs = Input(shape=(5,5,5,1))
     x = Reshape((125,1))(inputs)
     x = Conv1D(filters=1, kernel_size=1, padding="valid")(x)
+    x = BatchNormalization()(x, training=False)
     #12,14,18
 
     #stride 1/valid             stride 1/same = 1pad --> 13,15,20
@@ -132,7 +133,39 @@ def test_model():
     autoencoder = Model(inputs, x)
     return autoencoder
 
-autoencoder = test_model()
+
+
+
+import keras
+from keras.layers.normalization import BatchNormalization
+import numpy as np
+
+print("Version: ", keras.__version__)
+
+# Basic model
+inputs = Input(shape=(2,))
+x = BatchNormalization()(inputs, training=False)
+model = Model(inputs, x)
+model.compile(loss='mse', optimizer='adam')
+
+# Print weights and predictions before training.
+X = np.array([[0,2],[2,4]])
+print(X)
+print("Prediction before training: ", model.predict(X))
+print("Weights before training: ", [[list(w) for w in l.get_weights()] for l in model.layers])
+
+
+# Train on random output, but set all layers to Trainable=False
+Y = np.array([[1,2],[2,3]])
+
+#for l in model.layers:
+#    l.trainable = False
+    
+model.compile(loss='mse', optimizer='adam')
+model.fit(X, Y, verbose=0, epochs=100)
+
+print("\n\nPrediction after training: ", model.predict(X))
+print("Weights after training: ", [[list(w) for w in l.get_weights()] for l in model.layers])
 
 
 
