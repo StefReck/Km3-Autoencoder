@@ -7,6 +7,7 @@ from model_def.model_def_vgg_1 import setup_vgg_1, setup_vgg_1_xzt, setup_vgg_1_
 from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup_vgg_2_max, setup_vgg_2_stride
 from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall, setup_vgg_3_reg
 from model_def.model_def_vgg_4 import *
+from model_def.model_def_vgg_5 import *
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     #model tags can have version numbers, e.g. vgg_1-different_lr
@@ -76,11 +77,14 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     elif model_tag == "vgg_4_30c":
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
+    elif model_tag == "vgg_5_10c":
+        model = setup_vgg_5_10c(autoencoder_stage, modelpath_and_name)
+
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_3",2)
+#model=setup_model("vgg_5_10c",0)
 #model.summary()
 
 """

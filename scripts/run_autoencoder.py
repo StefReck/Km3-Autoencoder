@@ -113,28 +113,34 @@ Encoder+ new
 
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False, use_opti=use_opti, encoder_version=encoder_version):
+    which_data_to_use="xzt"
+    
+    #Path to my Km3_net-Autoencoder folder on HPC:
+    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
     #Path to training and testing datafiles on HPC for xyz
-    """
-    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
-    train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
-    test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
-    zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
-    """
-    #for xzt
-    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
-    train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
-    test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-    zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-    
+    if which_data_to_use=="xyz":
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
+        train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
+        zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
+    elif which_data_to_use=="xzt":
+        #for xzt
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+        train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+        zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+    elif which_data_to_use=="xzt_new":
+        #for xzt
+        data_path = home_path+"data/"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_600_shuffled_0.h5"
+        zero_center_data = "" # generated automatically
     
     train_file=data_path+train_data
     test_file=data_path+test_data
     zero_center_file=data_path+zero_center_data
     
-    
-    #Path to my Km3_net-Autoencoder folder on HPC:
-    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
     #For debug testing on my laptop these are overwritten:
     """
