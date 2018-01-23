@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Study of autoencoder layout
+"""
+
 from keras.models import Model, load_model
 from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras import backend as K
