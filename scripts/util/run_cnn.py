@@ -4,6 +4,9 @@ import numpy as np
 from keras import backend as K
 import warnings
 from datetime import datetime
+import re
+import os
+from functools import reduce
 
 from util.Loggers import *
 
@@ -346,8 +349,7 @@ def h5_get_number_of_rows(h5_filepath):
         
         
 #Kopiert von cnn_utilities
-#Not used currently, only np.load(...)
-def load_zero_center_data(train_files, batchsize, n_bins, n_gpu, swap_4d_channels=None):
+def load_zero_center_data(train_files, batchsize, n_bins, n_gpu):
     """
     Gets the xs_mean array that can be used for zero-centering.
     The array is either loaded from a previously saved file or it is calculated on the fly.
@@ -356,7 +358,6 @@ def load_zero_center_data(train_files, batchsize, n_bins, n_gpu, swap_4d_channel
     :param int batchsize: Batchsize that is being used in the data.
     :param tuple n_bins: Number of bins for each dimension (x,y,z,t) in the tran_file.
     :param int n_gpu: Number of gpu's, used for calculating the available RAM space in get_mean_image().
-    :param None/str swap_4d_channels: For 4D data. Specifies if the columns in the xs_mean array should be swapped.
     :return: ndarray xs_mean: mean_image of the x dataset. Can be used for zero-centering later on.
     """
     if len(train_files) > 1:
@@ -365,19 +366,73 @@ def load_zero_center_data(train_files, batchsize, n_bins, n_gpu, swap_4d_channel
 
     filepath = train_files[0][0]
 
-    if os.path.isfile(filepath + '_zero_center_mean.npy') is True:
+    # if the file has a shuffle index (e.g. shuffled_6.h5) and a .npy exists for the first shuffled file (shuffled.h5), we don't want to calculate the mean again
+    shuffle_index = re.search('shuffled(.*).h5', filepath)
+    filepath_without_index = re.sub(shuffle_index.group(1), '', filepath)
+
+    if os.path.isfile(filepath_without_index + '_zero_center_mean.npy') is True:
         print ('Loading an existing xs_mean_array in order to zero_center the data!')
-        xs_mean = np.load(filepath + '_zero_center_mean.npy')
+        xs_mean = np.load(filepath_without_index + '_zero_center_mean.npy')
     else:
         print ('Calculating the xs_mean_array in order to zero_center the data!')
         dimensions = get_dimensions_encoding(n_bins, batchsize)
-        xs_mean = get_mean_image(filepath, dimensions, n_gpu)
-
-    if swap_4d_channels is not None:
-        swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
-        xs_mean[:, swap_4d_channels_dict['yzt-x']] = xs_mean[:, [0,1,2,3]]
+        xs_mean = get_mean_image(filepath, filepath_without_index, dimensions, n_gpu)
 
     return xs_mean
-        
+
+
+def get_mean_image(filepath, filepath_without_index, dimensions, n_gpu):
+    """
+    Returns the mean_image of a xs dataset.
+    Calculating still works if xs is larger than the available memory and also if the file is compressed!
+    :param str filepath: Filepath of the data upon which the mean_image should be calculated.
+    :param str filepath_without_index: filepath without the number index.
+    :param tuple dimensions: Dimensions tuple for 2D, 3D or 4D data.
+    :param filepath: Filepath of the input data, used as a str for saving the xs_mean_image.
+    :param int n_gpu: Number of used gpu's that is related to how much RAM is available (16G per GPU).
+    :return: ndarray xs_mean: mean_image of the x dataset. Can be used for zero-centering later on.
+    """
+    f = h5py.File(filepath, "r")
+
+    # check available memory and divide the mean calculation in steps
+    total_memory = n_gpu * 8e9 # In bytes. Take 1/2 of what is available per GPU (16G), just to make sure.
+    #filesize = os.path.getsize(filepath) # doesn't work for compressed files
+    filesize =  get_array_memsize(f['x'])
+
+    steps = int(np.ceil(filesize/total_memory))
+    n_rows = f['x'].shape[0]
+    stepsize = int(n_rows / float(steps))
+
+    xs_mean_arr = None
+
+    for i in range(steps):
+        print ('Calculating the mean_image of the xs dataset in step ' + str(i))
+        if xs_mean_arr is None: # create xs_mean_arr that stores intermediate mean_temp results
+            xs_mean_arr = np.zeros((steps, ) + f['x'].shape[1:], dtype=np.float64)
+
+        if i == steps-1 or steps == 1: # for the last step, calculate mean till the end of the file
+            xs_mean_temp = np.mean(f['x'][i * stepsize: n_rows], axis=0, dtype=np.float64)
+        else:
+            xs_mean_temp = np.mean(f['x'][i*stepsize : (i+1) * stepsize], axis=0, dtype=np.float64)
+        xs_mean_arr[i] = xs_mean_temp
+
+    xs_mean = np.mean(xs_mean_arr, axis=0, dtype=np.float64).astype(np.float32)
+    xs_mean = np.reshape(xs_mean, dimensions[1:]) # give the shape the channels dimension again if not 4D
+
+    np.save(filepath_without_index + '_zero_center_mean.npy', xs_mean)
+    return xs_mean
+
+def get_array_memsize(array):
+    """
+    Calculates the approximate memory size of an array.
+    :param ndarray array: an array.
+    :return: float memsize: size of the array in bytes.
+    """
+    shape = array.shape
+    n_numbers = reduce(lambda x, y: x*y, shape) # number of entries in an array
+    precision = 8 # Precision of each entry, typically uint8 for xs datasets
+    memsize = (n_numbers * precision) / float(8) # in bytes
+
+    return memsize
         
         

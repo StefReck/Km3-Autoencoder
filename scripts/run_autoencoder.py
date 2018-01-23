@@ -218,8 +218,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             sys.exit(proposed_filename+ "exists already!")
     
     #Zero-Center with precalculated mean image
-    xs_mean = np.load(zero_center_file) if zero_center is True else None
-    
+    #xs_mean = np.load(zero_center_file) if zero_center is True else None
+    n_gpu=(1, 'avolkov')
+    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu[0]) if zero_center is True else None
     
     
     
