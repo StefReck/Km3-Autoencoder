@@ -300,7 +300,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #if first epoch is 0, then the trained supervised network will be used
         how_many_epochs_each_to_train =[0,]+[2,]*10+[1,]*100
         #model to initialize from if first epoch is 0
-        init_model_eps=model_folder + "models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
+        init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
         
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
@@ -360,6 +360,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Own execution of training
         #Set LR of loaded model to new lr
         K.set_value(model.optimizer.lr, lr)
+        if use_opti == "adam" or use_opti=="Adam":
+            K.set_value(model.optimizer.epsilon, 10**epsilon)
             
         #Which epochs are the ones relevant for current stage
         if is_autoencoder==True:
