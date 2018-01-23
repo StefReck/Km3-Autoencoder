@@ -119,15 +119,18 @@ def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
         if zero_center_before_dense==True: x = Lambda( zero_center )(x)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         
-        #x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        #x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         
         #Test with bigger dense setup (1000,1000,500)
-        x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=500, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        #x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        #x = dense_block(x, units=1000, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        #x = dense_block(x, units=500, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         
+        #Test with smaller dense setup
+        #x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         
+
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)

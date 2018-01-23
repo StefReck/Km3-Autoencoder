@@ -7,8 +7,8 @@ import matplotlib.lines as mlines
 matplotlib.rcParams.update({'font.size': 14})
 
 xlabel="Epoch"
-title="Progress of autoencoders with different optimization strategies"
-labels_override=[r"Adam with $\epsilon = 10^{-1}$","SGD",r"Adam with $\epsilon = 10^{-8}$"]
+title="Loss of autoencoders with a varying number of convolutional layers"
+labels_override=["12 layers CW", "12 layers","14 layers", "16 layers", "20 layers"]
 
 
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
@@ -61,13 +61,30 @@ xtest_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_d
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_noBN_BN_test.txt",
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
 
-#vgg4 autoencoders
-test_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
-              "vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
-              "vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+#vgg4 autoencoders variational depth
+test_files = ["vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
               "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
-              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",]
+              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+              "vgg_4_15c/trained_vgg_4_15c_autoencoder_test.txt",
+              "vgg_4_30c/trained_vgg_4_30c_autoencoder_test.txt",]
+
+xtitle="Loss of autoencoders with a varying number of convolutional layers"
+xlabels_override=["12 layers CW", "12 layers","14 layers", "16 layers", "20 layers", "30 layers"]
+
+
+#vgg4 autoencoders
+xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+              #"vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
+              #"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+              #"vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+              #"vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+              "vgg_4_10c_smallkernel/trained_vgg_4_10c_smallkernel_autoencoder_test.txt",
+              "vgg_4_10c_triple/trained_vgg_4_10c_triple_autoencoder_test.txt",
+              "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",
+              "vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
 
 
 modelnames=[] #e.g. vgg_3_autoencoder
@@ -177,7 +194,7 @@ legend1 = plt.legend(handles=handles1, loc=1)
 
 test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
 train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=2, label='Train')
-legend2 = plt.legend(handles=[test_line,train_line], loc="lower right")
+legend2 = plt.legend(handles=[test_line,train_line], loc="upper left")
 
 ax.add_artist(legend1)
 ax.add_artist(legend2)
