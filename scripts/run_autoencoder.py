@@ -118,8 +118,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
-    #Path to training and testing datafiles on HPC for xyz
+    #Dataset to use
     if which_data_to_use=="xyz":
+        #Path to training and testing datafiles on HPC for xyz
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
         train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
         test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
@@ -133,23 +134,21 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     elif which_data_to_use=="xzt_new":
         #for xzt
         data_path = home_path+"data/"
-        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_600_shuffled_0.h5"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
         zero_center_data = "" # generated automatically
-    
+    elif which_data_to_use=="debug":
+        #For debug testing on my laptop these are overwritten:
+        home_path="../"
+        train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+        test_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+        #file=h5py.File(train_file, 'r')
+        #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
+        
     train_file=data_path+train_data
     test_file=data_path+test_data
     zero_center_file=data_path+zero_center_data
     
-    
-    #For debug testing on my laptop these are overwritten:
-    """
-    home_path="../"
-    train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
-    test_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
-    #file=h5py.File(train_file, 'r')
-    #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
-    """
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
