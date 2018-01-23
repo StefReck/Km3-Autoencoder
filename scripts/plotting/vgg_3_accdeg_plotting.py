@@ -30,7 +30,7 @@ accuracies=[[78.9,	81.6,	82.5,	82.1,	79.9,	78.6,],
             [77.3, 76.9, 76.3, 75.6,	75.5,	76.4,],]
 
 
-#Parallel training test log files
+#PARALELL TRAINING
 #basic 
 basic_parallel_logfile = "../Daten/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt"
 how_many_epochs_each_to_train =[5,]*10+[1,]*100
@@ -38,6 +38,10 @@ how_many_epochs_each_to_train =[5,]*10+[1,]*100
 #eps
 eps_parallel_logfile="../Daten/trained_vgg_3_eps_autoencoder_supervised_parallel_up_down_test.txt"
 eps_how_many_epochs_each_to_train =[5,]*1+[2,]*100
+
+#eps v2
+eps_parallel_logfile_v2="../Daten/trained_vgg_3_eps_autoencoder_supervised_parallel_up_down_v2_test.txt"
+eps_how_many_epochs_each_to_train_v2 =[5,]*10+[1,]*100
 
 #MUON TO ELEC CC CLASSIFICATION
 CCautoencoder_epochs = [[10,90],#basic e01
@@ -242,4 +246,5 @@ make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencod
 
 #make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0], labels[0], colors[0])
 #make_accdeg_parallel_eps(eps_parallel_logfile,eps_how_many_epochs_each_to_train, losses[2], accuracies[2], labels[2], colors[2])
+make_accdeg_parallel_eps(eps_parallel_logfile_v2,eps_how_many_epochs_each_to_train_v2, losses[2], accuracies[2], labels[2], colors[2])
    

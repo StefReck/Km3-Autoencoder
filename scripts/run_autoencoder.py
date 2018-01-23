@@ -297,7 +297,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #This does not use the same call for executing the training as stage 0,1 and 2
     elif autoencoder_stage==3:
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
-        how_many_epochs_each_to_train =[5,]*10+[2,]*100
+        #if first epoch is 0, then the trained supervised network will be used
+        how_many_epochs_each_to_train =[0,]+[2,]*10+[1,]*100
+        #model to initialize from if first epoch is 0
+        init_model_eps=model_folder + "models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
         
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
@@ -329,6 +332,21 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create a new encoder network:
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model )
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            
+            #Custom model is loaded as initialization
+            if switch_autoencoder_model[0]==0:
+                if modeltag=="vgg_3_eps":
+                    init_model=init_model_eps
+                else:
+                    raise("Cannot load initial model "+init_model+" Modeltags are different "+modeltag)
+                print("Initializing model to", init_model)
+                autoencoder_epoch=2
+                autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
+                model_for_init = load_model(init_model)
+                for i,layer in enumerate(model.layers):
+                    layer.set_weights(model_for_init.layers[i].get_weights())
+            
+            
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
@@ -338,6 +356,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
         
+                
         #Own execution of training
         #Set LR of loaded model to new lr
         K.set_value(model.optimizer.lr, lr)
