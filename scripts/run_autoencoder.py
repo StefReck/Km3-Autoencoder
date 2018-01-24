@@ -202,9 +202,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             lr=abs(lr)
     
     #Optimizer to be used. If an epsilon is specified, adam is used with epsilon=10**(given epsilon).
+    #only used when compiling model, so use lambda_comp if optimizer should be changed
     #Default:
     #adam = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    if use_opti == "adam" or use_opti=="Adam":
+    if use_opti == "adam" or use_opti=="ADAM":
         adam = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=10**epsilon,   decay=0.0)
     elif use_opti == "SGD" or use_opti=="sgd":
         adam = optimizers.SGD(lr=lr, momentum=0.0, decay=0.0, nesterov=False)
@@ -238,6 +239,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                     
         if epoch == 0:
             #Create a new autoencoder network
+            print("Creating new autoencoder network:", modeltag)
             model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
             model.compile(optimizer=adam, loss='mse')
             #Create header for new test log file
@@ -247,13 +249,18 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
         else:
             #Load an existing trained autoencoder network and train that
+            autoencoder_model_to_load=model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5'
+            print("Loading existing autoencoder to continue training:", autoencoder_model_to_load)
             if lambda_comp==False:
-                model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5')
+                model = load_model(autoencoder_model_to_load)
             elif lambda_comp==True:
                 #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
                 model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
-                model.load_weights(model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5', by_name=True)
+                model.load_weights(autoencoder_model_to_load, by_name=True)
                 model.compile(optimizer=adam, loss='mse')
+                
+                opti_weights=load_model(autoencoder_model_to_load).optimizer.get_weights()
+                model.optimizer.set_weights(opti_weights)
             
     #Encoder supervised training:
     #Load the encoder part of an autoencoder, import weights from trained model, freeze it and add dense layers
@@ -266,6 +273,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
+            print("Creating new encoder network", modeltag, "from autoencoder", autoencoder_model)
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
@@ -275,7 +283,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
         else:
             #Load an existing trained encoder network and train that
-            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+            encoder_network_to_load=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
+            print("Loading existing encoder network", encoder_network_to_load)
+            model = load_model(encoder_network_to_load)
     
     
     #Unfrozen Encoder supervised training with completely unfrozen model:
@@ -286,6 +296,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
+            print("Creating new unfrozen encoder network:", modelname)
             model = setup_model(model_tag=modeltag, autoencoder_stage=2)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
@@ -295,7 +306,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
         else:
             #Load an existing trained encoder network and train that
-            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+            load_this=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
+            print("Loading existing unfrozen encoder network", load_this)
+            model = load_model(load_this)
     
     #Training of the supervised network on several different autoencoder epochs
     #epoch is calculated automatically and not used from user input
@@ -305,6 +318,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
         #if first epoch is 0, then the trained supervised network will be used
         how_many_epochs_each_to_train =[0,]+[2,]*10+[1,]*100
+        print("Parallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         #model to initialize from if first epoch is 0
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
         
@@ -366,8 +380,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Own execution of training
         #Set LR of loaded model to new lr
         K.set_value(model.optimizer.lr, lr)
-        if use_opti == "adam" or use_opti=="Adam":
-            K.set_value(model.optimizer.epsilon, 10**epsilon)
             
         #Which epochs are the ones relevant for current stage
         if is_autoencoder==True:
@@ -406,6 +418,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
     #Set LR of loaded model to new lr
     K.set_value(model.optimizer.lr, lr)
+    
         
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
