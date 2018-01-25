@@ -9,7 +9,12 @@ matplotlib.rcParams.update({'font.size': 14})
 xlabel="Epoch"
 title="Loss of autoencoders with a varying number of convolutional layers"
 labels_override=["12 layers CW", "12 layers","14 layers", "16 layers", "20 layers"]
+legend_locations=( 1, "upper left") #(labels, Test/Train)
+xticks=None # = automatic
+colors=[] # = automatic
 
+#Name of file to save the numpy array with the plot data to; None will skip saving
+dump_to_file=None
 
 #Test Files to make plots from; Format: vgg_3/trained_vgg_3_autoencoder_test.txt
 #Autoencoders:
@@ -61,6 +66,9 @@ xtest_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_d
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_noBN_BN_test.txt",
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
 
+#only
+xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_accdeg2_test.txt",]
+
 #vgg4 autoencoders variational depth
 test_files = ["vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
               "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
@@ -86,6 +94,15 @@ xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",
               "vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
 
+#vgg 3 parallel training
+"""
+test_files = ["vgg_3/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt",]
+title="Accuracy during parallel supervised training"
+labels_override=[r"Autoencoder with $\epsilon = 10^{-1}$"]
+xticks = np.arange(0,51,5)
+legend_locations=( "lower right", "upper left") #(labels, Test/Train)
+colors=["orange",]
+"""
 
 modelnames=[] #e.g. vgg_3_autoencoder
 for modelident in test_files:
@@ -181,27 +198,44 @@ if len(labels_override) == len(label_array):
 else:
     print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
 
+if len(colors) == len(label_array):
+    color_override = True
+else:
+    color_override = False
+    print("color array does not have the rights size (", len(label_array), "), using default colors.")
+
+if dump_to_file is not None:
+    print("Saving plot data to", dump_to_file)
+    np.save(dump_to_file, data_for_plots)
+
 handles1=[]
 #plot the data in one plot
 for i,data_of_model in enumerate(data_for_plots):
-    test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o")
+    if color_override==True:
+        test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o", color=colors[i])
+    else:
+        test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o")
     ax.plot(data_of_model[4], data_of_model[2], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
     handles1.append(handle_for_legend)
 
 #lhandles, llabels = ax.get_legend_handles_labels()
-legend1 = plt.legend(handles=handles1, loc=1)
+legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
 
 test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
 train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=2, label='Train')
-legend2 = plt.legend(handles=[test_line,train_line], loc="upper left")
+legend2 = plt.legend(handles=[test_line,train_line], loc=legend_locations[1])
 
 ax.add_artist(legend1)
 ax.add_artist(legend2)
 
 plt.xlim((0.2,max_epoch))
 #plt.xticks( np.linspace(1,max_epoch,max_epoch) )
-plt.xticks( np.arange(0,max_epoch,10) )
+
+if xticks is not None:
+    plt.xticks( xticks )
+else:
+    plt.xticks( np.arange(0,max_epoch+1,10) )
 
 plt.xlabel(xlabel)
 plt.title(title)

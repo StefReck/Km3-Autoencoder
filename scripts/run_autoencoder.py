@@ -29,13 +29,13 @@ def parse_input():
     parser.add_argument("encoder_epoch", type=int)
     parser.add_argument("class_type_bins", type=int)
     parser.add_argument("class_type_name", type=str)
-    parser.add_argument("zero_center", type=bool)
+    parser.add_argument("zero_center", type=int)
     parser.add_argument("verbose", type=int)    
     parser.add_argument("n_bins", nargs=4, type=int)
     parser.add_argument("learning_rate", type=float)
     parser.add_argument("learning_rate_decay", default=0.05, type=float)
     parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
-    parser.add_argument("lambda_comp", default=False, type=bool)
+    parser.add_argument("lambda_comp", type=int)
     parser.add_argument("optimizer", type=str)
     parser.add_argument("encoder_version", default="", nargs="?", type=str, help="e.g. -LeLu; Str added to the supervised file names to allow multiple runs on the same model.")
     
@@ -60,6 +60,7 @@ epsilon = params["epsilon"]
 lambda_comp = params["lambda_comp"]
 use_opti = params["optimizer"]
 encoder_version=params["encoder_version"]
+print(params)
 
 """
 #Tag for the model used; Identifies both autoencoder and encoder
@@ -114,10 +115,9 @@ Encoder+ new
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False, use_opti=use_opti, encoder_version=encoder_version):
     which_data_to_use="xzt"
-    
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
-    
+
     #Dataset to use
     if which_data_to_use=="xyz":
         #Path to training and testing datafiles on HPC for xyz
