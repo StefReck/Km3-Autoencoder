@@ -77,14 +77,16 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
     elif model_tag == "vgg_4_30c":
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
-    elif model_tag == "vgg_5_10c":
-        model = setup_vgg_5_10c(autoencoder_stage, modelpath_and_name)
-
+    elif model_tag == "vgg_5_picture":
+        model = setup_vgg_5_picture(autoencoder_stage, modelpath_and_name)
+    elif model_tag == "vgg_5_channel":
+        model = setup_vgg_5_channel(autoencoder_stage, modelpath_and_name)
+        
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_5_10c",0)
+#model=setup_model("vgg_5_channel",0)
 #model.summary()
 
 """

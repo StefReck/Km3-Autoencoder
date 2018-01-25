@@ -19,15 +19,15 @@ colors=["blue","green","red"]
 #UP DOWN CLASSIFICATION
 autoencoder_epochs = [[2,5,10,40,90,140],	
                       [2,10,50],
-                      [1,2,5,10,60,112],]
+                      [1,2,5,10,30,60,112],]
 
 losses = [[0.0753,	0.0719,	0.0704,	0.0679,	0.0489,	0.0359],	#basic eps 01
           [0.0678,0.0567, 0.0461], #sgd
-          [0.0419, 0.0312,0.0258, 0.0230,	0.0187,	0.0183],] #eps08
+          [0.0419, 0.0312,0.0258, 0.0230, 0.02,	0.0187,	0.0183],] #eps08
 
 accuracies=[[78.9,	81.6,	82.5,	82.1,	79.9,	78.6,],
             [82.0,80.6, 79.5],
-            [77.3, 76.9, 76.3, 75.6,	76.4,	76.4,],]
+            [77.3, 76.9, 76.3, 75.6, 76.1,	76.4,	76.4,],]
 
 
 #PARALELL TRAINING
@@ -42,6 +42,11 @@ eps_how_many_epochs_each_to_train =[5,]*1+[2,]*100
 #eps v2
 eps_parallel_logfile_v2="../Daten/trained_vgg_3_eps_autoencoder_supervised_parallel_up_down_v2_test.txt"
 eps_how_many_epochs_each_to_train_v2 =[5,]*10+[1,]*100
+
+#eps v3 (mit initialisierter erster epoche), trainiert auf AE epoche 1 gar nicht, AE epoche 2-11 je 2... 
+eps_parallel_logfile_v3="../Daten/trained_vgg_3_eps_autoencoder_supervised_parallel_up_down_v3_test.txt"
+eps_how_many_epochs_each_to_train_v3 =[0,]+[2,]*10+[1,]*100
+
 
 #MUON TO ELEC CC CLASSIFICATION
 CCautoencoder_epochs = [[10,90],#basic e01
@@ -160,17 +165,27 @@ def transform_epoch(data,how_many_epochs_each_to_train):
     epoch=np.array(data["Epoch"]).astype(int)
     acc=np.array(data["Test acc"]).astype(float)
     trainacc=np.array(data["Train acc"]).astype(float)
+
     take_acc_at_these_sup_epochs=np.cumsum(how_many_epochs_each_to_train)
     take=take_acc_at_these_sup_epochs[take_acc_at_these_sup_epochs<=max(epoch)]-1
+    
+    #if first AE epoch is trained 0 times on, skip it
+    if how_many_epochs_each_to_train[0]==0:
+        take=take[1:]
+        autoencoder_epoch_offset=1
+    else:
+        autoencoder_epoch_offset=0
+    
+    
     #      spvsd epoch, acc,       autoencoder epoch
-    return epoch[take], acc[take], np.arange(1,len(acc[take])+1), trainacc[take]
+    return epoch[take], acc[take], np.arange(1+autoencoder_epoch_offset,len(acc[take])+1+autoencoder_epoch_offset), trainacc[take]
         
 def get_ae_loss_array(test_log):
     test_log_dict=make_dict_from_file(test_log)
     return np.array(test_log_dict["Test loss"]).astype(float)
 
 
-def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, loss, accuracy, label, color):
+def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, loss, accuracy, epochs, label, color):
     data=make_dict_from_file(parallel_logfile)
     trans_data=transform_epoch(data, how_many_epochs_each_to_train)
     ae_loss_array=get_ae_loss_array("../Daten/trained_vgg_3_autoencoder_test.txt")
@@ -203,12 +218,18 @@ def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, l
             ticklabels.append("")
     ax2.set_xticklabels(ticklabels)
     ax2.set_xlabel("Autoencoder epoch")
+    
+    for j in range(len(loss)):
+        shiftx=0.0003
+        shifty=0
+        ax.annotate(epochs[j], xy=(loss[j]+shiftx,accuracy[j]+shifty))
+    
     #ax2.set_aspect("equal")
     
     plt.show()
     
 
-def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, loss, accuracy, label, color):
+def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, loss, accuracy, epochs, label, color):
     data=make_dict_from_file(parallel_logfile)
     trans_data=transform_epoch(data, how_many_epochs_each_to_train)
     ae_loss_array=get_ae_loss_array("../Daten/trained_vgg_3_eps_autoencoder_test.txt")
@@ -217,8 +238,8 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
     fig, ax = plt.subplots(figsize=(10,7))
     
     #plt.plot(data["Epoch"],data["Test acc"])
-    test_plot=ax.plot(ae_loss_data, trans_data[1]*100, "o-", ms=4, color="orange", label="Test")
-    ax.plot(ae_loss_data, trans_data[3]*100, "o--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
+    test_plot=ax.plot(ae_loss_data, trans_data[1]*100, "-", ms=4, color="orange", label="Test")
+    ax.plot(ae_loss_data, trans_data[3]*100, "--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
     ax.plot(loss, accuracy, "o", color=color, label=label)
     ax.grid()
     ax.legend()
@@ -242,11 +263,21 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
     ax2.set_xlabel("Autoencoder epoch")
     #ax2.set_aspect("equal")
     
+    for j in range(len(loss)):
+        if j==5:
+            shiftx=-0.0015
+            shifty=0
+        else:
+            shiftx=0.0003
+            shifty=0
+        ax.annotate(epochs[j], xy=(loss[j]+shiftx,accuracy[j]+shifty))
+        
     plt.show()
     
-make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
+#make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
 
-#make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0], labels[0], colors[0])
-#make_accdeg_parallel_eps(eps_parallel_logfile,eps_how_many_epochs_each_to_train, losses[2], accuracies[2], labels[2], colors[2])
-#make_accdeg_parallel_eps(eps_parallel_logfile_v2,eps_how_many_epochs_each_to_train_v2, losses[2], accuracies[2], labels[2], colors[2])
+#make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
+
+#make_accdeg_parallel_eps(eps_parallel_logfile,eps_how_many_epochs_each_to_train, losses[2], accuracies[2],autoencoder_epochs[2], labels[2], colors[2])
+make_accdeg_parallel_eps(eps_parallel_logfile_v3,eps_how_many_epochs_each_to_train_v3, losses[2], accuracies[2], autoencoder_epochs[2], labels[2], colors[2])
    
