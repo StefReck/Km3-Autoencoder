@@ -31,7 +31,7 @@ def parse_input():
     parser.add_argument("class_type_name", type=str)
     parser.add_argument("zero_center", type=int)
     parser.add_argument("verbose", type=int)    
-    parser.add_argument("n_bins", nargs=4, type=int)
+    parser.add_argument("dataset", type=str, help="Name of test/training dataset to be used, eg xzt. n_bins is automatically selected")
     parser.add_argument("learning_rate", type=float)
     parser.add_argument("learning_rate_decay", default=0.05, type=float)
     parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
@@ -53,7 +53,7 @@ encoder_epoch=params["encoder_epoch"]
 class_type = (params["class_type_bins"], params["class_type_name"])
 zero_center = params["zero_center"]
 verbose=params["verbose"]
-n_bins = params["n_bins"]
+dataset = params["dataset"]
 learning_rate = params["learning_rate"]
 learning_rate_decay = params["learning_rate_decay"]
 epsilon = params["epsilon"]
@@ -113,41 +113,46 @@ Encoder+ new
 """
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=0.05, epsilon=0.1, lambda_comp=False, use_opti=use_opti, encoder_version=encoder_version):
-    which_data_to_use="xzt"
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version):
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
     #Dataset to use
-    if which_data_to_use=="xyz":
+    if dataset=="xyz":
         #Path to training and testing datafiles on HPC for xyz
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
         train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
         test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
-        zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
-    elif which_data_to_use=="xzt":
+        #zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
+        n_bins = (11,13,18,1)
+    elif dataset=="xzt":
         #for xzt
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
         train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
         test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-        zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-    elif which_data_to_use=="xzt_new":
+        #zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+        n_bins = (11,18,50,1)
+    elif dataset=="xzt_new":
         #for xzt
         data_path = home_path+"data/"
         train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
-        zero_center_data = "" # generated automatically
-    elif which_data_to_use=="debug":
-        #For debug testing on my laptop these are overwritten:
+        #zero_center_data = "" # generated automatically
+        n_bins = (11,18,50,1)
+        
+        
+    elif dataset=="debug":
+        #For debug testing on my laptop:
         home_path="../"
         train_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
         test_file="Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+        n_bins = (11,13,18,1)
         #file=h5py.File(train_file, 'r')
         #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
         
     train_file=data_path+train_data
     test_file=data_path+test_data
-    zero_center_file=data_path+zero_center_data
+    #zero_center_file=data_path+zero_center_data
     
     
     #All models are now saved in their own folder   models/"modeltag"/
@@ -315,13 +320,18 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #epoch is calculated automatically and not used from user input
     #encoder epoch as usual
     #This does not use the same call for executing the training as stage 0,1 and 2
+    
+    #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     elif autoencoder_stage==3:
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
         #if first epoch is 0, then the trained supervised network will be used
         how_many_epochs_each_to_train =[0,]+[2,]*10+[1,]*100
-        print("Parallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         #model to initialize from if first epoch is 0
+        
+        #this one is only used for vgg_3_eps modeltag
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
+        
+        print("Parallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
@@ -335,7 +345,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                     break
             print("Weights of layers changed:", changed_layers)
         
-        #Encoder epoch after which to switch the autoencoder model
+        #Encoder epochs after which to switch the autoencoder model
         switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
         #calculate the current autoencoder epoch automatically based on the encoder epoch
         for ae_epoch,switch in enumerate(switch_autoencoder_model):
@@ -383,10 +393,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         K.set_value(model.optimizer.lr, lr)
             
         #Which epochs are the ones relevant for current stage
-        if is_autoencoder==True:
-            running_epoch=epoch #Stage 0
-        else:
-            running_epoch=encoder_epoch #Stage 1 and 2
+        running_epoch=encoder_epoch
             
         model.summary()
         print("Model: ", modelname)
@@ -413,7 +420,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 switch_encoder_weights(model, load_model(autoencoder_model))
                 
         sys.exit()
-    
+        
+        
+    #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         
 
         
@@ -448,4 +457,4 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, n_bins, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version)
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version)
