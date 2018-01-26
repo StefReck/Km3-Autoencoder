@@ -35,7 +35,6 @@ def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0):
 
 
 def setup_vgg_5_picture(autoencoder_stage, modelpath_and_name=None):
-    #753,969 free params
     batchnorm_before_dense=True
     dropout_for_dense=0.2
     batchnorm_for_dense=False
@@ -43,7 +42,7 @@ def setup_vgg_5_picture(autoencoder_stage, modelpath_and_name=None):
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    filter_base=[35,35,50,50]
+    filter_base=[32,39,50,50]
     
     inputs = Input(shape=(11,18,50,1))
     x=conv_block(inputs, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #11x18x50
@@ -57,12 +56,10 @@ def setup_vgg_5_picture(autoencoder_stage, modelpath_and_name=None):
     
     x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #5x8x12
     x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
-    x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #6x8x12
     x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #4x6x10
     x = AveragePooling3D((2, 2, 2), padding='valid')(x) #2x3x5
     
     x = ZeroPadding3D(((0,0),(0,1),(0,1)))(x) #2x4x6
-    x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x4x6
     encoded = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3
@@ -71,16 +68,14 @@ def setup_vgg_5_picture(autoencoder_stage, modelpath_and_name=None):
         #2x2x3
         x = UpSampling3D((1, 2, 2))(encoded) #2x4x6
         x=convT_block(x, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x4x6
-        x=convT_block(x, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x4x6
         x = ZeroPadding3D(((1,1),(0,1),(0,1)))(x) #4x5x7 
         x=conv_block(x,  filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #2x3x5
 
         x = UpSampling3D((2, 2, 2))(x) #4x6x10
         x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #6x8x12
         x = ZeroPadding3D(((0,1),(1,1),(1,1)))(x) #7x10x14
-        x=conv_block(x,  filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x12
-        x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
-
+        x=conv_block(x,  filters=filter_base[1], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x12
+        
         x = UpSampling3D((2, 2, 2))(x) #10x16x24
         x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #12x18x26
         x = ZeroPadding3D(((0,1),(1,1),(0,1)))(x) #13,20,27
@@ -112,7 +107,6 @@ def setup_vgg_5_picture(autoencoder_stage, modelpath_and_name=None):
 
 
 def setup_vgg_5_channel(autoencoder_stage, modelpath_and_name=None):
-    #753,969 free params
     batchnorm_before_dense=True
     dropout_for_dense=0.2
     batchnorm_for_dense=False
@@ -120,7 +114,7 @@ def setup_vgg_5_channel(autoencoder_stage, modelpath_and_name=None):
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    filter_base=[65,55,35,20]
+    filter_base=[32,60,50,20]
     
     inputs = Input(shape=(11,18,50,1))
     x=conv_block(inputs, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #11x18x50
@@ -134,26 +128,22 @@ def setup_vgg_5_channel(autoencoder_stage, modelpath_and_name=None):
     
     x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #5x8x12
     x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
-    x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #6x8x12
     x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #4x6x10
     x = AveragePooling3D((2, 2, 2), padding='valid')(x) #2x3x5
     
-    x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x3x5
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x3x5
     encoded=conv_block(x,filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis) #2x3x5
  
     if autoencoder_stage == 0:  #The Decoder part:
         #2x3x5
         x=convT_block(x, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
-        x=convT_block(x, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
         x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
-
+        
         x = UpSampling3D((2, 2, 2))(x) #4x6x10
         x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #6x8x12
         x = ZeroPadding3D(((0,1),(1,1),(1,1)))(x) #7x10x14
-        x=conv_block(x,  filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x12
-        x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #5x8x12
-
+        x=conv_block(x,  filters=filter_base[1], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x12
+        
         x = UpSampling3D((2, 2, 2))(x) #10x16x24
         x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #12x18x26
         x = ZeroPadding3D(((0,1),(1,1),(0,1)))(x) #13,20,27
