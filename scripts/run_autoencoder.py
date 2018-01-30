@@ -231,8 +231,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Zero-Center with precalculated mean image
     #xs_mean = np.load(zero_center_file) if zero_center is True else None
     n_gpu=(1, 'avolkov')
-    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=n_gpu[0]) if zero_center is True else None
-    
+    if zero_center == True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=n_gpu[0])
+    else:
+        xs_mean = None
+        print("Not using zero centering. Are you sure?")
     
     
     autoencoder_model=None
@@ -241,7 +244,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     if autoencoder_stage==0:
         is_autoencoder=True
         modelname = modeltag + "_autoencoder"
-                    
+        print("Autoencoder stage 0")
         if epoch == 0:
             #Create a new autoencoder network
             print("Creating new autoencoder network:", modeltag)
@@ -271,6 +274,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Encoder supervised training:
     #Load the encoder part of an autoencoder, import weights from trained model, freeze it and add dense layers
     elif autoencoder_stage==1:
+        print("Autoencoder stage 1")
         is_autoencoder=False
         #name of the autoencoder model file that the encoder part is taken from:
         autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
@@ -296,6 +300,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Unfrozen Encoder supervised training with completely unfrozen model:
     elif autoencoder_stage==2:
+        print("Autoencoder stage 2")
         is_autoencoder=False
         #name of the supervised model:
         modelname = modeltag + "_supervised_" + class_type[1] + encoder_version
@@ -331,7 +336,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #this one is only used for vgg_3_eps modeltag
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
         
-        print("Parallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
+        print("Autoencoder stage 3:\nParallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
@@ -447,6 +452,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     for current_epoch in range(running_epoch,running_epoch+runs):
         #Does the model we are about to save exist already?
         check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
+        
+        #print all the input for train_and_test_model for debugging
+        """
+        print("model=",model, "modelname=",modelname, "train_files=",train_tuple, "test_files=",test_tuple,
+                             "batchsize=32, n_bins=",n_bins, "class_type=",class_type, "xs_mean=",xs_mean, "epoch=",current_epoch,
+                             "shuffle=False, lr=",lr, "lr_decay=",lr_decay, "tb_logger=False, swap_4d_channels=None,",
+                             "save_path=",model_folder, "is_autoencoder=",is_autoencoder, "verbose=",verbose)
+        """
         
         #Train network, write logfile, save network, evaluate network, save evaluation to file
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,

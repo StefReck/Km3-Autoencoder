@@ -27,7 +27,7 @@ losses = [[0.0753,	0.0719,	0.0704,	0.0679,	0.0489,	0.0359],	#basic eps 01
 
 accuracies=[[78.9,	81.6,	82.5,	82.1,	79.9,	78.6,],
             [82.0,80.6, 79.5],
-            [77.3, 76.9, 76.3, 76.1, 76.1,	76.4,	76.4,],]
+            [78.2, 76.9, 76.3, 76.1, 76.1,	76.4,	76.4,],]
 
 
 #PARALELL TRAINING
@@ -274,7 +274,7 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
         
     plt.show()
     
-make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
+#make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
 
 #make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
 
