@@ -26,8 +26,8 @@ Saves a single plot for multiple files to the same place where the model is loac
 def parse_input():
     parser = argparse.ArgumentParser(description='Compare original 3d image of an event with the prediciton of an autoencoder. Saves a single plot for multiple files to the same place where the model is loacated at.')
     parser.add_argument('model', type=str, help='The model that does the predictions. Saved plot will be the same except with ending _3d_output_plot.h5')
-    parser.add_argument('how_many', type=str, help='How many plots of events will be in the pdf')
-    parser.add_argument('energy_threshold', type=str, help='Minimum energy of events for them to be considered')
+    parser.add_argument('how_many', type=int, help='How many plots of events will be in the pdf')
+    parser.add_argument('energy_threshold', type=float, help='Minimum energy of events for them to be considered')
     
     parser.add_argument('only_data_savename', type=str, default="", nargs="?", help='If given, plot of only data without model comparison of xzt data will be saved to given loation.')
     
@@ -43,7 +43,7 @@ if debug==False:
     params = parse_input()
     model_file = params["model"]
     how_many = params["how_many"]
-    energy_threshold = ["energy_threshold"]
+    energy_threshold = params["energy_threshold"]
     only_data_savename = params["only_data_savename"]
     
     lambda_comp_model_tag = None #params["modeltag_lambda_comp"]
@@ -58,11 +58,11 @@ if debug==False:
     #Name of output file
     if only_data_savename is not "":
         from keras.models import load_model
-        plot_file = model_file[:-3]+"_3d_output_plot.pdf"
-        compare_histograms=True
-    else:
         plot_file = only_data_savename
         compare_histograms=False
+    else:
+        plot_file = model_file[:-3]+"_3d_output_plot.pdf"
+        compare_histograms=True
     
 else:
     model_file="../Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
@@ -225,10 +225,11 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
     if energy_threshold > 0:
         #Only take events with an energy over a certain threshold
         minimum_energy = energy_threshold #GeV
+        only_load_this_many_events=10000 #takes forever otherwise
         print("Applying threshold of", minimum_energy," GeV; only events with higher energy will be considered")
-        where=file["y"][:, 2]>minimum_energy
-        labels=file["y"][where,:][which,:]
-        hists = file["x"][where,:][which,:]
+        where=file["y"][:only_load_this_many_events][:, 2]>minimum_energy
+        labels=file["y"][:only_load_this_many_events][where,:][which,:]
+        hists = file["x"][:only_load_this_many_events][where,:][which,:]
         
     else:
         #manually select events
