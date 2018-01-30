@@ -57,10 +57,10 @@ if debug==False:
     
     #Name of output file
     if only_data_savename is not "":
-        from keras.models import load_model
         plot_file = only_data_savename
         compare_histograms=False
     else:
+        from keras.models import load_model
         plot_file = model_file[:-3]+"_3d_output_plot.pdf"
         compare_histograms=True
     

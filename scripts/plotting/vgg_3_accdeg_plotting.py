@@ -274,9 +274,9 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
         
     plt.show()
     
-#make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
+make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
 
-#make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
+make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
 
 #make_accdeg_parallel_eps(eps_parallel_logfile,eps_how_many_epochs_each_to_train, losses[2], accuracies[2],autoencoder_epochs[2], labels[2], colors[2])
 make_accdeg_parallel_eps(eps_parallel_logfile_v3,eps_how_many_epochs_each_to_train_v3, losses[2], accuracies[2], autoencoder_epochs[2], labels[2], colors[2])

@@ -16,7 +16,7 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
@@ -27,8 +27,11 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         K.set_value(model.optimizer.lr, lr)
         print ('Set LR to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
 
+    if broken_simulations_mode != 0:
+        print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", broken_simulations_mode )
+
     start_time = datetime.now()
-    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose)
+    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     end_time = datetime.now()
@@ -36,7 +39,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     #Elapsed time for one epoch HH::MM:SS
     elapsed_time=str(time_delta).split(".")[0]
     
-    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder)
+    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
@@ -49,7 +52,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     return lr
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, n_events=None, tb_logger=False):
+              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, n_events=None, tb_logger=False):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -90,7 +93,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
                 
             history = model.fit_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
@@ -98,7 +101,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
     return history
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, n_events=None,):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, broken_simulations_mode, n_events=None,):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -116,7 +119,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         if n_events is not None: f_size = n_events  # for testing
 
         evaluation = model.evaluate_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode),
             steps=int(f_size / batchsize), max_queue_size=10)
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
     print (return_message)
@@ -124,7 +127,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
 
         
 #Copied from cnn_utilities and modified:
-def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
+def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
     """
     Generator that returns batches of images ('xs') and labels ('ys') from a h5 file.
     :param string filepath: Full filepath of the input h5 file, e.g. '/path/to/file/file.h5'.
@@ -132,6 +135,10 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     :param tuple n_bins: Number of bins for each dimension (x,y,z,t) in the h5 file.
     :param (int, str) class_type: Tuple with the umber of output classes and a string identifier to specify the exact output classes.
                                   I.e. (2, 'muon-CC_to_elec-CC')
+    broken_simulations_mode: Generate Simulations that are purpusefully suboptimal
+                                0: Normal simulation (Not broken)
+                                1: The up-down info is encoded in the first bin
+                                
     :param int f_size: Specifies the filesize (#images) of the .h5 file if not the whole .h5 file
                        but a fraction of it (e.g. 10%) should be used for yielding the xs/ys arrays.
                        This is important if you run fit_generator(epochs>1) with a filesize (and hence # of steps) that is smaller than the .h5 file.
@@ -168,6 +175,19 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             # we have read one more batch from this file
             n_entries += batchsize
+            
+            if broken_simulations_mode==1:
+                #encode up-down info in the first bin
+                ys = np.zeros((batchsize, class_type[0]), dtype=np.float32)
+                # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
+                for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
+                    ys[c] = encode_targets(y_val, class_type=(1, "up_down"))
+                    #ys is same length as xs and contains 1 (for up) or 0 (for down)
+                ys=ys*2 - 1 #now ys is -1 for down and 1 for up
+                    
+                for i in range(len(xs)):
+                    xs[i].itemset(0,ys[i])
+            
             
             #Modified for autoencoder:
             if is_autoencoder == True:
