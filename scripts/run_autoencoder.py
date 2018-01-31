@@ -148,9 +148,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     elif dataset=="xzt_broken":
         #for xzt
         #generates broken simulated data, very dangerous!
-        data_path = home_path+"data/"
-        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+        train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
         n_bins = (11,18,50,1)
         
         broken_simulations_mode=1
