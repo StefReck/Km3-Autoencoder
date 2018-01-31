@@ -178,12 +178,12 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             if broken_simulations_mode==1:
                 #encode up-down info in the first bin
-                ys = np.zeros((batchsize, class_type[0]), dtype=np.float32)
+                ys = np.zeros((batchsize, 1), dtype=np.float32)
                 # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
                 for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
                     ys[c] = encode_targets(y_val, class_type=(1, "up_down"))
-                    #ys is same length as xs and contains 1 (for up) or 0 (for down)
-                ys=ys*2 - 1 #now ys is -1 for down and 1 for up
+                    #ys is same length as xs and contains 1 (for up) or 0 (for down), shape (batchsize,1)
+                ys=ys.flatten()*2 - 1 #now ys is -1 for down and 1 for up, shape (batchsize,)
                     
                 for i in range(len(xs)):
                     xs[i].itemset(0,ys[i])
