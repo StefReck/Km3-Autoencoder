@@ -35,6 +35,8 @@ plot_file_name = "vgg_3_broken_unfrozen_acc_comp.pdf" #in the results/plots fold
 #Type of plot which is generated for whole array (it should all be of the same type):
 #loss, acc, None
 plot_type = "acc"
+#y limits of plot:
+y_lims=(0.4,1.05)
 
 
 #Info about model
@@ -75,7 +77,7 @@ def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_
     #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
     hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100))
     #save to file
-    print("Saving hist_data of ", modelident)
+    print("Saving hist_data as", name_of_file)
     with open(name_of_file, "wb") as dump_file:
         pickle.dump(hist_data, dump_file)
     return hist_data
@@ -125,7 +127,7 @@ hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, mod
 #make plot of multiple data:
 if plot_type == "acc":
     y_label_of_plot="Accuracy"
-    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
+    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims) 
 elif plot_type == "loss":
     y_label_of_plot="Loss"
     make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
@@ -134,4 +136,4 @@ elif plot_type == None:
 else:
     print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
 
-
+print("Plot saved to", save_plot_as)

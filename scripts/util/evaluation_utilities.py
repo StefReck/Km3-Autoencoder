@@ -62,7 +62,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
-    total_accuracy=np.sum(correct)/len(correct)
+    total_accuracy=np.sum(arr_energy_correct[1])/len(arr_energy_correct[1])
     print("Total accuracy:", total_accuracy)
     return arr_energy_correct
 
@@ -254,7 +254,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy"):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1)):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -272,7 +272,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     plt.legend()
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
-    plt.ylim((0.5, 1))
+    plt.ylim((y_lims[0], y_lims[1]))
     plt.title(title)
     plt.grid(True)
 
