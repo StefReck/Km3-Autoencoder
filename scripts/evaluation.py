@@ -10,6 +10,9 @@ import pickle
 import os
 
 from util.evaluation_utilities import *
+from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
+from get_dataset_info import get_dataset_info
+
 
 """
 Specify trained models, either AE or supervised, and calculate their loss or acc on test data.
@@ -39,18 +42,23 @@ plot_type = "loss"
 
 
 #Info about model
-n_bins = (11,18,50,1)
 class_type = (2, 'up_down')
 
 #Test data files:
 #for xzt
-data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
-test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-
+dataset_info_dict = get_dataset_info("xzt")
+home_path=dataset_info_dict["home_path"]
+train_file=dataset_info_dict["train_file"]
+test_file=dataset_info_dict["test_file"]
+n_bins=dataset_info_dict["n_bins"]
+broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
+xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
+
 
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
@@ -60,11 +68,9 @@ modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6"
 for modelident in modelidents:
     modelnames.append(modelident.split("trained_")[1][:-3])
 
-test_file=data_path+test_data
+
 save_plot_as = plot_path + plot_file_name
 
-zero_center_file=data_path+zero_center_data
-xs_mean = np.load(zero_center_file)
 
 #Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
 #results/data folder, so that it has not to be generated again
