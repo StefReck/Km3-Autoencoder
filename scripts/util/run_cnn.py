@@ -93,7 +93,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
                 
             history = model.fit_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
@@ -119,7 +119,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         if n_events is not None: f_size = n_events  # for testing
 
         evaluation = model.evaluate_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True),
             steps=int(f_size / batchsize), max_queue_size=10)
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
     print (return_message)
@@ -127,7 +127,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
 
         
 #Copied from cnn_utilities and modified:
-def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None):
+def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False):
     """
     Generator that returns batches of images ('xs') and labels ('ys') from a h5 file.
     :param string filepath: Full filepath of the input h5 file, e.g. '/path/to/file/file.h5'.
@@ -138,7 +138,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     broken_simulations_mode: Generate Simulations that are purpusefully suboptimal
                                 0: Normal simulation (Not broken)
                                 1: The up-down info is encoded in the first bin
-                                
+                                2: Add noise to data. Seed is set manually, so that the images always have the same noise.
     :param int f_size: Specifies the filesize (#images) of the .h5 file if not the whole .h5 file
                        but a fraction of it (e.g. 10%) should be used for yielding the xs/ys arrays.
                        This is important if you run fit_generator(epochs>1) with a filesize (and hence # of steps) that is smaller than the .h5 file.
@@ -147,9 +147,19 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                                The mc-infos are used for evaluation after training and testing is finished.
     :param bool swap_col: Specifies, if the index of the columns for xs should be swapped. Necessary for 3.5D nets.
                           Currently available: 'yzt-x' -> [3,1,2,0] from [0,1,2,3]
+    :param bool is_in_test_mode: Is this used in testing a model? Only used for random seed initialization for broken data mode 2.
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
     dimensions = get_dimensions_encoding(n_bins, batchsize)
+    
+    if broken_simulations_mode == 2:
+        #make it so the noise is always the same on the same histogramm
+        #also use different noise on test and train data
+        if is_in_test_mode == False:
+            np.random.seed(100)
+        else:
+            np.random.seed(101)
+
 
     while 1:
         f = h5py.File(filepath, "r")
@@ -187,7 +197,12 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                     
                 for i in range(len(xs)):
                     xs[i].itemset(0,ys[i])
-            
+                    
+            elif broken_simulations_mode==2:
+                #randomly add -0.5 or +0.5 to every bin. This is euquivalent to adding 0 or 1
+                #to every bin before zero centering
+                xs += np.random.randint(low=0, high=2, size=xs.shape) - 0.5
+                
             
             #Modified for autoencoder:
             if is_autoencoder == True:
