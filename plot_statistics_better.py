@@ -67,10 +67,10 @@ xtest_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_d
                "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
 
 #only
-xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_accdeg2_test.txt",]
+test_files = ["vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_epoch30_supervised_up_down_test.txt",]
 
 #vgg4 autoencoders variational depth
-test_files = ["vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+xtest_files = ["vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
               "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
               "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
@@ -93,6 +93,11 @@ xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_10c_triple/trained_vgg_4_10c_triple_autoencoder_test.txt",
               "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",
               "vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
+#vgg_5 smaller bottleneck
+test_files = ["vgg_5_channel/trained_vgg_5_channel_autoencoder_test.txt",
+              "vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt",
+              "vgg_3/trained_vgg_3_autoencoder_test.txt",]
+
 
 #vgg 3 parallel training
 """

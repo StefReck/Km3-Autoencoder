@@ -23,14 +23,16 @@ This data is then binned and automatically dumped. Instead of recalculating, it 
 #Model info:
 #list of modelidents to work on (has to be an array, so add , at the end if only one file)
 modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
-               "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",)
+               "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
+               "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+
 #Which dataset each to use
-dataset_array = ("xzt_broken", "xzt") 
+dataset_array = ("xzt_broken", "xzt", "xzt") 
 
 
 #Plot properties: All in the array are plotted in one figure, with own label each
-title_of_plot='Unfrozen network performance on different datasets'
-label_array=["Manipulated simulations", "Original simulations"]
+title_of_plot='Unfrozen network performance on manipulated simulations'
+label_array=["Train and test manipulated", "Train manipulated, test original", " Train and test original"]
 plot_file_name = "vgg_3_broken_unfrozen_acc_comp.pdf" #in the results/plots folder
 #Type of plot which is generated for whole array (it should all be of the same type):
 #loss, acc, None
