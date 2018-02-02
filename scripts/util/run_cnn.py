@@ -409,7 +409,7 @@ def load_zero_center_data(train_files, batchsize, n_bins, n_gpu):
     filepath_without_index = re.sub(shuffle_index.group(1), '', filepath)
 
     if os.path.isfile(filepath_without_index + '_zero_center_mean.npy') is True:
-        print ('Loading an existing xs_mean_array in order to zero_center the data!')
+        print ('Loading existing zero center image:', filepath_without_index + '_zero_center_mean.npy')
         xs_mean = np.load(filepath_without_index + '_zero_center_mean.npy')
     else:
         print ('Calculating the xs_mean_array in order to zero_center the data!')
@@ -458,6 +458,7 @@ def get_mean_image(filepath, filepath_without_index, dimensions, n_gpu):
     xs_mean = np.reshape(xs_mean, dimensions[1:]) # give the shape the channels dimension again if not 4D
 
     np.save(filepath_without_index + '_zero_center_mean.npy', xs_mean)
+    print("New zero center image saved as", filepath_without_index + '_zero_center_mean.npy')
     return xs_mean
 
 def get_array_memsize(array):
