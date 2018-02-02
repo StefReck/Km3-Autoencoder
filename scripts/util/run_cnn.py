@@ -199,9 +199,22 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                     xs[i].itemset(0,ys[i])
                     
             elif broken_simulations_mode==2:
-                #randomly add -0.5 or +0.5 to every bin. This is euquivalent to adding 0 or 1
-                #to every bin before zero centering
-                xs += np.random.randint(low=0, high=2, size=xs.shape) - 0.5
+                #randomly add poisson distributed noise
+                #rauschen bisherige rate: 10kHz pro pmt
+                #Zusätzliches rauschen z.B. 5 kHz
+                #Zeitfenster 1100ns etwa
+                #31 pmts pro dom
+                #Erwartungswert rauschen für ganzes Zeitfenster pro DOM:
+                #5kHz * 1100ns * 31 pmts = 0.1705
+                #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
+                #Aufsummiert über y (13 bins): 0.00341*13=0.04433
+                
+                poisson_noise_expectation_value=0.04433 #5kHz
+                
+                #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
+                #chance_of_noise = 0.5
+                #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
+                xs = xs + np.random.poisson(3*poisson_noise_expectation_value, size=xs.shape)
                 
             
             #Modified for autoencoder:

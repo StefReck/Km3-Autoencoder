@@ -38,7 +38,7 @@ def parse_input():
     return params
 
 
-debug=False
+debug=True
 if debug==False:
     params = parse_input()
     model_file = params["model"]
@@ -71,8 +71,8 @@ else:
     plot_file = "test.pdf"
     lambda_comp_model_tag = None
     #Minimum energy for events to be considered
-    energy_threshold=50
-    which=[0,1,]
+    energy_threshold=0
+    how_many=5
     from keras.models import load_model
     compare_histograms=1
 
@@ -218,6 +218,7 @@ def make_3d_single_plot(hist_org, n_bins, title, figsize):
 
 def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file, min_counts, n_bins, compare_histograms, energy_threshold):
     #Only bins with abs. more then min_counts are plotted
+    plot_manipulated_sim = True
     #Open files
     
     zero_center_image = np.load(zero_center_file)
@@ -242,15 +243,32 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
     hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
     #0 center them
     centered_hists = np.subtract(hists, zero_center_image)
-    
+        
     if compare_histograms==True:
-        #Predict on 0 centered data
-        hists_pred_centered=autoencoder.predict_on_batch(centered_hists).reshape(centered_hists.shape)
-        losses=[]
-        for i in range(len(centered_hists)):
-            losses.append(autoencoder.evaluate(x=centered_hists[i:i+1], y=centered_hists[i:i+1]))
-        #Remove centering again, so that empty bins (always 0) dont clutter the view
-        hists_pred = np.add(hists_pred_centered, zero_center_image)
+        if plot_manipulated_sim == True:
+            #rauschen bisherige rate: 10kHz pro pmt
+            #Zusätzliches rauschen z.B. 5 kHz
+            #Zeitfenster 1100ns etwa
+            #31 pmts pro dom
+            #Erwartungswert rauschen für ganzes Zeitfenster pro DOM:
+            #5kHz * 1100ns * 31 pmts = 0.1705
+            #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
+            #Aufsummiert über y (13 bins): 0.00341*13=0.04433
+            
+            #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
+            #chance_of_noise = 0.5
+            #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
+            hists_pred = hists + np.random.poisson(0.04433*3, size=hists.shape)
+            losses=[0,]*len(hists)
+        else:
+            #Predict on 0 centered data
+            hists_pred_centered=autoencoder.predict_on_batch(centered_hists).reshape(centered_hists.shape)
+            losses=[]
+            for i in range(len(centered_hists)):
+                losses.append(autoencoder.evaluate(x=centered_hists[i:i+1], y=centered_hists[i:i+1]))
+            #Remove centering again, so that empty bins (always 0) dont clutter the view
+            hists_pred = np.add(hists_pred_centered, zero_center_image)
+        
     
     #Some infos for the title
     ids = labels[:,0].astype(int)
@@ -294,6 +312,7 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
     #center_file is the zero center image
     with PdfPages(plot_file) as pp:
         #pp.attach_note(test_file)
+        print("Saving plot as", plot_file)
         for i,hist in enumerate(hists):
             if compare_histograms == True:
                 suptitle = pid_array[i]+"\t\t"+up_or_down_array[i]+"\t\t"+"Energy: " + str(energies[i]) + " GeV\t\tLoss: " + str(np.round(losses[i],5))
@@ -301,9 +320,9 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
             else:
                 suptitle = pid_array[i]+"\t\t"+up_or_down_array[i]+"\t\t"+"Energy: " + str(energies[i]) + " GeV"
                 fig = make_3d_single_plot(reshape_3d_to_3d(hist, min_counts), n_bins, suptitle, figsizes[1])
-            print("Saving plot as", plot_file)
             pp.savefig(fig)
             plt.close(fig)
+    print("Done.")
     
 
 

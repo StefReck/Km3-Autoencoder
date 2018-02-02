@@ -58,6 +58,18 @@ def get_dataset_info(dataset_tag):
         broken_simulations_mode=1
         print("Warning: GENERATING BROKEN SIMULATED DATA")
         
+    elif dataset_tag=="xzt_broken2":
+        #for xzt
+        #generates broken simulated data, very dangerous!
+        #data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+        data_path = home_path+"data/xzt/"
+        train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+        n_bins = (11,18,50,1)
+        
+        broken_simulations_mode=2
+        print("Warning: GENERATING BROKEN SIMULATED DATA")
+        
     elif dataset_tag=="debug":
         #For debug testing on my laptop:
         home_path="../"
