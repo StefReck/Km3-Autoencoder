@@ -214,7 +214,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
                 #chance_of_noise = 0.5
                 #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
-                xs = xs + np.random.poisson(3*poisson_noise_expectation_value, size=xs.shape)
+                xs = xs + np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape)
                 
             
             #Modified for autoencoder:
