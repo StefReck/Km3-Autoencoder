@@ -38,6 +38,14 @@ def get_dataset_info(dataset_tag):
         #zero_center_data = "" # generated automatically
         n_bins = (11,18,50,1)
         
+    elif dataset_tag=="xzt_new_spatial_only":
+        #for xzt with new spatial and time binning
+        data_path = home_path+"data/xzt_new_binning_spatial/"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_600_shuffled_0.h5"
+        #zero_center_data = "" # generated automatically
+        n_bins = (11,18,50,1)
+        
     elif dataset_tag=="xzt_broken":
         #for xzt
         #generates broken simulated data, very dangerous!
