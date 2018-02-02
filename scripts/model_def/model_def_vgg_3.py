@@ -28,10 +28,16 @@ from keras import regularizers
 from util.custom_layers import MaxUnpooling3D
 
 #Standard Conv Blocks
-def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, ac_reg_penalty=0):
+def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, ac_reg_penalty=0, BNunlock=False):
+    #unfreeze the BN layers
+    if BNunlock == True:
+        BNtrainable = True
+    else:
+        BNtrainable = trainable
+    
     regular = regularizers.l2(ac_reg_penalty) if ac_reg_penalty is not 0 else None
     x = Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable, activity_regularizer=regular)(inp)
-    x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
+    x = BatchNormalization(axis=channel_axis, trainable=BNtrainable)(x)
     x = Activation('relu', trainable=trainable)(x)
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
@@ -60,32 +66,34 @@ def zero_center(x):
     x-=K.mean(x, axis=1, keepdims=True)
     return x
 
-def setup_vgg_3(autoencoder_stage, modelpath_and_name=None):
+def setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name=None):
     #832k params
+    batchnorm_before_dense = options_dict["batchnorm_before_dense"]
+    dropout_for_dense      = options_dict["dropout_for_dense"]
+    unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
+    batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    
     zero_center_before_dense=False #should not be used together with normalize
     normalize_before_dense=False
-    batchnorm_before_dense=True
-    dropout_for_dense=0.2
-    batchnorm_for_dense=False
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
     inputs = Input(shape=(11,18,50,1))
-    x=conv_block(inputs, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
-    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x50
+    x=conv_block(inputs, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x25
     
-    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #11x18x25
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x25
     x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x) #12,18,26
-    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #10x16x24
+    x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #10x16x24
     x = AveragePooling3D((2, 2, 2), padding='valid')(x) #5x8x12
     
-    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
-    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis) #5x8x12
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x12
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x12
     x = ZeroPadding3D(((0,1),(0,0),(0,0)))(x) #6x8x12
-    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis) #4x6x10
+    x=conv_block(x, filters=64, kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
     encoded = AveragePooling3D((2, 2, 2), padding='valid')(x) #2x3x5
     
     if autoencoder_stage == 0:  #The Decoder part:

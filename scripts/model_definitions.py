@@ -9,13 +9,38 @@ from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg
 from model_def.model_def_vgg_4 import *
 from model_def.model_def_vgg_5 import *
 
-def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
+
+def make_options_dict(additional_options):
+    #Additional options can alter things like dropout rate or BN unlock etc.
+    options_dict={}
+    options_dict["dropout_for_dense"] = 0.2
+    options_dict["batchnorm_before_dense"]=True
+    options_dict["unlock_BN_in_encoder"]=False
+    options_dict["batchnorm_for_dense"]=False
+        
+    if additional_options == "unlock_BN":
+        #Always unlock the BN layers in the encoder part.
+        options_dict["unlock_BN_in_encoder"]=True
+        print("Batchnorms will be unlocked")
+        
+    if "dropout=" in additional_options:
+        #Change dropout of dense layers
+        dropout_rate = float(additional_options.split("=")[1])
+        options_dict["dropout_for_dense"]=dropout_rate
+        print("Dropout rate for dense layers will be", dropout_rate)
+    
+    return options_dict
+
+
+def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options=""):
     #model tags can have version numbers, e.g. vgg_1-different_lr
     #for this, load model without the version number
     splitted_tag = model_tag.split("-")
     model_tag = splitted_tag[0]
     if len(splitted_tag)==2:
         print("Creating model "+model_tag+" in version "+splitted_tag[1])
+    
+    options_dict = make_options_dict(additional_options)
     
     if model_tag == "vgg_1":
         model = setup_vgg_1(autoencoder_stage, modelpath_and_name)
@@ -36,7 +61,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_2_stride(autoencoder_stage, modelpath_and_name)
     
     elif model_tag == "vgg_3" or model_tag=="vgg_3_eps":
-        model = setup_vgg_3(autoencoder_stage, modelpath_and_name)
+        model = setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_3_small":
         model = setup_vgg_3_small(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_3_verysmall":
@@ -78,15 +103,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None):
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
     elif model_tag == "vgg_5_picture":
-        model = setup_vgg_5_picture(autoencoder_stage, modelpath_and_name)
+        model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_channel":
-        model = setup_vgg_5_channel(autoencoder_stage, modelpath_and_name)
+        model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
         
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_5_channel",0)
+#model=setup_model("vgg_5_channel", 0, additional_options="unlock_BN")
 #model.summary()
 
 """

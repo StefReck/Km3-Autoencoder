@@ -38,6 +38,7 @@ def parse_input():
     parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
     parser.add_argument("lambda_comp", type=int)
     parser.add_argument("optimizer", type=str)
+    parser.add_argument("options", type=str)
     parser.add_argument("encoder_version", default="", nargs="?", type=str, help="e.g. -LeLu; Str added to the supervised file names to allow multiple runs on the same model.")
     
     args = parser.parse_args()
@@ -60,6 +61,7 @@ learning_rate_decay = params["learning_rate_decay"]
 epsilon = params["epsilon"]
 lambda_comp = params["lambda_comp"]
 use_opti = params["optimizer"]
+options = params["options"]
 encoder_version=params["encoder_version"]
 print(params)
 
@@ -114,7 +116,7 @@ Encoder+ new
 """
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
     home_path=dataset_info_dict["home_path"]
@@ -217,7 +219,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if epoch == 0:
             #Create a new autoencoder network
             print("Creating new autoencoder network:", modeltag)
-            model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
             model.compile(optimizer=adam, loss='mse')
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -233,7 +235,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             elif lambda_comp==True:
                 #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
                 print("Lambda mode enabled")
-                model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None)
+                model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
                 model.load_weights(autoencoder_model_to_load, by_name=True)
                 model.compile(optimizer=adam, loss='mse')
                 
@@ -253,7 +255,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if encoder_epoch == 0:
             #Create a new encoder network:
             print("Creating new encoder network", modeltag, "from autoencoder", autoencoder_model)
-            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -277,7 +279,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if encoder_epoch == 0:
             #Create a new encoder network:
             print("Creating new unfrozen encoder network:", modelname)
-            model = setup_model(model_tag=modeltag, autoencoder_stage=2)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=2, additional_options=options)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -335,7 +337,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
-            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model )
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options )
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             
             #Custom model is loaded as initialization
@@ -439,4 +441,4 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     
 
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version)
+execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version, options=options)
