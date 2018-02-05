@@ -7,8 +7,11 @@ from datetime import datetime
 import re
 import os
 from functools import reduce
+import sys
 
 from util.Loggers import *
+sys.path.append('../')
+from get_dataset_info import get_dataset_info
 
 """
 train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
@@ -16,7 +19,7 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
@@ -31,7 +34,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", broken_simulations_mode )
 
     start_time = datetime.now()
-    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode)
+    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset=dataset)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     end_time = datetime.now()
@@ -39,7 +42,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     #Elapsed time for one epoch HH::MM:SS
     elapsed_time=str(time_delta).split(".")[0]
     
-    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode)
+    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset=dataset)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if is_autoencoder==False:
@@ -52,7 +55,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     return lr
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, n_events=None, tb_logger=False):
+              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset, n_events=None, tb_logger=False,):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -93,7 +96,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
                 
             history = model.fit_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset=dataset),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
                 validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
             model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
@@ -101,7 +104,7 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
     return history
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, broken_simulations_mode, n_events=None,):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, broken_simulations_mode, dataset, n_events=None,):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -119,15 +122,57 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         if n_events is not None: f_size = n_events  # for testing
 
         evaluation = model.evaluate_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True, dataset=dataset),
             steps=int(f_size / batchsize), max_queue_size=10)
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
     print (return_message)
     return evaluation
 
+
+def modify_batches(xs, y_values, batchsize, dataset_info_dict):
+    #Makes changes to the data as read from h5 file, e.g. adding noise, ...
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
+    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
+    
+    if flatten_to_filter == True:
+        #made for xyz-channel data
+        #flattens the data to be dimension (batchsize*11*13*18, 31)
+        xs = xs.reshape(-1, xs.shape[-1])
+    
+    if broken_simulations_mode==1:
+        #encode up-down info in the first bin
+        ys = np.zeros((batchsize, 1), dtype=np.float32)
+        # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
+        for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
+            ys[c] = encode_targets(y_val, class_type=(1, "up_down"))
+            #ys is same length as xs and contains 1 (for up) or 0 (for down), shape (batchsize,1)
+        ys=ys.flatten()*2 - 1 #now ys is -1 for down and 1 for up, shape (batchsize,)
+            
+        for i in range(len(xs)):
+            xs[i].itemset(0,ys[i])
+            
+    elif broken_simulations_mode==2:
+        #randomly add poisson distributed noise
+        #rauschen bisherige rate: 10kHz pro pmt
+        #Zusätzliches rauschen z.B. 5 kHz
+        #Zeitfenster 1100ns etwa
+        #31 pmts pro dom
+        #Erwartungswert rauschen für ganzes Zeitfenster pro DOM:
+        #5kHz * 1100ns * 31 pmts = 0.1705
+        #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
+        #Aufsummiert über y (13 bins): 0.00341*13=0.04433
         
+        poisson_noise_expectation_value=0.04433 #5kHz
+        
+        #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
+        #chance_of_noise = 0.5
+        #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
+        xs = xs + np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape)
+    return xs, ys
+
+
 #Copied from cnn_utilities and modified:
-def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False):
+def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, dataset, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False):
     """
     Generator that returns batches of images ('xs') and labels ('ys') from a h5 file.
     :param string filepath: Full filepath of the input h5 file, e.g. '/path/to/file/file.h5'.
@@ -150,6 +195,9 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     :param bool is_in_test_mode: Is this used in testing a model? Only used for random seed initialization for broken data mode 2.
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
+    dataset_info_dict = get_dataset_info(dataset)
+    filesize_factor=dataset_info_dict["filesize_factor"]
+    
     dimensions = get_dimensions_encoding(n_bins, batchsize)
     
     if broken_simulations_mode == 2:
@@ -164,14 +212,14 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     while 1:
         f = h5py.File(filepath, "r")
         if f_size is None:
-            f_size = len(f['y'])
+            f_size = int(len(f['y'])*filesize_factor)
             warnings.warn('f_size=None could produce unexpected results if the f_size used in fit_generator(steps=int(f_size / batchsize)) with epochs > 1 '
                           'is not equal to the f_size of the true .h5 file. Should be ok if you use the tb_callback.')
 
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
-            xs = f['x'][n_entries : n_entries + batchsize]
+            xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
             xs = np.reshape(xs, dimensions).astype(np.float32)
 
             if swap_col is not None:
@@ -186,36 +234,8 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             # we have read one more batch from this file
             n_entries += batchsize
             
-            if broken_simulations_mode==1:
-                #encode up-down info in the first bin
-                ys = np.zeros((batchsize, 1), dtype=np.float32)
-                # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
-                for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
-                    ys[c] = encode_targets(y_val, class_type=(1, "up_down"))
-                    #ys is same length as xs and contains 1 (for up) or 0 (for down), shape (batchsize,1)
-                ys=ys.flatten()*2 - 1 #now ys is -1 for down and 1 for up, shape (batchsize,)
-                    
-                for i in range(len(xs)):
-                    xs[i].itemset(0,ys[i])
-                    
-            elif broken_simulations_mode==2:
-                #randomly add poisson distributed noise
-                #rauschen bisherige rate: 10kHz pro pmt
-                #Zusätzliches rauschen z.B. 5 kHz
-                #Zeitfenster 1100ns etwa
-                #31 pmts pro dom
-                #Erwartungswert rauschen für ganzes Zeitfenster pro DOM:
-                #5kHz * 1100ns * 31 pmts = 0.1705
-                #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
-                #Aufsummiert über y (13 bins): 0.00341*13=0.04433
-                
-                poisson_noise_expectation_value=0.04433 #5kHz
-                
-                #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
-                #chance_of_noise = 0.5
-                #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
-                xs = xs + np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape)
-                
+            #Make changes, e.g. add noise,...
+            xs, ys = modify_batches(xs, y_values, batchsize, dataset_info_dict)
             
             #Modified for autoencoder:
             if is_autoencoder == True:

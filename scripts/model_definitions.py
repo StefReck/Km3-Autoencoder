@@ -8,7 +8,7 @@ from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup
 from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall, setup_vgg_3_reg
 from model_def.model_def_vgg_4 import *
 from model_def.model_def_vgg_5 import *
-
+from model_def.model_def_channel_1 import *
 
 def make_options_dict(additional_options):
     #Additional options can alter things like dropout rate or BN unlock etc.
@@ -107,12 +107,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     elif model_tag == "vgg_5_channel":
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
         
+    elif model_tag == "channel_vgg":
+        model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
+        
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("vgg_5_channel", 0, additional_options="unlock_BN")
-#model.summary()
+model=setup_model("channel_vgg", 0)
+model.summary()
 
 """
 import numpy as np

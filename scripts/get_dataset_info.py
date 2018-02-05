@@ -13,6 +13,10 @@ def get_dataset_info(dataset_tag):
     broken_simulations_mode=0
     #1: encode up-down info into first bin
     
+    #e.g. (batchsize, 11, 13, 18) --> (batchsize*11*13, 18)
+    flatten_to_filter = False
+    #How much of the file will be used for training/testing
+    filesize_factor=1.0
     #Dataset to use
     if dataset_tag=="xyz":
         #Path to training and testing datafiles on HPC for xyz
@@ -69,6 +73,24 @@ def get_dataset_info(dataset_tag):
         
         broken_simulations_mode=2
         print("Warning: GENERATING BROKEN SIMULATED DATA")
+    
+    elif dataset_tag=="xyzc":
+        #xyz-channel id as filter
+        #11x13x18x31
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
+        train_data = "elec-CC_and_muon-CC_xyzt_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+        flatten_to_filter = False
+        filesize_factor=0.5
+    elif dataset_tag=="xyzc_flat":
+        #original data: xyz-channel id as filter
+        #11x13x18x31
+        #This dataset flattens it to dimension 31 (batchsize, 31)
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
+        train_data = "elec-CC_and_muon-CC_xyzt_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+        flatten_to_filter = True
+        filesize_factor=0.5
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:
@@ -94,6 +116,8 @@ def get_dataset_info(dataset_tag):
     return_dict["test_file"]=test_file
     return_dict["n_bins"]=n_bins
     return_dict["broken_simulations_mode"]=broken_simulations_mode
+    return_dict["flatten_to_filter"]=flatten_to_filter
+    return_dict["filesize_factor"]=filesize_factor
     
     return return_dict
     
