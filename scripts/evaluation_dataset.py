@@ -20,26 +20,37 @@ Specify trained models and calculate their loss or acc on test data.
 This data is then binned and automatically dumped. Instead of recalculating, it is loaded automatically.
 """
 
+
+
 #Model info:
 #list of modelidents to work on (has to be an array, so add , at the end if only one file)
+"""
 modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
                "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
                "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+"""
+
+modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch1.h5",
+               "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch2.h5",
+               "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch3.h5",
+               "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5")
 
 #Which dataset each to use
-dataset_array = ("xzt_broken", "xzt", "xzt") 
+dataset_array = ("xzt", "xzt", "xzt")
 
 
 #Plot properties: All in the array are plotted in one figure, with own label each
-title_of_plot='Unfrozen network performance on manipulated simulations'
-label_array=["Train and test manipulated", "Train manipulated, test original", " Train and test original"]
-plot_file_name = "vgg_3_broken_unfrozen_acc_comp.pdf" #in the results/plots folder
+title_of_plot='Autoencoder-encoder network performance with unlocked batch norm'
+label_array=["Epoch 1", "Epoch 2", "Epoch 3", "Frozen BN"]
+#Overwrite default color palette. Leave empty for auto
+color_array=["blue", "orange", "green", "grey"]
+
+plot_file_name = "vgg_3_broken_encoder_acc_BN_unlocked.pdf" #in the results/plots folder
 #Type of plot which is generated for whole array (it should all be of the same type):
 #loss, acc, None
 plot_type = "acc"
 #y limits of plot:
-y_lims=(0.4,1.05)
-
+y_lims=(0.4,1.0)
 
 #Info about model
 class_type = (2, 'up_down')
@@ -129,10 +140,10 @@ hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, mod
 #make plot of multiple data:
 if plot_type == "acc":
     y_label_of_plot="Accuracy"
-    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims) 
+    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
 elif plot_type == "loss":
     y_label_of_plot="Loss"
-    make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot) 
+    make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
 elif plot_type == None:
     print("plot_type==None: Not generating plots")
 else:

@@ -254,7 +254,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1)):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[]):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -263,8 +263,12 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
     """
     for i, hist in enumerate(hist_data_array):
-        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
-    
+        #Use user defined colors, if given in proper length; else default palette
+        if len(color_array) == len(hist_data_array):
+            plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i], color=color_array[i])
+        else:
+            plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
+            
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
     plt.minorticks_on()
