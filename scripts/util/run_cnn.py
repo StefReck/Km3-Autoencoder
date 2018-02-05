@@ -168,7 +168,7 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict):
         #chance_of_noise = 0.5
         #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
         xs = xs + np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape)
-    return xs, ys
+    return xs
 
 
 #Copied from cnn_utilities and modified:
@@ -235,7 +235,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             n_entries += batchsize
             
             #Make changes, e.g. add noise,...
-            xs, ys = modify_batches(xs, y_values, batchsize, dataset_info_dict)
+            xs = modify_batches(xs, y_values, batchsize, dataset_info_dict)
             
             #Modified for autoencoder:
             if is_autoencoder == True:
