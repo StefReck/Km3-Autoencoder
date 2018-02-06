@@ -109,13 +109,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         
     elif model_tag == "channel_vgg":
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
-        
+    elif model_tag == "channel":
+        model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)    
+    
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-model=setup_model("channel_vgg", 0)
-model.summary()
+#model=setup_model("channel", 2)
+#model.summary()
 
 """
 import numpy as np

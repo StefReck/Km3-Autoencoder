@@ -4,7 +4,7 @@ Models for testing the channel if stuff.
 """
 
 from keras.models import Model, load_model
-from keras.layers import Activation, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Activation, Reshape, TimeDistributed, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras import backend as K
 
 
@@ -29,11 +29,11 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
-def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0):
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, activation="relu"):
     if dropout > 0.0: x = Dropout(dropout)(x)
     x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None)(x)
     if batchnorm==True: x = BatchNormalization(axis=channel_axis)(x)
-    x = Activation('relu')(x)
+    x = Activation(activation)(x)
     return x
 
 
@@ -69,3 +69,68 @@ def setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name=None):
     
     model = Model(inputs=inputs, outputs=outputs)
     return model
+
+def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
+    dropout_for_dense      = 0 #options_dict["dropout_for_dense"]
+    n_bins=(11,13,18,31)
+    # for time distributed wrappers: (batchsize, timesteps, n_bins)
+    #inputs = Input(shape=(31,11,13,18))
+    #x = TimeDistributed( Dense(8), input_shape=(10, 16) )(inputs)
+    
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    
+    units_array_enc = [256,128,128,64,64,32,32,16,8,1]
+    units_array_dec = [8,16,32,32,64,64,128,128,256,31]
+    
+    if autoencoder_stage==0:
+        units_array=units_array_enc+units_array_dec
+        
+        inputs = Input(shape=(n_bins[-1],))
+        x = dense_block(inputs, units_array[0], channel_axis, batchnorm=True, dropout=dropout_for_dense)
+        for units in units_array[1:-1]:
+            x = dense_block(x, units, channel_axis, batchnorm=True, dropout=dropout_for_dense)
+        outputs = dense_block(x, units_array[-1], channel_axis, batchnorm=False, dropout=dropout_for_dense, activation="linear")
+        
+        model = Model(inputs=inputs, outputs=outputs)
+    
+    else:
+        inputs = Input(shape=n_bins)
+        x = dense_block(inputs, units_array_enc[0], channel_axis, batchnorm=True, dropout=dropout_for_dense)
+        for units in units_array_enc[1:-1]:
+            x = dense_block(x, units, channel_axis, batchnorm=True, dropout=dropout_for_dense)
+        encoded = dense_block(x, units_array_enc[-1], channel_axis, batchnorm=True, dropout=dropout_for_dense)
+        
+        
+        if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
+            encoder = Model(inputs=inputs, outputs=encoded)
+            autoencoder = load_model(modelpath_and_name)
+            for i,layer in enumerate(encoder.layers):
+                layer.set_weights(autoencoder.layers[i].get_weights())
+        
+        filter_base=[32,32,64]
+        train=True
+        unlock_BN_in_encoder=False
+    
+        x=conv_block(encoded, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+        x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #11x18x25
+        
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x25
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #10x16x24
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #5x8x12
+        
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x12
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #2x3x5
+    
+        x = Flatten()(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=True, dropout=0.2)
+        x = dense_block(x, units=16,  channel_axis=channel_axis, batchnorm=True, dropout=0.2)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+    
+        
+    return model
+

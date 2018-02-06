@@ -139,7 +139,7 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict):
         #made for xyz-channel data
         #flattens the data to be dimension (batchsize*11*13*18, 31)
         xs = xs.reshape(-1, xs.shape[-1])
-    
+        
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
         ys = np.zeros((batchsize, 1), dtype=np.float32)
@@ -197,6 +197,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
     filesize_factor=dataset_info_dict["filesize_factor"]
+    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
     
     dimensions = get_dimensions_encoding(n_bins, batchsize)
     
@@ -240,7 +241,6 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             #Modified for autoencoder:
             if is_autoencoder == True:
                 output = (xs, xs) if yield_mc_info is False else (xs, xs) + (y_values,)
-                yield output
                 
             else:
                 ys = np.zeros((batchsize, class_type[0]), dtype=np.float32)
@@ -248,6 +248,14 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
                     ys[c] = encode_targets(y_val, class_type)
                 output = (xs, ys) if yield_mc_info is False else (xs, ys) + (y_values,)
+            
+            if flatten_to_filter==True:
+                #has dimension (batchsize*11*13*18, 31)
+                #but yield 32 batches each
+                for i in range(len(int(xs.shape[0]/batchsize))):
+                    part_output = ( output[0][i*32:(i+1)*32], output[1][i*32:(i+1)*32] )
+                    yield part_output
+            else:
                 yield output
             
         f.close() # this line of code is actually not reached if steps=f_size/batchsize
