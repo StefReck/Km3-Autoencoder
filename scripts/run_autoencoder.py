@@ -66,53 +66,62 @@ encoder_version=params["encoder_version"]
 print(params)
 
 """
-#Tag for the model used; Identifies both autoencoder and encoder
-modeltag="vgg_1_xzt"
-
+# Tag for the model used; Identifies both autoencoder and encoder
+# This also defines the name of the folder where everything is saved
+modeltag="vgg_3"
 #How many additinal epochs the network will be trained for by executing this script:
-runs=1
-
+runs=10
 #Type of training/network
 # 0: autoencoder
 # 1: encoder+ from autoencoder w/ frozen layers
 # 2: encoder+ from scratch, completely unfrozen
-autoencoder_stage=2
-
-#Define starting epoch of autoencoder model
-autoencoder_epoch=0
-
+# 3: Parallel supervised training (load in new frozen encoder epoch according to schedule)
+autoencoder_stage=1
+#Define starting epoch of autoencoder model (stage 1: which frozen encoder epoch to use)
+# not used for stage 2 and 3
+autoencoder_epoch=50
 #If in encoder stage (1 or 2), encoder_epoch is used to identify a possibly
-#existing supervised-trained encoder network
-encoder_epoch=0
+#existing supervised-trained encoder network; not used for stage 0
+encoder_epoch=-1
 #Define what the supervised encoder network is trained for, and how many neurons are in the output
 #This also defines the name of the saved model
-class_type = (2, 'up_down')
-
-#Wheter to use a precalculated zero-center image or not
-zero_center = True
-
+# class type names are currently "up_down", "muon-CC_to_elec-CC"
+class_type_bins=2
+class_type_name="up_down"
+#Wheter to use a precalculated zero-center image or not (1,0)
+#should typically be 1
+zero_center=1
 #Verbose bar during training?
 #0: silent, 1:verbose, 2: one log line per epoch
-verbose=0
+verbose=2
+# which dataset to use; see get_dataset_info.py
+# x  y  z  t  c
+# 11 13 18 50 31
+#additional options can be appended via -XXX-YYY, e.g. "xzt-filesize=0.3"
+dataset="xzt"
+#Initial Learning rate, usually 0.001
+# negative lr= take the absolute as the lr at epoch 1, and apply the decay epoch-times
+learning_rate=-0.001
+learning_rate_decay=0.05
 
-# x  y  z  t
-# 11 13 18 50
-n_bins = (11,18,50,1)
+# exponent of epsilon for the adam optimizer (actualy epsilon is 10^this)
+epsilon=-8
+# lambda compatibility mode (0,1): Load the model manually from model definition,
+# and insert the weigths; can be used to overwrite parameters of the optimizer
+lambda_comp=0
+#optimizer to use, either "adam" or "sgd"
+optimizer="adam"
+# allows to create multiple supervised trainings from the same AE model
+# the version is added to the filename
+encoder_version=""
+# Additional options for the model, see model_definitions.py
+# e.g. "dropout=0.3" or "unlock_BN"
+options="None"
 
-#Learning rate, usually 0.001
-learning_rate = 0.001
-"""
+cd $WOODYHOME/Km3-Autoencoder
+. ./../env_cnn.sh
 
-#Naming scheme for models
-"""
-Autoencoder
-"trained_" + modeltag + "_supervised_" + class_type[1] + "_epoch" + encoder_epoch + ".h5" 
-
-Encoder+
-"trained_" + modeltag + "_autoencoder_" + class_type[1] + "_epoch" + encoder_epoch + ".h5"
-
-Encoder+ new
-"trained_" + modeltag + "_autoencoder_" + autoencoder_epoch + "_supervised_" + class_type[1] + "_epoch" + encoder_epoch + ".h5" 
+python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
 """
 
 
