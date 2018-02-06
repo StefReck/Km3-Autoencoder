@@ -138,7 +138,7 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict):
     if flatten_to_filter == True:
         #made for xyz-channel data
         #flattens the data to be dimension (batchsize*11*13*18, 31)
-        xs = xs.reshape(-1, xs.shape[-1])
+        xs = np.random.shuffle(xs.reshape(-1, xs.shape[-1]))
         
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
@@ -252,7 +252,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             if flatten_to_filter==True:
                 #has dimension (batchsize*11*13*18, 31)
                 #but yield 32 batches each
-                for i in range(len(int(xs.shape[0]/batchsize))):
+                for i in range(int(xs.shape[0]/batchsize)):
                     part_output = ( output[0][i*32:(i+1)*32], output[1][i*32:(i+1)*32] )
                     yield part_output
             else:
