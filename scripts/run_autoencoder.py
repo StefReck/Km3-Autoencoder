@@ -124,7 +124,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
-    
+    filesize_factor=dataset_info_dict["filesize_factor"]
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
@@ -309,7 +309,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         print("Autoencoder stage 3:\nParallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         
-        
+        #lr is scheduled, no automatic decay
+        lr_decay=0
         def lr_schedule(completed_epochs):
             #return the desired lr of an epoch according to a lr schedule
             #lr rate should be set to this before starting the next epoch
@@ -386,21 +387,23 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         model.summary()
         print("Model: ", modelname)
         print("Current State of optimizer: \n", model.optimizer.get_config())
-        print("Train files:", train_tuple)
-        print("Test files:", test_tuple)
+        filesize_hint="Filesize factor="+str(filesize_factor) if filesize_factor!=1 else ""
+        print("Train files:", train_tuple, filesize_hint)
+        print("Test files:", test_tuple, filesize_hint)
         print("Using autoencoder model:", autoencoder_model)
         
         #Execute Training:
         for current_epoch in range(running_epoch,running_epoch+runs):
             #Does the model we are about to save exist already?
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
-            #custom lr schedule
-            K.set_value(model.optimizer.lr, lr_schedule(current_epoch))
+            #custom lr schedule; lr_decay was set to 0 already
+            lr = lr_schedule(current_epoch)
+            K.set_value(model.optimizer.lr, lr)
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                                  batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                                 save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset=dataset)  
+                                 save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)  
             
             if current_epoch+1 in switch_autoencoder_model:
                 autoencoder_epoch+=1
@@ -428,8 +431,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     model.summary()
     print("Model: ", modelname)
     print("Current State of optimizer: \n", model.optimizer.get_config())
-    print("Train files:", train_tuple)
-    print("Test files:", test_tuple)
+    filesize_hint="Filesize factor="+str(filesize_factor) if filesize_factor!=1 else ""
+    print("Train files:", train_tuple, filesize_hint)
+    print("Test files:", test_tuple, filesize_hint)
     if autoencoder_model is not None: print("Using autoencoder model:", autoencoder_model)
     
     #Execute Training:
@@ -449,7 +453,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                              batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                              shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                             save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset=dataset)    
+                             save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)    
     
     
     

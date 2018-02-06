@@ -8,15 +8,23 @@ def get_dataset_info(dataset_tag):
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
+    #Basic default options
     #Can generate purposefully broken simulations
     #0: Normal mode
     broken_simulations_mode=0
     #1: encode up-down info into first bin
-    
     #e.g. (batchsize, 11, 13, 18) --> (batchsize*11*13, 18)
     flatten_to_filter = False
     #How much of the file will be used for training/testing
     filesize_factor=1.0
+    
+    
+    #Additional options are appended to the dataset tag via -XXX-YYY...
+    #see list at the end of file
+    splitted_dataset_tag = dataset_tag.split("-")
+    dataset_tag = splitted_dataset_tag[0]
+    options = splitted_dataset_tag[1:]
+    
     #Dataset to use
     if dataset_tag=="xyz":
         #Path to training and testing datafiles on HPC for xyz
@@ -111,6 +119,18 @@ def get_dataset_info(dataset_tag):
     train_file=data_path+train_data
     test_file=data_path+test_data
     #zero_center_file=data_path+zero_center_data
+    
+    
+    #Custom options
+    for option in options:
+    #-filesize=0.3
+        if "filesize=" in option:
+            filesize_factor=option.split("=")[1]
+            print("Filesize set to", filesize_factor)
+
+        else:
+            print("Ignoring unrecognized dataset_tag option", option)
+    
     
     return_dict={}
     return_dict["home_path"]=home_path
