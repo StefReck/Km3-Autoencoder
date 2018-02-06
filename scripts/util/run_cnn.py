@@ -215,7 +215,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             f_size = len(f['y'])
             warnings.warn('f_size=None could produce unexpected results if the f_size used in fit_generator(steps=int(f_size / batchsize)) with epochs > 1 '
                           'is not equal to the f_size of the true .h5 file. Should be ok if you use the tb_callback.')
-        f_size = int(f_size * filesize_factor)
+        f_size = int(f_size * float(filesize_factor))
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
