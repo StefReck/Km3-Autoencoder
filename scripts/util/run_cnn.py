@@ -253,8 +253,8 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 #has dimension (batchsize*11*13*18, 31)
                 #but yield 32 batches each
                 for i in range(int(xs.shape[0]/batchsize)):
-                    #part_output = ( output[0][i*32:(i+1)*32], output[1][i*32:(i+1)*32] )
-                    part_output = output[:][i*32:(i+1)*32]
+                    part_output = ( output[0][i*batchsize:(i+1)*batchsize], output[1][i*batchsize:(i+1)*batchsize] )
+                    #part_output = output[:][i*32:(i+1)*32]
                     yield part_output
             else:
                 yield output
