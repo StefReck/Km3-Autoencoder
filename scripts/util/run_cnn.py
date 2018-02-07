@@ -138,7 +138,8 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image
     if flatten_to_filter == True:
         #made for xyz-channel data
         #flattens the data to be dimension (batchsize*11*13*18, 31)
-        xs = np.random.shuffle(xs.reshape(-1, xs.shape[-1]))
+        xs = xs.reshape(-1, xs.shape[-1])
+        np.random.shuffle(xs)
         
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
