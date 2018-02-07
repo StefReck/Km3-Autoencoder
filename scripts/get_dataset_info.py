@@ -128,7 +128,7 @@ def get_dataset_info(dataset_tag):
     for option in options:
     #-filesize=0.3
         if "filesize=" in option:
-            filesize_factor=option.split("=")[1]
+            filesize_factor=float(option.split("=")[1])
             print("Filesize set to", filesize_factor)
 
         else:
