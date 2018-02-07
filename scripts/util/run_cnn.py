@@ -130,7 +130,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     return evaluation
 
 
-def modify_batches(xs, y_values, batchsize, dataset_info_dict):
+def modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image):
     #Makes changes to the data as read from h5 file, e.g. adding noise, ...
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
     flatten_to_filter=dataset_info_dict["flatten_to_filter"]
@@ -164,11 +164,12 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict):
         #Aufsummiert über y (13 bins): 0.00341*13=0.04433
         
         poisson_noise_expectation_value=0.04433 #5kHz
-        
-        #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
-        #chance_of_noise = 0.5
-        #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
-        xs = xs + np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape)
+        #zero centered noise:
+        noise = np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape) - 2*poisson_noise_expectation_value
+        #only add noise to the bins that are not always empty. 
+        #xs = xs + np.multiply(noise[np.tile(zero_center_image!=0, (batchsize,1,1))], noise)
+        #For xzt though, this is unecessary since there are no empty bins
+        xs = xs + noise
     return xs
 
 
@@ -236,7 +237,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             n_entries += batchsize
             
             #Make changes, e.g. add noise,...
-            xs = modify_batches(xs, y_values, batchsize, dataset_info_dict)
+            xs = modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image)
             
             #Modified for autoencoder:
             if is_autoencoder == True:

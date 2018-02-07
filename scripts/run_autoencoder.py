@@ -34,7 +34,7 @@ def parse_input():
     parser.add_argument("verbose", type=int)    
     parser.add_argument("dataset", type=str, help="Name of test/training dataset to be used, eg xzt. n_bins is automatically selected")
     parser.add_argument("learning_rate", type=float)
-    parser.add_argument("learning_rate_decay", default=0.05, type=float)
+    parser.add_argument("learning_rate_decay")
     parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
     parser.add_argument("lambda_comp", type=int)
     parser.add_argument("optimizer", type=str)
@@ -102,6 +102,8 @@ dataset="xzt"
 #Initial Learning rate, usually 0.001
 # negative lr= take the absolute as the lr at epoch 1, and apply the decay epoch-times
 learning_rate=-0.001
+#lr_decay can either be a float, e.g. 0.05 for 5% decay of lr per epoch,
+#or it can be a string like s1 for lr schedule 1. In this case, lr is ignored
 learning_rate_decay=0.05
 
 # exponent of epsilon for the adam optimizer (actualy epsilon is 10^this)
@@ -142,7 +144,17 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Optimizer used in all the networks:
     lr = learning_rate # 0.01 default for SGD, 0.001 for Adam
-    lr_decay = learning_rate_decay # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
+    #lr_decay can either be a float, e.g. 0.05 for 5% decay of lr per epoch,
+    #or it can be a string like s1 for lr schedule 1. In this case, lr is ignored
+    try:
+        lr_decay=float(learning_rate_decay) # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
+        lr_schedule_number=0 # no schedule
+    except ValueError:
+        #then it is a schedule like s1
+        lr_schedule_number=int(learning_rate_decay.split("s")[-1])
+        lr_decay=0
+        lr=0.001
+        print("Using learning rate schedule", lr_schedule_number)
     
     
     #automatically look for latest epoch if -1 was given:
@@ -324,7 +336,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #return the desired lr of an epoch according to a lr schedule
             #lr rate should be set to this before starting the next epoch
             #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
-            if completed_epochs<13:
+            if completed_epochs<=13:
                 lr=0.001 * 0.95**completed_epochs
             else:
                 lr=0.0005
@@ -425,17 +437,31 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         
-
-        
-    #Set LR of loaded model to new lr
-    K.set_value(model.optimizer.lr, lr)
-    
+    def lr_schedule(before_epoch, lr_schedule_number):
+            #return the desired lr of an epoch according to a lr schedule
+            #in the test_log_file, the epoch before_epoch will have this lr
+            #lr rate should be set to this before starting the next epoch
+            if lr_schedule_number==1:
+                #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
+                if before_epoch<=14:
+                    lr=0.001 * 0.95**(before_epoch-1)
+                else:
+                    lr=0.0005
+                print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+                
+            return lr
         
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
         running_epoch=epoch #Stage 0
     else:
         running_epoch=encoder_epoch #Stage 1 and 2
+        
+    #Set LR of loaded model to new lr
+    if lr_schedule_number != 0:
+            lr=lr_schedule(running_epoch+1, lr_schedule_number )
+    K.set_value(model.optimizer.lr, lr)
+    
         
     model.summary()
     print("Model: ", modelname)
@@ -447,9 +473,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Execute Training:
     for current_epoch in range(running_epoch,running_epoch+runs):
+        #This is before epoch current_epoch+1
         #Does the model we are about to save exist already?
         check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
         
+        if lr_schedule_number != 0:
+            lr=lr_schedule(current_epoch+1, lr_schedule_number )
+            K.set_value(model.optimizer.lr, lr)
+            
         #print all the input for train_and_test_model for debugging
         """
         print("model=",model, "modelname=",modelname, "train_files=",train_tuple, "test_files=",test_tuple,

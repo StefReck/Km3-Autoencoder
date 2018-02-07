@@ -16,7 +16,7 @@ def parse_input():
     return params
 
 params = parse_input()
-test_files = params["model"]
+test_files = params["models"]
 
 xlabel="Epoch"
 title="Loss of autoencoders with a varying number of convolutional layers"

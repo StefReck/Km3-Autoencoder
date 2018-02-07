@@ -72,7 +72,7 @@ else:
     lambda_comp_model_tag = None
     #Minimum energy for events to be considered
     energy_threshold=0
-    how_many=5
+    how_many=2
     from keras.models import load_model
     compare_histograms=1
 
@@ -258,7 +258,12 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
             #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
             #chance_of_noise = 0.5
             #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
-            hists_pred = hists + np.random.poisson(0.04433*3, size=hists.shape)
+            poisson_noise_expectation_value=0.4433 #5kHz
+            #zero centered noise:
+            noise = np.random.poisson(2*poisson_noise_expectation_value, size=hists.shape)# - poisson_noise_expectation_value
+            #only add noise to the bins that are not always empty. For xzt though, this is unecessary since there are no empty bins
+            #hists_pred = hists + np.multiply(np.tile(zero_center_image!=0, (how_many,1,1,1,1)), noise)
+            hists_pred = hists + noise
             losses=[0,]*len(hists)
         else:
             #Predict on 0 centered data
