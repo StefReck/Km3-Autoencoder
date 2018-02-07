@@ -87,8 +87,8 @@ def get_dataset_info(dataset_tag):
         #xyz-channel id as filter
         #11x13x18x31
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
-        train_data = "elec-CC_and_muon-CC_xyzt_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+        train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
         flatten_to_filter = False
         filesize_factor=0.5
@@ -98,8 +98,8 @@ def get_dataset_info(dataset_tag):
         #11x13x18x31
         #This dataset flattens it to dimension 31 (batchsize, 31)
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
-        train_data = "elec-CC_and_muon-CC_xyzt_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+        train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
         flatten_to_filter = True
         filesize_factor=0.5
