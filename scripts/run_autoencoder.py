@@ -136,6 +136,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     n_bins=dataset_info_dict["n_bins"]
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
     filesize_factor=dataset_info_dict["filesize_factor"]
+    filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
@@ -211,8 +212,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         raise NameError(use_opti)
     
     #fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
-    train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
-    test_tuple=[[test_file, h5_get_number_of_rows(test_file)]]
+    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
+    test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
     
     
     #Check wheter a file with this name exists or not
@@ -409,8 +410,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         print("Model: ", modelname)
         print("Current State of optimizer: \n", model.optimizer.get_config())
         filesize_hint="Filesize factor="+str(filesize_factor) if filesize_factor!=1 else ""
+        filesize_hint_test="Filesize factor test="+str(filesize_factor_test) if filesize_factor_test!=1 else ""
         print("Train files:", train_tuple, filesize_hint)
-        print("Test files:", test_tuple, filesize_hint)
+        print("Test files:", test_tuple, filesize_hint_test)
         print("Using autoencoder model:", autoencoder_model)
         
         #Execute Training:
@@ -467,8 +469,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     print("Model: ", modelname)
     print("Current State of optimizer: \n", model.optimizer.get_config())
     filesize_hint="Filesize factor="+str(filesize_factor) if filesize_factor!=1 else ""
+    filesize_hint_test="Filesize factor test="+str(filesize_factor_test) if filesize_factor_test!=1 else ""
     print("Train files:", train_tuple, filesize_hint)
-    print("Test files:", test_tuple, filesize_hint)
+    print("Test files:", test_tuple, filesize_hint_test)
     if autoencoder_model is not None: print("Using autoencoder model:", autoencoder_model)
     
     #Execute Training:

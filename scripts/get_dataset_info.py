@@ -17,6 +17,7 @@ def get_dataset_info(dataset_tag):
     flatten_to_filter = False
     #How much of the file will be used for training/testing
     filesize_factor=1.0
+    filesize_factor_test=1.0
     
     
     #Additional options are appended to the dataset tag via -XXX-YYY...
@@ -91,6 +92,7 @@ def get_dataset_info(dataset_tag):
         n_bins = (11,13,18,31)
         flatten_to_filter = False
         filesize_factor=0.5
+        filesize_factor_test=0.5
     elif dataset_tag=="xyzc_flat":
         #original data: xyz-channel id as filter
         #11x13x18x31
@@ -101,6 +103,7 @@ def get_dataset_info(dataset_tag):
         n_bins = (11,13,18,31)
         flatten_to_filter = True
         filesize_factor=0.5
+        filesize_factor_test=0.5
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:
@@ -140,6 +143,7 @@ def get_dataset_info(dataset_tag):
     return_dict["broken_simulations_mode"]=broken_simulations_mode
     return_dict["flatten_to_filter"]=flatten_to_filter
     return_dict["filesize_factor"]=filesize_factor
+    return_dict["filesize_factor_test"]=filesize_factor_test
     
     return return_dict
     

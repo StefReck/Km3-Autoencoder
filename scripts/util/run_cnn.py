@@ -197,7 +197,6 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     :param bool is_in_test_mode: Is this used in testing a model? Only used for random seed initialization for broken data mode 2.
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
-    filesize_factor=dataset_info_dict["filesize_factor"]
     flatten_to_filter=dataset_info_dict["flatten_to_filter"]
     
     dimensions = get_dimensions_encoding(n_bins, batchsize)
@@ -217,7 +216,6 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             f_size = len(f['y'])
             warnings.warn('f_size=None could produce unexpected results if the f_size used in fit_generator(steps=int(f_size / batchsize)) with epochs > 1 '
                           'is not equal to the f_size of the true .h5 file. Should be ok if you use the tb_callback.')
-        f_size = int(f_size * float(filesize_factor))
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
