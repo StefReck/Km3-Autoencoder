@@ -450,6 +450,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 else:
                     lr=0.0005
                 print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+            
+            if lr_schedule_number==2:
+                if before_epoch<=20:
+                    lr=0.001
+                else:
+                    lr=0.01
+                print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
                 
             return lr
         
