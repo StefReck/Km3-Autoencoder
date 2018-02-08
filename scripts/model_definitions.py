@@ -106,6 +106,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_channel":
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "vgg_5_morefilter":
+        model = setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name)
         
     elif model_tag == "channel_vgg":
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
@@ -116,7 +118,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#model=setup_model("channel", 2)
+setup_model("vgg_5_morefilter", 0).summary()
 #model.summary()
 
 """
