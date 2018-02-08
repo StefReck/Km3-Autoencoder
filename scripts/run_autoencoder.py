@@ -126,6 +126,25 @@ cd $WOODYHOME/Km3-Autoencoder
 python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
 """
 
+def lr_schedule(before_epoch, lr_schedule_number):
+    #return the desired lr of an epoch according to a lr schedule.
+    #In the test_log file, the epoch "before_epoch" will have this lr.
+    #lr rate should be set to this before starting the next epoch.
+    if lr_schedule_number==1:
+        #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
+        if before_epoch<=14:
+            lr=0.001 * 0.95**(before_epoch-1)
+        else:
+            lr=0.0005
+        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+    
+    if lr_schedule_number==2:
+        if before_epoch<=20:
+            lr=0.001
+        else:
+            lr=0.01
+        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+    return lr
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
     #Get info like path of trainfile etc.
@@ -134,9 +153,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
-    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
     filesize_factor=dataset_info_dict["filesize_factor"]
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
+    batchsize=dataset_info_dict["batchsize"] #def 32
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
@@ -225,7 +245,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #xs_mean = np.load(zero_center_file) if zero_center is True else None
     n_gpu=(1, 'avolkov')
     if zero_center == True:
-        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=n_gpu[0])
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=n_gpu[0])
     else:
         xs_mean = None
         print("Not using zero centering. Are you sure?")
@@ -331,19 +351,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         print("Autoencoder stage 3:\nParallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         
-        #lr is scheduled, no automatic decay
-        lr_decay=0
-        def lr_schedule(completed_epochs):
-            #return the desired lr of an epoch according to a lr schedule
-            #lr rate should be set to this before starting the next epoch
-            #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
-            if completed_epochs<=13:
-                lr=0.001 * 0.95**completed_epochs
-            else:
-                lr=0.0005
-            print("LR is at", lr, "before epoch", completed_epochs+1)
-            return lr
-        
         def switch_encoder_weights(encoder_model, autoencoder_model):
             #Change the weights of the frozen layers (up to the flatten layer) 
             #of the frozen encoder to that of another autoencoder model
@@ -420,11 +427,11 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Does the model we are about to save exist already?
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
-            lr = lr_schedule(current_epoch)
+            lr = lr_schedule(current_epoch+1)
             K.set_value(model.optimizer.lr, lr)
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                                 batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                                 batchsize=batchsize, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                                  save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)  
             
@@ -438,27 +445,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        
-    def lr_schedule(before_epoch, lr_schedule_number):
-            #return the desired lr of an epoch according to a lr schedule
-            #in the test_log_file, the epoch before_epoch will have this lr
-            #lr rate should be set to this before starting the next epoch
-            if lr_schedule_number==1:
-                #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
-                if before_epoch<=14:
-                    lr=0.001 * 0.95**(before_epoch-1)
-                else:
-                    lr=0.0005
-                print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
-            
-            if lr_schedule_number==2:
-                if before_epoch<=20:
-                    lr=0.001
-                else:
-                    lr=0.01
-                print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
-                
-            return lr
         
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
@@ -494,14 +480,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #print all the input for train_and_test_model for debugging
         """
         print("model=",model, "modelname=",modelname, "train_files=",train_tuple, "test_files=",test_tuple,
-                             "batchsize=32, n_bins=",n_bins, "class_type=",class_type, "xs_mean=",xs_mean, "epoch=",current_epoch,
+                             "batchsize=batchsize, n_bins=",n_bins, "class_type=",class_type, "xs_mean=",xs_mean, "epoch=",current_epoch,
                              "shuffle=False, lr=",lr, "lr_decay=",lr_decay, "tb_logger=False, swap_4d_channels=None,",
                              "save_path=",model_folder, "is_autoencoder=",is_autoencoder, "verbose=",verbose)
         """
         
         #Train network, write logfile, save network, evaluate network, save evaluation to file
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
-                             batchsize=32, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
+                             batchsize=batchsize, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                              shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                              save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)    
     

@@ -19,6 +19,8 @@ def get_dataset_info(dataset_tag):
     filesize_factor=1.0
     filesize_factor_test=1.0
     
+    batchsize=32
+    
     
     #Additional options are appended to the dataset tag via -XXX-YYY...
     #see list at the end of file
@@ -96,14 +98,16 @@ def get_dataset_info(dataset_tag):
     elif dataset_tag=="xyzc_flat":
         #original data: xyz-channel id as filter
         #11x13x18x31
-        #This dataset flattens it to dimension 31 (batchsize, 31)
+        #This dataset flattens it to dimension 31 (batchsize*11*13*18, 31)
+        #This means that the file actually contains 11*13*18 times more batches
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
         train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
         flatten_to_filter = True
-        filesize_factor=0.5
-        filesize_factor_test=0.5
+        #reduce to 12 times the length of the normal file
+        filesize_factor=11*13*18*0.005
+        filesize_factor_test=11*13*18*0.005
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:
@@ -126,7 +130,7 @@ def get_dataset_info(dataset_tag):
     
     #Custom options
     for option in options:
-    #-filesize=0.3
+    #e.g. -filesize=0.3
         if "filesize=" in option:
             filesize_factor=float(option.split("=")[1])
             print("Filesize set to", filesize_factor)
@@ -144,6 +148,7 @@ def get_dataset_info(dataset_tag):
     return_dict["flatten_to_filter"]=flatten_to_filter
     return_dict["filesize_factor"]=filesize_factor
     return_dict["filesize_factor_test"]=filesize_factor_test
+    return_dict["batchsize"]=batchsize
     
     return return_dict
     
