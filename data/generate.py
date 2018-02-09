@@ -1,22 +1,30 @@
 import h5py
 import numpy as np
 
-original_train_file="../xyzt_new_binning_spatial_tight_time/elec-CC_and_muon-CC_xyzt_train_1_to_480_shuffled_0.h5"
-original_test_file="../xyzt_new_binning_spatial_tight_time/elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
 
-outfile_train="elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
-outfile_test="elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
+outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
+outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
    
+# x, y, z, t, c
+#11,13,18,50,31
+
+#11,13,18,31
+
 #percentage of events to keep
 fraction=0.5
-#which axis to sum over
-sum_over_axis=2
+#which axis including filesize to sum over, None if no sum
+#e.g. X,11,13,18,50 --> X,11,18,50 axis=2
+sum_over_axis=None
+#
+reshape_to_channel=True
 
-def generate_file(file, save_to, fraction, sum_over_axis):     
+def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel):     
     print("Generating file", save_to)
     f=h5py.File(file, "r")
-    shape=f["x"].shape #(X,11,13,18,50)
-    print("Shape of hists:", shape)
+    shape=f["x"].shape #e.g. (X,11,13,18,50)
+    print("Original shape of hists:", shape)
     up_to_which=int(shape[0]*fraction)
     print("Events left after cut:", up_to_which)
 
@@ -25,7 +33,12 @@ def generate_file(file, save_to, fraction, sum_over_axis):
     else:
         hists=f["x"][:up_to_which]
         
-    mc_infos=f["y"][:up_to_which]
+    if reshape_to_channel == True:
+        hists.reshape(-1, hists.shape[-1])
+        mc_infos=np.repeat(f["y"][:up_to_which], np.prod(shape[1:-1]), axis=0)
+    else:
+        mc_infos=f["y"][:up_to_which]
+    print("New shape:", hists.shape, mc_infos.shape)
     
     store_histograms_as_hdf5(hists, mc_infos, save_to, compression=("gzip", 1))
 
@@ -53,6 +66,6 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
     h5f.close()
 
 
-generate_file(original_train_file, outfile_train, fraction, sum_over_axis)
-generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis)
+generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel)
+generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel)
 print("Done.")
