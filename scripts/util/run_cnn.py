@@ -235,7 +235,8 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 #will not result in less diverse batches
                 original_batchsize=batchsize
                 batchsize=5
-                take_these_events=np.random.choice(f_size, batchsize, replace=False)
+                take_these_events=np.random.choice(f_size, batchsize, replace=False).tolist()
+                take_these_events.sort()
                 xs=f["x"][take_these_events]
                 xs = np.reshape(xs, get_dimensions_encoding(n_bins, batchsize)).astype(np.float32)
                 # and mc info (labels)
