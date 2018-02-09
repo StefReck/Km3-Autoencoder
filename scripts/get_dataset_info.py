@@ -107,9 +107,9 @@ def get_dataset_info(dataset_tag):
         flatten_to_filter = True
         #batches will be drawn from the file at random, not from start to finish
         #one batch consists of the 11*13*18 channel-id arrays from 5 events, shuffled and
-        #yielded in batches of :batchsize, so filesize can be much smaller
-        filesize_factor=1/(11*13*18)
-        filesize_factor_test=1/(11*13*18)
+        #yielded in batches of :batchsize
+        filesize_factor=0.5
+        filesize_factor_test=0.5
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:

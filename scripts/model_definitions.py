@@ -118,7 +118,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-setup_model("vgg_5_morefilter", 0).summary()
+#setup_model("vgg_5_morefilter", 0).summary()
 #model.summary()
 
 """
