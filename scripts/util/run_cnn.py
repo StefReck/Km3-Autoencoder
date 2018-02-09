@@ -173,7 +173,6 @@ def modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image
         xs = xs + noise
     return xs
 
-
 #Copied from cnn_utilities and modified:
 def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, dataset_info_dict, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False):
     """
@@ -278,6 +277,23 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 yield output
             
         f.close() # this line of code is actually not reached if steps=f_size/batchsize
+       
+#For testing:
+"""
+f="../Daten/JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+batchsize=32
+n_bins=(11,13,18,1)
+class_type=(2,"up_down")
+is_autoencoder=True
+f_size=None
+xs_mean=None
+broken_simulations_mode=0
+dataset_info_dict={}
+dataset_info_dict["flatten_to_filter"]=True
+dataset_info_dict["broken_simulations_mode"]=broken_simulations_mode
+g=generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset_info_dict=dataset_info_dict)
+"""
+        
         
 #Copied, removed print
 def get_dimensions_encoding(n_bins, batchsize):
