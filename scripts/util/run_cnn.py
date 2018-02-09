@@ -133,14 +133,16 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
 def modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image):
     #Makes changes to the data as read from h5 file, e.g. adding noise, ...
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
-    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
     
+    """
+    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
     if flatten_to_filter == True:
         #made for xyz-channel data
         #flattens the data to be dimension (batchsize*11*13*18, 31)
         xs = xs.reshape(-1, xs.shape[-1])
         np.random.shuffle(xs)
-        
+    """
+    
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
         ys = np.zeros((batchsize, 1), dtype=np.float32)
@@ -197,7 +199,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     :param bool is_in_test_mode: Is this used in testing a model? Only used for random seed initialization for broken data mode 2.
     :return: tuple output: Yields a tuple which contains a full batch of images and labels (+ mc_info if yield_mc_info=True).
     """
-    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
+    #flatten_to_filter=dataset_info_dict["flatten_to_filter"]
     
     dimensions = get_dimensions_encoding(n_bins, batchsize)
     
@@ -219,13 +221,15 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
-            if flatten_to_filter == False:
-                xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
-                xs = np.reshape(xs, dimensions).astype(np.float32)
-                # and mc info (labels)
-                y_values = f['y'][n_entries:n_entries+batchsize]
-                y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
             
+            #if flatten_to_filter == False:
+            xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
+            xs = np.reshape(xs, dimensions).astype(np.float32)
+            # and mc info (labels)
+            y_values = f['y'][n_entries:n_entries+batchsize]
+            y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
+        
+            """
             elif flatten_to_filter == True:
                 #instead of going through the file,
                 #Take 5 events at random, each of them giving 11*13*18 samples.
@@ -241,7 +245,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 # and mc info (labels)
                 y_values = f['y'][take_these_events]
                 y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
-            
+            """
 
             if swap_col is not None:
                 swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
@@ -266,6 +270,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                     ys[c] = encode_targets(y_val, class_type)
                 output = (xs, ys) if yield_mc_info is False else (xs, ys) + (y_values,)
             
+            """
             if flatten_to_filter==True:
                 #has dimension (batchsize*11*13*18, 31)
                 #but yield 32 batches each (or whatever the original_batchsize was)
@@ -274,7 +279,8 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                     #part_output = output[:][i*32:(i+1)*32]
                     yield part_output
             else:
-                yield output
+            """
+            yield output
             
         f.close() # this line of code is actually not reached if steps=f_size/batchsize
        

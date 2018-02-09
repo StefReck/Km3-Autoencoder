@@ -12,9 +12,6 @@ def get_dataset_info(dataset_tag):
     #Can generate purposefully broken simulations
     #0: Normal mode
     broken_simulations_mode=0
-    #1: encode up-down info into first bin
-    #e.g. (batchsize, 11, 13, 18) --> (batchsize*11*13, 18)
-    flatten_to_filter = False
     #How much of the file will be used for training/testing
     filesize_factor=1.0
     filesize_factor_test=1.0
@@ -101,7 +98,6 @@ def get_dataset_info(dataset_tag):
         train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
-        flatten_to_filter = False
         filesize_factor=0.5
         filesize_factor_test=0.5
     elif dataset_tag=="xyzc_flat":
@@ -113,7 +109,6 @@ def get_dataset_info(dataset_tag):
         train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
-        flatten_to_filter = True
         #batches will be drawn from the file at random, not from start to finish
         #one batch consists of the 11*13*18 channel-id arrays from 5 events, shuffled and
         #yielded in batches of :batchsize
@@ -156,7 +151,6 @@ def get_dataset_info(dataset_tag):
     return_dict["test_file"]=test_file
     return_dict["n_bins"]=n_bins
     return_dict["broken_simulations_mode"]=broken_simulations_mode
-    return_dict["flatten_to_filter"]=flatten_to_filter
     return_dict["filesize_factor"]=filesize_factor
     return_dict["filesize_factor_test"]=filesize_factor_test
     return_dict["batchsize"]=batchsize

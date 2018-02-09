@@ -18,9 +18,9 @@ fraction=0.5
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
 sum_over_axis=None
 #
-reshape_to_channel=True
+reshape_to_channel_and_shuffle=True
 
-def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel):     
+def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle):     
     print("Generating file", save_to)
     f=h5py.File(file, "r")
     shape=f["x"].shape #e.g. (X,11,13,18,50)
@@ -33,12 +33,13 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel):
     else:
         hists=f["x"][:up_to_which]
         
-    if reshape_to_channel == True:
-        hists.reshape(-1, hists.shape[-1])
-        mc_infos=np.repeat(f["y"][:up_to_which], np.prod(shape[1:-1]), axis=0)
+    if reshape_to_channel_and_shuffle == True:
+        hists = hists.reshape(-1, hists.shape[-1])
+        np.random.shuffle(hists)
+        mc_infos=np.zeros(1)
     else:
         mc_infos=f["y"][:up_to_which]
-    print("New shape:", hists.shape, mc_infos.shape)
+    print("New shape (hists):", hists.shape, ", mc infos:", mc_infos.shape)
     
     store_histograms_as_hdf5(hists, mc_infos, save_to, compression=("gzip", 1))
 
@@ -66,6 +67,6 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
     h5f.close()
 
 
-generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel)
-generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel)
+generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle)
+generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle)
 print("Done.")
