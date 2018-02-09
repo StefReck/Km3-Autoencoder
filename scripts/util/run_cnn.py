@@ -220,17 +220,34 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
-            xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
-            xs = np.reshape(xs, dimensions).astype(np.float32)
+            if flatten_to_filter == False:
+                xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
+                xs = np.reshape(xs, dimensions).astype(np.float32)
+                # and mc info (labels)
+                y_values = f['y'][n_entries:n_entries+batchsize]
+                y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
+            
+            elif flatten_to_filter == True:
+                #instead of going through the file,
+                #Take 5 events at random, each of them giving 11*13*18 samples.
+                #So this will be 12870 events for a total of 402 batches of 32.
+                #The filesizefactor only determines when the epoch ends, low factor
+                #will not result in less diverse batches
+                original_batchsize=batchsize
+                batchsize=5
+                take_these_events=np.random.choice(f_size, batchsize, replace=False)
+                xs=f["x"][take_these_events]
+                xs = np.reshape(xs, get_dimensions_encoding(n_bins, batchsize)).astype(np.float32)
+                # and mc info (labels)
+                y_values = f['y'][take_these_events]
+                y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
+            
 
             if swap_col is not None:
                 swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
                 xs[:, swap_4d_channels_dict[swap_col]] = xs[:, [0,1,2,3]]
 
             if zero_center_image is not None: xs = np.subtract(xs, zero_center_image) # if swap_col is not None, zero_center_image is already swapped
-            # and mc info (labels)
-            y_values = f['y'][n_entries:n_entries+batchsize]
-            y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
             
             # we have read one more batch from this file
             n_entries += batchsize
@@ -251,9 +268,9 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             if flatten_to_filter==True:
                 #has dimension (batchsize*11*13*18, 31)
-                #but yield 32 batches each
-                for i in range(int(xs.shape[0]/batchsize)):
-                    part_output = ( output[0][i*batchsize:(i+1)*batchsize], output[1][i*batchsize:(i+1)*batchsize] )
+                #but yield 32 batches each (or whatever the original_batchsize was)
+                for i in range(int(xs.shape[0]/original_batchsize)):
+                    part_output = ( output[0][i*original_batchsize:(i+1)*original_batchsize], output[1][i*original_batchsize:(i+1)*original_batchsize] )
                     #part_output = output[:][i*32:(i+1)*32]
                     yield part_output
             else:

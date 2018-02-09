@@ -105,9 +105,11 @@ def get_dataset_info(dataset_tag):
         test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
         n_bins = (11,13,18,31)
         flatten_to_filter = True
-        #reduce to 12 times the length of the normal file
-        filesize_factor=11*13*18*0.005
-        filesize_factor_test=11*13*18*0.005
+        #batches will be drawn from the file at random, not from start to finish
+        #one batch consists of the 11*13*18 channel-id arrays from 5 events, shuffled and
+        #yielded in batches of :batchsize, so filesize can be much smaller
+        filesize_factor=1/(11*13*18)
+        filesize_factor_test=1/(11*13*18)
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:
