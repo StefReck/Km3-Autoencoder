@@ -30,8 +30,7 @@ modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5
                "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
 """
 
-modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch1.h5",
-               "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch2.h5",
+modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch2.h5",
                "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_BN_unlocked_epoch3.h5",
                "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5")
 
@@ -41,16 +40,16 @@ dataset_array = ("xzt", "xzt", "xzt")
 
 #Plot properties: All in the array are plotted in one figure, with own label each
 title_of_plot='Autoencoder-encoder network performance with unlocked batch norm'
-label_array=["Epoch 1", "Epoch 2", "Epoch 3", "Frozen BN"]
+label_array=["Epoch 2", "Epoch 3", "Frozen BN"]
 #Overwrite default color palette. Leave empty for auto
-color_array=["blue", "orange", "green", "grey"]
+color_array=["blue", "orange", "grey"]
 
 plot_file_name = "vgg_3_broken_encoder_acc_BN_unlocked.pdf" #in the results/plots folder
 #Type of plot which is generated for whole array (it should all be of the same type):
 #loss, acc, None
 plot_type = "acc"
 #y limits of plot:
-y_lims=(0.4,1.0)
+y_lims=(0.4,0.95)
 
 #Info about model
 class_type = (2, 'up_down')

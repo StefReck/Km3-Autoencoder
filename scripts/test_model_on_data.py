@@ -18,8 +18,8 @@ def parse_input():
 
 params = parse_input()
 models_to_load = params["models"]
-dataset="xzt"
-
+dataset="xzt_broken2"
+is_autoencoder=False
 
 dataset_info_dict = get_dataset_info(dataset)
 home_path=dataset_info_dict["home_path"]
@@ -44,7 +44,7 @@ for model_to_load in models_to_load:
     print("Testing on model", model_to_load)
     for i, (f, f_size) in enumerate(test_tuple):
         evaluation = model.evaluate_generator(
-                generate_batches_from_hdf5_file(f, batchsize=batchsize, n_bins=n_bins, class_type=(2, 'up_down'), is_autoencoder=False, swap_col=None, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode),
+                generate_batches_from_hdf5_file(f, batchsize=batchsize, n_bins=n_bins, class_type=(2, 'up_down'), is_autoencoder=is_autoencoder, swap_col=None, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode),
                 steps=int(f_size / batchsize), max_queue_size=10)
 
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
