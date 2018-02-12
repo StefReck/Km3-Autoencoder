@@ -278,7 +278,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
                 print("Lambda mode enabled")
                 model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
-                model.load_weights(autoencoder_model_to_load, by_name=True)
+                model.load_weights(autoencoder_model_to_load)
                 model.compile(optimizer=adam, loss='mse')
                 
                 opti_weights=load_model(autoencoder_model_to_load).optimizer.get_weights()
