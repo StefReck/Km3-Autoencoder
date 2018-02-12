@@ -30,6 +30,7 @@ modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5
                "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
 """
 
+#vgg_3_broken2_unf
 modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                "vgg_3-noise10/trained_vgg_3-noise10_supervised_up_down_epoch6.h5",
                "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
@@ -37,22 +38,44 @@ modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
 #Which dataset each to use
 dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
 
-
 #Plot properties: All in the array are plotted in one figure, with own label each
 title_of_plot='Unfrozen network performance on noisy data'
 label_array=["Sim trained-Sim data", "Noisy trained-Noisy data", "Sim trained-Noisy data"]
 #Overwrite default color palette. Leave empty for auto
 color_array=["blue", "green", "orange"]
-
-plot_file_name = "vgg_3_broken2_unf.pdf" #in the results/plots folder
-
+#in the results/plots folder:
+plot_file_name = "vgg_3_broken2_unf.pdf" 
 #loss, acc, None
 plot_type = "acc"
 #y limits of plot:
 y_lims=(0.4,0.95)
-
 #Info about model
 class_type = (2, 'up_down')
+
+
+#vgg_3_broken2_enc
+"""
+modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5",
+               "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
+               "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
+
+#Which dataset each to use
+dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
+
+#Plot properties: All in the array are plotted in one figure, with own label each
+title_of_plot='Autoencoder-encoder network performance on noisy data'
+label_array=["Sim trained-Sim data", "Noisy trained-Noisy data", "Sim trained-Noisy data"]
+#Overwrite default color palette. Leave empty for auto
+color_array=["blue", "green", "orange"]
+#in the results/plots folder:
+plot_file_name = "vgg_3_broken2_enc.pdf" 
+#loss, acc, None
+plot_type = "acc"
+#y limits of plot:
+y_lims=(0.4,0.95)
+#Info about model
+class_type = (2, 'up_down')
+"""
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
