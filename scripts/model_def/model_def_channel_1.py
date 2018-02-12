@@ -73,13 +73,14 @@ def setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name=None):
 def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     #dropout_for_dense      = 0 #options_dict["dropout_for_dense"]
     n_bins=(11,13,18,31)
+    neurons_in_bottleneck = options_dict["neurons_in_bottleneck"]
     # for time distributed wrappers: (batchsize, timesteps, n_bins)
     #inputs = Input(shape=(31,11,13,18))
     #x = TimeDistributed( Dense(8), input_shape=(10, 16) )(inputs)
     
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    units_array_enc = [256,128,128,64 ,64 ,32,32,16,8 ,1]
+    units_array_enc = [256,128,128,64 ,64 ,32,32,16,8 ,neurons_in_bottleneck]
     dropout_enc =     [0  ,0.2,0.1,0.1,0.1, 0, 0, 0, 0,0]
     units_array_dec = [8,16,32,32,64,64 ,128,128,256,31]
     dropout_dec =     [0,0 , 0, 0, 0,0.1,0.1,0.1,0.2, 0]

@@ -111,15 +111,19 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         
     elif model_tag == "channel_vgg":
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
-    elif model_tag == "channel":
+    elif model_tag == "channel_1n":
+        options_dict["neurons_in_bottleneck"]=1
         model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)    
+    elif model_tag == "channel_5n":
+        options_dict["neurons_in_bottleneck"]=5
+        model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name) 
     
     else:
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-#setup_model("vgg_5_morefilter", 0).summary()
-#model.summary()
+if __name__=="__main__":
+    setup_model("channel_5n", 0).summary()
 
 """
 import numpy as np
