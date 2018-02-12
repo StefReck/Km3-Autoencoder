@@ -105,15 +105,11 @@ def get_dataset_info(dataset_tag):
         #11x13x18x31
         #This dataset flattens it to dimension 31 (batchsize*11*13*18, 31)
         #This means that the file actually contains 11*13*18 times more batches
-        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
-        train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
-        n_bins = (11,13,18,31)
-        #batches will be drawn from the file at random, not from start to finish
-        #one batch consists of the 11*13*18 channel-id arrays from 5 events, shuffled and
-        #yielded in batches of :batchsize
-        filesize_factor=0.5
-        filesize_factor_test=0.5
+        data_path = home_path+"data/channel/"
+        train_data = "elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
+        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5" # only 1_to_12
+        n_bins = (31,1)
+
         
     elif dataset_tag=="debug":
         #For debug testing on my laptop:

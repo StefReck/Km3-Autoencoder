@@ -62,8 +62,10 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
+    print("Shape of arr_energy_correct:", arr_energy_correct.shape)
+    print(arr_energy_correct[1][:15])
     total_accuracy=np.sum(arr_energy_correct[1])/len(arr_energy_correct[1])
-    print("Total accuracy:", total_accuracy, "(", len(arr_energy_correct[1]), "of", np.sum(arr_energy_correct[1]), "events)")
+    print("Total accuracy:", total_accuracy, "(", np.sum(arr_energy_correct[1]), "of",len(arr_energy_correct[1]) , "events)")
     return arr_energy_correct
 
 
