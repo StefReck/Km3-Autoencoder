@@ -20,7 +20,7 @@ from util.run_cnn import generate_batches_from_hdf5_file
 
 #------------- Functions used in evaluating the performance of model -------------#
 
-def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels,broken_simulations_mode=0, samples=None):
+def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels, dataset_info_dict, broken_simulations_mode=0, samples=None):
     """
     Creates an energy_correct array based on test_data that specifies for every event, if the model's prediction is True/False.
     :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
@@ -35,7 +35,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     :return: ndarray arr_energy_correct: Array that contains the energy, correct, particle_type, is_cc and y_pred info for each event.
     """
     # TODO only works for a single test_file till now
-    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode) # f_size=samples prob not necessary
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict) # f_size=samples prob not necessary
     
     if samples is None: samples = len(h5py.File(f, 'r')['y'])
     steps = samples/batchsize
@@ -63,7 +63,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
     total_accuracy=np.sum(arr_energy_correct[1])/len(arr_energy_correct[1])
-    print("Total accuracy:", total_accuracy)
+    print("Total accuracy:", total_accuracy, "(", len(arr_energy_correct[1]), "of", np.sum(arr_energy_correct[1]), "events)")
     return arr_energy_correct
 
 

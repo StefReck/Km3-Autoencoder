@@ -53,7 +53,7 @@ def get_dataset_info(dataset_tag):
     elif dataset_tag=="xzt_spat_tight":
         #for xzt with new spatial binning and tight time binning
         #was generated from xyzt data
-        data_path = home_path+"data/xzt_new_binning_spatial_tight_time"
+        data_path = home_path+"data/xzt_new_binning_spatial_tight_time/"
         train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
         #zero_center_data = "" # generated automatically
