@@ -345,6 +345,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
         #if first epoch is 0, then the trained supervised network will be used
         how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*94
+        #lr schedule 1 is 5% decay until at 50%, then constant
+        lr_schedule_number=1
         #model to initialize from if first epoch is 0
         #this one is only used for vgg_3_eps modeltag
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
@@ -427,7 +429,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Does the model we are about to save exist already?
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
-            lr = lr_schedule(current_epoch+1)
+            lr = lr_schedule(current_epoch+1 , lr_schedule_number)
             K.set_value(model.optimizer.lr, lr)
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
