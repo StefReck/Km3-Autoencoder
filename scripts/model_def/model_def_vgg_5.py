@@ -174,8 +174,9 @@ def setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name=None
             
         x = Flatten()(encoded)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        units=[100,16] #256,16
+        x = dense_block(x, units=units[0], channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=units[1], channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)

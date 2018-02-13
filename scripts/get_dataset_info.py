@@ -107,7 +107,7 @@ def get_dataset_info(dataset_tag):
         #This means that the file actually contains 11*13*18 times more batches
         data_path = home_path+"data/channel/"
         train_data = "elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
-        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5" # only 1_to_12
+        test_data = "elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5" # only 1_to_12
         n_bins = (31,1)
 
         
