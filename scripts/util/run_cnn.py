@@ -524,12 +524,12 @@ def get_mean_image(filepath, filepath_without_index, dimensions, n_gpu):
     #filesize = os.path.getsize(filepath) # doesn't work for compressed files
     filesize =  get_array_memsize(f['x'])
 
-    steps = int(np.ceil(filesize/total_memory))
+    steps = int(np.ceil(filesize/total_memory))*10
     n_rows = f['x'].shape[0]
     stepsize = int(n_rows / float(steps))
 
     xs_mean_arr = None
-    print("Steps:", steps, "Stepsize:", stepsize)
+    print("Shape of file:", f['x'].shape, "Steps:", steps, "Stepsize:", stepsize)
     for i in range(steps):
         print ('Calculating the mean_image of the xs dataset in step ' + str(i))
         if xs_mean_arr is None: # create xs_mean_arr that stores intermediate mean_temp results

@@ -108,7 +108,11 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_morefilter":
         model = setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name)
-        
+    elif model_tag == "vgg_5_200":
+        model = setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name)   
+    elif model_tag == "vgg_5_200_dense":
+        model = setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name) 
+     
     elif model_tag == "channel_vgg":
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "channel_1n":
@@ -123,7 +127,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    setup_model("channel_5n", 0).summary()
+    setup_model("vgg_5_200_dense", 0).summary()
 
 """
 import numpy as np
