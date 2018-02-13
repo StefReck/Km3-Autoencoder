@@ -529,7 +529,7 @@ def get_mean_image(filepath, filepath_without_index, dimensions, n_gpu):
     stepsize = int(n_rows / float(steps))
 
     xs_mean_arr = None
-
+    print("Steps:", steps, "Stepsize:", stepsize)
     for i in range(steps):
         print ('Calculating the mean_image of the xs dataset in step ' + str(i))
         if xs_mean_arr is None: # create xs_mean_arr that stores intermediate mean_temp results

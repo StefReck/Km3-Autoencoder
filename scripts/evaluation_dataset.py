@@ -3,6 +3,7 @@
 """
 Evaluate model performance after training. 
 This is for comparison of supervised accuracy on different datasets.
+Especially fro the plots for the broken data comparison.
 """
 
 import numpy as np
@@ -15,64 +16,77 @@ from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 from get_dataset_info import get_dataset_info
 
 
-"""
-Specify trained models and calculate their loss or acc on test data.
-This data is then binned and automatically dumped. Instead of recalculating, it is loaded automatically.
-"""
+# "broken_data_mode_"+enc oder +unf
+#e.g. "1enc"
+which_one="1unf"
+
+if which_one=="1unf":
+    #vgg_3_broken1_unf
+    modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
+                   "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
+                   "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+    #Which dataset each to use
+    dataset_array = ("xzt_broken", "xzt", "xzt")
+    #Plot properties: All in the array are plotted in one figure, with own label each
+    title_of_plot='Unfrozen network performance on manipulated simulations'
+    #in the results/plots folder:
+    plot_file_name = "vgg_3_broken1_unf.pdf" 
+    #y limits of plot:
+    y_lims=(0.4,1.05)
+
+elif which_one=="1enc":
+    #vgg_3_broken1_enc
+    modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
+                   "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
+                   "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
+    #Which dataset each to use
+    dataset_array = ("xzt_broken", "xzt", "xzt")
+    #Plot properties: All in the array are plotted in one figure, with own label each
+    title_of_plot='Autoencoder-encoder network performance on manipulated simulations'
+    #in the results/plots folder:
+    plot_file_name = "vgg_3_broken1_enc.pdf" 
+    #y limits of plot:
+    y_lims=(0.7,1.0)
+
+elif which_one=="2unf":
+    #vgg_3_broken2_unf
+    modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                   "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                   "vgg_3-noise10/trained_vgg_3-noise10_supervised_up_down_epoch6.h5")
+    #Which dataset each to use
+    dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
+    #Plot properties: All in the array are plotted in one figure, with own label each
+    title_of_plot='Unfrozen network performance on noisy data'
+    #in the results/plots folder:
+    plot_file_name = "vgg_3_broken2_enc.pdf" 
+    #y limits of plot:
+    y_lims=(0.4,0.95)
+    
+    
+elif which_one=="2enc":
+    #vgg_3_broken2_enc
+    modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
+                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
+                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epoch4.h5")
+    #Which dataset each to use
+    dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
+    #Plot properties: All in the array are plotted in one figure, with own label each
+    title_of_plot='Autoencoder-encoder network performance on noisy data'
+    #in the results/plots folder:
+    plot_file_name = "vgg_3_broken2_enc.pdf" 
+    #y limits of plot:
+    y_lims=(0.4,0.95)
+
+else:
+    print(which_one, "is not known!")
+    raise(TypeError)
 
 
-
-#Model info:
-#list of modelidents to work on (has to be an array, so add , at the end if only one file)
-"""
-modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
-               "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
-               "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
-"""
-
-#vgg_3_broken2_unf
-modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
-               "vgg_3-noise10/trained_vgg_3-noise10_supervised_up_down_epoch6.h5",
-               "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
-
-#Which dataset each to use
-dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
-
-#Plot properties: All in the array are plotted in one figure, with own label each
-title_of_plot='Unfrozen network performance on noisy data'
-label_array=["Sim trained-Sim data", "Noisy trained-Noisy data", "Sim trained-Noisy data"]
+label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 #Overwrite default color palette. Leave empty for auto
-color_array=["green", "blue", "orange"]
-#in the results/plots folder:
-plot_file_name = "vgg_3_broken2_unf.pdf" 
+color_array=["green", "blue", "navy"]
 #loss, acc, None
 plot_type = "acc"
-#y limits of plot:
-y_lims=(0.4,0.95)
-#Info about model
-class_type = (2, 'up_down')
-
-
-#vgg_3_broken2_enc
-
-modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5",
-               "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epochXX.h5",
-               "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5")
-
-#Which dataset each to use
-dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
-
-#Plot properties: All in the array are plotted in one figure, with own label each
-title_of_plot='Autoencoder-encoder network performance on noisy data'
-label_array=["Sim trained-Sim data", "Noisy trained-Noisy data", "Sim trained-Noisy data"]
-#Overwrite default color palette. Leave empty for auto
-color_array=["green", "blue", "orange"]
-#in the results/plots folder:
-plot_file_name = "vgg_3_broken2_enc.pdf" 
-#loss, acc, None
-plot_type = "acc"
-#y limits of plot:
-y_lims=(0.4,0.95)
 #Info about model
 class_type = (2, 'up_down')
 

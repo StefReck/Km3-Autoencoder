@@ -132,6 +132,7 @@ def lr_schedule(before_epoch, lr_schedule_number):
     #lr rate should be set to this before starting the next epoch.
     if lr_schedule_number==1:
         #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
+        #for parallel training
         if before_epoch<=14:
             lr=0.001 * 0.95**(before_epoch-1)
         else:
@@ -139,6 +140,7 @@ def lr_schedule(before_epoch, lr_schedule_number):
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     
     if lr_schedule_number==2:
+        #for autoencoder training
         if before_epoch<=20:
             lr=0.001
         else:
