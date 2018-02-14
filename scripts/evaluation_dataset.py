@@ -28,7 +28,7 @@ if which_one=="1unf":
     #Which dataset each to use
     dataset_array = ("xzt_broken", "xzt", "xzt")
     #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Unfrozen network performance on manipulated simulations'
+    title_of_plot='Unfrozen network performance with manipulated simulations'
     #in the results/plots folder:
     plot_file_name = "vgg_3_broken1_unf.pdf" 
     #y limits of plot:
@@ -42,7 +42,7 @@ elif which_one=="1enc":
     #Which dataset each to use
     dataset_array = ("xzt_broken", "xzt", "xzt")
     #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Autoencoder-encoder network performance on manipulated simulations'
+    title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
     #in the results/plots folder:
     plot_file_name = "vgg_3_broken1_enc.pdf" 
     #y limits of plot:
@@ -56,9 +56,9 @@ elif which_one=="2unf":
     #Which dataset each to use
     dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
     #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Unfrozen network performance on noisy data'
+    title_of_plot='Unfrozen network performance with noisy data'
     #in the results/plots folder:
-    plot_file_name = "vgg_3_broken2_enc.pdf" 
+    plot_file_name = "vgg_3_broken2_unf.pdf" 
     #y limits of plot:
     y_lims=(0.4,0.95)
     
@@ -67,11 +67,11 @@ elif which_one=="2enc":
     #vgg_3_broken2_enc
     modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
                    "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
-                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epoch4.h5")
+                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epoch14.h5")
     #Which dataset each to use
     dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
     #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Autoencoder-encoder network performance on noisy data'
+    title_of_plot='Autoencoder-encoder network performance with noisy data'
     #in the results/plots folder:
     plot_file_name = "vgg_3_broken2_enc.pdf" 
     #y limits of plot:
