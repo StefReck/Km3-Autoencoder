@@ -104,7 +104,7 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     return x
 
 def test_model():
-    inputs = Input(shape=(10,))
+    inputs = Input(shape=(10,1))
     x = Dense(10)(inputs)
     #12,14,18
 
@@ -134,7 +134,7 @@ def test_model():
 
 model = test_model()
 model.compile(optimizer='adam', loss='mse')
-
+"""
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))
 inputs=np.concatenate((inputs1,inputs2), axis=0)
@@ -142,7 +142,7 @@ outputs=np.concatenate((inputs2,inputs1), axis=0)
 
 model.fit(x=inputs, y=outputs, steps_per_epoch=int(len(inputs)/2), epochs=2)
 model.predict_on_batch(inputs)
-
+"""
 
 
 

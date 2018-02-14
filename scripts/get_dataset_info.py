@@ -29,6 +29,7 @@ def get_dataset_info(dataset_tag):
     #in this case, the part in the generator where those get read out can be skipped
     generator_can_read_y_values=True
     
+    return_dict={}
     #Dataset to use
     if dataset_tag=="xyz":
         #Path to training and testing datafiles on HPC for xyz
@@ -119,15 +120,23 @@ def get_dataset_info(dataset_tag):
         generator_can_read_y_values=False
 
         
-    elif dataset_tag=="debug":
+    elif dataset_tag=="debug_xyz":
         #For debug testing on my laptop:
         home_path="../"
         data_path=home_path+"Daten/"
-        train_file="JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
-        test_file="JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+        train_data="JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
+        test_data="JTE_KM3Sim_gseagen_muon-CC_3-100GeV-9_1E7-1bin-3_0gspec_ORCA115_9m_2016_588_xyz.h5"
         n_bins = (11,13,18,1)
         #file=h5py.File(train_file, 'r')
         #xyz_hists = np.array(file["x"]).reshape((3498,11,13,18,1))
+    elif dataset_tag=="debug_xzt":
+        #For debug testing on my laptop:
+        home_path=""
+        data_path=home_path+"Daten/xzt/"
+        train_data="JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5"
+        test_data="none"
+        return_dict["zero_center_image"]=data_path+"train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+        n_bins = (11,18,50,1)
         
     else:
         print("Dataset tag", dataset_tag, "is undefined!")
@@ -149,7 +158,6 @@ def get_dataset_info(dataset_tag):
             print("Ignoring unrecognized dataset_tag option", option)
     
     
-    return_dict={}
     return_dict["home_path"]=home_path
     return_dict["train_file"]=train_file
     return_dict["test_file"]=test_file

@@ -18,7 +18,12 @@ from get_dataset_info import get_dataset_info
 
 # "broken_data_mode_"+enc oder +unf
 #e.g. "1enc"
-which_one="1unf"
+which_one="2unf"
+#instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
+#between "on simulations" and "on measured data"
+make_difference_plot=True
+#which plots to make diff of; first - second
+make_diff_of_list=((0,1),)
 
 if which_one=="1unf":
     #vgg_3_broken1_unf
@@ -147,6 +152,7 @@ def make_and_save_hist_data_autoencoder(modelpath, modelident, modelname, test_f
 
 #open dumped histogramm data, that was generated from the above two functions
 def open_hist_data(name_of_file):
+    #hist data is list len 2 with 0:energy array, 1:acc/loss array
     print("Opening existing hist_data file", name_of_file)
     #load again
     with open(name_of_file, "rb") as dump_file:
@@ -173,16 +179,38 @@ def make_or_load_files(modelnames, dataset_array, modelidents=None, modelpath=No
 #generate or load data automatically:
 hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
 
-#make plot of multiple data:
-if plot_type == "acc":
-    y_label_of_plot="Accuracy"
-    make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
-elif plot_type == "loss":
-    y_label_of_plot="Loss"
-    make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
-elif plot_type == None:
-    print("plot_type==None: Not generating plots")
+if make_difference_plot == False:
+    #make plot of multiple data:
+    if plot_type == "acc":
+        y_label_of_plot="Accuracy"
+        make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+    elif plot_type == "loss":
+        y_label_of_plot="Loss"
+        make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
+    elif plot_type == None:
+        print("plot_type==None: Not generating plots")
+    else:
+        print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
+    
+    print("Plot saved to", save_plot_as)
 else:
-    print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
-
-print("Plot saved to", save_plot_as)
+    hist_data_array_diff=[]
+    for make_diff_of in make_diff_of_list:
+        hist_1=hist_data_array[make_diff_of[0]]
+        hist_2=hist_data_array[make_diff_of[1]]
+        diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
+        hist_data_array_diff.append(diff_hist)
+    
+    #make plot of multiple data:
+    if plot_type == "acc":
+        y_label_of_plot="Accuracy"
+        make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+    elif plot_type == "loss":
+        y_label_of_plot="Loss"
+        make_energy_to_loss_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
+    elif plot_type == None:
+        print("plot_type==None: Not generating plots")
+    else:
+        print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
+    
+    print("Plot saved to", save_plot_as)

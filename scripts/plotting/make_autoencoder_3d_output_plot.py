@@ -37,69 +37,69 @@ def parse_input():
     params = vars(args)
     return params
 
-
-debug=True
-if debug==False:
-    params = parse_input()
-    model_file = params["model"]
-    how_many = params["how_many"]
-    energy_threshold = params["energy_threshold"]
-    only_data_savename = params["only_data_savename"]
-    
-    lambda_comp_model_tag = None #params["modeltag_lambda_comp"]
-
-    #Path to data to predict on (for xzt)
-    data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
-    test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
-    zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-    test_file = data_path + test_data
-    zero_center_file= data_path + zero_center_data
-    
-    #Name of output file
-    if only_data_savename is not "":
-        plot_file = only_data_savename
-        compare_histograms=False
-    else:
-        from keras.models import load_model
-        plot_file = model_file[:-3]+"_3d_output_plot.pdf"
-        compare_histograms=True
-    
-else:
-    model_file="../Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
-    test_file = '../Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5'
-    zero_center_file = "../Daten/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
-    plot_file = "test.pdf"
-    lambda_comp_model_tag = None
-    #Minimum energy for events to be considered
-    energy_threshold=0
-    how_many=2
-    from keras.models import load_model
-    compare_histograms=1
-
-
-#Events to compare, each in a seperate page in the pdf
-which = range(0,how_many,1)
-
-
-#minimum number of counts in a bin for it to be displayed in the histogramms
-min_counts=0.3
-#Data file to predict on
-test_file=h5py.File(test_file , 'r')
-
-if compare_histograms==True:
-    #Load autoencoder model
-    if lambda_comp_model_tag == None:
-        autoencoder=load_model(model_file)
-    else:
-        #if lambda layers are present:    
-        autoencoder=model_definitions.setup_model(lambda_comp_model_tag, 0)
-        autoencoder.load_weights(model_file, by_name=True)
-        autoencoder.compile(optimizer="adam", loss='mse')
+if __name__ == "__main__":
+    debug=True
+    if debug==False:
+        params = parse_input()
+        model_file = params["model"]
+        how_many = params["how_many"]
+        energy_threshold = params["energy_threshold"]
+        only_data_savename = params["only_data_savename"]
         
-    n_bins = autoencoder.input_shape[1:-1] #input_shape ist z.b. None,11,13,18,1
-else:
-    autoencoder=None
-    n_bins = test_file["x"].shape[1:] #shape ist z.B. 4000,11,13,18
+        lambda_comp_model_tag = None #params["modeltag_lambda_comp"]
+    
+        #Path to data to predict on (for xzt)
+        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+        zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+        test_file = data_path + test_data
+        zero_center_file= data_path + zero_center_data
+        
+        #Name of output file
+        if only_data_savename is not "":
+            plot_file = only_data_savename
+            compare_histograms=False
+        else:
+            from keras.models import load_model
+            plot_file = model_file[:-3]+"_3d_output_plot.pdf"
+            compare_histograms=True
+        
+    else:
+        model_file="../Daten/xzt/trained_vgg_3_eps_autoencoder_epoch10.h5"
+        test_file = '../Daten/xzt/JTE_KM3Sim_gseagen_elec-CC_3-100GeV-1_1E6-1bin-3_0gspec_ORCA115_9m_2016_100_xzt.h5'
+        zero_center_file = "../Daten/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+        plot_file = "test.pdf"
+        lambda_comp_model_tag = None
+        #Minimum energy for events to be considered
+        energy_threshold=0
+        how_many=2
+        from keras.models import load_model
+        compare_histograms=1
+    
+    
+    #Events to compare, each in a seperate page in the pdf
+    which = range(0,how_many,1)
+    
+    
+    #minimum number of counts in a bin for it to be displayed in the histogramms
+    min_counts=0.3
+    #Data file to predict on
+    test_file=h5py.File(test_file , 'r')
+    
+    if compare_histograms==True:
+        #Load autoencoder model
+        if lambda_comp_model_tag == None:
+            autoencoder=load_model(model_file)
+        else:
+            #if lambda layers are present:    
+            autoencoder=model_definitions.setup_model(lambda_comp_model_tag, 0)
+            autoencoder.load_weights(model_file, by_name=True)
+            autoencoder.compile(optimizer="adam", loss='mse')
+            
+        n_bins = autoencoder.input_shape[1:-1] #input_shape ist z.b. None,11,13,18,1
+    else:
+        autoencoder=None
+        n_bins = test_file["x"].shape[1:] #shape ist z.B. 4000,11,13,18
 
 
 
@@ -144,7 +144,7 @@ def size_of_circles(hist):
     return size
 
 
-def make_3d_plots(hist_org, hist_pred, n_bins, suptitle, figsize):
+def make_3d_plots(hist_org, hist_pred, n_bins, suptitle, figsize, titles=["Original", "Prediction"]):
     #Plot original and predicted histogram side by side in one plot
     #n_bins e.g. (11,18,50)
     #input format: e.g. [x,y,z,val]
@@ -166,7 +166,7 @@ def make_3d_plots(hist_org, hist_pred, n_bins, suptitle, figsize):
     ax1.set_ylim([0,n_bins[1]])
     ax1.set_zlabel(binsize_to_name_dict[n_bins[2]])
     ax1.set_zlim([0,n_bins[2]])
-    ax1.set_title("Original")
+    ax1.set_title(titles[0])
     
     
     ax2 = fig.add_subplot(122, projection='3d')
@@ -180,7 +180,7 @@ def make_3d_plots(hist_org, hist_pred, n_bins, suptitle, figsize):
     ax2.set_ylim([0,n_bins[1]])
     ax2.set_zlabel(binsize_to_name_dict[n_bins[2]])
     ax2.set_zlim([0,n_bins[2]])
-    ax2.set_title("Prediction")
+    ax2.set_title(titles[1])
     
     
     fig.suptitle(suptitle)
@@ -330,8 +330,8 @@ def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file
     print("Done.")
     
 
-
-save_some_plots_to_pdf(autoencoder, test_file, zero_center_file, which, plot_file, min_counts=min_counts, n_bins=n_bins, compare_histograms=compare_histograms, energy_threshold=energy_threshold)
+if __name__ == "__main__":
+    save_some_plots_to_pdf(autoencoder, test_file, zero_center_file, which, plot_file, min_counts=min_counts, n_bins=n_bins, compare_histograms=compare_histograms, energy_threshold=energy_threshold)
 
     
     
