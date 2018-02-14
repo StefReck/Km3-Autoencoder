@@ -130,21 +130,13 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     return evaluation
 
 
-def modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image):
+def modify_batches(xs, batchsize, dataset_info_dict, y_values=None):
     #Makes changes to the data as read from h5 file, e.g. adding noise, ...
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
-    
-    """
-    flatten_to_filter=dataset_info_dict["flatten_to_filter"]
-    if flatten_to_filter == True:
-        #made for xyz-channel data
-        #flattens the data to be dimension (batchsize*11*13*18, 31)
-        xs = xs.reshape(-1, xs.shape[-1])
-        np.random.shuffle(xs)
-    """
-    
+
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
+        #y_values are needed for this
         ys = np.zeros((batchsize, 1), dtype=np.float32)
         # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
         for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
@@ -221,43 +213,24 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
         n_entries = 0
         while n_entries <= (f_size - batchsize):
             # create numpy arrays of input data (features)
-            
-            #if flatten_to_filter == False:
             xs = f['x'][n_entries : n_entries + batchsize] #(batchsize, n_bins)
             xs = np.reshape(xs, dimensions).astype(np.float32)
-            # and mc info (labels)
-            y_values = f['y'][n_entries:n_entries+batchsize]
-            y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
-        
-            """
-            elif flatten_to_filter == True:
-                #instead of going through the file,
-                #Take 5 events at random, each of them giving 11*13*18 samples.
-                #So this will be 12870 events for a total of 402 batches of 32.
-                #The filesizefactor only determines when the epoch ends, low factor
-                #will not result in less diverse batches
-                original_batchsize=batchsize
-                batchsize=5
-                take_these_events=np.random.choice(f_size, batchsize, replace=False).tolist()
-                take_these_events.sort()
-                xs=f["x"][take_these_events]
-                xs = np.reshape(xs, get_dimensions_encoding(n_bins, batchsize)).astype(np.float32)
-                # and mc info (labels)
-                y_values = f['y'][take_these_events]
-                y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
-            """
-
-            if swap_col is not None:
-                swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
-                xs[:, swap_4d_channels_dict[swap_col]] = xs[:, [0,1,2,3]]
+            
+            #if swap_col is not None:
+            #    swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
+            #    xs[:, swap_4d_channels_dict[swap_col]] = xs[:, [0,1,2,3]]
 
             if zero_center_image is not None: xs = np.subtract(xs, zero_center_image) # if swap_col is not None, zero_center_image is already swapped
             
-            # we have read one more batch from this file
-            n_entries += batchsize
-            
+            if dataset_info_dict["generator_can_read_y_values"]==True:
+                # and mc info (labels)
+                y_values = f['y'][n_entries:n_entries+batchsize]
+                y_values = np.reshape(y_values, (batchsize, y_values.shape[1])) #TODO simplify with (y_values, y_values.shape) ?
+            else:
+                y_values = None
+                
             #Make changes, e.g. add noise,...
-            xs = modify_batches(xs, y_values, batchsize, dataset_info_dict, zero_center_image)
+            xs = modify_batches(xs=xs, y_values=y_values, batchsize=batchsize, dataset_info_dict=dataset_info_dict)
             
             #Modified for autoencoder:
             if is_autoencoder == True:
@@ -269,17 +242,10 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
                     ys[c] = encode_targets(y_val, class_type)
                 output = (xs, ys) if yield_mc_info is False else (xs, ys) + (y_values,)
-            
-            """
-            if flatten_to_filter==True:
-                #has dimension (batchsize*11*13*18, 31)
-                #but yield 32 batches each (or whatever the original_batchsize was)
-                for i in range(int(xs.shape[0]/original_batchsize)):
-                    part_output = ( output[0][i*original_batchsize:(i+1)*original_batchsize], output[1][i*original_batchsize:(i+1)*original_batchsize] )
-                    #part_output = output[:][i*32:(i+1)*32]
-                    yield part_output
-            else:
-            """
+
+
+            # we have read one more batch from this file
+            n_entries += batchsize
             yield output
             
         f.close() # this line of code is actually not reached if steps=f_size/batchsize

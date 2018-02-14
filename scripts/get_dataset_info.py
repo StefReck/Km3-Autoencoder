@@ -25,6 +25,10 @@ def get_dataset_info(dataset_tag):
     dataset_tag = splitted_dataset_tag[0]
     options = splitted_dataset_tag[1:]
     
+    #Sometimes, the y_values (like event energy) are not in the files (especially for autoencoders)
+    #in this case, the part in the generator where those get read out can be skipped
+    generator_can_read_y_values=True
+    
     #Dataset to use
     if dataset_tag=="xyz":
         #Path to training and testing datafiles on HPC for xyz
@@ -105,10 +109,12 @@ def get_dataset_info(dataset_tag):
         #11x13x18x31
         #This dataset flattens it to dimension 31 (batchsize*11*13*18, 31)
         #This means that the file actually contains 11*13*18 times more batches
+        #y_values are not present
         data_path = home_path+"data/channel/"
         train_data = "elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
         test_data = "elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5" # only 1_to_12
         n_bins = (31,1)
+        generator_can_read_y_values=False
 
         
     elif dataset_tag=="debug":
@@ -150,6 +156,7 @@ def get_dataset_info(dataset_tag):
     return_dict["filesize_factor"]=filesize_factor
     return_dict["filesize_factor_test"]=filesize_factor_test
     return_dict["batchsize"]=batchsize
+    return_dict["generator_can_read_y_values"]=generator_can_read_y_values
     
     return return_dict
     
