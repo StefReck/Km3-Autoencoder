@@ -276,9 +276,9 @@ def get_dimensions_encoding(n_bins, batchsize):
                         If a dimension is equal to 1, it means that the dimension should be left out.
     :return: tuple dimensions: 2D, 3D or 4D dimensions tuple (integers).
     """
-    if len(n_bins) == 2:
-        #for channel data: n_bins=(31,1)
-        dimensions=(batchsize, n_bins[0], n_bins[1])
+    if len(n_bins) == 1:
+        #for channel data: n_bins=(31,)
+        dimensions=(batchsize, n_bins[0],)
     else:
         #e.g. xzt n_bins=(11,18,50,1)
         n_bins_x, n_bins_y, n_bins_z, n_bins_t = n_bins[0], n_bins[1], n_bins[2], n_bins[3]

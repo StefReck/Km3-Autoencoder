@@ -113,7 +113,9 @@ def get_dataset_info(dataset_tag):
         data_path = home_path+"data/channel/"
         train_data = "elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
         test_data = "elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5" # only 1_to_12
-        n_bins = (31,1)
+        n_bins = (31,)
+        filesize_factor=0.01
+        filesize_factor_test=0.01
         generator_can_read_y_values=False
 
         
