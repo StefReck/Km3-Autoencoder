@@ -22,70 +22,72 @@ which_one="2unf"
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
 #between "on simulations" and "on measured data"
 make_difference_plot=True
-#which plots to make diff of; first - second
-make_diff_of_list=((0,1),)
 
-if which_one=="1unf":
-    #vgg_3_broken1_unf
-    modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
-                   "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
-                   "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
-    #Which dataset each to use
-    dataset_array = ("xzt_broken", "xzt", "xzt")
-    #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Unfrozen network performance with manipulated simulations'
-    #in the results/plots folder:
-    plot_file_name = "vgg_3_broken1_unf.pdf" 
-    #y limits of plot:
-    y_lims=(0.4,1.05)
 
-elif which_one=="1enc":
-    #vgg_3_broken1_enc
-    modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
-                   "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
-                   "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
-    #Which dataset each to use
-    dataset_array = ("xzt_broken", "xzt", "xzt")
-    #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
-    #in the results/plots folder:
-    plot_file_name = "vgg_3_broken1_enc.pdf" 
-    #y limits of plot:
-    y_lims=(0.7,1.0)
-
-elif which_one=="2unf":
-    #vgg_3_broken2_unf
-    modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
-                   "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
-                   "vgg_3-noise10/trained_vgg_3-noise10_supervised_up_down_epoch6.h5")
-    #Which dataset each to use
-    dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
-    #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Unfrozen network performance with noisy data'
-    #in the results/plots folder:
-    plot_file_name = "vgg_3_broken2_unf.pdf" 
-    #y limits of plot:
-    y_lims=(0.4,0.95)
+def get_info(which_one):
+    if which_one=="1unf":
+        #vgg_3_broken1_unf
+        modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
+                       "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
+                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Unfrozen network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken1_unf.pdf" 
+        #y limits of plot:
+        y_lims=(0.4,1.05)
     
+    elif which_one=="1enc":
+        #vgg_3_broken1_enc
+        modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken1_enc.pdf" 
+        #y limits of plot:
+        y_lims=(0.7,1.0)
     
-elif which_one=="2enc":
-    #vgg_3_broken2_enc
-    modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
-                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
-                   "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epoch14.h5")
-    #Which dataset each to use
-    dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
-    #Plot properties: All in the array are plotted in one figure, with own label each
-    title_of_plot='Autoencoder-encoder network performance with noisy data'
-    #in the results/plots folder:
-    plot_file_name = "vgg_3_broken2_enc.pdf" 
-    #y limits of plot:
-    y_lims=(0.4,0.95)
+    elif which_one=="2unf":
+        #vgg_3_broken2_unf
+        modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                       "vgg_3-noise10/trained_vgg_3-noise10_supervised_up_down_epoch6.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Unfrozen network performance with noisy data'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken2_unf.pdf" 
+        #y limits of plot:
+        y_lims=(0.4,0.95)
+        
+    elif which_one=="2enc":
+        #vgg_3_broken2_enc
+        modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
+                       "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
+                       "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_noise_epoch14.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt", "xzt_broken2", "xzt_broken2")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Autoencoder-encoder network performance with noisy data'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken2_enc.pdf" 
+        #y limits of plot:
+        y_lims=(0.4,0.95)
+    
+    else:
+        print(which_one, "is not known!")
+        raise(TypeError)
+        
+    return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
 
-else:
-    print(which_one, "is not known!")
-    raise(TypeError)
-
+modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one)
 
 label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 #Overwrite default color palette. Leave empty for auto
@@ -176,10 +178,9 @@ def make_or_load_files(modelnames, dataset_array, modelidents=None, modelpath=No
 
 
 
-#generate or load data automatically:
-hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
-
 if make_difference_plot == False:
+    #generate or load data automatically:
+    hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
     #make plot of multiple data:
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
@@ -194,10 +195,25 @@ if make_difference_plot == False:
     
     print("Plot saved to", save_plot_as)
 else:
+    #which plots to make diff of; first - second
+    make_diff_of_list=((0,1),)
+    
+    #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+    modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2unf")
+    hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+    
+    modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
+    hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+    
     hist_data_array_diff=[]
     for make_diff_of in make_diff_of_list:
-        hist_1=hist_data_array[make_diff_of[0]]
-        hist_2=hist_data_array[make_diff_of[1]]
+        hist_1=hist_data_array_unf[make_diff_of[0]]
+        hist_2=hist_data_array_unf[make_diff_of[1]]
+        diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
+        hist_data_array_diff.append(diff_hist)
+        
+        hist_1=hist_data_array_enc[make_diff_of[0]]
+        hist_2=hist_data_array_enc[make_diff_of[1]]
         diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
         hist_data_array_diff.append(diff_hist)
     
