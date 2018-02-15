@@ -196,47 +196,52 @@ if make_difference_plot == False:
     print("Plot saved to", save_plot_as)
 else:
     #which plots to make diff of; first - second
-    make_diff_of_list=((0,1),)
+    make_diff_of_list=((0,1),(2,1))
+    title_list=("Loss of accuracy when moving from 'simulations' to 'measured' data",
+                "DIfference in accuracy: Upper limit - 'measured' data")
+    save_as_list=(plot_path + "vgg_3_broken2_sim_real.pdf", 
+                  plot_path + "vgg_3_broken2_upper_real.pdf")
+    y_lims_list=((-0.04,0.09),(-0.03,0.06))
     
-    #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-    modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2unf")
-    
-    modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
-    #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
-    for modelident in modelidents:
-        modelnames.append(modelident.split("trained_")[1][:-3])
-    
-    hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
-    
-    
-    modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
-    
-    modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
-    #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
-    for modelident in modelidents:
-        modelnames.append(modelident.split("trained_")[1][:-3])
+    for i in range(len(make_diff_of_list)):
+        #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2unf")
         
-    hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
-    
-    
-    label_array=["Unfrozen", "Autoencoder-encoder"]
-    #Overwrite default color palette. Leave empty for auto
-    color_array=[]
-    #loss, acc, None
-    plot_type = "acc"
-    #Info about model
-    class_type = (2, 'up_down')
-  
-    modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
-    
-    
-    title_of_plot="Loss of accuracy when moving from 'simulations' to 'measured' data"
-    save_plot_as = plot_path + "vgg_3_broken2_sim_real.pdf"
-    y_lims=(-0.04,0.09)
-    
-    hist_data_array_diff=[]
-    for make_diff_of in make_diff_of_list:
+        modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+        #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+        for modelident in modelidents:
+            modelnames.append(modelident.split("trained_")[1][:-3])
+        
+        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        
+        
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
+        
+        modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+        #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+        for modelident in modelidents:
+            modelnames.append(modelident.split("trained_")[1][:-3])
+            
+        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        
+        
+        label_array=["Unfrozen", "Autoencoder-encoder"]
+        #Overwrite default color palette. Leave empty for auto
+        color_array=[]
+        #loss, acc, None
+        plot_type = "acc"
+        #Info about model
+        class_type = (2, 'up_down')
+      
+        modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+        plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+        
+        title_of_plot=title_list[i]
+        save_plot_as = save_as_list[i]
+        y_lims=y_lims_list[i]
+        make_diff_of=make_diff_of_list[i]
+        
+        hist_data_array_diff=[]
         hist_1=hist_data_array_unf[make_diff_of[0]]
         hist_2=hist_data_array_unf[make_diff_of[1]]
         diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
@@ -247,16 +252,16 @@ else:
         diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
         hist_data_array_diff.append(diff_hist)
     
-    #make plot of multiple data:
-    if plot_type == "acc":
-        y_label_of_plot="Difference in accuracy"
-        make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
-    elif plot_type == "loss":
-        y_label_of_plot="Loss"
-        make_energy_to_loss_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
-    elif plot_type == None:
-        print("plot_type==None: Not generating plots")
-    else:
-        print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
-    
-    print("Plot saved to", save_plot_as)
+        #make plot of multiple data:
+        if plot_type == "acc":
+            y_label_of_plot="Difference in accuracy"
+            make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+        elif plot_type == "loss":
+            y_label_of_plot="Loss"
+            make_energy_to_loss_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
+        elif plot_type == None:
+            print("plot_type==None: Not generating plots")
+        else:
+            print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
+        
+        print("Plot saved to", save_plot_as)
