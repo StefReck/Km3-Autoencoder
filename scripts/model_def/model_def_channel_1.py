@@ -30,7 +30,8 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     return x
 
 def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, activation="relu"):
-    if dropout > 0.0: x = Dropout(dropout)(x)
+    #if dropout > 0.0: x = Dropout(dropout)(x)
+    x = Dropout(dropout)(x) #always add this layer even when dropout=0, so that loading of modelweights by going through layers works
     x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None)(x)
     if batchnorm==True: x = BatchNormalization(axis=channel_axis)(x)
     x = Activation(activation)(x)
@@ -89,7 +90,7 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     elif model_type==1:
         units_array_enc = [512,512,128,neurons_in_bottleneck]
         dropout_enc =     [0,0,0,0]
-        units_array_dec = [32,512,128,31]
+        units_array_dec = [128,512,512,31]
         dropout_dec =     [0,0,0,0]
         
     
