@@ -22,7 +22,8 @@ def parse_input():
 
 params = parse_input()
 model_name = params["model_name"]
-
+how_many_doms=10 #to read from file
+minimum_counts = 5
 
 model=load_model(model_name)
 
@@ -31,7 +32,15 @@ test_file = dataset_info_dict["test_file"]
 xs_mean=load_zero_center_data(((dataset_info_dict["train_file"],),), batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
 f = h5py.File(test_file, "r")
 
-batch=f["x"][:10]
+#look for some doms that are not mostly 0
+batch=()
+i=0
+while len(batch)<=how_many_doms:
+    dom=f["x"][i, i+1]
+    if dom.sum()>=minimum_counts:
+        batch.append(dom)
+    i+=1
+        
 batch_centered=np.subtract(batch, xs_mean)
 pred=np.add(model.predict_on_batch(batch_centered), xs_mean)
 
