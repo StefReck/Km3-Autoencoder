@@ -91,7 +91,7 @@ modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_o
 
 label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 #Overwrite default color palette. Leave empty for auto
-color_array=["green", "blue", "navy"]
+color_array=["orange", "blue", "navy"]
 #loss, acc, None
 plot_type = "acc"
 #Info about model
@@ -200,10 +200,39 @@ else:
     
     #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
     modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2unf")
+    
+    modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+    #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+    for modelident in modelidents:
+        modelnames.append(modelident.split("trained_")[1][:-3])
+    
     hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
     
+    
     modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
+    
+    modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+    #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+    for modelident in modelidents:
+        modelnames.append(modelident.split("trained_")[1][:-3])
+        
     hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+    
+    
+    label_array=["Unfrozen", "Autoencoder-encoder"]
+    #Overwrite default color palette. Leave empty for auto
+    color_array=[]
+    #loss, acc, None
+    plot_type = "acc"
+    #Info about model
+    class_type = (2, 'up_down')
+  
+    modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+    
+    
+        
+    save_plot_as = plot_path + "vgg_3_broken2_sim_real.pdf"
     
     hist_data_array_diff=[]
     for make_diff_of in make_diff_of_list:
