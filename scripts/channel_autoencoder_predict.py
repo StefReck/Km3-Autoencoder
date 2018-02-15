@@ -28,11 +28,12 @@ model=load_model(model_name)
 
 dataset_info_dict=get_dataset_info("xyzc_flat")
 test_file = dataset_info_dict["test_file"]
-xs_mean=load_zero_center_data(dataset_info_dict["train_file"], batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
+xs_mean=load_zero_center_data(((dataset_info_dict["train_file"],),), batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
 f = h5py.File(test_file, "r")
 
-batch=np.subtract(f["x"][:10], xs_mean)
-pred=np.add(model.predict_on_batch(batch), xs_mean)
+batch=f["x"][:10]
+batch_centered=np.subtract(batch, xs_mean)
+pred=np.add(model.predict_on_batch(batch_centered), xs_mean)
 
 for i in range(len(batch)):
     print("Original")
