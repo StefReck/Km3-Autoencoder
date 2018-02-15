@@ -9,6 +9,7 @@ import numpy as np
 import argparse
 
 from get_dataset_info import get_dataset_info
+from util.run_cnn import load_zero_center_data
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Predict on channel data')
@@ -27,15 +28,17 @@ model=load_model(model_name)
 
 dataset_info_dict=get_dataset_info("xyzc_flat")
 test_file = dataset_info_dict["test_file"]
+xs_mean=load_zero_center_data(dataset_info_dict["train_file"], batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
 f = h5py.File(test_file, "r")
 
-batch=f["x"][:10]
-pred=model.predict_on_batch(batch)
+batch=np.subtract(f["x"][:10], xs_mean)
+pred=np.add(model.predict_on_batch(batch), xs_mean)
 
 for i in range(len(batch)):
     print("Original")
     print(batch[i])
     print("Prediction")
     print(pred[i])
+    print("loss:", ((batch[i]-pred[i])**2).mean())
     print("\n")
 
