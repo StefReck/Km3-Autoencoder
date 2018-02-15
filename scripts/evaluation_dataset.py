@@ -231,8 +231,9 @@ else:
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
     
     
-        
+    title_of_plot="Loss of accuracy when moving from 'simulations' to 'measured' data"
     save_plot_as = plot_path + "vgg_3_broken2_sim_real.pdf"
+    y_lims=(-0.04,0.09)
     
     hist_data_array_diff=[]
     for make_diff_of in make_diff_of_list:
@@ -248,7 +249,7 @@ else:
     
     #make plot of multiple data:
     if plot_type == "acc":
-        y_label_of_plot="Accuracy"
+        y_label_of_plot="Difference in accuracy"
         make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
     elif plot_type == "loss":
         y_label_of_plot="Loss"
