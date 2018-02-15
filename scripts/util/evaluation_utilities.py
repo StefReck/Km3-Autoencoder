@@ -282,6 +282,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     plt.grid(True)
 
     plt.savefig(filepath)
+    plt.close()
     
 def make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Loss"):
     """

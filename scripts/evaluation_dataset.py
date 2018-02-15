@@ -263,5 +263,4 @@ else:
             print("plot_type==None: Not generating plots")
         else:
             print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
-        
         print("Plot saved to", save_plot_as)
