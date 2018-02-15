@@ -33,14 +33,15 @@ xs_mean=load_zero_center_data(((dataset_info_dict["train_file"],),), batchsize=3
 f = h5py.File(test_file, "r")
 
 #look for some doms that are not mostly 0
-batch=()
+batch=[]
 i=0
 while len(batch)<=how_many_doms:
-    dom=f["x"][i, i+1]
+    dom=f["x"][i:i+1]
     if dom.sum()>=minimum_counts:
-        batch.append(dom)
+        batch.extend(dom)
     i+=1
-        
+    
+batch=np.array(batch) 
 batch_centered=np.subtract(batch, xs_mean)
 pred=np.add(model.predict_on_batch(batch_centered), xs_mean)
 
