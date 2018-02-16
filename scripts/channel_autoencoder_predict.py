@@ -62,6 +62,7 @@ if mode == "simple":
 elif mode=="plot":
     #make plot of predictions
     how_many_dom_batches = 100
+    skip_zero_counts=True
     
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
@@ -104,13 +105,14 @@ elif mode=="plot":
         #data_real is still a batch of len batchsize of singe doms, so look at each one:
         for dom_no,data_real_single in enumerate(data_real):
             pred_single=pred[dom_no]
-            for measured_counts in range(maximum_counts_to_look_for+1):
+            for measured_counts in range(skip_zero_counts, maximum_counts_to_look_for+1):
                 pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
     
-    make_plots_of_counts=[0,1,2,3]
+    make_plots_of_counts=[1,2,3]
     for c in make_plots_of_counts:
-        plt.hist( pred_on[c], label=str(c) )
-        plt.show()
+        if len(pred[c]) is not 0:
+            plt.hist( pred_on[c], label=str(c), bins=50 )
+            plt.show()
     plt.legend()
     plt.show()
         
