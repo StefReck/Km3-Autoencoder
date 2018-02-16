@@ -71,6 +71,8 @@ elif mode=="plot":
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     batchsize=dataset_info_dict["batchsize"] #def 32
     
+    print("Total channel ids:", how_many_dom_batches*batchsize*31)
+    
     class_type=(2,"up_down")
     is_autoencoder=True
     
@@ -103,12 +105,12 @@ elif mode=="plot":
         for dom_no,data_real_single in enumerate(data_real):
             pred_single=pred[dom_no]
             for measured_counts in range(maximum_counts_to_look_for+1):
-                pred_on[measured_counts].append(pred_single[data_real_single==measured_counts])
+                pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
     
-    print(np.array(pred_on).shape)
-    
-    for c,measured_count_array in enumerate(pred_on):
-        plt.hist( measured_count_array, label=str(c) )
+    make_plots_of_counts=[0,1,2,3]
+    for c in make_plots_of_counts:
+        plt.hist( pred_on[c], label=str(c) )
+        plt.show()
     plt.legend()
     plt.show()
         
