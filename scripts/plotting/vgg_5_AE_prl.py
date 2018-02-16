@@ -18,11 +18,11 @@ file_prl="../Daten/vgg5_picture_AE_prl_plotdata_prl.npy"
 AE_data = np.load(file_AE, encoding='latin1')[0]
 
 prl_data = np.load(file_prl, encoding='latin1')[0][[0,1,4,2]]
-how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*64)
+how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*63)
 take_these_epochs=np.cumsum(how_many_epochs_each_to_train)
 
 for i in range(len(prl_data[0:2])):
-    prl_data[i]=np.array(prl_data[i])[take_these_epochs-1]
+    prl_data[i]=np.array(prl_data[i])[take_these_epochs]
 
 def plot_test_train(testE, testloss, trainE, trainloss, label, ax):
     test_plot = ax.plot(testE, testloss, marker="o", ms=3, label=label)
@@ -41,7 +41,7 @@ ax2.plot(AE_data[0][:len(prl_data[0])],prl_data[1], marker="o", ms=3, color="ora
 ax.set_ylim([0.05,0.09])
 ax.set_xlabel("Autoencoder epoch")
 ax.set_ylabel("Loss")
-ax.text(x=38,y=0.066,s=r'$\epsilon = 10^{-1}$')
+ax.text(x=38,y=0.066,s=r'$\epsilon = 10^{-8}$')
 
 ax2.set_ylabel("Accuracy")
 

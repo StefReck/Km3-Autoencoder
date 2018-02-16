@@ -374,6 +374,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Encoder epochs after which to switch the autoencoder model
         switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
         #calculate the current autoencoder epoch automatically based on the encoder epoch
+        #e.g. switch_at = [10,12,14], encoder_epoch = 11
+        #--> AE epoch=2
         for ae_epoch,switch in enumerate(switch_autoencoder_model):
             if encoder_epoch-switch <= 0:
                 autoencoder_epoch=ae_epoch+1
@@ -437,17 +439,18 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #custom lr schedule; lr_decay was set to 0 already
             lr = lr_schedule(current_epoch+1 , lr_schedule_number)
             K.set_value(model.optimizer.lr, lr)
+            
+            if current_epoch in switch_autoencoder_model:
+                autoencoder_epoch+=1
+                autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
+                print("Changing weights before epoch ",current_epoch+1," to ",autoencoder_model)
+                switch_encoder_weights(model, load_model(autoencoder_model))
+            
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                                  batchsize=batchsize, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                                  shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
                                  save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)  
-            
-            if current_epoch+1 in switch_autoencoder_model:
-                autoencoder_epoch+=1
-                autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-                print("Changing weights after epoch ",current_epoch+1," to ",autoencoder_model)
-                switch_encoder_weights(model, load_model(autoencoder_model))
                 
         sys.exit()
         
