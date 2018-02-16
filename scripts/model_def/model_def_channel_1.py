@@ -95,6 +95,8 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         dropout_enc =     [0,0,0,0]
         units_array_dec = [128,512,512,31]
         dropout_dec =     [0,0,0,0]
+    
+        
         
     
     if autoencoder_stage==1:
@@ -121,6 +123,61 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
             x = dense_block(x, units, channel_axis, batchnorm=True, dropout=dropout_enc[i+1])
         encoded = dense_block(x, units_array_enc[-1], channel_axis, batchnorm=True, dropout=dropout_enc[-1])
         
+        
+        if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
+            encoder = Model(inputs=inputs, outputs=encoded)
+            autoencoder = load_model(modelpath_and_name)
+            for i,layer in enumerate(encoder.layers):
+                layer.set_weights(autoencoder.layers[i].get_weights())
+        
+        filter_base=[32,32,64]
+        train=True
+        unlock_BN_in_encoder=False
+    
+        x=conv_block(encoded, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+        x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #11x18x25
+        
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x25
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #10x16x24
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #5x8x12
+        
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x12
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #2x3x5
+    
+        x = Flatten()(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=True, dropout=0.2)
+        x = dense_block(x, units=16,  channel_axis=channel_axis, batchnorm=True, dropout=0.2)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+    
+        
+    return model
+
+
+def setup_channel_tiny(autoencoder_stage, options_dict, modelpath_and_name=None):
+    #dropout_for_dense      = 0 #options_dict["dropout_for_dense"]
+    n_bins=(11,13,18,31)
+    neurons_in_bottleneck = options_dict["neurons_in_bottleneck"]
+    # for time distributed wrappers: (batchsize, timesteps, n_bins)
+    #inputs = Input(shape=(31,11,13,18))
+    #x = TimeDistributed( Dense(8), input_shape=(10, 16) )(inputs)
+    
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    
+    if autoencoder_stage==0:
+        inputs = Input(shape=(n_bins[-1],))
+        x = Dense(neurons_in_bottleneck)(inputs)
+        outputs = Dense(31)(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+    
+    else:
+        inputs = Input(shape=n_bins)
+        encoded = Dense(inputs)(neurons_in_bottleneck)
         
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder = Model(inputs=inputs, outputs=encoded)
