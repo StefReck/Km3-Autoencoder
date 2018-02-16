@@ -18,7 +18,8 @@ from get_dataset_info import get_dataset_info
 
 # "broken_data_mode_"+enc oder +unf
 #e.g. "1enc"
-which_one="2unf"
+which_ones=("1unf","1enc","2unf","2enc")
+extra_name="_coarse"
 #default is 1
 energy_range_of_one_bin=10
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
@@ -26,7 +27,7 @@ energy_range_of_one_bin=10
 make_difference_plot=False
 
 
-def get_info(which_one):
+def get_info(which_one, extra_name=""):
     if which_one=="1unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -37,7 +38,7 @@ def get_info(which_one):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Unfrozen network performance with manipulated simulations'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken1_unf.pdf" 
+        plot_file_name = "vgg_3_broken1_unf"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.4,1.05)
     
@@ -51,7 +52,7 @@ def get_info(which_one):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken1_enc.pdf" 
+        plot_file_name = "vgg_3_broken1_enc."+extra_name+"pdf" 
         #y limits of plot:
         y_lims=(0.7,1.0)
     
@@ -65,7 +66,7 @@ def get_info(which_one):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Unfrozen network performance with noisy data'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken2_unf.pdf" 
+        plot_file_name = "vgg_3_broken2_unf."+extra_name+"pdf" 
         #y limits of plot:
         y_lims=(0.73,0.96)
         
@@ -79,7 +80,7 @@ def get_info(which_one):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Autoencoder-encoder network performance with noisy data'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken2_enc.pdf" 
+        plot_file_name = "vgg_3_broken2_enc."+extra_name+"pdf" 
         #y limits of plot:
         y_lims=(0.68,0.92)
     
@@ -89,29 +90,10 @@ def get_info(which_one):
         
     return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
 
-modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one)
-
-label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-#Overwrite default color palette. Leave empty for auto
-color_array=["orange", "blue", "navy"]
-#loss, acc, None
-plot_type = "acc"
-#Info about model
-class_type = (2, 'up_down')
 
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
-
-modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
-#           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
-for modelident in modelidents:
-    modelnames.append(modelident.split("trained_")[1][:-3])
-    
-save_plot_as = plot_path + plot_file_name
     
 
 #Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
@@ -178,25 +160,46 @@ def make_or_load_files(modelnames, dataset_array, modelidents=None, modelpath=No
         print("Done.")
     return hist_data_array
 
-
-
 if make_difference_plot == False:
-    #generate or load data automatically:
-    hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
-    #make plot of multiple data:
-    if plot_type == "acc":
-        y_label_of_plot="Accuracy"
-        make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
-    elif plot_type == "loss":
-        y_label_of_plot="Loss"
-        make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
-    elif plot_type == None:
-        print("plot_type==None: Not generating plots")
-    else:
-        print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
-    
-    print("Plot saved to", save_plot_as)
-    
+    for which_one in which_ones:
+        
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name)
+        
+        label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+        #Overwrite default color palette. Leave empty for auto
+        color_array=["orange", "blue", "navy"]
+        #loss, acc, None
+        plot_type = "acc"
+        #Info about model
+        class_type = (2, 'up_down')
+        
+        
+        modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+        plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+        
+        modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+        #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+        for modelident in modelidents:
+            modelnames.append(modelident.split("trained_")[1][:-3])
+            
+        save_plot_as = plot_path + plot_file_name
+        
+        #generate or load data automatically:
+        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        #make plot of multiple data:
+        if plot_type == "acc":
+            y_label_of_plot="Accuracy"
+            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
+        elif plot_type == "loss":
+            y_label_of_plot="Loss"
+            make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
+        elif plot_type == None:
+            print("plot_type==None: Not generating plots")
+        else:
+            print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
+        
+        print("Plot saved to", save_plot_as)
+            
     
 else:
     #which plots to make diff of; (first - second) / first
