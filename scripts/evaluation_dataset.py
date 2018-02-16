@@ -19,9 +19,11 @@ from get_dataset_info import get_dataset_info
 # "broken_data_mode_"+enc oder +unf
 #e.g. "1enc"
 which_one="2unf"
+#default is 1
+energy_range_of_one_bin=10
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
 #between "on simulations" and "on measured data"
-make_difference_plot=True
+make_difference_plot=False
 
 
 def get_info(which_one):
@@ -65,7 +67,7 @@ def get_info(which_one):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken2_unf.pdf" 
         #y limits of plot:
-        y_lims=(0.4,0.95)
+        y_lims=(0.73,0.96)
         
     elif which_one=="2enc":
         #vgg_3_broken2_enc
@@ -79,7 +81,7 @@ def get_info(which_one):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken2_enc.pdf" 
         #y limits of plot:
-        y_lims=(0.4,0.95)
+        y_lims=(0.68,0.92)
     
     else:
         print(which_one, "is not known!")
@@ -184,7 +186,7 @@ if make_difference_plot == False:
     #make plot of multiple data:
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
-        make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+        make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
     elif plot_type == "loss":
         y_label_of_plot="Loss"
         make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
@@ -194,11 +196,13 @@ if make_difference_plot == False:
         print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
     
     print("Plot saved to", save_plot_as)
+    
+    
 else:
-    #which plots to make diff of; first - second
+    #which plots to make diff of; (first - second) / first
     make_diff_of_list=((0,1),(2,1))
-    title_list=("Loss of accuracy when moving from 'simulations' to 'measured' data",
-                "DIfference in accuracy: Upper limit - 'measured' data")
+    title_list=("Relative loss of accuracy when moving from 'simulations' to 'measured' data",
+                "Realtive difference in accuracy: Upper limit to 'measured' data")
     save_as_list=(plot_path + "vgg_3_broken2_sim_real.pdf", 
                   plot_path + "vgg_3_broken2_upper_real.pdf")
     y_lims_list=((-0.04,0.09),(-0.03,0.06))
@@ -242,20 +246,20 @@ else:
         make_diff_of=make_diff_of_list[i]
         
         hist_data_array_diff=[]
-        hist_1=hist_data_array_unf[make_diff_of[0]]
-        hist_2=hist_data_array_unf[make_diff_of[1]]
-        diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
+        hist_1=np.array(hist_data_array_unf[make_diff_of[0]])
+        hist_2=np.array(hist_data_array_unf[make_diff_of[1]])
+        diff_hist=[hist_1[0], (hist_1[1]-hist_2[1])/hist_1[1]]
         hist_data_array_diff.append(diff_hist)
         
-        hist_1=hist_data_array_enc[make_diff_of[0]]
-        hist_2=hist_data_array_enc[make_diff_of[1]]
-        diff_hist=[hist_1[0], hist_1[1]-hist_2[1]]
+        hist_1=np.array(hist_data_array_enc[make_diff_of[0]])
+        hist_2=np.array(hist_data_array_enc[make_diff_of[1]])
+        diff_hist=[hist_1[0], (hist_1[1]-hist_2[1])/hist_1[1]]
         hist_data_array_diff.append(diff_hist)
     
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Difference in accuracy"
-            make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+            make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
         elif plot_type == "loss":
             y_label_of_plot="Loss"
             make_energy_to_loss_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 

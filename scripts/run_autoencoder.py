@@ -357,13 +357,19 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Change the weights of the frozen layers (up to the flatten layer) 
             #of the frozen encoder to that of another autoencoder model
             changed_layers=0
+            #look for last encoder layer = last flatten layer in the network
+            last_encoder_layer_index = 1
             for i,layer in enumerate(encoder_model.layers):
-                if "flatten" not in layer.name:
+                if "flatten" in layer.name:
+                    last_encoder_layer_index = i
+            
+            for i,layer in enumerate(encoder_model.layers):
+                if i <= last_encoder_layer_index:
                     layer.set_weights(autoencoder_model.layers[i].get_weights())
                     changed_layers+=1
                 else:
                     break
-            print("Weights of layers changed:", changed_layers)
+            print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index], ")")
         
         #Encoder epochs after which to switch the autoencoder model
         switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)

@@ -210,7 +210,7 @@ def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range
 
     plt.savefig(filepath+".pdf")
 
-def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, title, filepath, plot_range=(3, 100)):
+def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, title, filepath, plot_range=(3, 100), ):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -255,7 +255,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[]):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], energy_range_of_one_bin=1):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -265,10 +265,27 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     """
     for i, hist in enumerate(hist_data_array):
         #Use user defined colors, if given in proper length; else default palette
+        energy=hist_data_array[i][0]
+        y_axis_data=hist_data_array[i][1]
+        
+        if energy_range_of_one_bin != 1:
+            #default energy resolution is 1 bin per GeV, ranging from 3 to 100
+            #can be made more coarse:
+            coarse_energy, coarse_y_data = [], []
+            for lower_bin_edge in np.arange(0,99,energy_range_of_one_bin):
+                data_in_this_range = np.logical_and(energy>lower_bin_edge, energy<lower_bin_edge+energy_range_of_one_bin)
+                if len(energy[data_in_this_range]) is not 0:
+                    new_bin_energy=np.average(energy[data_in_this_range])
+                    new_bin_y_data=np.average(y_axis_data[data_in_this_range])
+                    coarse_energy.append(new_bin_energy)
+                    coarse_y_data.append(new_bin_y_data)
+            energy=coarse_energy
+            y_axis_data = coarse_y_data
+        
         if len(color_array) == len(hist_data_array):
-            plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i], color=color_array[i])
+            plt.step(energy, y_axis_data, where='mid', label=label_array[i], color=color_array[i])
         else:
-            plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
+            plt.step(energy, y_axis_data, where='mid', label=label_array[i])
             
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
