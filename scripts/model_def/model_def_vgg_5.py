@@ -405,8 +405,8 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
             
-        x = Flatten()(encoded)
-        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
+        #x = Flatten()(encoded)
+        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(encoded)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)

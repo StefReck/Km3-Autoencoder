@@ -110,9 +110,8 @@ elif mode=="plot":
     
     make_plots_of_counts=[1,2,3]
     for c in make_plots_of_counts:
-        if len(pred[c]) is not 0:
+        if len(pred[c]) != 0:
             plt.hist( pred_on[c], label=str(c), bins=50 )
-            plt.show()
     plt.legend()
     plt.show()
         

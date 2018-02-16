@@ -136,7 +136,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    setup_model("channel_tiny", 0).summary()
+    setup_model("vgg_5_200_dense", 2).summary()
 
 """
 import numpy as np
