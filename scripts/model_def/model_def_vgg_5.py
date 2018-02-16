@@ -30,10 +30,10 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
-def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0):
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True):
     if dropout > 0.0: x = Dropout(dropout)(x)
-    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None)(x)
-    if batchnorm==True: x = BatchNormalization(axis=channel_axis)(x)
+    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable)(x)
+    if batchnorm==True: x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
     x = Activation('relu')(x)
     return x
 
@@ -369,7 +369,7 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
     x = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3
     x = Flatten()(x)
-    encoded = dense_block(x, units=200, channel_axis=channel_axis, batchnorm=True, dropout=0)
+    encoded = dense_block(x, units=200, channel_axis=channel_axis, batchnorm=True, dropout=0, trainable=train)
     
     if autoencoder_stage == 0:  #The Decoder part:
         #2x2x3
@@ -406,8 +406,11 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
                 layer.set_weights(autoencoder.layers[i].get_weights())
             
         #x = Flatten()(encoded)
-        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(encoded)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        if batchnorm_before_dense==True: 
+            x = BatchNormalization(axis=channel_axis)(encoded)
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        else:
+            x = dense_block(encoded, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
