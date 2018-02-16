@@ -94,13 +94,18 @@ elif mode=="plot":
         pred_on.append([])
         
     for i in range(how_many_dom_batches):
-        data=next(generator)
+        data=next(generator)[0]
         
         data_real = np.add(data, xs_mean)
         pred=np.add(model.predict_on_batch(data), xs_mean)
         
-        for measured_counts in range(maximum_counts_to_look_for+1):
-            pred_on[measured_counts].append(pred[data_real==measured_counts])
+        #data_real is still a batch of len batchsize of singe doms, so look at each one:
+        for dom_no,data_real_single in enumerate(data_real):
+            pred_single=pred[dom_no]
+            for measured_counts in range(maximum_counts_to_look_for+1):
+                pred_on[measured_counts].append(pred_single[data_real_single==measured_counts])
+    
+    print(np.array(pred_on).shape)
     
     for c,measured_count_array in enumerate(pred_on):
         plt.hist( measured_count_array, label=str(c) )
