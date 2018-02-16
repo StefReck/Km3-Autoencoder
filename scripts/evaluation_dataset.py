@@ -52,7 +52,7 @@ def get_info(which_one, extra_name=""):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken1_enc."+extra_name+"pdf" 
+        plot_file_name = "vgg_3_broken1_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,1.0)
     
@@ -66,7 +66,7 @@ def get_info(which_one, extra_name=""):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Unfrozen network performance with noisy data'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken2_unf."+extra_name+"pdf" 
+        plot_file_name = "vgg_3_broken2_unf"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.73,0.96)
         
@@ -80,7 +80,7 @@ def get_info(which_one, extra_name=""):
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Autoencoder-encoder network performance with noisy data'
         #in the results/plots folder:
-        plot_file_name = "vgg_3_broken2_enc."+extra_name+"pdf" 
+        plot_file_name = "vgg_3_broken2_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.68,0.92)
     
@@ -160,22 +160,22 @@ def make_or_load_files(modelnames, dataset_array, modelidents=None, modelpath=No
         print("Done.")
     return hist_data_array
 
+label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+#Overwrite default color palette. Leave empty for auto
+color_array=["orange", "blue", "navy"]
+#loss, acc, None
+plot_type = "acc"
+#Info about model
+class_type = (2, 'up_down')
+
+
+modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+
 if make_difference_plot == False:
     for which_one in which_ones:
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name)
-        
-        label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-        #Overwrite default color palette. Leave empty for auto
-        color_array=["orange", "blue", "navy"]
-        #loss, acc, None
-        plot_type = "acc"
-        #Info about model
-        class_type = (2, 'up_down')
-        
-        
-        modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-        plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
@@ -206,8 +206,8 @@ else:
     make_diff_of_list=((0,1),(2,1))
     title_list=("Relative loss of accuracy when moving from 'simulations' to 'measured' data",
                 "Realtive difference in accuracy: Upper limit to 'measured' data")
-    save_as_list=(plot_path + "vgg_3_broken2_sim_real.pdf", 
-                  plot_path + "vgg_3_broken2_upper_real.pdf")
+    save_as_list=(plot_path + "vgg_3_broken2_sim_real"+extra_name+".pdf", 
+                  plot_path + "vgg_3_broken2_upper_real"+extra_name+".pdf")
     y_lims_list=((-0.04,0.09),(-0.03,0.06))
     
     for i in range(len(make_diff_of_list)):
