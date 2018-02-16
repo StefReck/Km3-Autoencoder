@@ -29,14 +29,14 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
-def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, activation="relu"):
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, activation="relu", trainable=True):
     if dropout > 0.0: 
         x = Dropout(dropout)(x)
     elif dropout == -1:
         x = Dropout(0.0)(x)#add this layer, so that loading of modelweights by going through layers works
     
-    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None)(x)
-    if batchnorm==True: x = BatchNormalization(axis=channel_axis)(x)
+    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable)(x)
+    if batchnorm==True: x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
     x = Activation(activation)(x)
     return x
 
@@ -96,11 +96,9 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         units_array_dec = [128,512,512,31]
         dropout_dec =     [0,0,0,0]
     
-        
-        
-    
     if autoencoder_stage==1:
         #no dropout if the encoder part is used frozen
+        trainable=False
         dropout_enc=[0,]*len(dropout_enc)
         dropout_dec=[0,]*len(dropout_dec)
     
@@ -118,10 +116,10 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     
     else:
         inputs = Input(shape=n_bins)
-        x = dense_block(inputs, units_array_enc[0], channel_axis, batchnorm=True, dropout=dropout_enc[0])
+        x = dense_block(inputs, units_array_enc[0], channel_axis, batchnorm=True, dropout=dropout_enc[0], trainable=trainable)
         for i,units in enumerate(units_array_enc[1:-1]):
-            x = dense_block(x, units, channel_axis, batchnorm=True, dropout=dropout_enc[i+1])
-        encoded = dense_block(x, units_array_enc[-1], channel_axis, batchnorm=True, dropout=dropout_enc[-1])
+            x = dense_block(x, units, channel_axis, batchnorm=True, dropout=dropout_enc[i+1], trainable=trainable)
+        encoded = dense_block(x, units_array_enc[-1], channel_axis, batchnorm=True, dropout=dropout_enc[-1], trainable=trainable)
         
         
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
@@ -177,7 +175,7 @@ def setup_channel_tiny(autoencoder_stage, options_dict, modelpath_and_name=None)
     
     else:
         inputs = Input(shape=n_bins)
-        encoded = Dense(inputs)(neurons_in_bottleneck)
+        encoded = Dense(inputs)(neurons_in_bottleneck, trainable=(autoencoder_stage!=1))
         
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder = Model(inputs=inputs, outputs=encoded)
