@@ -369,7 +369,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                     changed_layers+=1
                 else:
                     break
-            print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index], ")")
+            print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index].name, ")")
         
         #Encoder epochs after which to switch the autoencoder model
         switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
