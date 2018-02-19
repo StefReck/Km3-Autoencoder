@@ -165,6 +165,12 @@ def modify_batches(xs, batchsize, dataset_info_dict, y_values=None):
         #xs = xs + np.multiply(noise[np.tile(zero_center_image!=0, (batchsize,1,1))], noise)
         #For xzt though, this is unecessary since there are no empty bins
         xs = xs + noise
+        
+    elif broken_simulations_mode==3:
+        #replace the lower third (z) of the measured signal with 0
+        #xs.shape: (32,11,18,50,1)
+        xs[:,:,:6,:,:]=np.zeros_like(xs[:,:,:6,:,:])
+        
     return xs
 
 #Copied from cnn_utilities and modified:

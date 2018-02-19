@@ -11,6 +11,9 @@ def get_dataset_info(dataset_tag):
     #Basic default options
     #Can generate purposefully broken simulations
     #0: Normal mode
+    #1: updown in bin 0
+    #2: more noise
+    #3: 
     broken_simulations_mode=0
     #How much of the file will be used for training/testing
     filesize_factor=1.0
@@ -87,6 +90,17 @@ def get_dataset_info(dataset_tag):
         n_bins = (11,18,50,1)
         
         broken_simulations_mode=2
+        print("Warning: GENERATING BROKEN SIMULATED DATA")
+    
+    elif dataset_tag=="xzt_broken3":
+        #for xzt
+        #generates broken simulated data, very dangerous!
+        data_path = home_path+"data/xzt/"
+        train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+        n_bins = (11,18,50,1)
+        
+        broken_simulations_mode=3
         print("Warning: GENERATING BROKEN SIMULATED DATA")
     
     elif dataset_tag=="xyz":
