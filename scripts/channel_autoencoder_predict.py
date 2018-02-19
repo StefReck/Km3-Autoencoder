@@ -103,7 +103,7 @@ elif mode=="plot":
     print_something_after_every = int(how_many_dom_batches/10)
     for i in range(how_many_dom_batches):
         if i%print_something_after_every==0:
-            print("Predicting ... ", int(i/print_something_after_every), "% done")
+            print("Predicting ... ", int(10*i/print_something_after_every), "% done")
             
         data=next(generator)[0]
         
@@ -115,12 +115,19 @@ elif mode=="plot":
             pred_single=pred[dom_no]
             for measured_counts in range(skip_zero_counts, maximum_counts_to_look_for+1):
                 pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
+    print("Done, generating plot...")
     
     plt.title("Channel autoencoder predictions")
     plt.ylabel("Fraction of predicitons")
     plt.xlabel("Predicted counts")
     make_plots_of_counts=[0,1]
     plt.plot([],[], " ", label="Original counts")
+    
+    ex_list=[]
+    for counts_array in pred_on:
+        ex_list.append(np.amax(counts_array), np.amin(counts_array))
+    range_of_plot=[np.amin(ex_list),np.amax(ex_list)]
+        
     range_of_plot=[np.min(pred_on), np.max(pred_on)]
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
