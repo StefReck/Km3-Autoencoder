@@ -31,14 +31,7 @@ def get_dataset_info(dataset_tag):
     
     return_dict={}
     #Dataset to use
-    if dataset_tag=="xyz":
-        #Path to training and testing datafiles on HPC for xyz
-        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xyz/concatenated/"
-        train_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5"
-        test_data = "test_muon-CC_and_elec-CC_each_120_xyz_shuffled.h5"
-        #zero_center_data = "train_muon-CC_and_elec-CC_each_480_xyz_shuffled.h5_zero_center_mean.npy"
-        n_bins = (11,13,18,1)
-    elif dataset_tag=="xzt":
+    if dataset_tag=="xzt":
         #for xzt
         #data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
         data_path = home_path + "data/xzt/"
@@ -96,6 +89,15 @@ def get_dataset_info(dataset_tag):
         broken_simulations_mode=2
         print("Warning: GENERATING BROKEN SIMULATED DATA")
     
+    elif dataset_tag=="xyz":
+        #xyz- generated from xyzc by summing over channel
+        #11x13x18
+        data_path = home_path+"data/xyz/"
+        train_data = "elec-CC_and_muon-CC_xyz_train_1_to_240_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyz_test_481_to_540_shuffled_0.h5"
+        n_bins = (11,13,18,1)
+        filesize_factor=1
+        filesize_factor_test=1
     elif dataset_tag=="xyzc":
         #xyz-channel id as filter
         #11x13x18x31

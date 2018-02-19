@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Load a channel id autoencoder model and predict on some train files.
+Load a channel id autoencoder model and predict on some train files, then plot it optionally.
+Channel id arrays are almost always 0 or 1, so only these cases are looked for.
 """
 
 from keras.models import load_model
@@ -23,8 +24,10 @@ def parse_input():
 
 params = parse_input()
 model_name = params["model_name"]
-
 mode="plot"
+
+#for plot mode, number of 32 batches of channel_id arrays should be read through for the plot
+how_many_dom_batches = 10000
 
 model=load_model(model_name)
 dataset_info_dict=get_dataset_info("xyzc_flat")
@@ -61,8 +64,10 @@ if mode == "simple":
 
 elif mode=="plot":
     #make plot of predictions
-    how_many_dom_batches = 100
-    skip_zero_counts=True
+    maximum_counts_to_look_for=1
+    skip_zero_counts=False
+    
+    bins=100
     
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
@@ -91,7 +96,6 @@ elif mode=="plot":
     #prediction on channel id that measured
     #          0 ,1 ,2 ,3 ...  counts
     pred_on = []
-    maximum_counts_to_look_for=3
     
     for measured_counts in range(maximum_counts_to_look_for+1):
         pred_on.append([])
@@ -108,10 +112,14 @@ elif mode=="plot":
             for measured_counts in range(skip_zero_counts, maximum_counts_to_look_for+1):
                 pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
     
-    make_plots_of_counts=[1,2,3]
+    plt.title("Channel autoencoder predictions")
+    plt.ylabel("Fraction of predicitons")
+    plt.xlabel("Predicted counts")
+    make_plots_of_counts=[0,1]
+    plt.plot([],[], " ", label="Original counts")
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
-            plt.hist( pred_on[c], label=str(c), bins=50 )
+            plt.hist( pred_on[c], label=str(c), bins=bins, density=True )
     plt.legend()
     plt.show()
         

@@ -46,13 +46,14 @@ def setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name=None):
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = False
     batchnorm_for_dense    = True
+    number_of_filters_in_input = options_dict["number_of_filters_in_input"] #either 1 (no channel id) or 31
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
     filter_base=[32,32,64]
     
-    inputs = Input(shape=(11,13,18,31))
+    inputs = Input(shape=(11,13,18,number_of_filters_in_input))
     x=conv_block(inputs, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
     x = AveragePooling3D((2, 2, 2), padding='same')(x) #11x18x25

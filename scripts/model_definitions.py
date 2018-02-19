@@ -114,6 +114,10 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name) 
      
     elif model_tag == "channel_vgg":
+        options_dict["number_of_filters_in_input"]=31
+        model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "channel_vgg_xyz":
+        options_dict["number_of_filters_in_input"]=1
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "channel_1n":
         options_dict["neurons_in_bottleneck"]=1
@@ -136,7 +140,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    setup_model("vgg_5_200_dense", 2).summary()
+    setup_model("channel_vgg_xyz", 2).summary()
 
 """
 import numpy as np
