@@ -99,8 +99,12 @@ elif mode=="plot":
     
     for measured_counts in range(maximum_counts_to_look_for+1):
         pred_on.append([])
-        
+    
+    print_something_after_every = int(how_many_dom_batches/10)
     for i in range(how_many_dom_batches):
+        if i%print_something_after_every==0:
+            print("Predicting ... ", int(i/print_something_after_every), "% done")
+            
         data=next(generator)[0]
         
         data_real = np.add(data, xs_mean)
@@ -117,9 +121,10 @@ elif mode=="plot":
     plt.xlabel("Predicted counts")
     make_plots_of_counts=[0,1]
     plt.plot([],[], " ", label="Original counts")
+    range_of_plot=[np.min(pred_on), np.max(pred_on)]
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
-            plt.hist( pred_on[c], label=str(c), bins=bins, density=True )
+            plt.hist( pred_on[c], label=str(c), bins=bins, density=True, range=range_of_plot )
     plt.legend()
     plt.show()
         
