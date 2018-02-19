@@ -28,6 +28,7 @@ mode="plot"
 
 #for plot mode, number of 32 batches of channel_id arrays should be read through for the plot
 how_many_dom_batches = 10000
+bins=100
 
 model=load_model(model_name)
 dataset_info_dict=get_dataset_info("xyzc_flat")
@@ -66,8 +67,6 @@ elif mode=="plot":
     #make plot of predictions
     maximum_counts_to_look_for=1
     skip_zero_counts=False
-    
-    bins=100
     
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
@@ -117,7 +116,7 @@ elif mode=="plot":
                 pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
     print("Done, generating plot...")
     
-    plt.title("Channel autoencoder predictions")
+    plt.title("Channel autoencoder predictions (%)")
     plt.ylabel("Fraction of predicitons")
     plt.xlabel("Predicted counts")
     make_plots_of_counts=[0,1]
@@ -125,10 +124,9 @@ elif mode=="plot":
     
     ex_list=[]
     for counts_array in pred_on:
-        ex_list.append(np.amax(counts_array), np.amin(counts_array))
+        ex_list.extend([np.amax(counts_array), np.amin(counts_array)])
     range_of_plot=[np.amin(ex_list),np.amax(ex_list)]
-        
-    range_of_plot=[np.min(pred_on), np.max(pred_on)]
+
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
             plt.hist( pred_on[c], label=str(c), bins=bins, density=True, range=range_of_plot )

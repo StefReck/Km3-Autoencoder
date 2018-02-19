@@ -131,6 +131,10 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         options_dict["neurons_in_bottleneck"]=5
         options_dict["model_type"]=1
         model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)  
+    elif model_tag == "channel_3n":
+        options_dict["neurons_in_bottleneck"]=3
+        options_dict["model_type"]=2
+        model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name) 
     elif model_tag == "channel_tiny":
         options_dict["neurons_in_bottleneck"]=5
         model = setup_channel_tiny(autoencoder_stage, options_dict, modelpath_and_name)
@@ -140,7 +144,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    setup_model("channel_vgg_xyz", 2).summary()
+    setup_model("channel_3n", 0).summary()
 
 """
 import numpy as np

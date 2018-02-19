@@ -32,7 +32,7 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
 def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, activation="relu", trainable=True):
     if dropout > 0.0: 
         x = Dropout(dropout)(x)
-    elif dropout == -1:
+    elif dropout < 0:
         x = Dropout(0.0)(x)#add this layer, so that loading of modelweights by going through layers works
     
     x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable)(x)
@@ -96,12 +96,18 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         dropout_enc =     [0,0,0,0]
         units_array_dec = [128,512,512,31]
         dropout_dec =     [0,0,0,0]
+    elif model_type==2:
+        units_array_enc = [512,512,128,neurons_in_bottleneck]
+        dropout_enc =     [0,0.1,0.1,0]
+        units_array_dec = [128,512,512,31]
+        dropout_dec =     [0,0.1,0.1,0]
     
     if autoencoder_stage==1:
         #no dropout if the encoder part is used frozen
+        #still add dropout layer with 0 dropout though, so that load_weights works
         trainable=False
-        dropout_enc=[0,]*len(dropout_enc)
-        dropout_dec=[0,]*len(dropout_dec)
+        dropout_enc=[x * (-1) for x in dropout_enc]
+        dropout_dec=[x * (-1) for x in dropout_dec]
     
     if autoencoder_stage==0:
         units_array=units_array_enc+units_array_dec
