@@ -67,7 +67,7 @@ def size_of_circles(hist):
     #default
     #size=8*36*((hist[-1]-min_value)/max_value)
     #new: for xzt
-    size=500*36*((np.abs(hist[-1]))/max_value)**2+1
+    size=50*36*((np.abs(hist[-1]))/max_value)**2+10
     
     return size
 
@@ -182,7 +182,7 @@ elif plot_type=="xyzc":
     encoder.compile(optimizer="adam", loss='mse')
     
     generator = setup_generator_testfile( (1, "up_down"), False, dataset_info_dict, yield_mc_info=True)
-    select_id = None
+    select_id = 2657
     cycle=True
     while cycle==True:
         data, ys, mc_info = next(generator)
@@ -213,6 +213,7 @@ elif plot_type=="xyzc":
             titles = ["Summed over channel id", "Neuron 1", "Neuron 2", "Neuron 3"]
             fig = make_4_plots(xyz_event, prediction[:,:,:,0], prediction[:,:,:,1], prediction[:,:,:,2], n_bins[:-1], titles )
             plt.show(fig)
+            plt.save_fig("fig"+str(event_id)+".pdf")
     
     
 else:
