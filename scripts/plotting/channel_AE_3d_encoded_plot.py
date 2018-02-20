@@ -39,7 +39,7 @@ plot_type = "xyzc"
 fraction_of_train_file=1
 
 
-def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict):
+def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False):
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
@@ -55,7 +55,7 @@ def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict):
     
     generator = generate_batches_from_hdf5_file(test_file, batchsize, n_bins, class_type, 
                                     is_autoencoder, dataset_info_dict, broken_simulations_mode=0,
-                                    f_size=None, zero_center_image=xs_mean, yield_mc_info=False,
+                                    f_size=None, zero_center_image=xs_mean, yield_mc_info=yield_mc_info,
                                     swap_col=None, is_in_test_mode = False)
     return generator
 
@@ -66,7 +66,12 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
     
     for i,plot in enumerate([plot1, plot2, plot3, plot4]):
         ax = fig.add_subplot(221+i, projection='3d')
-        plot_this = reshape_3d_to_3d(plot)
+        
+        #dont display the lowest few percent of counts, so that the view is not cluttered
+        minimal_counts, maximal_counts = np.amin(plot), np.amax(plot)
+        filter_small = minimal_counts + (maximal_counts - minimal_counts)/10
+        
+        plot_this = reshape_3d_to_3d(plot, filter_small=filter_small)
         plot = ax.scatter(plot_this[0],plot_this[1],plot_this[2], c=plot_this[3], rasterized=True)
       
         cbar=fig.colorbar(plot,fraction=0.046, pad=0.1)
@@ -78,7 +83,7 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
         ax.set_zlabel(binsize_to_name_dict[n_bins[2]])
         ax.set_zlim([0,n_bins[2]])
         ax.set_title(titles[i])
-        
+    fig.tight_layout()
     return fig
 
 if plot_type == "encoded":
@@ -177,7 +182,7 @@ elif plot_type=="xyzc":
         print("Mc Info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]\n", mc_info[event_no])
         #event: (1,11,13,18,31)
         #prediction: (1,11,13,18,3)
-        prediction = encoder.predict(event)
+        prediction = encoder.predict(event.reshape((1,)+event.shape))
         prediction = np.reshape( prediction, prediction.shape[1:]) #11,13,18,3
         xyz_event = np.sum(event.reshape(data.shape[1:]), axis=-1) #11,13,18
         
