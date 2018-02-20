@@ -30,11 +30,16 @@ def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
-def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True):
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True, name=None):
     if dropout > 0.0: x = Dropout(dropout)(x)
     x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable)(x)
     if batchnorm==True: x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
-    x = Activation('relu')(x)
+    
+    if name is not None:
+        x = Activation('relu', name=name)(x)
+    else:
+        x = Activation('relu')(x)
+        
     return x
 
 
@@ -369,7 +374,7 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
     x = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3
     x = Flatten()(x)
-    encoded = dense_block(x, units=200, channel_axis=channel_axis, batchnorm=True, dropout=0, trainable=train)
+    encoded = dense_block(x, units=200, channel_axis=channel_axis, batchnorm=True, dropout=0, trainable=train, name="encoded")
     
     if autoencoder_stage == 0:  #The Decoder part:
         #2x2x3

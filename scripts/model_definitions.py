@@ -17,6 +17,7 @@ def make_options_dict(additional_options):
     options_dict["batchnorm_before_dense"]=True
     options_dict["unlock_BN_in_encoder"]=False
     options_dict["batchnorm_for_dense"]=False
+    options_dict["encoder_only"]=False
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -28,6 +29,11 @@ def make_options_dict(additional_options):
         dropout_rate = float(additional_options.split("=")[1])
         options_dict["dropout_for_dense"]=dropout_rate
         print("Dropout rate for dense layers will be", dropout_rate)
+        
+    if "encoder_only" in additional_options:
+        #Change dropout of dense layers
+        options_dict["encoder_only"]=True
+        print("Encoder only mode enabled! Not compatible with all models (you might get an error)")
     
     return options_dict
 
@@ -144,7 +150,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    setup_model("channel_3n", 0).summary()
+    model=setup_model("vgg_5_200_dense",0)
+    model.summary()
 
 """
 import numpy as np

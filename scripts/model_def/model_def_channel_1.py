@@ -83,6 +83,11 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     # for time distributed wrappers: (batchsize, timesteps, n_bins)
     #inputs = Input(shape=(31,11,13,18))
     #x = TimeDistributed( Dense(8), input_shape=(10, 16) )(inputs)
+    encoder_only_mode=options_dict["encoder_only"]
+    if encoder_only_mode==True:
+        autoencoder_stage=1
+        print("Autoencoder stage set to 1 for encoder onyl mode")
+    
     
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
@@ -134,6 +139,9 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
             autoencoder = load_model(modelpath_and_name)
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
+            
+            if encoder_only_mode==True:
+                return encoder
         
         filter_base=[32,32,64]
         train=True

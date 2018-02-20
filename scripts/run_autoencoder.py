@@ -353,15 +353,21 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         print("Autoencoder stage 3:\nParallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
         
-        def switch_encoder_weights(encoder_model, autoencoder_model):
+        def switch_encoder_weights(encoder_model, autoencoder_model, last_encoder_layer_index_override=None):
             #Change the weights of the frozen layers (up to the flatten layer) 
             #of the frozen encoder to that of another autoencoder model
             changed_layers=0
-            #look for last encoder layer = last flatten layer in the network
+            #look for last encoder layer = last flatten layer in the network / layer with name encoded if present
             last_encoder_layer_index = 1
-            for i,layer in enumerate(encoder_model.layers):
-                if "flatten" in layer.name:
-                    last_encoder_layer_index = i
+            if last_encoder_layer_index_override == None:
+                for i,layer in enumerate(encoder_model.layers):
+                    if layer.name == "encoded":
+                        last_encoder_layer_index = i
+                        break
+                    elif "flatten" in layer.name:
+                        last_encoder_layer_index = i
+            else:
+                last_encoder_layer_index = last_encoder_layer_index_override
             
             for i,layer in enumerate(encoder_model.layers):
                 if i <= last_encoder_layer_index:
@@ -370,6 +376,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 else:
                     break
             print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index].name, ")")
+        
+        #in case of the 200_dense model, manually set encoded layer (does not work otherwise...)
+        if modeltag=="vgg_5_200_dense":
+            last_encoder_layer_index_override=35
+            print("Last encoder layer set to 35")
+        else:
+            last_encoder_layer_index_override=None
         
         #Encoder epochs after which to switch the autoencoder model
         switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
@@ -444,7 +457,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 autoencoder_epoch+=1
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
                 print("Changing weights before epoch ",current_epoch+1," to ",autoencoder_model)
-                switch_encoder_weights(model, load_model(autoencoder_model))
+                switch_encoder_weights(model, load_model(autoencoder_model), last_encoder_layer_index_override)
             
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
