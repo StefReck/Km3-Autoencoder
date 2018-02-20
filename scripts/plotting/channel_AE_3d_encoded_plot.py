@@ -82,29 +82,37 @@ data, ys = next(generator)
 #channel AE takes it in that dimension also
 #ys is (32,1)
 
-is_zero = np.where(ys==0)[0][0]#down
-is_one = np.where(ys==1)[0][0] #up
+is_zero_array = np.where(ys==0)[0]#down
+is_one_array = np.where(ys==1)[0] #up
+print(is_zero_array, is_one_array)
 
-#pick two events that are up/down going
-data_event_0, ys_0 = data[is_zero], ys[is_zero]
-data_event_1, ys_1 = data[is_one], ys[is_one]
-
-#prediction has dimension (11,13,18,3)
-prediction_zero = np.reshape(encoder.predict( np.reshape(data_event_0), (1,)+n_bins ), n_bins)
-prediction_one  = np.reshape(encoder.predict( np.reshape(data_event_1), (1,)+n_bins ), n_bins)
-
-prediction_flat_zero=np.reshape(prediction_zero, (11*13*18, 3))
-prediction_flat_one= np.reshape(prediction_one,  (11*13*18, 3))
- 
-# make to (x,y,z), shape (3,32)
-prediction_flat_zero=prediction_flat_zero.transpose()
-prediction_flat_one=prediction_flat_one.transpose()
+how_many_each=3
 
 fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(111, projection='3d')
 
-ax.scatter(prediction_flat_zero[0], prediction_flat_zero[1], prediction_flat_zero[2], c="blue", label="down", rasterized=True)
-ax.scatter(prediction_flat_one[0], prediction_flat_one[1], prediction_flat_one[2], c="red", label="up", rasterized=True)
+
+for is_zero in is_zero_array[:how_many_each]:
+    data_event_0, ys_0 = data[is_zero], ys[is_zero]
+    prediction_zero = np.reshape( encoder.predict( np.reshape(data_event_0, (1,)+n_bins) ), n_bins[:-1]+(3,))
+    prediction_flat_zero=np.reshape(prediction_zero, (11*13*18, 3))
+    prediction_flat_zero=prediction_flat_zero.transpose()
+    ax.scatter(prediction_flat_zero[0], prediction_flat_zero[1], prediction_flat_zero[2], c="blue", label="down", rasterized=True)
+
+for is_one in is_one_array[:how_many_each]:
+    
+    data_event_1, ys_1 = data[is_one], ys[is_one]
+    
+    #prediction has dimension (11,13,18,3)
+    prediction_one  = np.reshape( encoder.predict( np.reshape(data_event_1, (1,)+n_bins) ), n_bins[:-1]+(3,))
+    prediction_flat_one= np.reshape(prediction_one,  (11*13*18, 3))
+     
+    # make to (x,y,z), shape (3,32)
+    prediction_flat_one=prediction_flat_one.transpose()
+
+    ax.scatter(prediction_flat_one[0], prediction_flat_one[1], prediction_flat_one[2], c="red", label="up", rasterized=True)
+
+
 plt.legend()
 plt.show()
 
