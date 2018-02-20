@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
 
 
-def reshape_3d_to_3d(hist_data, filter_small=0):
+def reshape_3d_to_3d(hist_data, filter_small=None):
     #input z.B. 11x13x18  (x,y,z)
     #output: [ [x],[y],[z],[val] ]
     #all values with abs<filter_small are removed
@@ -124,8 +124,8 @@ def reshape_3d_to_3d(hist_data, filter_small=0):
                 grid[3][i]=val
                 i=i+1
                 
-    if filter_small>=0:
-        bigs = abs(grid[3])>filter_small
+    if filter_small is not None:
+        bigs = grid[3]>filter_small
         grid=grid[:,bigs] #Bug?
         #grid[3] = np.multiply(grid[3],bigs)
         
@@ -218,7 +218,7 @@ def make_3d_single_plot(hist_org, n_bins, title, figsize):
 
 def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file, min_counts, n_bins, compare_histograms, energy_threshold):
     #Only bins with abs. more then min_counts are plotted
-    plot_manipulated_sim = True
+    plot_manipulated_sim = False
     #Open files
     
     zero_center_image = np.load(zero_center_file)
