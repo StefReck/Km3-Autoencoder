@@ -66,15 +66,8 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
     
     for i,plot in enumerate([plot1, plot2, plot3, plot4]):
         ax = fig.add_subplot(221+i, projection='3d')
-        
-        if i>0:
-            #subtract mean of image so that less clutter
-            plot = plot - np.mean(plot)
             
-        minimal_counts, maximal_counts = np.amin(plot), np.amax(plot)
-        filter_small = minimal_counts + (maximal_counts - minimal_counts)/10
-        
-        plot_this = reshape_3d_to_3d(plot, filter_small=filter_small)
+        plot_this = reshape_3d_to_3d(plot, filter_small=0.3)
         plot = ax.scatter(plot_this[0],plot_this[1],plot_this[2], c=plot_this[3], rasterized=True)
       
         cbar=fig.colorbar(plot,fraction=0.046, pad=0.1)
@@ -180,10 +173,16 @@ elif plot_type=="xyzc":
     #channel AE takes it in that dimension also
     #ys is (32,1)
     #mc info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
-    
+    select_id = None
     for event_no, event in enumerate(data):
-        if mc_info[event_no][2]<50:
+        event_id = mc_info[event_no][0]
+        if select_id != None:
+            if event_id!=select_id:
+                continue
+        
+        if mc_info[event_no][2]<30:
             continue
+        
         print("Mc Info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]\n", mc_info[event_no])
         #event: (1,11,13,18,31)
         #prediction: (1,11,13,18,3)

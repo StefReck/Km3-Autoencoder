@@ -125,7 +125,7 @@ def reshape_3d_to_3d(hist_data, filter_small=None):
                 i=i+1
                 
     if filter_small is not None:
-        bigs = grid[3]>filter_small
+        bigs = abs(grid[3])>filter_small
         grid=grid[:,bigs] #Bug?
         #grid[3] = np.multiply(grid[3],bigs)
         
