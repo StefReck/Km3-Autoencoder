@@ -377,7 +377,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                     break
             print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index].name, ")")
         
-        #in case of the 200_dense model, manually set encoded layer (does not work otherwise...)
+        #in case of the 200_dense model, manually set encoded layer (does not work otherwise...(it actually does...))
         if modeltag=="vgg_5_200_dense":
             last_encoder_layer_index_override=35
             print("Last encoder layer set to 35")

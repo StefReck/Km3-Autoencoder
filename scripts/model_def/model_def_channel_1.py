@@ -106,6 +106,11 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         dropout_enc =     [0,0.1,0.1,0]
         units_array_dec = [128,512,512,31]
         dropout_dec =     [0,0.1,0.1,0]
+    elif model_type==3:
+        units_array_enc = [768,512,256,neurons_in_bottleneck]
+        dropout_enc =     [0,  0.2,0.1,0 ]
+        units_array_dec = [256,512,768,31]
+        dropout_dec =     [0,  0.2,0.1,0 ]
     
     if autoencoder_stage==1:
         #no dropout if the encoder part is used frozen
