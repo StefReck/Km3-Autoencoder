@@ -67,7 +67,10 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
     for i,plot in enumerate([plot1, plot2, plot3, plot4]):
         ax = fig.add_subplot(221+i, projection='3d')
         
-        #dont display the lowest few percent of counts, so that the view is not cluttered
+        if i>0:
+            #subtract mean of image so that less clutter
+            plot = plot - np.mean(plot)
+            
         minimal_counts, maximal_counts = np.amin(plot), np.amax(plot)
         filter_small = minimal_counts + (maximal_counts - minimal_counts)/10
         
@@ -165,7 +168,7 @@ elif plot_type=="xyzc":
     
     #how many batches will be taken from the file
     #steps = int(test_tuple[0][1] / batchsize)
-    #xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
+    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
     #predictions = encoder.predict_generator(generator, steps=int(test_tuple[0][1] / batchsize), max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
 
     encoder = setup_model(modeltag, 1, model_name, additional_options="encoder_only")
@@ -178,12 +181,15 @@ elif plot_type=="xyzc":
     #ys is (32,1)
     #mc info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     
-    for event_no, event in enumerate(data[:1]):
+    for event_no, event in enumerate(data):
+        if mc_info[event_no][2]<50:
+            continue
         print("Mc Info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]\n", mc_info[event_no])
         #event: (1,11,13,18,31)
         #prediction: (1,11,13,18,3)
         prediction = encoder.predict(event.reshape((1,)+event.shape))
         prediction = np.reshape( prediction, prediction.shape[1:]) #11,13,18,3
+        xyz_event = np.add( event, xs_mean )
         xyz_event = np.sum(event.reshape(data.shape[1:]), axis=-1) #11,13,18
         
         titles = ["Summed over channel id", "Neuron 1", "Neuron 2", "Neuron 3"]
