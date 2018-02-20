@@ -67,7 +67,7 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
     for i,plot in enumerate([plot1, plot2, plot3, plot4]):
         ax = fig.add_subplot(221+i, projection='3d')
             
-        plot_this = reshape_3d_to_3d(plot, filter_small=0.3)
+        plot_this = reshape_3d_to_3d(plot, filter_small=0.5)
         plot = ax.scatter(plot_this[0],plot_this[1],plot_this[2], c=plot_this[3], rasterized=True)
       
         cbar=fig.colorbar(plot,fraction=0.046, pad=0.1)
@@ -168,32 +168,36 @@ elif plot_type=="xyzc":
     encoder.compile(optimizer="adam", loss='mse')
     
     generator = setup_generator_testfile( (1, "up_down"), False, dataset_info_dict, yield_mc_info=True)
-    data, ys, mc_info = next(generator)
-    #data is dimension (batchsize,11,13,18,31)
-    #channel AE takes it in that dimension also
-    #ys is (32,1)
-    #mc info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     select_id = None
-    for event_no, event in enumerate(data):
-        event_id = mc_info[event_no][0]
-        if select_id != None:
-            if event_id!=select_id:
+    cycle=True
+    while cycle==True:
+        data, ys, mc_info = next(generator)
+        #data is dimension (batchsize,11,13,18,31)
+        #channel AE takes it in that dimension also
+        #ys is (32,1)
+        #mc info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
+        
+        for event_no, event in enumerate(data):
+            event_id = mc_info[event_no][0]
+            if select_id != None:
+                if event_id!=select_id:
+                    cycle=False
+                    continue
+            
+            if mc_info[event_no][2]<60:
                 continue
-        
-        if mc_info[event_no][2]<30:
-            continue
-        
-        print("Mc Info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]\n", mc_info[event_no])
-        #event: (1,11,13,18,31)
-        #prediction: (1,11,13,18,3)
-        prediction = encoder.predict(event.reshape((1,)+event.shape))
-        prediction = np.reshape( prediction, prediction.shape[1:]) #11,13,18,3
-        xyz_event = np.add( event, xs_mean )
-        xyz_event = np.sum(event.reshape(data.shape[1:]), axis=-1) #11,13,18
-        
-        titles = ["Summed over channel id", "Neuron 1", "Neuron 2", "Neuron 3"]
-        fig = make_4_plots(xyz_event, prediction[:,:,:,0], prediction[:,:,:,1], prediction[:,:,:,2], n_bins[:-1], titles )
-        plt.show(fig)
+            
+            print("Mc Info: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]\n", mc_info[event_no])
+            #event: (1,11,13,18,31)
+            #prediction: (1,11,13,18,3)
+            prediction = encoder.predict(event.reshape((1,)+event.shape))
+            prediction = np.reshape( prediction, prediction.shape[1:]) #11,13,18,3
+            xyz_event = np.add( event, xs_mean )
+            xyz_event = np.sum(event.reshape(data.shape[1:]), axis=-1) #11,13,18
+            
+            titles = ["Summed over channel id", "Neuron 1", "Neuron 2", "Neuron 3"]
+            fig = make_4_plots(xyz_event, prediction[:,:,:,0], prediction[:,:,:,1], prediction[:,:,:,2], n_bins[:-1], titles )
+            plt.show(fig)
     
     
 else:
