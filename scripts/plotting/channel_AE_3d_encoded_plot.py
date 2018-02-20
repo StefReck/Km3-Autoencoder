@@ -59,6 +59,18 @@ def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yiel
                                     swap_col=None, is_in_test_mode = False)
     return generator
 
+def size_of_circles(hist):
+    #Size of the circles in the histogram, depending on the counts of the bin they represent
+    max_value = np.amax(np.abs(hist))
+    min_value = np.amin(hist)
+    
+    #default
+    #size=8*36*((hist[-1]-min_value)/max_value)
+    #new: for xzt
+    size=500*36*((np.abs(hist[-1]))/max_value)**2+1
+    
+    return size
+
 def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles): 
     binsize_to_name_dict = {11: "X", 13:"Y", 18:"Z", 50:"T", 31:"Channel"}
     
@@ -67,10 +79,12 @@ def make_4_plots(plot1, plot2, plot3, plot4, n_bins, titles):
     for i,plot in enumerate([plot1, plot2, plot3, plot4]):
         ax = fig.add_subplot(221+i, projection='3d')
             
+        plot = plot - plot.mean()
+        
         plot_this = reshape_3d_to_3d(plot, filter_small=0.5)
-        plot = ax.scatter(plot_this[0],plot_this[1],plot_this[2], c=plot_this[3], rasterized=True)
+        hist_plot = ax.scatter(plot_this[0],plot_this[1],plot_this[2], c=plot_this[3], s=size_of_circles(plot_this), rasterized=True)
       
-        cbar=fig.colorbar(plot,fraction=0.046, pad=0.1)
+        cbar=fig.colorbar(hist_plot,fraction=0.046, pad=0.1)
         cbar.ax.set_title('Hits')
         ax.set_xlabel(binsize_to_name_dict[n_bins[0]])
         ax.set_xlim([0,n_bins[0]])
@@ -181,8 +195,9 @@ elif plot_type=="xyzc":
             event_id = mc_info[event_no][0]
             if select_id != None:
                 if event_id!=select_id:
-                    cycle=False
                     continue
+                else:
+                    select_id=None
             
             if mc_info[event_no][2]<60:
                 continue
