@@ -64,6 +64,7 @@ test_file=dataset_info_dict["test_file"]
 filesize_factor_test=dataset_info_dict["filesize_factor_test"]
 batchsize=dataset_info_dict["batchsize"] #def 32
 filesize_factor=dataset_info_dict["filesize_factor"]
+n_bins=dataset_info_dict["n_bins"]
 
 train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
 test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test*fraction_of_train_file)]]
@@ -81,16 +82,16 @@ data, ys = next(generator)
 #channel AE takes it in that dimension also
 #ys is (32,1)
 
-is_zero = np.where(ys==0)[0]#down
-is_one = np.where(ys==1)[0] #up
+is_zero = np.where(ys==0)[0][0]#down
+is_one = np.where(ys==1)[0][0] #up
 
 #pick two events that are up/down going
 data_event_0, ys_0 = data[is_zero], ys[is_zero]
 data_event_1, ys_1 = data[is_one], ys[is_one]
 
 #prediction has dimension (11,13,18,3)
-prediction_zero = encoder.predict(data_event_0)
-prediction_one  = encoder.predict(data_event_1)
+prediction_zero = np.reshape(encoder.predict( np.reshape(data_event_0), (1,)+n_bins ), n_bins)
+prediction_one  = np.reshape(encoder.predict( np.reshape(data_event_1), (1,)+n_bins ), n_bins)
 
 prediction_flat_zero=np.reshape(prediction_zero, (11*13*18, 3))
 prediction_flat_one= np.reshape(prediction_one,  (11*13*18, 3))
