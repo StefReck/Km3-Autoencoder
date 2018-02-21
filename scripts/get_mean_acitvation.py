@@ -17,8 +17,8 @@ from get_dataset_info import get_dataset_info
 from util.run_cnn import load_zero_center_data, generate_batches_from_hdf5_file, h5_get_number_of_rows
 
 def parse_input():
-    parser = argparse.ArgumentParser(description='Make plot of channel AE encoded image')
-    parser.add_argument('model_name', type=str)
+    parser = argparse.ArgumentParser(description='Get mean activation of encoded layer.')
+    parser.add_argument('model_name', nargs="+", type=str)
 
     args = parser.parse_args()
     params = vars(args)
@@ -35,6 +35,7 @@ def get_index_of_encoded_layer(model):
         if neurons <= minimum_neurons:
             minimum_neurons = neurons 
             index_of_encoded_layer=layer_index
+    print("Encoded layer:", model.layers[index_of_encoded_layer].name)
     return index_of_encoded_layer
 
 def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False):
@@ -82,25 +83,31 @@ def get_mean(autoencoder, dataset, no_of_batches):
     dataset_info_dict=get_dataset_info(dataset)
     generator = setup_generator_testfile(class_type=None, is_autoencoder=True, dataset_info_dict=dataset_info_dict)
 
-    list_of_means_of_batches=[]
-    for batch_no in range(no_of_batches):
+    list_of_means_of_events=[]
+    for batch_no in range(no_of_batches):       
         batch_of_data = next(generator)[0]
         encoded_output = get_output_from_layer(index_of_encoded_layer, autoencoder, batch_of_data)
         # dimension will be e.g. (32,2,2,3,50)
         # mean(32xmean(2,2,3,50)) = mean(32,2,2,3,50), 
         # ie mean of means is identical to mean of all sample sets (if all sample sets have same sample size)
-        list_of_means_of_batches.append(np.mean(encoded_output))
-    mean_activation = np.mean(list_of_means_of_batches)
-    return mean_activation
+        #reshape to (32, X)
+        encoded_output = np.reshape( encoded_output, ( encoded_output.shape[0], np.prod(encoded_output.shape[1:]) ) )
+        means = np.mean(encoded_output, axis=1)
+        list_of_means_of_events.extend(means)
+    mean_activation = np.mean(list_of_means_of_events)
+    standard_deviation = np.std(list_of_means_of_events)
+    return mean_activation, standard_deviation
     
 
 if __name__=="__main__":
     params = parse_input()
-    autoencoder_model = params["model_name"]
+    autoencoder_models = params["model_name"]
     
     #autoencoder_model=""
     dataset="xzt"
     no_of_batches = 100
     
-    autoencoder = load_model(autoencoder_model)
-    mean_activation = get_mean(autoencoder, dataset, no_of_batches)
+    for autoencoder_model in autoencoder_models:
+        autoencoder = load_model(autoencoder_model)
+        mean_activation, standard_deviation = get_mean(autoencoder, dataset, no_of_batches)
+        print(autoencoder_model, ":", mean_activation, "+-", standard_deviation)
