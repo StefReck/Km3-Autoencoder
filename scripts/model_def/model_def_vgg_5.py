@@ -7,7 +7,7 @@ Bottleneck study
 from keras.models import Model, load_model
 from keras.layers import Activation, Cropping3D, Reshape, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
 from keras import backend as K
-
+from keras import regularizers
 
 #Standard Conv Blocks
 def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, BNunlock=False):
@@ -50,6 +50,13 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    encoded_penalty        = options_dict["encoded_penalty"]
+    
+    if encoded_penalty != 0:
+        encoded_regularizer = regularizers.l1(encoded_penalty)
+        print("Activity regularizer penalty:", encoded_penalty)
+    else:
+        encoded_regularizer = None
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -74,7 +81,8 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     x = ZeroPadding3D(((0,0),(0,1),(0,1)))(x) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
-    encoded = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3
+    
+    encoded = AveragePooling3D((1, 2, 2), padding='valid', activity_regularizer=encoded_regularizer)(x) #2x2x3
     
     if autoencoder_stage == 0:  #The Decoder part:
         #2x2x3

@@ -109,6 +109,10 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
     elif model_tag == "vgg_5_picture":
+        options_dict["encoded_penalty"]=0
+        model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "vgg_5_picture_reg":
+        options_dict["encoded_penalty"]=1e-4
         model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_channel":
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)

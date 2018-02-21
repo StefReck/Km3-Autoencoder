@@ -35,7 +35,7 @@ def get_index_of_encoded_layer(model):
         if neurons <= minimum_neurons:
             minimum_neurons = neurons 
             index_of_encoded_layer=layer_index
-    print("Encoded layer:", model.layers[index_of_encoded_layer].name)
+    print("Encoded layer:", model.layers[index_of_encoded_layer].name, "with size of bottleneck:", minimum_neurons, "neurons")
     return index_of_encoded_layer
 
 def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False):
