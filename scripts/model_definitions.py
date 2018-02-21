@@ -168,7 +168,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model("channel_2n",0)
+    model=setup_model("vgg_5_picture",0)
     model.summary()
 
 """
