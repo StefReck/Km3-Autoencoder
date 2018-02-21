@@ -18,6 +18,7 @@ def make_options_dict(additional_options):
     options_dict["unlock_BN_in_encoder"]=False
     options_dict["batchnorm_for_dense"]=False
     options_dict["encoder_only"]=False
+    options_dict["encoded_penalty"]=0
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -29,6 +30,12 @@ def make_options_dict(additional_options):
         dropout_rate = float(additional_options.split("=")[1])
         options_dict["dropout_for_dense"]=dropout_rate
         print("Dropout rate for dense layers will be", dropout_rate)
+        
+    if "l1reg=" in additional_options:
+        #Apply l1 reguarizer to encoded layer
+        penalty = float(additional_options.split("=")[1])
+        options_dict["encoded_penalty"]=penalty
+        print("L1 regularizer of encoded layer with factor", penalty)
         
     if "encoder_only" in additional_options:
         #Change dropout of dense layers
@@ -109,10 +116,6 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
     elif model_tag == "vgg_5_picture":
-        options_dict["encoded_penalty"]=0
-        model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
-    elif model_tag == "vgg_5_picture_reg":
-        options_dict["encoded_penalty"]=1e-4
         model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_channel":
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
@@ -172,7 +175,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model("vgg_5_picture",0)
+    model=setup_model(model_tag="vgg_5_picture", autoencoder_stage=0, additional_options="l1reg=1e-4", modelpath_and_name=None)
     model.summary()
 
 """

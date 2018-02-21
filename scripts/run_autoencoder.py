@@ -146,6 +146,15 @@ def lr_schedule(before_epoch, lr_schedule_number):
         else:
             lr=0.01
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+        
+    if lr_schedule_number==3:
+        #for autoencoder training
+        if before_epoch<=20:
+            lr=0.01
+        else:
+            lr=0.1
+        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+        
     return lr
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
