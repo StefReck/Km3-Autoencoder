@@ -61,13 +61,9 @@ xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
               "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
               "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",]
 
-
-modelnames=[] #e.g. vgg_3_autoencoder
-for modelident in test_files:
-    modelnames.append(modelident.split("trained_")[1][:-9])
-    
     
 def make_dicts_from_files(test_files):
+    #Read in multiple test files and for each, sort all columns in their own dict entry
     dict_array=[]
     for test_file in test_files:
         with open("models/"+test_file, "r") as f:
@@ -109,9 +105,66 @@ def make_test_train_plot(epochs, test, train, label, epochs_train=None):
     #plt.minorticks_on()
     #plt.ylim((0, 1))
 
+def make_data_for_plot(dict_array, test_files):
+    #Returns [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
+    return_list_array=[]
+    for i,data_dict in enumerate(dict_array): 
+        #Gather training loss from the _log.txt files for every epoch in the test file:
+        train_epoch_data=[]
+        train_y_data=[]
+        for epoch in data_dict["Epoch"]:
+            e,l = make_loss_epoch(test_files[i], int(epoch)) #automatically takes acc if available
+            train_epoch_data.extend(e)
+            train_y_data.extend(l)
+                
+        test_epochs =      list(map(int,     data_dict["Epoch"])) 
+        #train_epoch_data = list(map(float,   train_epoch_data ))
+        #train_y_data =     list(map(float,   train_y_data))
+        
+        if "Test acc" in data_dict:
+            #This is an encoder network
+            plt.ylabel("Accuracy")
+            test_acc    = list(map(float, data_dict["Test acc"])) 
+            return_list = [test_epochs, test_acc, train_epoch_data, train_y_data]   
+        else:
+            #This is an autoencoder network
+            plt.ylabel("Loss")
+            test_loss    = list(map(float, data_dict["Test loss"])) 
+            return_list = [test_epochs, test_loss, train_epoch_data, train_y_data]
+            
+        return_list_array.append(return_list)
+    return return_list_array
 
+def show_the_plots(data_list_array, test_files):
+    modelnames=[] #e.g. vgg_3_autoencoder; used for labels in plot
+    for modelident in test_files:
+        modelnames.append(modelident.split("trained_")[1][:-9])
+    
+    #one plot for every entry in the array = every test file
+    max_epoch_of_all_plots=0
+    for i,data_list in enumerate(data_list_array):
+        test_epochs = data_list[0]
+        max_epoch=max(test_epochs)
+        if max_epoch>max_epoch_of_all_plots:
+            max_epoch_of_all_plots = max_epoch 
+            
+        make_test_train_plot(epochs=test_epochs, test=data_list[1], epochs_train=data_list[2], train=data_list[3], label=modelnames[i])
+    
+    plt.xlim((0.2,max_epoch))
+    plt.xticks( np.linspace(1,max_epoch,max_epoch) )
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.title("Progress")
+    plt.grid(True)
+    plt.show()
+
+#contains a dict for every test file
 dict_array = make_dicts_from_files(test_files)
+data_list_array = make_data_for_plot(dict_array, test_files)
+show_the_plots(data_list_array, test_files)
 
+
+"""
 max_epoch=0
 for i,data_dict in enumerate(dict_array):
     current_max_epoch = max(tuple(map(int, data_dict["Epoch"])))
@@ -148,7 +201,7 @@ for i,data_dict in enumerate(dict_array):
             
         else:
             make_test_train_plot(data_dict["Epoch"], data_dict["Test loss"], data_dict["Train loss"], modelnames[i])
-            
+
 
         
 plt.xlim((0.2,max_epoch))
@@ -158,3 +211,4 @@ plt.xlabel('Epoch')
 plt.title("Progress")
 plt.grid(True)
 plt.show()
+"""

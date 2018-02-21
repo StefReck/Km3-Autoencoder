@@ -223,10 +223,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #previous epochs; The lr gets decayed once when train_and_test_model is called (so epoch-1 here)
     if lr<0:
         if autoencoder_stage==0  and epoch>0:
-            lr=abs(lr*(1-float(lr_decay))**(epoch-1))
+            lr=abs( lr * (1-float(lr_decay))**(epoch-1) )
             
         elif (autoencoder_stage==1 or autoencoder_stage==2 or autoencoder_stage==3)  and encoder_epoch>0:
-            lr=abs(lr*(1-float(lr_decay))**(encoder_epoch-1))
+            lr=abs( lr * (1-float(lr_decay))**(encoder_epoch-1) )
         else:
             lr=abs(lr)
     
