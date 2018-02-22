@@ -26,7 +26,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
     """
     epoch += 1
-    if epoch > 1 and lr_decay > 0:
+    if epoch > 1 and lr_decay != 0:
         lr *= 1 - float(lr_decay)
         K.set_value(model.optimizer.lr, lr)
         print ('Set LR to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
