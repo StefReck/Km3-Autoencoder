@@ -28,7 +28,7 @@ dump_to_file=None
 
 
 #Generate dummy data instead of actually reading in the files
-debug=False
+debug=1
 
 
 
@@ -131,7 +131,9 @@ colors=["orange",]
 """
 
 
-  
+
+for i,test_file in enumerate(test_files):
+    test_files[i] = "models/"+test_file
 
 if debug==False:
     #Generate data from files (can also save it)
