@@ -14,7 +14,7 @@ def make_dicts_from_files(test_files):
     # returns list of dicts of length len(test_files)
     dict_array=[]
     for test_file in test_files:
-        with open("models/"+test_file, "r") as f:
+        with open(test_file, "r") as f:
             k = list(zip(*(line.strip().split('\t') for line in f)))
         data = {}
         for column in k:
@@ -27,7 +27,7 @@ def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.tx
     #lin-spaced epoch data is added (slightly off)
     loss_epoch_file=test_file[:-8]+"epoch"+str(epoch)+"_log.txt"
 
-    with open("models/"+loss_epoch_file, "r") as f:
+    with open(loss_epoch_file, "r") as f:
         losses=[]
         use_column = 1 #0 is samples, 1 is loss, 2 is accuracy if supervised model
         for line in f:
