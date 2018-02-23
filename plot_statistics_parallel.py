@@ -51,7 +51,7 @@ highest_ae_epoch = max(data_autoencoder[0])
 take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch]
 
 
-data_parallel = np.array(data_parallel)[:,take_these_prl_epochs-1]
+data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
 
 
 def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
@@ -93,7 +93,7 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     else:
         test_plot = ax2.plot(data_parallel[0], data_parallel[1], marker="o")
         
-    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[0])
+    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[1])
     handles1.append(handle_for_legend)
     
     #lhandles, llabels = ax.get_legend_handles_labels()
