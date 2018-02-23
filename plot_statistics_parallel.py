@@ -40,7 +40,7 @@ dump_to_file=None
 
 #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list) 
 #for every test file
-data_from_files, ylabel_list = make_data_from_files(test_files)
+data_from_files, ylabel_list = np.ones((2,4,100)), ("a","b") #make_data_from_files(test_files)
 data_autoencoder = data_from_files[0]
 data_parallel = data_from_files[1]
 
@@ -72,7 +72,6 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
         print("color array does not have the rights size (", len(label_array), "), using default colors.")
     
     
-    handles1=[]
     #plot the data in one plot
     #autoencoder
     if color_override==True:
@@ -91,20 +90,18 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
-    handles1.append(handle_for_legend)
-    
     handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
                                       lw=3, label=label_array[1])
-    handles1.append(handle_for_legend_prl)
+    legend1 = ax.legend(handles=[handle_for_legend, handle_for_legend_prl], 
+                         loc=legend_locations[0])
+    ax.add_artist(legend1)
     
-    legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
-    ax2.add_artist(legend1)
     
     #the test/train box
     test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
     train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, 
                                lw=2, label='Train')
-    legend2 = plt.legend(handles=[test_line,train_line], loc=legend_locations[1])
+    legend2 = ax.legend(handles=[test_line,train_line], loc=legend_locations[1])
     ax.add_artist(legend2)
     
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
