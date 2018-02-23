@@ -40,15 +40,16 @@ dump_to_file=None
 
 #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list) 
 #for every test file
-data_from_files, ylabel_list = np.ones((2,4,100)), ("a","b") #make_data_from_files(test_files)
+data_from_files, ylabel_list = make_data_from_files(test_files)
 data_autoencoder = data_from_files[0]
 data_parallel = data_from_files[1]
 
+#For the parallel network:
 how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*100)
 
 take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
 highest_ae_epoch = max(data_autoencoder[0])
-take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch]
+take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch] #(10,12,14,...)
 
 
 data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
@@ -82,11 +83,16 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     #the train plot
     ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
     
+    
     #parallel, no train plot
+    if len(data_parallel[0]) < len(data_autoencoder[0]):
+        #parallel training might not have been done for all AE epochs
+        data_parallel = data_parallel[:,:len(data_autoencoder)]
+        
     if color_override==True:
-        test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_autoencoder[0], data_parallel[1], marker="o", color=colors[1])
     else:
-        test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o")
+        test_plot_prl = ax2.plot(data_autoencoder[0], data_parallel[1], marker="o")
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
@@ -120,5 +126,6 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     plt.grid(True)
     return(fig)
 
-make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, 
+fig = make_plot_same_y(test_files, data_autoencoder, data_parallel_test, xlabel, ylabel_list, 
                  title, legend_locations, labels_override, colors, xticks, figsize)
+plt.show(fig)
