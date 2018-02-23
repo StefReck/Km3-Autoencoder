@@ -24,7 +24,7 @@ test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
 xlabel="Epoch"
 title="Parallel Training"
-figsize = (9,6)
+figsize = (13,8)
 #Override default labels (names of the models); must be one for every test file, otherwise default
 labels_override=[]
 #legend location for the labels and the test/train box
@@ -32,7 +32,7 @@ legend_locations=(1, "upper left")
 #Override xtick locations; None for automatic
 xticks=None
 # override line colors; must be one color for every test file, otherwise automatic
-colors=[] # = automatic
+colors=["blue", "orange"] # = automatic
 #Name of file to save the numpy array with the plot data to; None will skip saving
 dump_to_file=None
 
@@ -52,7 +52,7 @@ highest_ae_epoch = max(data_autoencoder[0])
 take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch] #(10,12,14,...)
 
 
-data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
+data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-2]
 
 
 def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
@@ -109,9 +109,20 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     legend2 = ax.legend(handles=[test_line,train_line], loc=legend_locations[1])
     ax.add_artist(legend2)
     
+    #x range
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
     plt.xlim((0.2,max_epoch))
-    #plt.xticks( np.linspace(1,max_epoch,max_epoch) )
+    
+    #y range
+    y_range_auto = ( min(data_autoencoder[1]), max(data_autoencoder[1]) )
+    y_range_parallel = ( min(data_parallel[1]), max(data_parallel[1]) )
+    y_range_auto_span = y_range_auto[1]-y_range_auto[0]
+    y_range_parallel_span = y_range_parallel[1]-y_range_parallel[0]
+    
+    ax.set_ylim( (y_range_auto[0]-y_range_auto_span*0.05, 
+                  y_range_auto[1]+y_range_auto_span*0.05 ))
+    ax2.set_ylim( (y_range_parallel[0]-0.05*y_range_parallel_span,
+                   y_range_parallel[1]+0.05*y_range_parallel_span) )
     
     if xticks is not None:
         plt.xticks( xticks )
@@ -122,7 +133,7 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     ax2.set_ylabel(ylabel_list[1])
     plt.xlabel(xlabel)
     plt.title(title)
-    plt.grid(True)
+    ax.grid(True)
     return(fig)
 
 fig = make_plot_same_y(test_files, data_autoencoder, data_parallel_test, xlabel, ylabel_list, 
