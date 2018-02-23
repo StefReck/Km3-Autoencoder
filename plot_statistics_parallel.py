@@ -85,14 +85,13 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     
     
     #parallel, no train plot
-    if len(data_parallel[0]) < len(data_autoencoder[0]):
-        #parallel training might not have been done for all AE epochs
-        data_parallel = data_parallel[:,:len(data_autoencoder)]
-        
+    #parallel training might not have been done for all AE epochs:
+    data_parallel_epochs = data_autoencoder[0][:len(data_parallel[0])]
+    
     if color_override==True:
-        test_plot_prl = ax2.plot(data_autoencoder[0], data_parallel[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o", color=colors[1])
     else:
-        test_plot_prl = ax2.plot(data_autoencoder[0], data_parallel[1], marker="o")
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o")
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
