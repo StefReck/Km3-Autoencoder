@@ -82,29 +82,29 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     
     #the train plot
     ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
-    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
-                                      lw=3, label=label_array[0])
-    handles1.append(handle_for_legend)
     
-    #parallel
+    #parallel, no train plot
     if color_override==True:
         test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o", color=colors[1])
     else:
         test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o")
-        
+    
+    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
+                                      lw=3, label=label_array[0])
+    handles1.append(handle_for_legend)
+    
     handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
                                       lw=3, label=label_array[1])
     handles1.append(handle_for_legend_prl)
     
-    #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
+    ax2.add_artist(legend1)
     
+    #the test/train box
     test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
     train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, 
                                lw=2, label='Train')
     legend2 = plt.legend(handles=[test_line,train_line], loc=legend_locations[1])
-    
-    ax.add_artist(legend1)
     ax.add_artist(legend2)
     
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
