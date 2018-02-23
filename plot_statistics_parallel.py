@@ -52,7 +52,7 @@ highest_ae_epoch = max(data_autoencoder[0])
 take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch] #(10,12,14,...)
 
 
-data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-2]
+data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
 
 
 def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
@@ -120,9 +120,9 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     y_range_parallel_span = y_range_parallel[1]-y_range_parallel[0]
     
     ax.set_ylim( (y_range_auto[0]-y_range_auto_span*0.05, 
-                  y_range_auto[1]+y_range_auto_span*0.05 ))
+                  y_range_auto[1]+y_range_auto_span*0.2 ))
     ax2.set_ylim( (y_range_parallel[0]-0.05*y_range_parallel_span,
-                   y_range_parallel[1]+0.05*y_range_parallel_span) )
+                   y_range_parallel[1]+0.2*y_range_parallel_span) )
     
     if xticks is not None:
         plt.xticks( xticks )
