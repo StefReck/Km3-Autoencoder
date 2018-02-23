@@ -51,7 +51,7 @@ highest_ae_epoch = max(data_autoencoder[0])
 take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch]
 
 
-data_parallel = data_parallel[:,take_these_prl_epochs-1]
+data_parallel = np.array(data_parallel)[:,take_these_prl_epochs-1]
 
 
 def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
@@ -121,4 +121,5 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     plt.grid(True)
     return(fig)
 
-
+make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, 
+                 title, legend_locations, labels_override, colors, xticks, figsize)
