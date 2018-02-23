@@ -103,7 +103,7 @@ def get_dataset_info(dataset_tag):
         broken_simulations_mode=3
         print("Warning: GENERATING BROKEN SIMULATED DATA")
     
-    elif dataset_tag=="xzt_broken3":
+    elif dataset_tag=="xzt_broken4":
         #for xzt
         #generates broken simulated data, very dangerous!
         data_path = home_path+"data/xzt/"
