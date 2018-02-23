@@ -444,7 +444,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 
         #Own execution of training
         #Set LR of loaded model to new lr
-        #K.set_value(model.optimizer.lr, lr)
+        K.set_value(model.optimizer.lr, lr)
             
         #Which epochs are the ones relevant for current stage
         running_epoch=encoder_epoch
@@ -463,8 +463,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Does the model we are about to save exist already?
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
-            lr = lr_schedule(current_epoch+1 , lr_schedule_number)
-            K.set_value(model.optimizer.lr, lr)
+            if lr_schedule_number != 0:
+                lr=lr_schedule(current_epoch+1, lr_schedule_number )
+                K.set_value(model.optimizer.lr, lr)
             
             if current_epoch in switch_autoencoder_model:
                 autoencoder_epoch+=1
