@@ -56,11 +56,8 @@ data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
 
 def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     fig, ax=plt.subplots(figsize=figsize)
+    ax2 = ax.twinx()
     
-    all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
-    if all_ylabels_equal == False:
-        print("Warning: Not all ylabels are equal:", ylabel_list, ",\nchoosing ", ylabel_list[0] )
-
     
     label_array = get_default_labels(test_files)
     if len(labels_override) == len(label_array):
@@ -74,6 +71,7 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
         color_override = False
         print("color array does not have the rights size (", len(label_array), "), using default colors.")
     
+    
     handles1=[]
     #plot the data in one plot
     #autoencoder
@@ -81,26 +79,29 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
         test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o", color=colors[0])
     else:
         test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o")
+    
     #the train plot
     ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
-    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[0])
+    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
+                                      lw=3, label=label_array[0])
     handles1.append(handle_for_legend)
     
     #parallel
-    ax2 = ax.twinx()
     if color_override==True:
-        test_plot = ax2.plot(data_parallel[0], data_parallel[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o", color=colors[1])
     else:
-        test_plot = ax2.plot(data_parallel[0], data_parallel[1], marker="o")
+        test_plot_prl = ax2.plot(data_parallel[0], data_parallel[1], marker="o")
         
-    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[1])
-    handles1.append(handle_for_legend)
+    handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
+                                      lw=3, label=label_array[1])
+    handles1.append(handle_for_legend_prl)
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
     
     test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
-    train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, lw=2, label='Train')
+    train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, 
+                               lw=2, label='Train')
     legend2 = plt.legend(handles=[test_line,train_line], loc=legend_locations[1])
     
     ax.add_artist(legend1)
@@ -114,6 +115,7 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
         plt.xticks( xticks )
     else:
         plt.xticks( np.arange(0, max_epoch+1,10) )
+        
     ax.ylabel(ylabel_list[0])
     ax2.ylabel(ylabel_list[1])
     plt.xlabel(xlabel)
