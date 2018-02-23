@@ -113,8 +113,8 @@ def make_plot_same_y(test_files, data_autoencoder, data_parallel, xlabel, ylabel
     else:
         plt.xticks( np.arange(0, max_epoch+1,10) )
         
-    ax.ylabel(ylabel_list[0])
-    ax2.ylabel(ylabel_list[1])
+    ax.set_ylabel(ylabel_list[0])
+    ax2.set_ylabel(ylabel_list[1])
     plt.xlabel(xlabel)
     plt.title(title)
     plt.grid(True)
