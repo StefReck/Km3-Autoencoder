@@ -130,13 +130,17 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     return evaluation
 
 
-def modify_batches(xs, batchsize, dataset_info_dict, y_values=None):
+def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values=None):
     #Makes changes to the data as read from h5 file, e.g. adding noise, ...
-    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
-
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] 
+    
     if broken_simulations_mode==1:
         #encode up-down info in the first bin
         #y_values are needed for this
+        
+        # if swap_col is not None, zero_center_image is already swapped
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
+        
         ys = np.zeros((batchsize, 1), dtype=np.float32)
         # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
         for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
@@ -158,6 +162,9 @@ def modify_batches(xs, batchsize, dataset_info_dict, y_values=None):
         #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
         #Aufsummiert über y (13 bins): 0.00341*13=0.04433
         
+        # if swap_col is not None, zero_center_image is already swapped
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
+        
         poisson_noise_expectation_value=0.04433 #5kHz
         #zero centered noise:
         noise = np.random.poisson(2*poisson_noise_expectation_value, size=xs.shape) - 2*poisson_noise_expectation_value
@@ -169,7 +176,39 @@ def modify_batches(xs, batchsize, dataset_info_dict, y_values=None):
     elif broken_simulations_mode==3:
         #replace the lower third (z) of the measured signal with 0
         #xs.shape: (32,11,18,50,1)
+        
+        # if swap_col is not None, zero_center_image is already swapped
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
+        
         xs[:,:,:6,:,:]=np.zeros_like(xs[:,:,:6,:,:])
+        
+    elif broken_simulations_mode==4:
+        #increase count rate of down-going events
+        #y_values are needed for this; xs_mean is not updated
+        ys = np.zeros((batchsize, 1), dtype=np.float32)
+        # encode the labels such that they are all within the same range (and filter the ones we don't want for now)
+        for c, y_val in enumerate(y_values): # Could be vectorized with numba, or use dataflow from tensorpack
+            ys[c] = encode_targets(y_val, class_type=(1, "up_down"))
+            #ys is same length as xs and contains 1 (for up) or 0 (for down), shape (batchsize,1)
+        ys=ys.flatten().astype(bool) #now ys is shape (batchsize,); 1 (for up) or 0 (for down)
+        
+        #where are more then x hits
+        hits_mask = xs>=3
+        #which events are up going (this is equal to ys)
+        #up_going = ys==1
+        #where are more then x hits AND the event is down going
+        hits_mask[ys] = np.zeros_like(hits_mask[ys])
+        #expectation value = 2, with n=3,p=2/3
+        multiply_by = np.random.binomial(3,2/3, hits_mask.shape)
+        xs = np.add(xs, hits_mask*multiply_by)
+            
+        # if swap_col is not None, zero_center_image is already swapped
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
+            
+        
+    else:
+        # if swap_col is not None, zero_center_image is already swapped
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
         
     return xs
 
@@ -201,7 +240,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     
     dimensions = get_dimensions_encoding(n_bins, batchsize)
     
-    if broken_simulations_mode == 2:
+    if broken_simulations_mode == 2 or broken_simulations_mode == 4:
         #make it so the noise is always the same on the same histogramm
         #also use different noise on test and train data
         if is_in_test_mode == False:
@@ -226,8 +265,6 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             #    swap_4d_channels_dict = {'yzt-x': [3,1,2,0]}
             #    xs[:, swap_4d_channels_dict[swap_col]] = xs[:, [0,1,2,3]]
 
-            if zero_center_image is not None: xs = np.subtract(xs, zero_center_image) # if swap_col is not None, zero_center_image is already swapped
-            
             if dataset_info_dict["generator_can_read_y_values"]==True:
                 # and mc info (labels)
                 y_values = f['y'][n_entries:n_entries+batchsize]
@@ -235,8 +272,8 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             else:
                 y_values = None
                 
-            #Make changes, e.g. add noise,...
-            xs = modify_batches(xs=xs, y_values=y_values, batchsize=batchsize, dataset_info_dict=dataset_info_dict)
+            #Make changes, e.g. add broken mode, subtract zero_center_image, ...
+            xs = modify_batches(xs=xs, y_values=y_values, batchsize=batchsize, dataset_info_dict=dataset_info_dict, zero_center_image=zero_center_image)
             
             #Modified for autoencoder:
             if is_autoencoder == True:
