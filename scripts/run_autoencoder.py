@@ -355,8 +355,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Always using custom lr schedule now, parser values are ignored
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
         #if first epoch is 0, then the trained supervised network will be used
-        if "channel" in modeltag:
-            #channel id autoencoders need less epochs per AE epoch
+        if modeltag[:7] == "channel":
+            #channel id autoencoders need less epochs per AE epoch, their modeltag starts with channel
             how_many_epochs_each_to_train =[1,]*100
         else:
             how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*94
