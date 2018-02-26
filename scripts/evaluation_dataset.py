@@ -10,6 +10,7 @@ import numpy as np
 from keras.models import load_model
 import pickle
 import os
+import matplotlib.pyplot as plt
 
 from util.evaluation_utilities import *
 from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
@@ -19,9 +20,10 @@ from get_dataset_info import get_dataset_info
 # "broken_data_mode_"+enc oder +unf
 #e.g. "1enc"
 which_ones=("4unf","4enc")
+#extra string to be included in file names
 extra_name=""
-#default is 1
-energy_range_of_one_bin=1
+#number of bins; default is 97; backward compatibility with 98 bins
+bins=97
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
 #between "on simulations" and "on measured data"
 make_difference_plot=False
@@ -89,26 +91,26 @@ def get_info(which_one, extra_name=""):
                        "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
         #Which dataset each to use
-        dataset_array = ("xzt_broken", "xzt", "xzt")
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Unfrozen network performance with manipulated simulations'
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken4_unf"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.4,1.05)
+        y_lims=(0.5,1.0)
     
     elif which_one=="4enc":
         modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
         #Which dataset each to use
-        dataset_array = ("xzt_broken", "xzt", "xzt")
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.7,1.0)
+        y_lims=(0.7,0.95)
     
     else:
         print(which_one, "is not known!")
@@ -124,7 +126,7 @@ def get_info(which_one, extra_name=""):
 
 #Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
 #results/data folder, so that it has not to be generated again
-def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_file):
+def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_file, bins):
     model = load_model(modelpath + modelident)
     
     dataset_info_dict = get_dataset_info(dataset)
@@ -141,7 +143,7 @@ def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_
     print("Making energy_coorect_array of ", modelident)
     arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
     #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
-    hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100))
+    hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
     #save to file
     print("Saving hist_data as", name_of_file)
     with open(name_of_file, "wb") as dump_file:
@@ -171,20 +173,29 @@ def open_hist_data(name_of_file):
         hist_data = pickle.load(dump_file)
     return hist_data
 
-def make_or_load_files(modelnames, dataset_array, modelidents=None, modelpath=None, class_type=None):
+def make_or_load_files(modelnames, dataset_array, bins, modelidents=None, modelpath=None, class_type=None):
     hist_data_array=[]
     for i,modelname in enumerate(modelnames):
         dataset=dataset_array[i]
         
-        print("Working on ",modelname,"using dataset", dataset)
-        name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_hist_data.txt"
+        print("Working on ",modelname,"using dataset", dataset, "with", bins, "bins")
+        
+        if bins==98:
+            #backward compatibility: Earlier no bins were specified
+            name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_hist_data.txt"
+        else:
+            name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_"+str(bins)+"_bins_hist_data.txt"
+        
+        
         if os.path.isfile(name_of_file)==True:
             hist_data_array.append(open_hist_data(name_of_file))
         else:
-            hist_data = make_and_save_hist_data(modelpath, dataset, modelidents[i], class_type, name_of_file)
+            hist_data = make_and_save_hist_data(modelpath, dataset, modelidents[i], class_type, name_of_file, bins)
             hist_data_array.append(hist_data)
         print("Done.")
     return hist_data_array
+
+
 
 label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 #Overwrite default color palette. Leave empty for auto
@@ -211,11 +222,11 @@ if make_difference_plot == False:
         save_plot_as = plot_path + plot_file_name
         
         #generate or load data automatically:
-        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Accuracy"
-            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
+            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
         elif plot_type == "loss":
             y_label_of_plot="Loss"
             make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
@@ -245,7 +256,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
         
-        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
         
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
@@ -255,7 +266,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
             
-        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type)
+        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
         
         
         label_array=["Unfrozen", "Autoencoder-encoder"]
@@ -288,7 +299,7 @@ else:
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Difference in accuracy"
-            make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, energy_range_of_one_bin=energy_range_of_one_bin) 
+            make_energy_to_accuracy_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
         elif plot_type == "loss":
             y_label_of_plot="Loss"
             make_energy_to_loss_plot_comp_data(hist_data_array_diff, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 

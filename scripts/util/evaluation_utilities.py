@@ -151,7 +151,7 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
 
 #------------- Functions used in making Matplotlib plots -------------#
 
-def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100)):
+def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100), bins=97):
     """
     Makes data for a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -163,14 +163,17 @@ def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100)):
     energy = arr_energy_correct[:, 0]
     correct = arr_energy_correct[:, 1]
 
-    hist_1d_energy = np.histogram(energy, bins=98, range=plot_range) #häufigkeit von energien
-    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=98, range=plot_range) #häufigkeit von richtigen energien
+    hist_1d_energy = np.histogram(energy, bins=bins, range=plot_range) #häufigkeit von energien
+    hist_1d_energy_correct = np.histogram(arr_energy_correct[correct == 1, 0], bins=bins, range=plot_range) #häufigkeit von richtigen energien
 
     bin_edges = hist_1d_energy[1]
     hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
     # For making it work with matplotlib step plot
     #hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
-    bin_edges_centered = bin_edges[:-1] + 0.5
+    
+    #shift the energy scale by half a bin, so that step plot is centered later
+    width_of_one_bin = bin_edges[1]-bin_edges[0]
+    bin_edges_centered = bin_edges[:-1] + 0.5*width_of_one_bin
     
     return [bin_edges_centered, hist_1d_energy_accuracy_bins]
 
@@ -255,7 +258,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], energy_range_of_one_bin=1):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], energy_range_of_one_bin=1, save=True):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -267,20 +270,6 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
         #Use user defined colors, if given in proper length; else default palette
         energy=hist_data_array[i][0]
         y_axis_data=hist_data_array[i][1]
-        
-        if energy_range_of_one_bin != 1:
-            #default energy resolution is 1 bin per GeV, ranging from 3 to 100
-            #can be made more coarse:
-            coarse_energy, coarse_y_data = [], []
-            for lower_bin_edge in np.arange(0,99,energy_range_of_one_bin):
-                data_in_this_range = np.logical_and(energy>lower_bin_edge, energy<lower_bin_edge+energy_range_of_one_bin)
-                if len(energy[data_in_this_range]) is not 0:
-                    new_bin_energy=np.average(energy[data_in_this_range])
-                    new_bin_y_data=np.average(y_axis_data[data_in_this_range])
-                    coarse_energy.append(new_bin_energy)
-                    coarse_y_data.append(new_bin_y_data)
-            energy=coarse_energy
-            y_axis_data = coarse_y_data
         
         if len(color_array) == len(hist_data_array):
             plt.step(energy, y_axis_data, where='mid', label=label_array[i], color=color_array[i])

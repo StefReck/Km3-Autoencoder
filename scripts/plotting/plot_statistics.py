@@ -194,6 +194,89 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     return(fig)
     
 
+
+def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+    fig, ax=plt.subplots(figsize=figsize)
+    ax2 = ax.twinx()
+    
+    
+    label_array = get_default_labels(test_files)
+    if len(labels_override) == len(label_array):
+        label_array=labels_override
+    else:
+        print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+    
+    if len(colors) == len(label_array):
+        color_override = True
+    else:
+        color_override = False
+        print("color array does not have the rights size (", len(label_array), "), using default colors.")
+    
+    
+    #plot the data in one plot
+    #autoencoder
+    if color_override==True:
+        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o", color=colors[0])
+    else:
+        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o")
+    
+    #the train plot
+    ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
+    
+    
+    #parallel, no train plot
+    #parallel training might not have been done for all AE epochs:
+    data_parallel_epochs = data_autoencoder[0][:len(data_parallel[0])]
+    
+    if color_override==True:
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o", color=colors[1])
+    else:
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o")
+    
+    handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
+                                      lw=3, label=label_array[0])
+    handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
+                                      lw=3, label=label_array[1])
+    legend1 = ax.legend(handles=[handle_for_legend, handle_for_legend_prl], 
+                         loc=legend_locations[0])
+    ax.add_artist(legend1)
+    
+    
+    #the test/train box
+    test_line = mlines.Line2D([], [], color='grey', marker="o", label='Test')
+    train_line = mlines.Line2D([], [], color='grey', linestyle="-", alpha=0.5, 
+                               lw=2, label='Train')
+    legend2 = ax.legend(handles=[test_line,train_line], loc=legend_locations[1])
+    ax.add_artist(legend2)
+    
+    #x range
+    max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
+    plt.xlim((0.2,max_epoch))
+    
+    #y range
+    y_range_auto = ( min(data_autoencoder[1]), max(data_autoencoder[1]) )
+    y_range_parallel = ( min(data_parallel[1]), max(data_parallel[1]) )
+    y_range_auto_span = y_range_auto[1]-y_range_auto[0]
+    y_range_parallel_span = y_range_parallel[1]-y_range_parallel[0]
+    
+    ax.set_ylim( (y_range_auto[0]-y_range_auto_span*0.05, 
+                  y_range_auto[1]+y_range_auto_span*0.2 ))
+    ax2.set_ylim( (y_range_parallel[0]-0.05*y_range_parallel_span,
+                   y_range_parallel[1]+0.2*y_range_parallel_span) )
+    
+    if xticks is not None:
+        plt.xticks( xticks )
+    else:
+        plt.xticks( np.arange(0, max_epoch+1,10) )
+        
+    ax.set_ylabel(ylabel_list[0])
+    ax2.set_ylabel(ylabel_list[1])
+    plt.xlabel(xlabel)
+    plt.title(title)
+    ax.grid(True)
+    return(fig)
+    
+
 """
 max_epoch=0
 for i,data_dict in enumerate(dict_array):
