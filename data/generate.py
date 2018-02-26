@@ -4,8 +4,11 @@ import numpy as np
 original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
 original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
 
-outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
-outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
+#outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
+#outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
+
+outfile_train="xyz/elec-CC_and_muon-CC_xyz_train_1_to_240_shuffled_0.h5"
+outfile_test ="xyz/elec-CC_and_muon-CC_xyz_test_481_to_540_shuffled_0.h5"
    
 # x, y, z, t, c
 #11,13,18,50,31
@@ -16,9 +19,9 @@ outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
 fraction=0.5
 #which axis including filesize to sum over, None if no sum
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
-sum_over_axis=None
+sum_over_axis=4
 #
-reshape_to_channel_and_shuffle=True
+reshape_to_channel_and_shuffle=False
 
 def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle):     
     print("Generating file", save_to)
@@ -36,7 +39,7 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
     if reshape_to_channel_and_shuffle == True:
         hists = hists.reshape(-1, hists.shape[-1])
         np.random.shuffle(hists)
-        mc_infos=np.zeros(1)
+        mc_infos=np.zeros(100)
     else:
         mc_infos=f["y"][:up_to_which]
     print("New shape (hists):", hists.shape, ", mc infos:", mc_infos.shape)
