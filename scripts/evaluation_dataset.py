@@ -222,7 +222,7 @@ if make_difference_plot == False:
         save_plot_as = plot_path + plot_file_name
         
         #generate or load data automatically:
-        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
+        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Accuracy"
@@ -256,7 +256,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
         
-        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
+        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins))
         
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
@@ -266,7 +266,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
             
-        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents, modelpath, class_type, bins=bins)
+        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins))
         
         
         label_array=["Unfrozen", "Autoencoder-encoder"]

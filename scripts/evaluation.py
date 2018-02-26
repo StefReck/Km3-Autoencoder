@@ -20,6 +20,8 @@ This data is then binned and automatically dumped. Instead of recalculating, it 
 Can also plot it and save it to results/plots
 """
 
+#TODO update with new bin option of make_energy_to_accuracy_plot
+
 #Model info:
 #list of modelidents to work on (has to be an array, so add , at the end if only one file)
 modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch2_supervised_up_down_accdeg_epoch17.h5",
