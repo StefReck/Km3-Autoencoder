@@ -2,7 +2,7 @@
 """
 Plot autoencoder and supervised parallel performance in one plot.
 """
-
+#TODO display train loss of parallel where possible (when schedule is at 1 AE E/1 par E)
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
@@ -49,7 +49,7 @@ how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*100)
 
 take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
 highest_ae_epoch = max(data_autoencoder[0])
-take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_ae_epoch] #(10,12,14,...)
+take_these_prl_epochs=take_these_prl_epochs[:highest_ae_epoch] #(10,12,14,...)
 
 
 data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
