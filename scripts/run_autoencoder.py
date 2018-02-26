@@ -130,7 +130,7 @@ def lr_schedule(before_epoch, lr_schedule_number):
     #return the desired lr of an epoch according to a lr schedule.
     #In the test_log file, the epoch "before_epoch" will have this lr.
     #lr rate should be set to this before starting the next epoch.
-    if lr_schedule_number==1:
+    if lr_schedule_number=="s1":
         #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
         #for parallel training
         if before_epoch<=14:
@@ -139,7 +139,7 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.0005
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     
-    if lr_schedule_number==2:
+    elif lr_schedule_number=="s2":
         #for autoencoder training
         if before_epoch<=20:
             lr=0.001
@@ -147,13 +147,26 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.01
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
         
-    if lr_schedule_number==3:
+    elif lr_schedule_number=="s3":
         #for autoencoder training
         if before_epoch<=20:
             lr=0.01
         else:
             lr=0.1
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+        
+    elif lr_schedule_number=="lin_growth":
+        start_lr = 0.001
+        target_lr = 0.1
+        in_epochs=30
+        lrates = np.linspace(start=start_lr, top=target_lr, num=in_epochs)
+        
+        try:
+            lr=lrates[before_epoch-1]
+            print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+        except IndexError:
+            lr=lrates[-1]
+            print("Warning: LR-schedule",lr_schedule_number,"is not defined anymore before epoch", before_epoch, ", using last lr from schedule:", lr)
         
     return lr
 
@@ -180,10 +193,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #or it can be a string like s1 for lr schedule 1. In this case, lr is ignored
     try:
         lr_decay=float(learning_rate_decay) # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
-        lr_schedule_number=0 # no schedule
+        lr_schedule_number=None # no schedule
     except ValueError:
-        #then it is a schedule like s1
-        lr_schedule_number=int(learning_rate_decay.split("s")[-1])
+        #then it is a schedule like s1 or some other string
+        lr_schedule_number=learning_rate_decay
         lr_decay=0
         lr=0.001
         print("Using learning rate schedule", lr_schedule_number)
@@ -463,7 +476,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Does the model we are about to save exist already?
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
-            if lr_schedule_number != 0:
+            if lr_schedule_number != None:
                 lr=lr_schedule(current_epoch+1, lr_schedule_number )
                 K.set_value(model.optimizer.lr, lr)
             
@@ -491,7 +504,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         running_epoch=encoder_epoch #Stage 1 and 2
         
     #Set LR of loaded model to new lr
-    if lr_schedule_number != 0:
+    if lr_schedule_number != None:
             lr=lr_schedule(running_epoch+1, lr_schedule_number )
     K.set_value(model.optimizer.lr, lr)
     
@@ -511,7 +524,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Does the model we are about to save exist already?
         check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
         
-        if lr_schedule_number != 0:
+        if lr_schedule_number != None:
             lr=lr_schedule(current_epoch+1, lr_schedule_number )
             K.set_value(model.optimizer.lr, lr)
             
