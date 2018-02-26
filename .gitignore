@@ -5,5 +5,7 @@ models/*
 results/*
 scripts/model_def/__pycache__
 scripts/util/__pycache__
+__pycache__/
+scripts/plotting/__pycache__/
 
 

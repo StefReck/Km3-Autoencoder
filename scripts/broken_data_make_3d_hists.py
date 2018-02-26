@@ -5,21 +5,26 @@ They are taken from the generator, just like in training.
 """
 import h5py
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 from util.run_cnn import generate_batches_from_hdf5_file
 from get_dataset_info import get_dataset_info
 from plotting.make_autoencoder_3d_output_plot import make_3d_plots, reshape_3d_to_3d
-import matplotlib.pyplot as plt
+
 
 which_broken_mode=4
 batchsize=5
 min_counts=0.1
 
+#save to data; None for dont save but just display
+save_to_pdf_name="broken_2_3D_hist.pdf"
+
 titles=["Manipulated simulation", "Original simulation as 'measured' data"]
-suptitle="Simulated data with added up-down information"
+suptitle="Simulated data with higher counts for up-going events"
 
 #norm = normal first for plot, inv = broken first
-order="norm"
+order="inv"
 
 dataset_info_dict=get_dataset_info("debug_xzt")
 is_autoencoder=True
@@ -53,6 +58,7 @@ if which_broken_mode==3:
     xs_mean[:,:6,:,:]=np.zeros_like(xs_mean[:,:6,:,:])
 data_broken=np.add(next(generator_broken)[0], xs_mean)
 
+fig_array=[]
 for i in range(len(data_normal)):
     plot_brok=reshape_3d_to_3d(data_broken[i], min_counts)
     plot_norm=reshape_3d_to_3d(data_normal[i], min_counts)
@@ -62,5 +68,19 @@ for i in range(len(data_normal)):
         fig = make_3d_plots(plot_brok, plot_norm, n_bins[:-1], suptitle=suptitle, figsize=(12,7), titles=titles)
     else:
         raise()
-plt.show()
+    fig_array.append(fig)
+    plt.close(fig)
+
+if save_to_pdf_name == None:
+    for figure in fig_array:
+        plt.show(figure)
+else:
+    with PdfPages(save_to_pdf_name) as pp:
+        for figure in fig_array:
+            pp.savefig(figure)
+            plt.close(figure)
+    print("Saved as", save_to_pdf_name)
+
+        
+    
 
