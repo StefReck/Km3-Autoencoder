@@ -3,7 +3,7 @@
 """
 Evaluate model performance after training. 
 This is for comparison of supervised accuracy on different datasets.
-Especially fro the plots for the broken data comparison.
+Especially for the plots for the broken data comparison.
 """
 
 import numpy as np
@@ -18,10 +18,10 @@ from get_dataset_info import get_dataset_info
 
 # "broken_data_mode_"+enc oder +unf
 #e.g. "1enc"
-which_ones=("1unf","1enc","2unf","2enc")
-extra_name="_coarse"
+which_ones=("4unf","4enc")
+extra_name=""
 #default is 1
-energy_range_of_one_bin=10
+energy_range_of_one_bin=1
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
 #between "on simulations" and "on measured data"
 make_difference_plot=False
@@ -84,13 +84,39 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.68,0.92)
     
+    elif which_one=="4unf":
+        modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
+                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Unfrozen network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken4_unf"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.4,1.05)
+    
+    elif which_one=="4enc":
+        modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken4_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,1.0)
+    
     else:
         print(which_one, "is not known!")
         raise(TypeError)
         
     return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
 
-
+#label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
