@@ -23,13 +23,14 @@ which_ones=("4unf","4enc")
 #extra string to be included in file names
 extra_name=""
 #number of bins; default is 97; backward compatibility with 98 bins
-bins=97
+bins=32
 #instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
 #between "on simulations" and "on measured data"
 make_difference_plot=False
 
 
-def get_info(which_one, extra_name=""):
+def get_info(which_one, extra_name="", bins=97):
+    extra_name="_"+ str(bins)+"_bins" + extra_name
     if which_one=="1unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -140,7 +141,7 @@ def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_
     xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
 
     
-    print("Making energy_coorect_array of ", modelident)
+    print("Making energy_correct_array of ", modelident)
     arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
     #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
     hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
@@ -180,11 +181,7 @@ def make_or_load_files(modelnames, dataset_array, bins, modelidents=None, modelp
         
         print("Working on ",modelname,"using dataset", dataset, "with", bins, "bins")
         
-        if bins==98:
-            #backward compatibility: Earlier no bins were specified
-            name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_hist_data.txt"
-        else:
-            name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_"+str(bins)+"_bins_hist_data.txt"
+        name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_"+str(bins)+"_bins_hist_data.txt"
         
         
         if os.path.isfile(name_of_file)==True:
@@ -256,7 +253,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
         
-        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins))
+        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
         
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
@@ -266,7 +263,7 @@ else:
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
             
-        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins))
+        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
         
         
         label_array=["Unfrozen", "Autoencoder-encoder"]

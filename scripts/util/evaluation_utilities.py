@@ -168,14 +168,11 @@ def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100), bins=9
 
     bin_edges = hist_1d_energy[1]
     hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
-    # For making it work with matplotlib step plot
-    #hist_1d_energy_accuracy_bins_leading_zero = np.hstack((0, hist_1d_energy_accuracy_bins))
     
-    #shift the energy scale by half a bin, so that step plot is centered later
-    width_of_one_bin = bin_edges[1]-bin_edges[0]
-    bin_edges_centered = bin_edges[:-1] + 0.5*width_of_one_bin
+    #For proper plotting with plt.step where="post"
+    hist_1d_energy_accuracy_bins=np.append(hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins[-1])
     
-    return [bin_edges_centered, hist_1d_energy_accuracy_bins]
+    return [bin_edges, hist_1d_energy_accuracy_bins]
 
 
 def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range=(3, 100)):
@@ -272,9 +269,9 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
         y_axis_data=hist_data_array[i][1]
         
         if len(color_array) == len(hist_data_array):
-            plt.step(energy, y_axis_data, where='mid', label=label_array[i], color=color_array[i])
+            plt.step(energy, y_axis_data, where='post', label=label_array[i], color=color_array[i])
         else:
-            plt.step(energy, y_axis_data, where='mid', label=label_array[i])
+            plt.step(energy, y_axis_data, where='post', label=label_array[i])
             
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
