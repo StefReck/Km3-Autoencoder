@@ -29,8 +29,9 @@ bins=32
 make_difference_plot=False
 
 
+extra_name="_"+ str(bins)+"_bins" + extra_name
+
 def get_info(which_one, extra_name="", bins=97):
-    extra_name="_"+ str(bins)+"_bins" + extra_name
     if which_one=="1unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",

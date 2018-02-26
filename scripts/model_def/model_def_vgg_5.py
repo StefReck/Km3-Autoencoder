@@ -427,6 +427,93 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
         model = Model(inputs=inputs, outputs=outputs)
         return model
 
+
+def setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name=None):
+    batchnorm_before_dense = options_dict["batchnorm_before_dense"]
+    dropout_for_dense      = options_dict["dropout_for_dense"]
+    unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
+    batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    
+    train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    
+    filter_base=[32,40,44,46,64]
+    
+    inputs = Input(shape=(11,18,50,1))
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
+    x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
+    x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
+    x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
+    
+    x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x23
+    x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x) #12,18,24
+    x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #10x16x22
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x) #5x8x11
+    
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #7x10x11
+    x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x9
+    x = ZeroPadding3D(((0,1),(0,0),(0,1)))(x) #6x8x10
+    x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="valid", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x8
+    x = AveragePooling3D((2, 2, 2), padding='valid')(x) #2x3x4
+    
+    x = ZeroPadding3D(((0,0),(0,1),(0,0)))(x) #2x4x4
+    x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x4
+    x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x4
+    x = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x2
+    
+    x=conv_block(x,      filters=filter_base[4], kernel_size=(2,2,2), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x2x2
+    x=conv_block(x,      filters=filter_base[4], kernel_size=(2,2,2), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x2x2
+    encoded = AveragePooling3D((2, 2, 2), padding='valid')(x) #1x1x1
+    
+    
+    if autoencoder_stage == 0:  #The Decoder part:
+        #2x2x3
+        x = UpSampling3D((2, 2, 2))(encoded) #2x2x2
+        x=convT_block(x, filters=filter_base[4], kernel_size=(2,2,2), padding="same", channel_axis=channel_axis) #2x4x4
+        x=convT_block(x, filters=filter_base[3], kernel_size=(2,2,2), padding="same", channel_axis=channel_axis) #2x4x4
+        
+        x = UpSampling3D((1, 2, 2))(x) #2x4x4
+        x = ZeroPadding3D(((1,1),(0,1),(1,1)))(x) #4x5x6
+        x=conv_block(x,  filters=filter_base[3], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #2x3x4
+        x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x4
+        
+        x = UpSampling3D((2, 2, 2))(x) #4x6x8
+        x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #6x8x10
+        x = ZeroPadding3D(((0,1),(1,1),(1,2)))(x) #7x10x13
+        x=conv_block(x,  filters=filter_base[1], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #5x8x11
+        
+        x = UpSampling3D((2, 2, 2))(x) #10x16x22
+        x=convT_block(x, filters=filter_base[1], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #12x18x24
+        x = ZeroPadding3D(((0,1),(1,1),(0,1)))(x) #13,20,25
+        x=conv_block(x,  filters=filter_base[0], kernel_size=(3,3,3), padding="valid", trainable=True, channel_axis=channel_axis) #11x18x23
+        
+        x = UpSampling3D((1, 1, 2))(x) #11x18x46
+        x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #13x20x48
+        x=Cropping3D(((1,1),(1,1),(0,0)))(x) #11x18x48
+        x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #13x20x50
+        x=Cropping3D(((1,1),(1,1),(0,0)))(x)#11x18x50
+        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        #Output 11x13x18 x 1
+        autoencoder = Model(inputs, decoded)
+        return autoencoder
+    else: #Replacement for the decoder part for supervised training:
+        if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
+            encoder = Model(inputs=inputs, outputs=encoded)
+            autoencoder = load_model(modelpath_and_name)
+            for i,layer in enumerate(encoder.layers):
+                layer.set_weights(autoencoder.layers[i].get_weights())
+            
+        x = Flatten()(encoded)
+        if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
+
+
 #setup_vgg_5_morefilter(0, 0).summary()
 #setup_vgg_5_channel(0).summary()
 
