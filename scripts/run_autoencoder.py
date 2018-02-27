@@ -126,7 +126,8 @@ cd $WOODYHOME/Km3-Autoencoder
 python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
 """
 
-def lr_schedule(before_epoch, lr_schedule_number):
+def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
+    #learning rate is the original lr input
     #return the desired lr of an epoch according to a lr schedule.
     #In the test_log file, the epoch "before_epoch" will have this lr.
     #lr rate should be set to this before starting the next epoch.
@@ -137,7 +138,6 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.001 * 0.95**(before_epoch-1)
         else:
             lr=0.0005
-        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     
     elif lr_schedule_number=="s2":
         #for autoencoder training
@@ -145,7 +145,6 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.001
         else:
             lr=0.01
-        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
         
     elif lr_schedule_number=="s3":
         #for autoencoder training
@@ -153,18 +152,15 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.01
         else:
             lr=0.1
-        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
         
-    elif lr_schedule_number=="lin_growth1":
-        start_lr = 0.01
-        target_lr = 1.0
-        in_epochs=50
-        increment = (target_lr - start_lr)/in_epochs
+    elif lr_schedule_number=="steps15":
+        # multiply user lr by 10 every 15 epochs
+        start_lr       = learning_rate
+        multiply_with  = 10
+        every_n_epochs = 15
+        lr = start_lr * multiply_with**np.floor((before_epoch-1)/every_n_epochs)
         
-
-        lr = start_lr + increment * (before_epoch-1)
-        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
-
+    print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
@@ -454,7 +450,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 
         #Own execution of training
         #Set LR of loaded model to new lr
-        K.set_value(model.optimizer.lr, lr)
+        K.set_value(model.optimizer.lr, user_lr)
             
         #Which epochs are the ones relevant for current stage
         running_epoch=encoder_epoch
@@ -474,7 +470,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
             if lr_schedule_number != None:
-                lr=lr_schedule(current_epoch+1, lr_schedule_number )
+                lr=lr_schedule(current_epoch+1, lr_schedule_number, learning_rate )
                 K.set_value(model.optimizer.lr, lr)
             
             if current_epoch in switch_autoencoder_model:
@@ -502,7 +498,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
     #Set LR of loaded model to new lr
     if lr_schedule_number != None:
-            lr=lr_schedule(running_epoch+1, lr_schedule_number )
+            lr=lr_schedule(running_epoch+1, lr_schedule_number, learning_rate )
     K.set_value(model.optimizer.lr, lr)
     
         
@@ -522,7 +518,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
         
         if lr_schedule_number != None:
-            lr=lr_schedule(current_epoch+1, lr_schedule_number )
+            lr=lr_schedule(current_epoch+1, lr_schedule_number, learning_rate )
             K.set_value(model.optimizer.lr, lr)
             
         #print all the input for train_and_test_model for debugging
