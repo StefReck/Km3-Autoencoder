@@ -56,13 +56,15 @@ data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
 #train: Only take epochs that were trained for one Epoch on an AE Epoch
 is_1=np.where(how_many_epochs_each_to_train==1)[0][0]-1
 take_these_train_epochs = take_these_prl_epochs[is_1:]
+#shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
+shift_epochs_by = take_these_prl_epochs[is_1] - (is_1+1) 
 
 #data_parallel_train=[train_epoch, train_ydata]
 data_parallel_train=[[],[]]
 for epoch in take_these_train_epochs:
     take_these = np.logical_and(data_parallel[2]>=epoch, data_parallel[2]<epoch+1)
-    data_parallel_train[0].extend(data_parallel[2][take_these])
-    data_parallel_train[1].extend(data_parallel[3][take_these])
+    data_parallel_train[0].extend( (np.array(data_parallel[2])-shift_epochs_by)[take_these])
+    data_parallel_train[1].extend( (np.array(data_parallel[3])-shift_epochs_by)[take_these])
     
 
 

@@ -230,6 +230,7 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel_train,
     else:
         test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel_test[1], marker="o")
     
+    #train plot
     ax2.plot(data_parallel_train[0], data_parallel_train[1], linestyle="-", 
             color=test_plot_prl[0].get_color(), alpha=0.5, lw=0.6)
     
