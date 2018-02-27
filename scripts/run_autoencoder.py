@@ -155,19 +155,16 @@ def lr_schedule(before_epoch, lr_schedule_number):
             lr=0.1
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
         
-    elif lr_schedule_number=="lin_growth":
+    elif lr_schedule_number=="lin_growth1":
         start_lr = 0.01
-        target_lr = 0.1
-        in_epochs=30
-        lrates = np.linspace(start=start_lr, top=target_lr, num=in_epochs)
+        target_lr = 1.0
+        in_epochs=50
+        increment = (target_lr - start_lr)/in_epochs
         
-        try:
-            lr=lrates[before_epoch-1]
-            print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
-        except IndexError:
-            lr=lrates[-1]
-            print("Warning: LR-schedule",lr_schedule_number,"is not defined anymore before epoch", before_epoch, ", using last lr from schedule:", lr)
-        
+
+        lr = start_lr + increment * (before_epoch-1)
+        print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+
     return lr
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
