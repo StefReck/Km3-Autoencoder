@@ -101,22 +101,6 @@ def get_default_labels(test_files):
         modelnames.append(modelident.split("trained_")[1][:-9])
     return modelnames
     
-"""
-def show_the_plots(data_list_array, test_files):
-    modelnames = get_default_labels(test_files)
-    #one plot for every entry in the array = every test file
-    max_epoch = get_max_epoch(data_list_array)
-    for i,data_list in enumerate(data_list_array):
-        make_test_train_plot(epochs=data_list[0], test=data_list[1], epochs_train=data_list[2], train=data_list[3], label=modelnames[i])
-    
-    plt.xlim((0.2,max_epoch))
-    plt.xticks( np.linspace(1,max_epoch,max_epoch) )
-    plt.legend()
-    plt.xlabel('Epoch')
-    plt.title("Progress")
-    plt.grid(True)
-    plt.show()
-"""
 
 def make_data_from_files(test_files, dump_to_file=None):
     # Takes a list of names from the test files, and returns:
@@ -132,6 +116,14 @@ def make_data_from_files(test_files, dump_to_file=None):
         np.save(dump_to_file, data_to_be_saved)
     
     return data_from_files, ylabel_list
+
+    
+def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
+    mini = min(ydata)
+    maxi = max(ydata)
+    span = maxi - mini
+    ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
+    return ranges
 
 
 def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
@@ -197,15 +189,9 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     plt.title(title)
     plt.grid(True)
     return(fig)
-    
-def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
-    mini = min(ydata)
-    maxi = max(ydata)
-    span = maxi - mini
-    ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
-    return ranges
 
-def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+
+def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel_train, data_parallel_test, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     fig, ax=plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     
@@ -231,17 +217,23 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
         test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o")
     
     #the train plot
-    ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
+    ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", 
+            color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
     
     
-    #parallel, no train plot
+    #parallel enc
     #parallel training might not have been done for all AE epochs:
-    data_parallel_epochs = data_autoencoder[0][:len(data_parallel[0])]
+    data_parallel_epochs = data_autoencoder[0][:len(data_parallel_test[0])]
     
     if color_override==True:
-        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel_test[1], marker="o", color=colors[1])
     else:
-        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel[1], marker="o")
+        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel_test[1], marker="o")
+    
+    ax2.plot(data_parallel_train[0], data_parallel_train[1], linestyle="-", 
+            color=test_plot_prl[0].get_color(), alpha=0.5, lw=0.6)
+    
+    
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
@@ -260,12 +252,12 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
     ax.add_artist(legend2)
     
     #x range
-    max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
+    max_epoch = get_max_epoch( [data_autoencoder, data_parallel_test] )
     plt.xlim((0,max_epoch))
     
     #y range
     ax.set_ylim(get_proper_range(data_autoencoder[1]))
-    ax2.set_ylim(get_proper_range(data_parallel[1]))
+    ax2.set_ylim(get_proper_range(data_parallel_test[1]))
     
     if xticks is not None:
         plt.xticks( xticks )
@@ -281,51 +273,4 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
     
 
 
-"""
-max_epoch=0
-for i,data_dict in enumerate(dict_array):
-    current_max_epoch = max(tuple(map(int, data_dict["Epoch"])))
-    if max_epoch<current_max_epoch:
-        max_epoch=current_max_epoch 
-        
-    if "Test acc" in data_dict:
-        plt.ylabel("Accuracy")
-        if hd == True:
-            train_epoch_data=[]
-            train_acc_data=[]
-            for epoch in data_dict["Epoch"]:
-                e,l = make_loss_epoch(test_files[i], int(epoch))
-                train_epoch_data.extend(e)
-                train_acc_data.extend(l)
-            
-            make_test_train_plot(data_dict["Epoch"], data_dict["Test acc"], train_acc_data, modelnames[i], epochs_train=train_epoch_data)
-       
-        else:
-            make_test_train_plot(data_dict["Epoch"], data_dict["Test acc"], data_dict["Train acc"], modelnames[i])
-        
-        
-    else:
-        plt.ylabel("Loss")
-        if hd == True:
-            train_epoch_data=[]
-            train_loss_data=[]
-            for epoch in data_dict["Epoch"]:
-                e,l = make_loss_epoch(test_files[i], int(epoch))
-                train_epoch_data.extend(e)
-                train_loss_data.extend(l)
-            
-            make_test_train_plot(data_dict["Epoch"], data_dict["Test loss"], train_loss_data, modelnames[i], epochs_train=train_epoch_data)
-            
-        else:
-            make_test_train_plot(data_dict["Epoch"], data_dict["Test loss"], data_dict["Train loss"], modelnames[i])
 
-
-        
-plt.xlim((0.2,max_epoch))
-plt.xticks( np.linspace(1,max_epoch,max_epoch) )
-plt.legend()
-plt.xlabel('Epoch')
-plt.title("Progress")
-plt.grid(True)
-plt.show()
-"""
