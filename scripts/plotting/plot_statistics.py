@@ -188,7 +188,7 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     if xticks is not None:
         plt.xticks( xticks )
     else:
-        plt.xticks( np.arange(0, max_epoch+1,10) )
+        plt.xticks( np.arange(0, max_epoch+1,5) )
     
     #yrange
     plt.ylim(get_proper_range(y_value_extrema))
@@ -270,7 +270,7 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
     if xticks is not None:
         plt.xticks( xticks )
     else:
-        plt.xticks( np.arange(0, max_epoch+1,10) )
+        plt.xticks( np.arange(0, max_epoch+1,5) )
         
     ax.set_ylabel(ylabel_list[0])
     ax2.set_ylabel(ylabel_list[1])

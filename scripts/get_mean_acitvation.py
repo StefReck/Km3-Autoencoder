@@ -11,6 +11,7 @@ import argparse
 #sys.path.append('../')
 from keras.models import load_model
 from keras import backend as K
+import matplotlib.pyplot as plt
 
 from get_dataset_info import get_dataset_info
 #from model_definitions import setup_model
@@ -24,6 +25,11 @@ def parse_input():
     params = vars(args)
 
     return params
+
+#calculate mean and std for 100 batches
+calc_mean=False
+#make a hist for 1 batch of the flattened encoder output
+plot_it=True
 
 
 def get_index_of_encoded_layer(model):
@@ -97,7 +103,29 @@ def get_mean(autoencoder, dataset, no_of_batches):
     mean_activation = np.mean(list_of_means_of_events)
     standard_deviation = np.std(list_of_means_of_events)
     return mean_activation, standard_deviation
+
+
+def make_activation_plot(autoencoder, dataset, no_of_batches):
+    index_of_encoded_layer = get_index_of_encoded_layer(autoencoder)
     
+    dataset_info_dict=get_dataset_info(dataset)
+    generator = setup_generator_testfile(class_type=None, is_autoencoder=True, dataset_info_dict=dataset_info_dict)
+
+    list_of_output=np.array([])
+    for batch_no in range(no_of_batches):       
+        batch_of_data = next(generator)[0]
+        encoded_output = get_output_from_layer(index_of_encoded_layer, autoencoder, batch_of_data)
+        # dimension will be e.g. (32,2,2,3,50)
+        np.append(list_of_output,encoded_output)
+        
+    fig, ax = plt.subplots(figsize=(8,8))
+    ax.hist(list_of_output.flatten(), bins=100)
+    ax.set_xlabel("Output of neurons")
+    ax.set_ylabel("Number of neurons")
+    fig.suptitle("Flattened output of encoder layer")
+    
+    return fig, ax
+
 
 if __name__=="__main__":
     params = parse_input()
@@ -109,5 +137,13 @@ if __name__=="__main__":
     
     for autoencoder_model in autoencoder_models:
         autoencoder = load_model(autoencoder_model)
-        mean_activation, standard_deviation = get_mean(autoencoder, dataset, no_of_batches)
-        print(autoencoder_model, ":", mean_activation, "+-", standard_deviation)
+        if calc_mean == True:
+            mean_activation, standard_deviation = get_mean(autoencoder, dataset, no_of_batches)
+            print(autoencoder_model, ":", mean_activation, "+-", standard_deviation)
+        if plot_it == True:
+            fig, ax = make_activation_plot(autoencoder, dataset, no_of_batches=1)
+            plt.show(fig)
+        
+        
+        
+        

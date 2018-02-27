@@ -25,7 +25,7 @@ test_files = params["models"]
 
 xlabel="Epoch"
 title="Loss of autoencoders with a varying number of convolutional layers"
-figsize = (9,6)
+figsize = (13,8)
 #Override default labels (names of the models); must be one for every test file, otherwise default
 labels_override=["12 layers CW", "12 layers","14 layers", "16 layers", "20 layers"]
 #legend location for the labels and the test/train box

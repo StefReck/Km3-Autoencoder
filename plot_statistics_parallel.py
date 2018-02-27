@@ -45,7 +45,7 @@ data_autoencoder = data_from_files[0]
 data_parallel = data_from_files[1]
 
 #For the parallel network:
-how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*100)
+how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 
 take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
 #highest_ae_epoch = max(data_autoencoder[0])
@@ -54,6 +54,8 @@ take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_e
 
 
 data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
+
+
 
 fig = make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel_test, xlabel, ylabel_list, 
                  title, legend_locations, labels_override, colors, xticks, figsize)
