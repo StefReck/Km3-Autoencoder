@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Calculate the mean activation of the encoded layer of an autoencoder.
+The encoded layer is picked out automatically.
+Also has the option to plot a histogram of the output of the encoder, and save that
+as a pdf multipage.
 """
 
 import numpy as np

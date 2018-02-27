@@ -428,7 +428,6 @@ def encode_targets(y_val, class_type):
 
         return categorical
 
-
     if class_type[1] == 'muon-CC_to_elec-NC':
         categorical_type = convert_particle_class_to_categorical(y_val[1], y_val[3], num_classes=4)
         train_y = np.zeros(class_type[0], dtype='float32') # 1 ([0], [1]) or 2 ([0,1], [1,0]) neurons
@@ -458,6 +457,10 @@ def encode_targets(y_val, class_type):
     elif class_type[1] == 'up_down':
         #supports both 1 or 2 neurons at the cnn softmax end
         train_y = get_class_up_down_categorical(y_val[7], class_type[0])
+        
+    elif class_type[1] == 'energy':
+        #always has one neuron as the output
+        train_y = class_type[2].reshape(class_type[2].shape+(1,))
 
     else:
         print ("Class type " + str(class_type) + " not supported!")

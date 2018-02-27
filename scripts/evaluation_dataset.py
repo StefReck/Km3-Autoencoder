@@ -239,11 +239,11 @@ if make_difference_plot == False:
 else:
     #which plots to make diff of; (first - second) / first
     make_diff_of_list=((0,1),(2,1))
-    title_list=("Relative loss of accuracy when moving from 'simulations' to 'measured' data",
+    title_list=("Relative loss of accuracy: 'simulations' to 'measured' data",
                 "Realtive difference in accuracy: Upper limit to 'measured' data")
     save_as_list=(plot_path + "vgg_3_broken2_sim_real"+extra_name+".pdf", 
                   plot_path + "vgg_3_broken2_upper_real"+extra_name+".pdf")
-    y_lims_list=((-0.04,0.09),(-0.03,0.06))
+    y_lims_list=((-0.02,0.1),(-0.02,0.1))
     
     for i in range(len(make_diff_of_list)):
         #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
