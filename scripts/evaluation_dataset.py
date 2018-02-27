@@ -17,16 +17,21 @@ from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 from get_dataset_info import get_dataset_info
 
 
-# "broken_data_mode_"+enc oder +unf
-#e.g. "1enc"
-which_ones=("4unf","4enc")
 #extra string to be included in file names
 extra_name=""
 #number of bins; default is 97; backward compatibility with 98 bins
 bins=32
-#instead of plotting acc vs. energy, one can also make a compare plot, which shows the difference
-#between "on simulations" and "on measured data"
-make_difference_plot=False
+
+#Standard, plot acc vs energy plots of these:
+which_ones=("4unf","4enc")
+#instead of plotting acc vs. energy, one can also make a compare plot, 
+#which shows the difference #between "on simulations" and "on measured data"
+#then, the number of the broken mode has to be given
+#can be True, False or "both"
+make_difference_plot=True
+which_broken_study=4
+
+
 
 
 extra_name="_"+ str(bins)+"_bins" + extra_name
@@ -207,7 +212,7 @@ class_type = (2, 'up_down')
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
 
-if make_difference_plot == False:
+if make_difference_plot == False or make_difference_plot == "both":
     for which_one in which_ones:
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name)
@@ -236,18 +241,30 @@ if make_difference_plot == False:
         print("Plot saved to", save_plot_as)
             
     
-else:
+if make_difference_plot == True or make_difference_plot == "both":
     #which plots to make diff of; (first - second) / first
     make_diff_of_list=((0,1),(2,1))
     title_list=("Relative loss of accuracy: 'simulations' to 'measured' data",
                 "Realtive difference in accuracy: Upper limit to 'measured' data")
-    save_as_list=(plot_path + "vgg_3_broken2_sim_real"+extra_name+".pdf", 
-                  plot_path + "vgg_3_broken2_upper_real"+extra_name+".pdf")
-    y_lims_list=((-0.02,0.1),(-0.02,0.1))
+    
+    if which_broken_study==2:
+        which_ones = ("2unf", "2enc")
+        save_as_list=(plot_path + "vgg_3_broken2_sim_real"+extra_name+".pdf", 
+                      plot_path + "vgg_3_broken2_upper_real"+extra_name+".pdf")
+        y_lims_list=((-0.02,0.1),(-0.02,0.1))
+        
+    elif which_broken_study==4:
+        which_ones = ("4unf", "4enc")
+        save_as_list=(plot_path + "vgg_3_broken4_sim_real"+extra_name+".pdf", 
+                      plot_path + "vgg_3_broken4_upper_real"+extra_name+".pdf")
+        y_lims_list=((-0.02,0.1),(-0.02,0.1))
+        
+    else:
+        raise()
     
     for i in range(len(make_diff_of_list)):
         #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2unf")
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[0])
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
@@ -257,7 +274,7 @@ else:
         hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
         
         
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info("2enc")
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[1])
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
