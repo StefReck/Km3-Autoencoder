@@ -12,6 +12,7 @@ import argparse
 from keras.models import load_model
 from keras import backend as K
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 from get_dataset_info import get_dataset_info
 #from model_definitions import setup_model
@@ -30,6 +31,8 @@ def parse_input():
 calc_mean=False
 #make a hist for 1 batch of the flattened encoder output
 plot_it=True
+#name of pdf, None if no save
+to_pdf = "out.pdf"
 
 
 def get_index_of_encoded_layer(model):
@@ -146,7 +149,14 @@ if __name__=="__main__":
         if plot_it == True:
             fig, ax = make_activation_plot(autoencoder, dataset, no_of_batches=1)
             figures_list.append([fig, ax])
+            if to_pdf == None:
+                plt.show(fig)
 
+if to_pdf != None:
+    with PdfPages(to_pdf) as pp:
+        for figure in figures_list:
+            pp.savefig(figure[0])
+            plt.close()
     
         
         
