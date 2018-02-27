@@ -116,7 +116,7 @@ def make_activation_plot(autoencoder, dataset, no_of_batches):
         batch_of_data = next(generator)[0]
         encoded_output = get_output_from_layer(index_of_encoded_layer, autoencoder, batch_of_data)
         # dimension will be e.g. (32,2,2,3,50)
-        np.append(list_of_output,encoded_output)
+        list_of_output=np.append(list_of_output,encoded_output)
         
     fig, ax = plt.subplots(figsize=(8,8))
     ax.hist(list_of_output.flatten(), bins=100)
@@ -135,14 +135,27 @@ if __name__=="__main__":
     dataset="xzt"
     no_of_batches = 100
     
+    figures_list=[]
+    
     for autoencoder_model in autoencoder_models:
         autoencoder = load_model(autoencoder_model)
         if calc_mean == True:
             mean_activation, standard_deviation = get_mean(autoencoder, dataset, no_of_batches)
             print(autoencoder_model, ":", mean_activation, "+-", standard_deviation)
+            
         if plot_it == True:
             fig, ax = make_activation_plot(autoencoder, dataset, no_of_batches=1)
-            plt.show(fig)
+            figures_list.append([fig, ax])
+ 
+    if len(autoencoder_models==2):
+        fig, axes = plt.subplots(1,2, figsize=(14,8))
+        axes[0] = figures_list[0][1]
+        axes[1] = figures_list[1][1]
+        plt.show(fig)
+    else:
+        for figure in figures_list:
+            plt.show(figure[0])
+    
         
         
         
