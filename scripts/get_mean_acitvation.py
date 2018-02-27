@@ -123,7 +123,7 @@ def make_activation_plot(autoencoder, dataset, no_of_batches):
     ax.set_xlabel("Output of neurons")
     ax.set_ylabel("Number of neurons")
     fig.suptitle("Flattened output of encoder layer")
-    
+
     return fig, ax
 
 
@@ -146,15 +146,7 @@ if __name__=="__main__":
         if plot_it == True:
             fig, ax = make_activation_plot(autoencoder, dataset, no_of_batches=1)
             figures_list.append([fig, ax])
- 
-    if len(autoencoder_models==2):
-        fig, axes = plt.subplots(1,2, figsize=(14,8))
-        axes[0] = figures_list[0][1]
-        axes[1] = figures_list[1][1]
-        plt.show(fig)
-    else:
-        for figure in figures_list:
-            plt.show(figure[0])
+
     
         
         
