@@ -156,7 +156,7 @@ def lr_schedule(before_epoch, lr_schedule_number):
         print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
         
     elif lr_schedule_number=="lin_growth":
-        start_lr = 0.001
+        start_lr = 0.01
         target_lr = 0.1
         in_epochs=30
         lrates = np.linspace(start=start_lr, top=target_lr, num=in_epochs)
@@ -372,7 +372,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #channel id autoencoders need less epochs per AE epoch, their modeltag starts with channel
             how_many_epochs_each_to_train =[1,]*100
         else:
-            how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*94
+            how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*194
         #model to initialize from if first epoch is 0
         #this one is only used for vgg_3_eps modeltag
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
