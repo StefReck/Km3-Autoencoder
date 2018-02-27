@@ -157,6 +157,7 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
         print("color array does not have the rights size (", len(label_array), "), using default colors.")
     
     handles1=[]
+    y_value_extrema=[]
     #plot the data in one plot
     for i,data_of_model in enumerate(data_for_plots):
         # [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
@@ -168,6 +169,7 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
         ax.plot(data_of_model[2], data_of_model[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
         handles1.append(handle_for_legend)
+        y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1])] )
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
@@ -179,21 +181,29 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     ax.add_artist(legend1)
     ax.add_artist(legend2)
     
+    #xrange
     max_epoch = get_max_epoch(data_for_plots)
-    plt.xlim((0.2,max_epoch))
-    #plt.xticks( np.linspace(1,max_epoch,max_epoch) )
-    
+    plt.xlim((0,max_epoch))
+
     if xticks is not None:
         plt.xticks( xticks )
     else:
         plt.xticks( np.arange(0, max_epoch+1,10) )
+    
+    #yrange
+    plt.ylim(get_proper_range(y_value_extrema))
     
     plt.xlabel(xlabel)
     plt.title(title)
     plt.grid(True)
     return(fig)
     
-
+def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
+    mini = min(ydata)
+    maxi = max(ydata)
+    span = maxi - mini
+    ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
+    return ranges
 
 def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     fig, ax=plt.subplots(figsize=figsize)
@@ -251,18 +261,11 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
     
     #x range
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel] )
-    plt.xlim((0.2,max_epoch))
+    plt.xlim((0,max_epoch))
     
     #y range
-    y_range_auto = ( min(data_autoencoder[1]), max(data_autoencoder[1]) )
-    y_range_parallel = ( min(data_parallel[1]), max(data_parallel[1]) )
-    y_range_auto_span = y_range_auto[1]-y_range_auto[0]
-    y_range_parallel_span = y_range_parallel[1]-y_range_parallel[0]
-    
-    ax.set_ylim( (y_range_auto[0]-y_range_auto_span*0.05, 
-                  y_range_auto[1]+y_range_auto_span*0.2 ))
-    ax2.set_ylim( (y_range_parallel[0]-0.05*y_range_parallel_span,
-                   y_range_parallel[1]+0.2*y_range_parallel_span) )
+    ax.set_ylim(get_proper_range(data_autoencoder[1]))
+    ax2.set_ylim(get_proper_range(data_parallel[1]))
     
     if xticks is not None:
         plt.xticks( xticks )
@@ -276,6 +279,7 @@ def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel, xlabe
     ax.grid(True)
     return(fig)
     
+
 
 """
 max_epoch=0
