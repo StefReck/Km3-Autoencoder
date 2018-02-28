@@ -48,6 +48,7 @@ highest_prl_epoch = max(data_parallel[0])
 #Which epochs from the parallel encoder history to take:
 how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
+#only take epochs that have actually been made:
 take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
 
 data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]

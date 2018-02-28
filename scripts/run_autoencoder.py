@@ -15,8 +15,8 @@ import os
 import sys
 import argparse
 
-from util.run_cnn import *
-from model_definitions import *
+from util.run_cnn import train_and_test_model, load_zero_center_data, h5_get_number_of_rows
+from model_definitions import setup_model
 from get_dataset_info import get_dataset_info
 
 
@@ -450,7 +450,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 
         #Own execution of training
         #Set LR of loaded model to new lr
-        K.set_value(model.optimizer.lr, user_lr)
+        K.set_value(model.optimizer.lr, learning_rate)
             
         #Which epochs are the ones relevant for current stage
         running_epoch=encoder_epoch
