@@ -3,12 +3,10 @@
 import matplotlib
 matplotlib.use('Agg') #dont open plotting windows
 
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
 import h5py
 import argparse
+
+from histogramm_3d_utils import save_some_plots_to_pdf
 
 #if MaxUnpooling is present: Load model manually:
 #currently defunct, not possible to load lambda models
@@ -52,6 +50,8 @@ if __name__ == "__main__":
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo3d/h5/xzt/concatenated/"
         test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
         zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"
+        #test_file is a .h5 file on which the predictions are done
+        #center_file is the zero center image
         test_file = data_path + test_data
         zero_center_file= data_path + zero_center_data
         
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         energy_threshold=0
         how_many=2
         from keras.models import load_model
-        compare_histograms=1
+        compare_histograms=0
     
     
     #Events to compare, each in a seperate page in the pdf
@@ -101,6 +101,16 @@ if __name__ == "__main__":
         autoencoder=None
         n_bins = test_file["x"].shape[1:] #shape ist z.B. 4000,11,13,18
 
+
+    save_some_plots_to_pdf(autoencoder, test_file, zero_center_file, 
+                           which, plot_file, min_counts=min_counts, 
+                           n_bins=n_bins, compare_histograms=compare_histograms, 
+                           energy_threshold=energy_threshold)
+
+
+
+"""
+#Legacy code: moved to histogramm_3d_utils
 
 
 def reshape_3d_to_3d(hist_data, filter_small=None):
@@ -214,124 +224,6 @@ def make_3d_single_plot(hist_org, n_bins, title, figsize):
     fig.tight_layout()   
     
     return fig
-
-
-def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file, min_counts, n_bins, compare_histograms, energy_threshold):
-    #Only bins with abs. more then min_counts are plotted
-    plot_manipulated_sim = False
-    #Open files
-    
-    zero_center_image = np.load(zero_center_file)
-    
-    if energy_threshold > 0:
-        #Only take events with an energy over a certain threshold
-        minimum_energy = energy_threshold #GeV
-        only_load_this_many_events=10000 #takes forever otherwise
-        print("Applying threshold of", minimum_energy," GeV; only events with higher energy will be considered")
-        where=file["y"][:only_load_this_many_events][:, 2]>minimum_energy
-        labels=file["y"][:only_load_this_many_events][where,:][which,:]
-        hists = file["x"][:only_load_this_many_events][where,:][which,:]
-        
-    else:
-        #manually select events
-        # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
-        print("No energy threshold applied")
-        labels = file["y"][which]
-        hists = file["x"][which]
-    
-    #Get some hists from the file, and reshape them from eg. 5,11,13,18 to 5,11,13,18,1
-    hists=hists.reshape((hists.shape+(1,))).astype(np.float32)
-    #0 center them
-    centered_hists = np.subtract(hists, zero_center_image)
-        
-    if compare_histograms==True:
-        if plot_manipulated_sim == True:
-            #rauschen bisherige rate: 10kHz pro pmt
-            #Zusätzliches rauschen z.B. 5 kHz
-            #Zeitfenster 1100ns etwa
-            #31 pmts pro dom
-            #Erwartungswert rauschen für ganzes Zeitfenster pro DOM:
-            #5kHz * 1100ns * 31 pmts = 0.1705
-            #Erwartungswert pro Zeitbin und DOM: 0.1705 / 50 = 0.00341
-            #Aufsummiert über y (13 bins): 0.00341*13=0.04433
-            
-            #hists_pred = hists + np.random.randint(low=0, high=2, size=hists.shape)
-            #chance_of_noise = 0.5
-            #hists_pred = hists + np.random.choice([0, 1], size=hists.shape, p=[1-chance_of_noise, chance_of_noise])
-            poisson_noise_expectation_value=0.4433 #5kHz
-            #zero centered noise:
-            noise = np.random.poisson(2*poisson_noise_expectation_value, size=hists.shape)# - poisson_noise_expectation_value
-            #only add noise to the bins that are not always empty. For xzt though, this is unecessary since there are no empty bins
-            #hists_pred = hists + np.multiply(np.tile(zero_center_image!=0, (how_many,1,1,1,1)), noise)
-            hists_pred = hists + noise
-            losses=[0,]*len(hists)
-        else:
-            #Predict on 0 centered data
-            hists_pred_centered=autoencoder.predict_on_batch(centered_hists).reshape(centered_hists.shape)
-            losses=[]
-            for i in range(len(centered_hists)):
-                losses.append(autoencoder.evaluate(x=centered_hists[i:i+1], y=centered_hists[i:i+1]))
-            #Remove centering again, so that empty bins (always 0) dont clutter the view
-            hists_pred = np.add(hists_pred_centered, zero_center_image)
-        
-    
-    #Some infos for the title
-    ids = labels[:,0].astype(int)
-    particle_type = labels[:,1] #Specifies the particle type, i.e. elec/muon/tau (12, 14, 16). Negative values for antiparticles.
-    energies = np.round(labels[:,2],1)
-    is_CC = labels[:,3]
-    dir_z = labels[:,7]
-    
-    #Make an array that contains strings Up or down depending on the direction the prt is going
-    up_or_down_array=[]
-    for dz in dir_z:
-        up_or_down = int(np.sign(dz)) # returns -1 if dir_z < 0, 0 if dir_z==0, 1 if dir_z > 0
-        direction = "Up-going" if up_or_down>=0 else "Down-going"
-        up_or_down_array.append(direction)
-        
-    #Make an array that contains eg Muon-CC or Elec-NC
-    pid_array=[]
-    for i in range(len(particle_type)):
-        current_type = "CC" if is_CC[i]==True else "NC"
-        if particle_type[i]<0:
-            particle_type[i]*=-1
-            prefix="Anti-"
-        else:
-            prefix=""
-            
-        if particle_type[i]==12:
-            part="Elec"
-        elif particle_type[i]==14:
-            part="Muon"
-        elif particle_type[i]==16:
-            part="Tau"
-        part=prefix+part
-        
-        pid=part+"-"+ current_type
-        pid_array.append(pid)
-
-    #proper layout for xzt:
-    figsizes=[(12,7),(6,7)] #[double, single]
-
-    #test_file is a .h5 file on which the predictions are done
-    #center_file is the zero center image
-    with PdfPages(plot_file) as pp:
-        #pp.attach_note(test_file)
-        print("Saving plot as", plot_file)
-        for i,hist in enumerate(hists):
-            if compare_histograms == True:
-                suptitle = pid_array[i]+"\t\t"+up_or_down_array[i]+"\t\t"+"Energy: " + str(energies[i]) + " GeV\t\tLoss: " + str(np.round(losses[i],5))
-                fig = make_3d_plots(reshape_3d_to_3d(hist, min_counts), reshape_3d_to_3d(hists_pred[i], min_counts), n_bins, suptitle, figsizes[0])
-            else:
-                suptitle = pid_array[i]+"\t\t"+up_or_down_array[i]+"\t\t"+"Energy: " + str(energies[i]) + " GeV"
-                fig = make_3d_single_plot(reshape_3d_to_3d(hist, min_counts), n_bins, suptitle, figsizes[1])
-            pp.savefig(fig)
-            plt.close(fig)
-    print("Done.")
-    
-
-if __name__ == "__main__":
-    save_some_plots_to_pdf(autoencoder, test_file, zero_center_file, which, plot_file, min_counts=min_counts, n_bins=n_bins, compare_histograms=compare_histograms, energy_threshold=energy_threshold)
-
+"""
     
     

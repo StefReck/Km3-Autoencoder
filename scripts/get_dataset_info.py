@@ -145,6 +145,21 @@ def get_dataset_info(dataset_tag):
         filesize_factor=0.01
         filesize_factor_test=0.01
         generator_can_read_y_values=False
+        
+    elif dataset_tag=="xyzc_flat_event":
+        #original data: xyz-channel id as filter
+        #11x13x18x31
+        #This dataset flattens it to dimension 31 (batchsize*11*13*18, 31)
+        #This means that the file actually contains 11*13*18 times more batches
+        #y_values are not present
+        #Most of the noise doms (with 0 or 1 hits) are deleted here, so the actual file is much smaller
+        data_path = home_path+"data/channel/"
+        train_data = "elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
+        test_data = "elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5" # only 1_to_12
+        n_bins = (31,)
+        filesize_factor=1
+        filesize_factor_test=1
+        generator_can_read_y_values=False
 
         
     elif dataset_tag=="debug_xyz":
