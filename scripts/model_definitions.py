@@ -19,6 +19,7 @@ def make_options_dict(additional_options):
     options_dict["batchnorm_for_dense"]=False
     options_dict["encoder_only"]=False
     options_dict["encoded_penalty"]=0
+    options_dict["dropout_for_conv"]=0.0
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -30,7 +31,14 @@ def make_options_dict(additional_options):
         dropout_rate = float(additional_options.split("=")[1])
         options_dict["dropout_for_dense"]=dropout_rate
         print("Dropout rate for dense layers will be", dropout_rate)
-        
+    
+    if "dropout_conv=" in additional_options:
+        #Change dropout of conv layers
+        dropout_rate = float(additional_options.split("=")[1])
+        options_dict["dropout_for_conv"]=dropout_rate
+        print("Dropout rate for conv layers will be", dropout_rate)
+        print("Warning: not supported for all models!")
+    
     if "l1reg=" in additional_options:
         #Apply l1 reguarizer to encoded layer
         penalty = float(additional_options.split("=")[1])

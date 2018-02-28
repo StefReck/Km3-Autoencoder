@@ -64,7 +64,7 @@ data_parallel_train=[[],[]]
 for epoch in take_these_train_epochs:
     take_these = np.logical_and(data_parallel[2]>=epoch, data_parallel[2]<epoch+1)
     data_parallel_train[0].extend( (np.array(data_parallel[2])-shift_epochs_by)[take_these])
-    data_parallel_train[1].extend( (np.array(data_parallel[3])-shift_epochs_by)[take_these])
+    data_parallel_train[1].extend( np.array(data_parallel[3])[take_these])
     
 
 

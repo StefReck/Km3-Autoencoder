@@ -81,6 +81,7 @@ def setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name=None):
 def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     #dropout_for_dense      = 0 #options_dict["dropout_for_dense"]
     n_bins=(11,13,18,31)
+    dropout_for_conv = options_dict["dropout_for_conv"]
     neurons_in_bottleneck = options_dict["neurons_in_bottleneck"]
     model_type = options_dict["model_type"]
     # for time distributed wrappers: (batchsize, timesteps, n_bins)
@@ -89,7 +90,7 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     encoder_only_mode=options_dict["encoder_only"]
     if encoder_only_mode==True:
         autoencoder_stage=1
-        print("Autoencoder stage set to 1 for encoder onyl mode")
+        print("Autoencoder stage set to 1 for encoder only mode")
     
     
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -159,22 +160,22 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         train=True
         unlock_BN_in_encoder=False
     
-        x=conv_block(encoded, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
-        x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
+        x=conv_block(encoded, filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #11x18x50
+        x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #11x18x50
         x = AveragePooling3D((2, 2, 2), padding='same')(x) #11x18x25
         
-        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x25
-        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #10x16x24
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #11x18x25
+        x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #10x16x24
         x = AveragePooling3D((2, 2, 2), padding='same')(x) #5x8x12
         
-        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #5x8x12
-        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
-        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #4x6x10
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #5x8x12
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #4x6x10
+        x=conv_block(x,      filters=filter_base[2], kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder, dropout=dropout_for_conv) #4x6x10
         x = AveragePooling3D((2, 2, 2), padding='same')(x) #2x3x5
     
         x = Flatten()(x)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=True, dropout=0.2)
-        x = dense_block(x, units=16,  channel_axis=channel_axis, batchnorm=True, dropout=0.2)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=True, dropout=0.0)
+        x = dense_block(x, units=16,  channel_axis=channel_axis, batchnorm=True, dropout=0.0)
         outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
