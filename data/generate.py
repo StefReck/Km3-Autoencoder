@@ -7,8 +7,8 @@ original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_
 #outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
 #outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
 
-outfile_train="xyz/elec-CC_and_muon-CC_xyz_train_1_to_240_shuffled_0.h5"
-outfile_test ="xyz/elec-CC_and_muon-CC_xyz_test_481_to_540_shuffled_0.h5"
+outfile_train="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
+outfile_test ="channel/elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5"
    
 # x, y, z, t, c
 #11,13,18,50,31
@@ -19,11 +19,12 @@ outfile_test ="xyz/elec-CC_and_muon-CC_xyz_test_481_to_540_shuffled_0.h5"
 fraction=0.5
 #which axis including filesize to sum over, None if no sum
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
-sum_over_axis=4
+sum_over_axis=None
 #
-reshape_to_channel_and_shuffle=False
+reshape_to_channel_and_shuffle=True
+only_doms_with_more_then=1
 
-def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle):     
+def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then):     
     print("Generating file", save_to)
     f=h5py.File(file, "r")
     shape=f["x"].shape #e.g. (X,11,13,18,50)
@@ -36,14 +37,33 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
     else:
         hists=f["x"][:up_to_which]
         
+        
     if reshape_to_channel_and_shuffle == True:
-        hists = hists.reshape(-1, hists.shape[-1])
+        hists = hists.reshape(-1, hists.shape[-1]) # dimension e.g. (X*11*13*18, 50)
         np.random.shuffle(hists)
+        
+        if only_doms_with_more_then > 0:
+            #this will delete doms with less then ... hits, so that the ratio of 
+            #doms with more/less hits is at a defined value
+            ratio_of_more_to_less = 2 #how many with more hits come on one with less
+            
+            sum_of_all_channels = np.sum(hists, axis=1) # e.g. (X*11*13*18,)
+            
+            how_many_with_more_hits = np.sum(sum_of_all_channels>only_doms_with_more_then)
+            how_many_with_less_hits_to_keep = int(how_many_with_more_hits/ratio_of_more_to_less)
+            
+            where_hists_with_less_hits = np.where(sum_of_all_channels<=only_doms_with_more_then)
+            delete_these = where_hists_with_less_hits[how_many_with_less_hits_to_keep:]
+            
+            print("There are", how_many_with_more_hits, "events with more then", only_doms_with_more_then, "hits, and there will be", how_many_with_less_hits_to_keep, " with less hits left after this.")
+            
+            hists = np.delete(hists, delete_these)
+        
         mc_infos=np.zeros(100)
     else:
         mc_infos=f["y"][:up_to_which]
+        
     print("New shape (hists):", hists.shape, ", mc infos:", mc_infos.shape)
-    
     store_histograms_as_hdf5(hists, mc_infos, save_to, compression=("gzip", 1))
 
 
@@ -70,6 +90,6 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
     h5f.close()
 
 
-generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle)
-generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle)
+generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
+generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
 print("Done.")
