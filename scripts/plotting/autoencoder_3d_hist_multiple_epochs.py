@@ -18,7 +18,7 @@ from histogramm_3d_utils import make_plots_from_array
 
 save_name_of_pdf="test.pdf"
 #name of the AE h5 files, up to the epoch number
-autoencoder_model_base = "models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
+autoencoder_model_base = "../../models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
 plot_which_epochs = [5,6,7,8,9,10]
 number_of_events = 2
 
@@ -60,13 +60,15 @@ figures = []
 original_image_batch, info = get_hists(data_path_of_file, number_of_events)
 
 for i,original_image in enumerate(original_image_batch):
+    print("Plotting event no", i+1)
     event_id = info[i,0].astype(int)
     org_fig = make_plots_from_array(original_image, suptitle="Original image  Event ID: "+str(event_id))
     figures.append(org_fig)
     
-    for epoch_no,autoencoder_epoch in enumerate(plot_which_epochs):
+    for autoencoder_epoch in plot_which_epochs:
+        print("Plotting for autoencoder epoch", autoencoder_epoch)
         autoencoder_model = autoencoder_model_base + str(autoencoder_epoch) + ".h5"
-        pred_image_batch = predict_on_hists(original_image, zero_center_file, autoencoder_model)
+        pred_image_batch = predict_on_hists(original_image_batch[i:(i+1)], zero_center_file, autoencoder_model)
         fig = make_plots_from_array(pred_image_batch[0], suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch"+str(autoencoder_epoch))
         figures.append(fig)
     
