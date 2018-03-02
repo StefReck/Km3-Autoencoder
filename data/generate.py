@@ -26,6 +26,8 @@ only_doms_with_more_then=1
 
 #show how often certain total number of hits in a dom occur; No files will be generated
 make_statistics = True
+#save it as a npy file
+save_statistics_name = original_train_file.split("/")[-1][:-3]+"_statistics_fraction_"+str(fraction)+".npy"
 
 def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then):     
     print("Generating file", save_to)
@@ -72,7 +74,7 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
     store_histograms_as_hdf5(hists, mc_infos, save_to, compression=("gzip", 1))
 
 
-def make_channel_statistics(file, fraction):
+def make_channel_statistics(file, fraction, save_statistics_name):
     f=h5py.File(file, "r")
     shape=f["x"].shape #e.g. (X,11,13,18,50)
     print("Original shape of hists:", shape)
@@ -84,6 +86,8 @@ def make_channel_statistics(file, fraction):
     print("How many DOMs are there with how many total hits:")
     for no_counts in range(len(count_number)):
         print(no_counts, "Hits:\t", count_number[no_counts], "times")
+    if save_statistics_name != None:
+        np.save(save_statistics_name, count_number)
         
 
 def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None, None)):
@@ -109,7 +113,7 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
     h5f.close()
 
 if make_statistics==True:
-    make_channel_statistics(original_train_file, fraction)
+    make_channel_statistics(original_train_file, fraction, save_statistics_name)
 else:
     generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
     generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
