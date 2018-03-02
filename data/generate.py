@@ -24,6 +24,9 @@ sum_over_axis=None
 reshape_to_channel_and_shuffle=True
 only_doms_with_more_then=1
 
+#show how often certain total number of hits in a dom occur; No files will be generated
+make_channel_statistics = True
+
 def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then):     
     print("Generating file", save_to)
     f=h5py.File(file, "r")
@@ -69,6 +72,19 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
     store_histograms_as_hdf5(hists, mc_infos, save_to, compression=("gzip", 1))
 
 
+def make_channel_statistics(file):
+    f=h5py.File(file, "r")
+    shape=f["x"].shape #e.g. (X,11,13,18,50)
+    print("Original shape of hists:", shape)
+    up_to_which=int(shape[0]*0.5)
+    hists=f["x"][:up_to_which]
+    #number of occurances of total hits in a whole dom
+    count_number = np.bincount(np.sum(hists, axis=-1).flatten())
+    print("How many DOMs are there with how many total hits:")
+    for no_counts in range(len(count_number)):
+        print(no_counts, " Hits:", count_number[no_counts], "times")
+        
+
 def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None, None)):
     """
     Takes numpy histograms ('images') for a certain projection as well as the mc_info ('tracks') and saves them to a h5 file.
@@ -91,7 +107,9 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
 
     h5f.close()
 
-
-generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
-generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
-print("Done.")
+if make_channel_statistics==True:
+    make_channel_statistics(file)
+else:
+    generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
+    generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
+    print("Done.")
