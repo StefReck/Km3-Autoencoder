@@ -46,18 +46,20 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
             #this will delete doms with less then ... hits, so that the ratio of 
             #doms with more/less hits is at a defined value
             ratio_of_more_to_less = 2 #how many with more hits come on one with less
-            
+            #total number of hits of a dom
             sum_of_all_channels = np.sum(hists, axis=1) # e.g. (X*11*13*18,)
-            
+            #how many doms have more then ... hits
             how_many_with_more_hits = np.sum(sum_of_all_channels>only_doms_with_more_then)
+            #how many doms under this threshold to keep
             how_many_with_less_hits_to_keep = int(how_many_with_more_hits/ratio_of_more_to_less)
-            
-            where_hists_with_less_hits = np.where(sum_of_all_channels<=only_doms_with_more_then)
+            #which doms have less hits then the threshold
+            where_hists_with_less_hits = np.where(sum_of_all_channels<=only_doms_with_more_then)[0]
+            #delete some of those doms that are under the threshold
             delete_these = where_hists_with_less_hits[how_many_with_less_hits_to_keep:]
             
-            print("There are", how_many_with_more_hits, "events with more then", only_doms_with_more_then, "hits, and there will be", how_many_with_less_hits_to_keep, " with less hits left after this.")
+            print("There are", how_many_with_more_hits, "doms with more then", only_doms_with_more_then, "hits, and there will be", how_many_with_less_hits_to_keep, " with less hits left after this.")
             
-            hists = np.delete(hists, delete_these)
+            hists = np.delete(hists, delete_these, axis=0)
         
         mc_infos=np.zeros(100)
     else:

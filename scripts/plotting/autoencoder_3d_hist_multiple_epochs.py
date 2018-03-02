@@ -3,6 +3,8 @@
 Make 3d plots of some events and the autoencoder predictions for one autoencoder model
 and multiple epochs.
 """
+import matplotlib
+matplotlib.use('Agg') #dont open plotting windows
 
 from keras.models import load_model
 import h5py
@@ -16,11 +18,11 @@ from get_dataset_info import get_dataset_info
 from histogramm_3d_utils import make_plots_from_array
 
 
-save_name_of_pdf="test.pdf"
+save_name_of_pdf="vgg_5_picture-instanthighlr.pdf"
 #name of the AE h5 files, up to the epoch number
 autoencoder_model_base = "../../models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
-plot_which_epochs = [5,6,7,8,9,10]
-number_of_events = 2
+plot_which_epochs = [5,7,9,11,13]
+number_of_events = 5
 
 dataset_tag="xzt"
 
@@ -55,6 +57,8 @@ zero_center_file  = data_path_of_file + "_zero_center_mean.npy"
 print("Data file:", data_path_of_file)
 print("Zero center file:", zero_center_file)
 
+#TODO make predictions happen for a specific AE epoch on all events in prallel
+
 figures = []
 
 original_image_batch, info = get_hists(data_path_of_file, number_of_events)
@@ -69,7 +73,7 @@ for i,original_image in enumerate(original_image_batch):
         print("Plotting for autoencoder epoch", autoencoder_epoch)
         autoencoder_model = autoencoder_model_base + str(autoencoder_epoch) + ".h5"
         pred_image_batch = predict_on_hists(original_image_batch[i:(i+1)], zero_center_file, autoencoder_model)
-        fig = make_plots_from_array(pred_image_batch[0], suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch"+str(autoencoder_epoch))
+        fig = make_plots_from_array(pred_image_batch[0], suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(autoencoder_epoch), min_counts=0.2, titles=["",])
         figures.append(fig)
     
     
