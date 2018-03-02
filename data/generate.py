@@ -16,7 +16,7 @@ outfile_test ="channel/elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5
 #11,13,18,31
 
 #percentage of events to keep
-fraction=0.1
+fraction=0.02
 #which axis including filesize to sum over, None if no sum
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
 sum_over_axis=None
@@ -65,6 +65,7 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
             print("There are", how_many_with_more_hits, "doms with more then", only_doms_with_more_then, "hits, and there will be", how_many_with_less_hits_to_keep, " with less hits left after this.")
             
             hists = np.delete(hists, delete_these, axis=0)
+            np.random.shuffle(hists)
         
         mc_infos=np.zeros(100)
     else:

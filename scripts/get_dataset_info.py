@@ -152,7 +152,9 @@ def get_dataset_info(dataset_tag):
         #This dataset flattens it to dimension 31 (batchsize*11*13*18, 31)
         #This means that the file actually contains 11*13*18 times more batches
         #y_values are not present
-        #Most of the noise doms (with 0 or 1 hits) are deleted here, so the actual file is much smaller
+        #Most of the noise doms (with 0 or 1 or 2 hits) are deleted here, so the actual file is much smaller
+        # ratio is 2/3 of more hits; fraction of original file: 0.02
+        #total doms in the train file: about 2 million, test: 500k
         data_path = home_path+"data/channel/"
         train_data = "elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5" #this is actually only 1_to_48 (fs 0.1)
         test_data = "elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5" # only 1_to_12
