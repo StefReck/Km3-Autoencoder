@@ -23,7 +23,6 @@ save_name_of_pdf="vgg_5_picture-instanthighlr.pdf"
 autoencoder_model_base = "../../models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
 plot_which_epochs = [5,7,9,11,13]
 number_of_events = 5
-
 dataset_tag="xzt"
 
 
@@ -57,23 +56,34 @@ zero_center_file  = data_path_of_file + "_zero_center_mean.npy"
 print("Data file:", data_path_of_file)
 print("Zero center file:", zero_center_file)
 
-#TODO make predictions happen for a specific AE epoch on all events in prallel
 
-figures = []
+# a list of all the autoencoders for training
+autoencoders_list = []
+for epoch in plot_which_epochs:
+    autoencoders_list.append(autoencoder_model_base + str(epoch) + ".h5")
 
+# read data from file
 original_image_batch, info = get_hists(data_path_of_file, number_of_events)
+# make predictions for all the models
+predicted_image_batch=np.zeros(len(autoencoders_list))
+for AE_no,autoencoder in enumerate(autoencoders_list):
+    #the prediction of all events for a single AE
+    pred_image_batch = predict_on_hists(original_image_batch, zero_center_file, autoencoder)
+    predicted_image_batch[AE_no] = pred_image_batch
 
-for i,original_image in enumerate(original_image_batch):
-    print("Plotting event no", i+1)
-    event_id = info[i,0].astype(int)
+#plot them all in a pdf
+# for every event: first the original image, then the predictions from the AEs
+figures = []
+for original_image_no,original_image in enumerate(original_image_batch):
+    #First the original image
+    print("Plotting event no", original_image_no+1)
+    event_id = info[original_image_no,0].astype(int)
     org_fig = make_plots_from_array(original_image, suptitle="Original image  Event ID: "+str(event_id))
     figures.append(org_fig)
     
-    for autoencoder_epoch in plot_which_epochs:
-        print("Plotting for autoencoder epoch", autoencoder_epoch)
-        autoencoder_model = autoencoder_model_base + str(autoencoder_epoch) + ".h5"
-        pred_image_batch = predict_on_hists(original_image_batch[i:(i+1)], zero_center_file, autoencoder_model)
-        fig = make_plots_from_array(pred_image_batch[0], suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(autoencoder_epoch), min_counts=0.2, titles=["",])
+    #then the prediction of all the AEs
+    for autoencoder_no, predicted_image in enumerate(predicted_image_batch[:,original_image_no]):
+        fig = make_plots_from_array(pred_image_batch, suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(plot_which_epochs[autoencoder_no]), min_counts=0.2, titles=["",])
         figures.append(fig)
     
     
