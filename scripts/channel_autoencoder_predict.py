@@ -71,7 +71,8 @@ if mode == "simple":
 
 elif mode=="plot":
     #make plot of predictions
-    maximum_counts_to_look_for=6
+    #measured counts are almost always 0 or 1
+    maximum_counts_to_look_for=1
     skip_zero_counts=False
     
     train_file=dataset_info_dict["train_file"]
@@ -116,7 +117,7 @@ elif mode=="plot":
         data_real = np.add(data, xs_mean)
         pred=np.add(model.predict_on_batch(data), xs_mean)
         
-        #data_real is still a batch of len batchsize of singe doms, so look at each one:
+        #data_real is still a batch of len batchsize of single doms (dim. e.g. (32,31)), so look at each one:
         for dom_no,data_real_single in enumerate(data_real):
             pred_single=pred[dom_no]
             for measured_counts in range(skip_zero_counts, maximum_counts_to_look_for+1):
@@ -135,18 +136,20 @@ elif mode=="plot":
     ex_list=[]
     #fill with maximum and minimum prediction of every original count number
     for counts_array in pred_on:
-        ex_list.extend([np.amax(counts_array), np.amin(counts_array)])
+        len(counts_array)
+        if len(counts_array) != 0:
+            ex_list.extend([np.amax(counts_array), np.amin(counts_array)])
     range_of_plot=[np.amin(ex_list),np.amax(ex_list)]
 
     #relative width of bins as fracton of bin size
-    relative_width=1/len(make_plots_of_counts)
-    bin_size = (range_of_plot[0]-range_of_plot[1]) / bins
-    bin_edges = np.linspace(range_of_plot[0], range_of_plot[1], num=bins+1)
+    #relative_width=1/len(make_plots_of_counts)
+    #bin_size = (range_of_plot[0]-range_of_plot[1]) / bins
+    #bin_edges = np.linspace(range_of_plot[0], range_of_plot[1], num=bins+1)
     
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
-            offset = bin_size*relative_width*c
-            plt.hist( pred_on[c], bin_edges+offset, label=str(c), bins=bins, density=True, range=range_of_plot, rwidth=relative_width )
+            #offset = bin_size*relative_width*c
+            plt.hist( x=pred_on[c], bins=bins, label=str(c), density=True, range=range_of_plot )
     plt.legend()
     plt.show()
         
