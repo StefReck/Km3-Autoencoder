@@ -116,12 +116,16 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
         units_array_dec = [256,512,768,31]
         dropout_dec =     [0,  0.2,0.1,0 ]
     
-    if autoencoder_stage==1:
+    if autoencoder_stage==1 or autoencoder_stage==3:
         #no dropout if the encoder part is used frozen
         #still add dropout layer with 0 dropout though, so that load_weights works
-        trainable=False
+        trainable=False #the dense layers of the channel AE
         dropout_enc=[x * (-1) for x in dropout_enc]
         dropout_dec=[x * (-1) for x in dropout_dec]
+    elif autoencoder_stage==2:
+        #in unfrozen stage, dense layers are unfrozen (I dont use this stage for channel networks)
+        trainable=True
+    
     
     if autoencoder_stage==0:
         units_array=units_array_enc+units_array_dec
