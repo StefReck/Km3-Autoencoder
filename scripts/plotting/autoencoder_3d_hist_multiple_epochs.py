@@ -65,11 +65,13 @@ for epoch in plot_which_epochs:
 # read data from file
 original_image_batch, info = get_hists(data_path_of_file, number_of_events)
 # make predictions for all the models
-predicted_image_batch=np.zeros(len(autoencoders_list))
+predicted_image_batch=[]
 for AE_no,autoencoder in enumerate(autoencoders_list):
     #the prediction of all events for a single AE
+    print("Predicting for model", autoencoder)
     pred_image_batch = predict_on_hists(original_image_batch, zero_center_file, autoencoder)
-    predicted_image_batch[AE_no] = pred_image_batch
+    predicted_image_batch.append(pred_image_batch)
+predicted_image_batch=np.array(predicted_image_batch)
 
 #plot them all in a pdf
 # for every event: first the original image, then the predictions from the AEs
