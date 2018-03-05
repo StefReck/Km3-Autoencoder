@@ -23,6 +23,10 @@ save_name_of_pdf="vgg_5_picture-instanthighlr.pdf"
 autoencoder_model_base = "../../models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
 plot_which_epochs = [5,7,9,11,13]
 number_of_events = 5
+#insted of plotting X events, can also explicitly look for a specific event id and plot only that
+# None if not
+event_id_override = None #737
+
 dataset_tag="xzt"
 
 
@@ -34,6 +38,24 @@ def get_hists(data_path_of_file, number_of_events):
     #read data, not zero centered
     hists = file["x"][:number_of_events]
     info  = file["y"][:number_of_events]
+    return hists, info
+
+def get_specific_id(data_path_of_file, target_event_id):
+    #look for the event with a specific id in the file, and return that
+    file=h5py.File(data_path_of_file , 'r')
+    batchsize = 320
+    
+    batch_no = 0
+    while True:
+        info = file["y"][batchsize*batch_no:batchsize*(batch_no+1)]
+        event_ids = info[:,0].astype(int)
+        where = np.where(event_ids==target_event_id)[0]
+        if len(where)!=0:
+            where_is_it = batchsize*batch_no + where[0]
+            break
+            
+    hists = file["x"][where_is_it:where_is_it+1]
+    info = file["y"][where_is_it:where_is_it+1]
     return hists, info
 
 def predict_on_hists(hists, zero_center_file, autoencoder_model):
@@ -57,14 +79,19 @@ zero_center_file  = data_path_of_file + "_zero_center_mean.npy"
 print("Data file:", data_path_of_file)
 print("Zero center file:", zero_center_file)
 
-
 # a list of all the autoencoders for training
 autoencoders_list = []
 for epoch in plot_which_epochs:
     autoencoders_list.append(autoencoder_model_base + str(epoch) + ".h5")
 
+
 # read data from file
-original_image_batch, info = get_hists(data_path_of_file, number_of_events)
+if event_id_override == None:
+    original_image_batch, info = get_hists(data_path_of_file, number_of_events)
+else:
+    original_image_batch, info = get_specific_id(data_path_of_file, event_id_override)
+
+
 # make predictions for all the models
 predicted_image_batch=[]
 for AE_no,autoencoder in enumerate(autoencoders_list):
@@ -76,6 +103,7 @@ for AE_no,autoencoder in enumerate(autoencoders_list):
 #dimension e.g. (3,5,11,13,18) for 3 AEs and 5 events
 predicted_image_batch=np.array(predicted_image_batch)
 
+
 #plot them all in a pdf
 # for every event: first the original image, then the predictions from the AEs
 figures = []
@@ -85,11 +113,13 @@ for original_image_no,original_image in enumerate(original_image_batch):
     event_id = info[original_image_no,0].astype(int)
     org_fig = make_plots_from_array(original_image, suptitle="Original image  Event ID: "+str(event_id))
     figures.append(org_fig)
+    plt.close(org_fig)
     
     #then the prediction of all the AEs
     for autoencoder_no, predicted_image in enumerate(predicted_image_batch[:,original_image_no]):
         fig = make_plots_from_array(predicted_image, suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(plot_which_epochs[autoencoder_no]), min_counts=0.2, titles=["",])
         figures.append(fig)
+        plt.close(fig)
     
     
 with PdfPages(save_name_of_pdf) as pp:

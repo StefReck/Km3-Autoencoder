@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Dropout, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.layers import LeakyReLU
 from keras.callbacks import Callback
 import numpy as np
@@ -105,7 +105,7 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
 
 def test_model():
     inputs = Input(shape=(10,1))
-    x = Dense(10)(inputs)
+    x = Dropout(0.5)(inputs)
     #12,14,18
 
     #stride 1/valid             stride 1/same = 1pad --> 13,15,20
@@ -134,6 +134,9 @@ def test_model():
 
 model = test_model()
 model.compile(optimizer='adam', loss='mse')
+get_3rd_layer_output = K.function([model.layers[0].input, K.learning_phase()],
+                                  [model.layers[1].output])
+layer_output = get_3rd_layer_output([a, 0])[0]
 """
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))

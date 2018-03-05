@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Load a channel id autoencoder model and predict on some train files, then plot it optionally.
-Channel id arrays are almost always 0 or 1, so only these cases are looked for.
 """
 
 from keras.models import load_model
+from keras import metrics
 import h5py
 import numpy as np
 import argparse
@@ -25,9 +25,10 @@ def parse_input():
 params = parse_input()
 model_name = params["model_name"]
 mode="plot"
+zero_center = False
 
 #for plot mode, number of 32 batches of channel_id arrays should be read through for the plot
-how_many_dom_batches = 10000
+how_many_dom_batches = 100
 bins=100
 
 model=load_model(model_name)
@@ -39,7 +40,12 @@ if mode == "simple":
     minimum_counts = 5
     
     test_file = dataset_info_dict["test_file"]
-    xs_mean=load_zero_center_data(((dataset_info_dict["train_file"],),), batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
+    
+    if zero_center==True:
+        xs_mean=load_zero_center_data(((dataset_info_dict["train_file"],),), batchsize=32, n_bins=dataset_info_dict["n_bins"], n_gpu=1)
+    else:
+        xs_mean = 0
+    
     f = h5py.File(test_file, "r")
     
     #look for some doms that are not mostly 0
@@ -65,7 +71,7 @@ if mode == "simple":
 
 elif mode=="plot":
     #make plot of predictions
-    maximum_counts_to_look_for=1
+    maximum_counts_to_look_for=6
     skip_zero_counts=False
     
     train_file=dataset_info_dict["train_file"]
@@ -84,8 +90,10 @@ elif mode=="plot":
     train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
     #test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
     
-    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
-
+    if zero_center==True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
+    else:
+        xs_mean=0
     
     generator = generate_batches_from_hdf5_file(test_file, batchsize, n_bins, class_type, 
                                     is_autoencoder, dataset_info_dict, broken_simulations_mode=0,
@@ -105,7 +113,6 @@ elif mode=="plot":
             print("Predicting ... ", int(10*i/print_something_after_every), "% done")
             
         data=next(generator)[0]
-        
         data_real = np.add(data, xs_mean)
         pred=np.add(model.predict_on_batch(data), xs_mean)
         
@@ -113,23 +120,33 @@ elif mode=="plot":
         for dom_no,data_real_single in enumerate(data_real):
             pred_single=pred[dom_no]
             for measured_counts in range(skip_zero_counts, maximum_counts_to_look_for+1):
+                #sort predicitions into list according to original counts
                 pred_on[measured_counts].extend(pred_single[data_real_single==measured_counts])
+                
     print("Done, generating plot...")
     
     plt.title("Channel autoencoder predictions (%)")
     plt.ylabel("Fraction of predicitons")
     plt.xlabel("Predicted counts")
-    make_plots_of_counts=[0,1]
     plt.plot([],[], " ", label="Original counts")
     
+    make_plots_of_counts=list(range(maximum_counts_to_look_for+1))
+    
     ex_list=[]
+    #fill with maximum and minimum prediction of every original count number
     for counts_array in pred_on:
         ex_list.extend([np.amax(counts_array), np.amin(counts_array)])
     range_of_plot=[np.amin(ex_list),np.amax(ex_list)]
 
+    #relative width of bins as fracton of bin size
+    relative_width=1/len(make_plots_of_counts)
+    bin_size = (range_of_plot[0]-range_of_plot[1]) / bins
+    bin_edges = np.linspace(range_of_plot[0], range_of_plot[1], num=bins+1)
+    
     for c in make_plots_of_counts:
         if len(pred[c]) != 0:
-            plt.hist( pred_on[c], label=str(c), bins=bins, density=True, range=range_of_plot )
+            offset = bin_size*relative_width*c
+            plt.hist( pred_on[c], bin_edges+offset, label=str(c), bins=bins, density=True, range=range_of_plot, rwidth=relative_width )
     plt.legend()
     plt.show()
         
