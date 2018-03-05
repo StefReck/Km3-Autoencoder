@@ -44,7 +44,8 @@ def predict_on_hists(hists, zero_center_file, autoencoder_model):
     zero_centered_hists = np.subtract( hists.reshape((hists.shape+(1,))), zero_center_image )
     #predict on data
     zero_centered_hists_pred=autoencoder.predict_on_batch(zero_centered_hists)
-    #remove zero centering and remove 1 at the end of dimension again
+    #remove zero centering and remove 1 at the end of dimension again,
+    #so that the output has the same dimension as the hists input
     hists_pred = np.add(zero_centered_hists_pred, zero_center_image).reshape(hists.shape)
     return hists_pred
     
@@ -69,8 +70,10 @@ predicted_image_batch=[]
 for AE_no,autoencoder in enumerate(autoencoders_list):
     #the prediction of all events for a single AE
     print("Predicting for model", autoencoder)
+    # dimension e.g. (5,11,13,18) for 5 events
     pred_image_batch = predict_on_hists(original_image_batch, zero_center_file, autoencoder)
     predicted_image_batch.append(pred_image_batch)
+#dimension e.g. (3,5,11,13,18) for 3 AEs and 5 events
 predicted_image_batch=np.array(predicted_image_batch)
 
 #plot them all in a pdf
@@ -85,7 +88,7 @@ for original_image_no,original_image in enumerate(original_image_batch):
     
     #then the prediction of all the AEs
     for autoencoder_no, predicted_image in enumerate(predicted_image_batch[:,original_image_no]):
-        fig = make_plots_from_array(pred_image_batch, suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(plot_which_epochs[autoencoder_no]), min_counts=0.2, titles=["",])
+        fig = make_plots_from_array(predicted_image, suptitle="Event ID: "+str(event_id)+"  Autoencoder epoch "+str(plot_which_epochs[autoencoder_no]), min_counts=0.2, titles=["",])
         figures.append(fig)
     
     
