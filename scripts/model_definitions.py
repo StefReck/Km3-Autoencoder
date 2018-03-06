@@ -135,7 +135,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name) 
     elif model_tag == "vgg_5_64":
         model = setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name) 
-        
+    elif model_tag == "vgg_5_32":
+        model = setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name)    
      
     elif model_tag == "channel_vgg":
         options_dict["number_of_filters_in_input"]=31
@@ -186,7 +187,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_64", autoencoder_stage=0, 
+    model=setup_model(model_tag="vgg_5_32", autoencoder_stage=0, 
                       additional_options="", modelpath_and_name=None)
     model.summary()
 

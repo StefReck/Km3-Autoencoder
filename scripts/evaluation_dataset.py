@@ -23,12 +23,12 @@ extra_name=""
 bins=32
 
 #Standard, plot acc vs energy plots of these:
-which_ones=("4unf","4enc")
+which_ones=("4pic_enc","4flip_unf","4flip_enc")
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
 #can be True, False or "both"
-make_difference_plot=True
+make_difference_plot=False
 which_broken_study=4
 
 
@@ -126,7 +126,7 @@ def get_info(which_one, extra_name=""):
         #Which dataset each to use
         dataset_array = ("xzt_broken4", "xzt", "xzt")
         #Plot properties: All in the array are plotted in one figure, with own label each
-        title_of_plot='600 neuron Autoencoder-encoder network performance with manipulated simulations'
+        title_of_plot='600 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
         #in the results/plots folder:
         plot_file_name = "vgg_5_picture_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
