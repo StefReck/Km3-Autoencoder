@@ -7,8 +7,11 @@ import matplotlib.pyplot as plt
 
 from plot_statistics import make_data_from_files, get_last_prl_epochs, get_default_labels
 
-test_files_ae = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",]
-test_files_prl = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",]
+test_files_ae = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",
+                 "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt",]
+
+test_files_prl = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",
+                  "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt",]
 
 how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*194, ]*len(test_files_ae)
 
@@ -47,6 +50,7 @@ def make_plot(loss_acc_list, labels):
     ax.set_xlabel("Autoencoder loss")
     ax.set_ylabel("Encoder accuracy")
     ax.grid()
+    ax.legend()
     return fig, ax
 
 labels = get_default_labels(test_files_ae)
