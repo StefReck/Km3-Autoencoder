@@ -5,7 +5,7 @@ Plot of AE loss vs Encoder acc of several networks.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plot_statistics import make_data_from_files, get_last_prl_epochs
+from plot_statistics import make_data_from_files, get_last_prl_epochs, get_default_labels
 
 test_files_ae = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",]
 test_files_prl = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",]
@@ -31,7 +31,7 @@ for ae_number in range(len(test_files_ae)):
     loss_acc = [[],[]]
     for autoencoder_epoch in data_ae[0]:
         #ae loss of specific ae epoch
-        ae_loss = data_ae[1][autoencoder_epoch]
+        ae_loss = data_ae[1][autoencoder_epoch-1]
         #encoder accuracy of a specific ae epoch
         enc_acc = data_parallel_test[1][np.where(data_parallel_test[0]==autoencoder_epoch)]
     
@@ -40,10 +40,18 @@ for ae_number in range(len(test_files_ae)):
             loss_acc[1].append(enc_acc)
     loss_acc_list.append(loss_acc)
 
+def make_plot(loss_acc_list, labels):
+    fig, ax = plt.subplots(figsize=(8,8))
+    for i,model_loss_acc in enumerate(loss_acc_list):
+        ax.plot(model_loss_acc[0], model_loss_acc[1], "o-", label=labels[i])
+    ax.set_xlabel("Autoencoder loss")
+    ax.set_ylabel("Encoder accuracy")
+    ax.grid()
+    return fig, ax
 
-for model_loss_acc in loss_acc_list:
-    plt.plot(model_loss_acc[0], model_loss_acc[1])
-plt.show()
+labels = get_default_labels(test_files_ae)
+fig, ax = make_plot(loss_acc_list, labels)
+plt.show(fig)
 
 
 

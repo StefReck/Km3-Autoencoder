@@ -145,10 +145,7 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
 
 
     #train: Only take epochs that were trained for one Epoch on an AE Epoch
-    try:
-        is_1=np.where(how_many_epochs_each_to_train==1)[0][0]-1
-    except IndexError:
-        is_1=np.where(how_many_epochs_each_to_train==1)[0]-1
+    is_1=np.where(how_many_epochs_each_to_train==1)[0][0]-1
     take_these_train_epochs = take_these_prl_epochs[is_1:]
     #shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
     shift_epochs_by = take_these_prl_epochs[is_1] - (is_1+1) 
