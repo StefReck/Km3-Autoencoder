@@ -145,9 +145,9 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.5,1.0)
     elif which_one=="4flip_enc":
-        modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch12.h5",
-                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch12.h5",
-                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch10_supervised_up_down_broken4_epoch10.h5")
+        modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch10_supervised_up_down_broken4_epoch59.h5")
         #Which dataset each to use
         dataset_array = ("xzt", "xzt_broken4", "xzt_broken4")
         #Plot properties: All in the array are plotted in one figure, with own label each
