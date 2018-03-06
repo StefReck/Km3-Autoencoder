@@ -132,6 +132,31 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
+    elif which_one=="4flip_unf":
+        modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt", "xzt_broken4", "xzt_broken4")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Unfrozen network performance with manipulated data'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken4_flip_unf"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.5,1.0)
+    elif which_one=="4flip_enc":
+        modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch12.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch12.h5",
+                       "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch10_supervised_up_down_broken4_epoch10.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt", "xzt_broken4", "xzt_broken4")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Autoencoder-encoder network performance with manipulated data'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken4_flip_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
+    
     else:
         print(which_one, "is not known!")
         raise(TypeError)
