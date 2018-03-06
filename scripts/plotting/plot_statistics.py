@@ -103,9 +103,12 @@ def get_default_labels(test_files):
     
 
 def make_data_from_files(test_files, dump_to_file=None):
-    # Takes a list of names from the test files, and returns:
+    #Input: list of strings, each the path to a model in the models folder
+    
+    # Takes a list of names of test files, and returns:
     # ( [Test_epoch, Test_ydata, Train_epoch, Train_ydata], [...], ... ] , [ylabel1, ylabel2, ...] )
     #                 For test file 1,                      File 2 ...   ,   File1 ,  File2,  ...
+    #ydata is loss, or instead acc if that is to be found in the log files
     dict_array = make_dicts_from_files(test_files) #a list of dicts, one for every test file
     data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files)
     
@@ -124,6 +127,38 @@ def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
     span = maxi - mini
     ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
     return ranges
+
+
+
+def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train):
+    #Input: data from an autoenocoder and the parallel training that was made with it
+    #       how many epochs of parallel training were done on each AE epoch
+    #Output:train and test data of the last prl epoch that was trained on each AE epoch
+    #           each containing [epoch, ydata]
+    
+    take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
+    #only take epochs that have actually been made:
+    highest_prl_epoch = max(data_parallel[0])
+    take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
+    
+    data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
+
+
+    #train: Only take epochs that were trained for one Epoch on an AE Epoch
+    is_1=np.where(how_many_epochs_each_to_train==1)[0][0]-1
+    take_these_train_epochs = take_these_prl_epochs[is_1:]
+    #shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
+    shift_epochs_by = take_these_prl_epochs[is_1] - (is_1+1) 
+
+    #data_parallel_train=[train_epoch, train_ydata]
+    data_parallel_train=[[],[]]
+    for epoch in take_these_train_epochs:
+        take_these = np.logical_and(data_parallel[2]>=epoch, data_parallel[2]<epoch+1)
+        data_parallel_train[0].extend( (np.array(data_parallel[2])-shift_epochs_by)[take_these])
+        data_parallel_train[1].extend( np.array(data_parallel[3])[take_these])
+    
+    return data_parallel_test, data_parallel_train
+
 
 
 def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
