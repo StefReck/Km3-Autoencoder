@@ -103,19 +103,8 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     x = Activation('relu', trainable=trainable)(x)
     return x
 
-y_pred = Input((10,10,1))
-y_true = Input((10,10,1))
 
-from scipy.stats import poisson
-def mse_poisson(y_true, y_pred):
-    mean = K.mean(y_true)
-    #mean = K.get_value(K.mean(y_true))
-    #y_true_array = K.batch_get_value(y_true)
-    y_true_probs = poisson.pmf(y_true,mean)
-    return K.mean(K.square(y_pred - y_true), axis=-1)
-    #return K.mean( (1-y_true_probs) * K.square(y_pred - y_true), axis=-1)
 
-v = mse_poisson(y_true, y_pred)
 
 
 
