@@ -143,7 +143,7 @@ def get_info(which_one, extra_name=""):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken4_flip_unf"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.5,1.0)
+        y_lims=(0.75,1.0)
     elif which_one=="4flip_enc":
         modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
@@ -155,7 +155,7 @@ def get_info(which_one, extra_name=""):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken4_flip_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.7,0.95)
+        y_lims=(0.75,1)
     
     else:
         print(which_one, "is not known!")
