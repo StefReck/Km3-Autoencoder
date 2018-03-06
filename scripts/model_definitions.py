@@ -20,6 +20,7 @@ def make_options_dict(additional_options):
     options_dict["encoder_only"]=False
     options_dict["encoded_penalty"]=0
     options_dict["dropout_for_conv"]=0.0
+    options_dict["add_conv_layer"]=False
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -44,6 +45,11 @@ def make_options_dict(additional_options):
         penalty = float(additional_options.split("=")[1])
         options_dict["encoded_penalty"]=penalty
         print("L1 regularizer of encoded layer with factor", penalty)
+    
+    if "add_conv_layer" in additional_options:
+        #Add a trainable conv layer before the dense layers of the encoder
+        options_dict["add_conv_layer"]=True
+        print("Conv layer is being added to encoder")
         
     if "encoder_only" in additional_options:
         #Change dropout of dense layers

@@ -50,6 +50,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
     encoded_penalty        = options_dict["encoded_penalty"]
+    additional_conv_layer_for_encoder = options_dict["add_conv_layer"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -74,7 +75,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     x = ZeroPadding3D(((0,0),(0,1),(0,1)))(x) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
     x=conv_block(x,      filters=filter_base[3], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #2x4x6
-    encoded = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3
+    encoded = AveragePooling3D((1, 2, 2), padding='valid')(x) #2x2x3 x 50
 
     if autoencoder_stage == 0:  #The Decoder part:
         #2x2x3
@@ -112,8 +113,12 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
             autoencoder = load_model(modelpath_and_name)
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
-            
-        x = Flatten()(encoded)
+        #2x2x3 x50
+        if additional_conv_layer_for_encoder == True:
+             x = conv_block(encoded, filters=filter_base[3], kernel_size=(2,2,3), padding="valid",  trainable=True, channel_axis=channel_axis)
+             x = Flatten()(x)
+        else:
+            x = Flatten()(encoded)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
