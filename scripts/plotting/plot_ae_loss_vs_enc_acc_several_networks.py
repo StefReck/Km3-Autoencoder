@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from plot_statistics import make_data_from_files, get_last_prl_epochs
 
-test_files_ae = ["vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",]
-test_files_prl = ["vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",]
+test_files_ae = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",]
+test_files_prl = ["models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",]
 
 how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*194, ]*len(test_files_ae)
 
