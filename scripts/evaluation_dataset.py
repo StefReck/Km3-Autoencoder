@@ -118,6 +118,19 @@ def get_info(which_one, extra_name=""):
         plot_file_name = "vgg_3_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,0.95)
+        
+    elif which_one=="4pic_enc":
+        modelidents = ("vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
+                       "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
+                       "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch74.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='600 neuron Autoencoder-encoder network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_picture_broken4_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
     
     else:
         print(which_one, "is not known!")
