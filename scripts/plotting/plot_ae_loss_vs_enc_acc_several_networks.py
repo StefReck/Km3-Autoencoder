@@ -23,7 +23,7 @@ for ae_number in range(len(test_files_ae)):
     data_ae = data_for_plots_ae[ae_number]
     data_prl =data_for_plots_prl[ae_number]
     #[Test_epoch, Test_ydata, Train_epoch, Train_ydata]
-    how_many_epochs_each_to_train = how_many_epochs_each_to_train_list[ae_number]
+    how_many_epochs_each_to_train = np.array(how_many_epochs_each_to_train_list[ae_number])
     
     data_parallel_test, data_parallel_train = get_last_prl_epochs(data_ae, data_prl, how_many_epochs_each_to_train)
     #[epoch, ydata]
