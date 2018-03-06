@@ -163,6 +163,16 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
     print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
 
+
+from scipy.stats import poisson
+def mse_poisson(y_true, y_pred):
+    #weigh the squared error of every bin by the likelihood this is caused by the poisson distribution
+    mean = K.get_value(K.mean(y_true))
+    y_true_array = K.batch_get_value(y_true)
+    y_true_probs = poisson.pmf(y_true_array,mean)
+    return K.mean( (1-y_true_probs) * K.square(y_pred - y_true), axis=-1)
+
+
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
@@ -174,6 +184,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     filesize_factor=dataset_info_dict["filesize_factor"]
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     batchsize=dataset_info_dict["batchsize"] #def 32
+    
+    #the loss that is used for the autoencoder
+    #usually "mse", "mae", or mse_poisson
+    ae_loss = "mse"
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
@@ -279,7 +293,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create a new autoencoder network
             print("Creating new autoencoder network:", modeltag)
             model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
-            model.compile(optimizer=adam, loss='mse')
+            model.compile(optimizer=adam, loss=ae_loss)
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #["loss"]
@@ -296,7 +310,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 print("Lambda mode enabled")
                 model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
                 model.load_weights(autoencoder_model_to_load)
-                model.compile(optimizer=adam, loss='mse')
+                model.compile(optimizer=adam, loss=ae_loss)
                 
                 opti_weights=load_model(autoencoder_model_to_load).optimizer.get_weights()
                 model.optimizer.set_weights(opti_weights)

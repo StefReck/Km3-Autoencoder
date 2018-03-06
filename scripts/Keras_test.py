@@ -103,6 +103,22 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     x = Activation('relu', trainable=trainable)(x)
     return x
 
+y_pred = K.variable(np.array([0,1,5,0,1,0,2,0,0,0,0,0,0,0,0]))
+y_true = K.variable(np.array([1,1,5,1,0,1,0,0,1,0,0,0,0,0,0]))
+
+from scipy.stats import poisson
+def mse_poisson(y_true, y_pred):
+    mean = K.get_value(K.mean(y_true))
+    y_true_array = K.batch_get_value(y_true)
+    y_true_probs = poisson.pmf(y_true_array,mean)
+    return K.mean( (1-y_true_probs) * K.square(y_pred - y_true), axis=-1)
+
+v,w = mse_poisson(y_true, y_pred)
+print(K.get_value(v), K.get_value(w))
+
+
+
+
 def test_model():
     inputs = Input(shape=(10,1))
     x = Dropout(0.5)(inputs)
@@ -132,11 +148,9 @@ def test_model():
     return autoencoder
 
 
-model = test_model()
-model.compile(optimizer='adam', loss='mse')
-get_3rd_layer_output = K.function([model.layers[0].input, K.learning_phase()],
-                                  [model.layers[1].output])
-layer_output = get_3rd_layer_output([a, 0])[0]
+#model = test_model()
+#model.compile(optimizer='adam', loss='mse')
+
 """
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))
