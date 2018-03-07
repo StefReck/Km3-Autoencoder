@@ -397,6 +397,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                     if layer.name == "encoded":
                         last_encoder_layer_index = i
                         break
+                    elif layer.name == "encoded+1":
+                        last_encoder_layer_index = i-1
+                        break
                     elif "flatten" in layer.name:
                         last_encoder_layer_index = i
             else:

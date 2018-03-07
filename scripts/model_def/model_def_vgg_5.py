@@ -9,14 +9,18 @@ from keras.layers import Activation, ActivityRegularization, Cropping3D, Reshape
 from keras import backend as K
 
 #Standard Conv Blocks
-def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, BNunlock=False):
+def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, BNunlock=False, name_of_first_layer = None):
     #unfreeze the BN layers
     if BNunlock == True:
         BNtrainable = True
     else:
         BNtrainable = trainable
     
-    x = Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable)(inp)
+    if name_of_first_layer == None:
+        x = Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable)(inp)
+    else:
+        x = Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable, name = name_of_first_layer)(inp)
+    
     x = BatchNormalization(axis=channel_axis, trainable=BNtrainable)(x)
     x = Activation('relu', trainable=trainable)(x)
     if dropout > 0.0: x = Dropout(dropout)(x)
@@ -115,7 +119,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
                 layer.set_weights(autoencoder.layers[i].get_weights())
         #2x2x3 x50
         if additional_conv_layer_for_encoder == True:
-             x = conv_block(encoded, filters=filter_base[3], kernel_size=(2,2,2), padding="same",  trainable=True, channel_axis=channel_axis)
+             x = conv_block(encoded, filters=filter_base[3], kernel_size=(2,2,2), padding="same",  trainable=True, channel_axis=channel_axis, name_of_first_layer = "encoded+1")
              x = Flatten()(x)
         else:
             x = Flatten()(encoded)
