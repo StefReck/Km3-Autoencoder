@@ -113,10 +113,11 @@ def make_data_from_files(test_files, dump_to_file=None):
     data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files)
     
     if dump_to_file is not None:
-        print("Saving plot data to", dump_to_file, "via np.save")
+        save_path = "results/dumped_statistics/"+dump_to_file
+        print("Saving plot data via np.save to", save_path)
         print("This file contains (data_from_files, ylabel_list)")
         data_to_be_saved = (data_from_files, ylabel_list)
-        np.save(dump_to_file, data_to_be_saved)
+        np.save(save_path, data_to_be_saved)
     
     return data_from_files, ylabel_list
 

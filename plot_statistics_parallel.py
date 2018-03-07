@@ -32,14 +32,15 @@ legend_locations=(1, "upper left")
 xticks=None
 # override line colors; must be one color for every test file, otherwise automatic
 colors=["blue", "orange"] # = automatic
-#Name of file to save the numpy array with the plot data to; None will skip saving
+#Name of file in the results/dumped_statistics folder to save the numpy array 
+#with the plot data to; None will skip saving
 dump_to_file=None
 
 
 
 #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list) 
 #for every test file
-data_from_files, ylabel_list = make_data_from_files(test_files)
+data_from_files, ylabel_list = make_data_from_files(test_files, dump_to_file)
 data_autoencoder = data_from_files[0]
 data_parallel = data_from_files[1]
 
