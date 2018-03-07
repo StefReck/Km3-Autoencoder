@@ -23,7 +23,7 @@ extra_name=""
 bins=32
 
 #Standard, plot acc vs energy plots of these:
-which_ones=("4pic_enc","4flip_unf","4flip_enc")
+which_ones=("4_200_enc",)
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
@@ -37,7 +37,7 @@ which_broken_study=4
 extra_name="_"+ str(bins)+"_bins" + extra_name
 
 def get_info(which_one, extra_name=""):
-    if which_one=="1unf":
+    if which_one=="1_unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
                        "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -51,7 +51,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.4,1.05)
     
-    elif which_one=="1enc":
+    elif which_one=="1_enc":
         #vgg_3_broken1_enc
         modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
@@ -65,7 +65,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.7,1.0)
     
-    elif which_one=="2unf":
+    elif which_one=="2_unf":
         #vgg_3_broken2_unf
         modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
@@ -79,7 +79,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.73,0.96)
         
-    elif which_one=="2enc":
+    elif which_one=="2_enc":
         #vgg_3_broken2_enc
         modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
                        "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
@@ -93,7 +93,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.68,0.92)
     
-    elif which_one=="4unf":
+    elif which_one=="4_unf":
         modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
@@ -106,7 +106,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.5,1.0)
     
-    elif which_one=="4enc":
+    elif which_one=="4_enc":
         modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
@@ -119,7 +119,7 @@ def get_info(which_one, extra_name=""):
         #y limits of plot:
         y_lims=(0.7,0.95)
         
-    elif which_one=="4pic_enc":
+    elif which_one=="4_pic_enc":
         modelidents = ("vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
                        "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
                        "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch74.h5")
@@ -129,6 +129,19 @@ def get_info(which_one, extra_name=""):
         title_of_plot='600 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
         #in the results/plots folder:
         plot_file_name = "vgg_5_picture_broken4_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
+    
+    elif which_one=="4_200_enc":
+        modelidents = ("vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_broken4_epoch59.h5",
+                       "vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_broken4_epoch59.h5",
+                       "vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='200 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_200_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,0.95)
     
@@ -286,13 +299,13 @@ if make_difference_plot == True or make_difference_plot == "both":
                 "Realtive difference in accuracy: Upper limit to 'measured' data")
     
     if which_broken_study==2:
-        which_ones = ("2unf", "2enc")
+        which_ones = ("2_unf", "2_enc")
         save_as_list=(plot_path + "vgg_3_broken2_sim_real"+extra_name+".pdf", 
                       plot_path + "vgg_3_broken2_upper_real"+extra_name+".pdf")
         y_lims_list=((-0.02,0.1),(-0.02,0.1))
         
     elif which_broken_study==4:
-        which_ones = ("4unf", "4enc")
+        which_ones = ("4_unf", "4_enc")
         save_as_list=(plot_path + "vgg_3_broken4_sim_real"+extra_name+".pdf", 
                       plot_path + "vgg_3_broken4_upper_real"+extra_name+".pdf")
         y_lims_list=((-0.02,0.1),(-0.02,0.1))
