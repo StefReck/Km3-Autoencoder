@@ -138,13 +138,19 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
     #       how many epochs of parallel training were done on each AE epoch
     #Output:train and test data of the last prl epoch that was trained on each AE epoch
     #           each containing [epoch, ydata]
+
     
+    #The test data:
     take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
     #only take epochs that have actually been made:
     highest_prl_epoch = max(data_parallel[0])
     take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
     
-    data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
+    #contains [epoch, ydata]
+    data_parallel_test = [np.arange(1,len(take_these_prl_epochs)+1), np.array(data_parallel[1])[:,take_these_prl_epochs-1]]
+    #formerly, it contained the epoch of the supervised training, and not the one from the autoencoder,
+    #which it will be plotted against later:
+    #data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
 
 
     #train: Only take epochs that were trained for one Epoch on an AE Epoch
@@ -160,7 +166,7 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
         data_parallel_train[0].extend( (np.array(data_parallel[2])-shift_epochs_by)[take_these])
         data_parallel_train[1].extend( np.array(data_parallel[3])[take_these])
     
-    return data_parallel_test, data_parallel_train
+    return np.array(data_parallel_test), np.array(data_parallel_train)
 
 
 
@@ -262,12 +268,12 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     
     #parallel enc
     #parallel training might not have been done for all AE epochs:
-    data_parallel_epochs = data_autoencoder[0][:len(data_parallel_test[0])]
+    #data_parallel_epochs = data_autoencoder[0][:len(data_parallel_test[0])]
     
     if color_override==True:#        21                      22
-        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel_test[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o", color=colors[1])
     else:
-        test_plot_prl = ax2.plot(data_parallel_epochs, data_parallel_test[1], marker="o")
+        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o")
     
     #train plot
     ax2.plot(data_parallel_train[0], data_parallel_train[1], linestyle="-", 
