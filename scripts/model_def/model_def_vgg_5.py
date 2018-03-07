@@ -119,7 +119,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
                 layer.set_weights(autoencoder.layers[i].get_weights())
         #2x2x3 x50
         if additional_conv_layer_for_encoder == True:
-             x = conv_block(encoded, filters=filter_base[3], kernel_size=(2,2,2), padding="same",  trainable=True, channel_axis=channel_axis, name_of_first_layer = "encoded+1")
+             x = conv_block(encoded, filters=filter_base[3], kernel_size=(2,2,2), padding="same",  trainable=True, channel_axis=channel_axis, name_of_first_layer = "after_encoded")
              x = Flatten()(x)
         else:
             x = Flatten()(encoded)
