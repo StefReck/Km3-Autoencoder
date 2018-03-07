@@ -177,8 +177,9 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     if len(labels_override) == len(default_label_array):
         label_array=labels_override
     else:
-        print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
         label_array = default_label_array
+        print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+        
     
     if len(colors) == len(label_array):
         color_override = True
@@ -236,8 +237,9 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     if len(labels_override) == len(default_label_array):
         label_array=labels_override
     else:
-        print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
         label_array = default_label_array
+        print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+        
     
     if len(colors) == len(label_array):
         color_override = True
