@@ -138,7 +138,7 @@ for i,test_file in enumerate(test_files):
 if debug==False:
     #Generate data from files (can also save it)
     # [Test_epoch, Test_ydata, Train_epoch, Train_ydata], ylabels
-    data_for_plots, ylabel_list = make_data_from_files(test_files, dump_to_file=dump_to_file)
+    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file=dump_to_file)
 else:
     # [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
     data_for_plots=[[np.linspace(0,9,10), np.linspace(0,9,10)*0.1, np.linspace(0,9,10)*0.1 + 1, np.linspace(0,9,10) ], ]
@@ -146,7 +146,7 @@ else:
     ylabel_list=("test","test")
 
 
-fig = make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, 
+fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
                 legend_locations, labels_override, colors, xticks, figsize=figsize)
 plt.show(fig)
 

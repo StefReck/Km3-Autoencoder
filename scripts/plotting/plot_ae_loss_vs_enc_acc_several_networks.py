@@ -20,8 +20,8 @@ how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*94,
                                        [10,]*1+[2,]*5+[1,]*194,]
 
 
-data_for_plots_ae, ylabel_list_ae = make_data_from_files(test_files_ae)
-data_for_plots_prl, ylabel_list_prl = make_data_from_files(test_files_prl)
+data_for_plots_ae, ylabel_list_ae, default_label_array_ae = make_data_from_files(test_files_ae)
+data_for_plots_prl, ylabel_list_prl, default_label_array_prl = make_data_from_files(test_files_prl)
 #data_for_plots:
 # [  [Test_epoch, Test_ydata, Train_epoch, Train_ydata],...    ]
 #                   for every test file, ....
@@ -58,8 +58,7 @@ def make_plot(loss_acc_list, labels):
     ax.legend()
     return fig, ax
 
-labels = get_default_labels(test_files_ae)
-fig, ax = make_plot(loss_acc_list, labels)
+fig, ax = make_plot(loss_acc_list, default_label_array_ae)
 plt.show(fig)
 
 

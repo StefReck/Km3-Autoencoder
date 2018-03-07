@@ -106,20 +106,22 @@ def make_data_from_files(test_files, dump_to_file=None):
     #Input: list of strings, each the path to a model in the models folder
     
     # Takes a list of names of test files, and returns:
-    # ( [Test_epoch, Test_ydata, Train_epoch, Train_ydata], [...], ... ] , [ylabel1, ylabel2, ...] )
+    # ( [Test_epoch, Test_ydata, Train_epoch, Train_ydata], [...], ... ] , [ylabel1, ylabel2, ...], [default labels] )
     #                 For test file 1,                      File 2 ...   ,   File1 ,  File2,  ...
     #ydata is loss, or instead acc if that is to be found in the log files
+    #default labels are the labels for the legend
     dict_array = make_dicts_from_files(test_files) #a list of dicts, one for every test file
     data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files)
+    default_label_array = get_default_labels(test_files)
     
     if dump_to_file is not None:
         save_path = "results/dumped_statistics/"+dump_to_file
         print("Saving plot data via np.save to", save_path)
-        print("This file contains (data_from_files, ylabel_list)")
-        data_to_be_saved = (data_from_files, ylabel_list)
+        print("This file contains (data_from_files, ylabel_list, default_label_array)")
+        data_to_be_saved = (data_from_files, ylabel_list, default_label_array)
         np.save(save_path, data_to_be_saved)
     
-    return data_from_files, ylabel_list
+    return data_from_files, ylabel_list, default_label_array
 
     
 def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
@@ -162,7 +164,7 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
 
 
 
-def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     fig, ax=plt.subplots(figsize=figsize)
     
     all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
@@ -172,11 +174,11 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     ylabel = ylabel_list[0]
     plt.ylabel(ylabel)
     
-    label_array = get_default_labels(test_files)
-    if len(labels_override) == len(label_array):
+    if len(labels_override) == len(default_label_array):
         label_array=labels_override
     else:
         print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+        label_array = default_label_array
     
     if len(colors) == len(label_array):
         color_override = True
@@ -227,16 +229,15 @@ def make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, leg
     return(fig)
 
 
-def make_plot_same_y_parallel(test_files, data_autoencoder, data_parallel_train, data_parallel_test, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     fig, ax=plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     
-    
-    label_array = get_default_labels(test_files)
-    if len(labels_override) == len(label_array):
+    if len(labels_override) == len(default_label_array):
         label_array=labels_override
     else:
         print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
+        label_array = default_label_array
     
     if len(colors) == len(label_array):
         color_override = True

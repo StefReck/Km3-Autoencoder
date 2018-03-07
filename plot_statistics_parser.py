@@ -43,8 +43,8 @@ dump_to_file=None
 
 
 
-data_for_plots, ylabel_list = make_data_from_files(test_files, dump_to_file=dump_to_file)
-fig = make_plot_same_y(test_files, data_for_plots, xlabel, ylabel_list, title, 
+data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file=dump_to_file)
+fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
                 legend_locations, labels_override, colors, xticks, figsize=figsize)
 plt.show(fig)
 
