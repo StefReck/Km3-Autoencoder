@@ -53,7 +53,8 @@ how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train)
 data_parallel_test_2, data_parallel_train_2 = get_last_prl_epochs(data_autoencoder, data_parallel_2, how_many_epochs_each_to_train)
 
+data_parallel_2 = [data_parallel_test_2[0], data_parallel_test_2[1], data_parallel_train_2[0], data_parallel_train_2[1]]
 
 fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                 title, legend_locations, labels_override, colors, xticks, figsize, np.concatenate((data_parallel_test_2, data_parallel_train_2)))
+                 title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2)
 plt.show(fig)
