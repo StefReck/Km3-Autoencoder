@@ -288,12 +288,16 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     
     if data_parallel_2 != None:
         #Optional: A second parallel plot is added
-        test_plot_prl_2 = ax2.plot(data_parallel_2[0], data_parallel_2[1], marker="o", color=colors[2])
+        if color_override==True:
+            test_plot_prl_2 = ax2.plot(data_parallel_2[0], data_parallel_2[1], marker="o", color=colors[2])
+        else:
+            test_plot_prl_2 = ax2.plot(data_parallel_2[0], data_parallel_2[1], marker="o")
         ax2.plot(data_parallel_2[2], data_parallel_2[3], linestyle="-", 
             color=test_plot_prl_2[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend_prl_2 = mlines.Line2D([], [], color=test_plot_prl_2[0].get_color(), 
                                       lw=3, label=label_array[2])
         handle_for_legend_array.append(handle_for_legend_prl_2)
+        
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
