@@ -147,7 +147,7 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
     take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
     
     #contains [epoch, ydata]
-    data_parallel_test = [np.arange(1,len(take_these_prl_epochs)+1), np.array(data_parallel[1])[:,take_these_prl_epochs-1]]
+    data_parallel_test = [np.arange(1,len(take_these_prl_epochs)+1), np.array(data_parallel[1])[take_these_prl_epochs-1]]
     #formerly, it contained the epoch of the supervised training, and not the one from the autoencoder,
     #which it will be plotted against later:
     #data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
@@ -236,7 +236,11 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     return(fig)
 
 
-def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2=None): 
+    #data autoencoder 
+    #[Test Epoch, Test ydata, Epoch train, ydata train]
+    #and data_parallel:
+    #[Epoch, ydata]
     fig, ax=plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     
@@ -279,14 +283,24 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     ax2.plot(data_parallel_train[0], data_parallel_train[1], linestyle="-", 
             color=test_plot_prl[0].get_color(), alpha=0.5, lw=0.6)
     
+    #custom handles for all the lines of both axes
+    handle_for_legend_array=[]
     
+    if data_parallel_2 != None:
+        #Optional: A second parallel plot is added
+        test_plot_prl_2 = ax2.plot(data_parallel_2[0], data_parallel_2[1], marker="o", color=colors[2])
+        ax2.plot(data_parallel_2[2], data_parallel_2[3], linestyle="-", 
+            color=test_plot_prl_2[0].get_color(), alpha=0.5, lw=0.6)
+        handle_for_legend_prl_2 = mlines.Line2D([], [], color=test_plot_prl_2[0].get_color(), 
+                                      lw=3, label=label_array[2])
+        handle_for_legend_array.append(handle_for_legend_prl_2)
     
     handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(),
                                       lw=3, label=label_array[0])
     handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
                                       lw=3, label=label_array[1])
-    legend1 = ax.legend(handles=[handle_for_legend, handle_for_legend_prl], 
-                         loc=legend_locations[0])
+    handle_for_legend_array.extend(handle_for_legend_prl,handle_for_legend)
+    legend1 = ax.legend(handles=handle_for_legend_array, loc=legend_locations[0])
     ax.add_artist(legend1)
     
     
