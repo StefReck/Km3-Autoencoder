@@ -10,9 +10,11 @@ import h5py
 from keras import backend as K
 from matplotlib.backends.backend_pdf import PdfPages
 from keras import regularizers
+import tensorflow as tf
+from scipy.special import factorial
 
-from compare_hists import *
-from util.Loggers import *
+#from compare_hists import *
+#from util.Loggers import *
 
 
 def setup_simple_model():
@@ -104,6 +106,37 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     return x
 
 
+
+
+def poisson_loss(y_true):
+    #np.mean( np.square(y_true - y_pred) )
+    #lambda = expec
+    # k = y_true
+    expec = np.mean( y_true )
+    return np.exp(-1 * expec)*np.power(expec,y_true)/factorial(y_true)
+
+
+
+
+
+def mean_squared_error_poisson(y_true, y_pred):
+    #the mean of y_true is the approximated poisson expectation value
+    expec = tf.multiply(tf.ones_like(y_true), tf.reduce_mean(y_true))
+    #The probability to get a certain bin of y_true from poisson
+    poisson_factor = tf.exp(-1*expec) * tf.pow(expec, y_true) / tf.exp(tf.lgamma(y_true+1))
+    #return weighted mean squared error
+    return tf.reduce_mean(tf.squared_difference(y_true, y_pred) * (1-poisson_factor))
+  
+
+init = tf.global_variables_initializer()
+with tf.Session() as sess:
+    sess.run(init)
+    #a=np.random.randint(0,4,10)
+    a=np.array([0,0,0,5])
+    b=np.array([1,1,0,5])
+    x = tf.constant(a, shape=a.shape, dtype="float32")
+    y = tf.constant(b, shape=b.shape, dtype="float32")
+    print(sess.run(mean_squared_error_poisson(x,y)))
 
 
 

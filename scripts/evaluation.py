@@ -39,7 +39,7 @@ plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" #in the results/plots folder
 #loss, acc, None
 plot_type = "acc"
 bins=32
-y_lims=(0.5,1) #for acc only
+y_lims=(0.75,1) #for acc only
 
 
 #Info about model
@@ -153,6 +153,7 @@ elif plot_type == None:
 else:
     print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
 
+print("Plot saved to", save_plot_as)
 
 #For an array of data:
 """
