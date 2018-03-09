@@ -303,7 +303,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
                                       lw=3, label=label_array[0])
     handle_for_legend_prl = mlines.Line2D([], [], color=test_plot_prl[0].get_color(), 
                                       lw=3, label=label_array[1])
-    handle_for_legend_array.extend(handle_for_legend_prl,handle_for_legend)
+    handle_for_legend_array.extend([handle_for_legend_prl,handle_for_legend])
     legend1 = ax.legend(handles=handle_for_legend_array, loc=legend_locations[0])
     ax.add_artist(legend1)
     

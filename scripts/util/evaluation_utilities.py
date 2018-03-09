@@ -9,13 +9,18 @@ steps -> int(steps)
 
 import h5py
 import numpy as np
-import keras as ks
-import matplotlib as mpl
-mpl.use('Agg')
+#import keras as ks
+import pickle
+import os
+
 import matplotlib.pyplot as plt
+from keras.models import load_model
 
-from util.run_cnn import generate_batches_from_hdf5_file
+import sys
+sys.path.append('../')
 
+from util.run_cnn import generate_batches_from_hdf5_file, load_zero_center_data, h5_get_number_of_rows
+from get_dataset_info import get_dataset_info
 
 
 #------------- Functions used in evaluating the performance of model -------------#
@@ -65,6 +70,48 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
 
     total_accuracy=np.sum(arr_energy_correct[:,1])/len(arr_energy_correct[:,1])
     print("Total accuracy:", total_accuracy, "(", np.sum(arr_energy_correct[:,1]), "of",len(arr_energy_correct[:,1]) , "events)")
+    return arr_energy_correct
+
+def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels, dataset_info_dict, broken_simulations_mode=0, samples=None):
+    """
+    Creates an energy_correct array based on test_data that specifies for every event the loss of the autoencoder.
+    :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
+    :param str f: Filepath of the file that is used for making predctions.
+    :param tuple n_bins: The number of bins for each dimension (x,y,z,t) in the testfile.
+    :param (int, str) class_type: The number of output classes and a string identifier to specify the exact output classes.
+                                  I.e. (2, 'muon-CC_to_elec-CC')
+    :param int batchsize: Batchsize that should be used for predicting.
+    :param ndarray xs_mean: mean_image of the x dataset if zero-centering is enabled.
+    :param None/str swap_4d_channels: For 4D data input (3.5D models). Specifies, if the channels for the 3.5D net should be swapped in the generator.
+    :param None/int samples: Number of events that should be predicted. If samples=None, the whole file will be used.
+    :return: ndarray arr_energy_correct: Array that contains the energy, correct, particle_type, is_cc and y_pred info for each event.
+    """
+    # TODO only works for a single test_file till now
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=True, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)
+    
+    if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    steps = samples/batchsize
+    
+    arr_energy_correct = None
+    for s in range(int(steps)):
+        if s % 300 == 0:
+            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
+        xs, xs_2, mc_info  = next(generator)
+        y_pred = model.predict_on_batch(xs) #(32, 11, 18, 50, 1) 
+
+        # calculate mean squared error between original image and autoencoded one
+        mse = ((xs - y_pred) ** 2).mean(axis=(1,2,3,4)) #(32,)
+        energy = mc_info[:, 2] # (32,)
+
+        ax = np.newaxis
+
+        # make a temporary energy_correct array for this batch, (32, 4)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:,ax]], axis=1)
+
+        if arr_energy_correct is None:
+            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
+        arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
+
     return arr_energy_correct
 
 
@@ -175,6 +222,24 @@ def make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3, 100), bins=9
     return [bin_edges, hist_1d_energy_accuracy_bins]
 
 
+def make_energy_to_loss_data(arr_energy_correct, plot_range=(3, 100), bins=97):
+    # Calculate loss in energy range
+    energy = arr_energy_correct[:, 0]
+    losses = arr_energy_correct[:, 1]
+    
+    bins_list=np.linspace(plot_range[0],plot_range[1],bins)
+    hist_energy_losses=np.zeros((len(bins_list)-1))
+    bin_indices = np.digitize(energy,bins_list) #in which bin the lines belong, e.g. [1,1,2,2,2,...], 1-->bin 3-4
+    for bin_no in range(min(bin_indices), max(bin_indices)+1):
+        hist_energy_losses[bin_no-1] = np.mean(losses[bin_indices==bin_no])
+        
+    #For proper plotting with plt.step where="post"
+    hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
+    
+
+    return [bins_list, hist_energy_losses]
+
+
 def make_energy_to_accuracy_plot(arr_energy_correct, title, filepath, plot_range=(3, 100)):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
@@ -255,7 +320,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], energy_range_of_one_bin=1, save=True):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[]):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -296,7 +361,7 @@ def make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title, file
     :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
     """
     for i, hist in enumerate(hist_data_array):
-        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='mid', label=label_array[i])
+        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='post', label=label_array[i])
     
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
@@ -397,6 +462,109 @@ def select_class(arr_energy_correct_classes, class_vector):
     selected_rows_of_class = arr_energy_correct_classes[indices_rows_with_class]
 
     return selected_rows_of_class
+
+#------------- My Code --------------------
+
+#Takes a bunch of models and returns the hist data for plotting, either
+#by loading if it exists already or by generating it from scratch
+#can also evaluate the performance of an autoencoder 
+#TODO: not bugfixed
+def make_or_load_files(modelnames, dataset_array, bins, modelidents=None, modelpath=None, class_type=None, is_autoencoder_list=None):
+    if is_autoencoder_list==None:
+        #default: no autoencoders
+        is_autoencoder_list=np.zeros_like(modelnames)
+        
+    hist_data_array=[]
+    for i,modelname in enumerate(modelnames):
+        dataset=dataset_array[i]
+        is_autoencoder = is_autoencoder_list[i]
+        print("Working on ",modelname,"using dataset", dataset, "with", bins, "bins")
+        
+        name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_"+str(bins)+"_bins_hist_data.txt"
+        
+        
+        if os.path.isfile(name_of_file)==True:
+            hist_data_array.append(open_hist_data(name_of_file))
+        else:
+            
+            if is_autoencoder == 1:
+                hist_data = make_and_save_hist_data_autoencoder(modelpath, dataset, modelidents[i], class_type, name_of_file, bins)
+            else:
+                hist_data = make_and_save_hist_data(modelpath, dataset, modelidents[i], class_type, name_of_file, bins)
+            
+            hist_data_array.append(hist_data)
+        print("Done.")
+    return hist_data_array
+
+
+#open dumped histogramm data, that was generated from the below functions
+def open_hist_data(name_of_file):
+    #hist data is list len 2 with 0:energy array, 1:acc/loss array
+    print("Opening existing hist_data file", name_of_file)
+    #load again
+    with open(name_of_file, "rb") as dump_file:
+        hist_data = pickle.load(dump_file)
+    return hist_data
+
+
+#Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
+#results/data folder, so that it has not to be generated again
+def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_file, bins):
+    model = load_model(modelpath + modelident)
+    
+    dataset_info_dict = get_dataset_info(dataset)
+    #home_path=dataset_info_dict["home_path"]
+    train_file=dataset_info_dict["train_file"]
+    test_file=dataset_info_dict["test_file"]
+    n_bins=dataset_info_dict["n_bins"]
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
+    
+    train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
+    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
+
+    
+    print("Making energy_correct_array of ", modelident)
+    arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
+    #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
+    hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
+    #save to file
+    print("Saving hist_data as", name_of_file)
+    with open(name_of_file, "wb") as dump_file:
+        pickle.dump(hist_data, dump_file)
+    return hist_data
+
+
+
+#Loss of an AE as a function of energy, rest like above
+def make_and_save_hist_data_autoencoder(modelpath, dataset, modelident, class_type, name_of_file, bins):
+    model = load_model(modelpath + modelident)
+    
+    dataset_info_dict = get_dataset_info(dataset)
+    #home_path=dataset_info_dict["home_path"]
+    train_file=dataset_info_dict["train_file"]
+    test_file=dataset_info_dict["test_file"]
+    n_bins=dataset_info_dict["n_bins"]
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
+    
+    train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
+    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
+    
+    
+    print("Making energy_correct_array of ", modelident)
+    arr_energy_correct = make_loss_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
+    hist_data = make_energy_to_loss_data(arr_energy_correct, plot_range=(3,100), bins=bins)
+    #save to file
+    print("Saving hist_data as", name_of_file)
+    with open(name_of_file, "wb") as dump_file:
+        pickle.dump(hist_data, dump_file)
+    return hist_data
+
+
+
+
+
+
+
 
 # ------------- Functions used in making Matplotlib plots -------------#
 
