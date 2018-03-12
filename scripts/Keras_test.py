@@ -116,7 +116,8 @@ def poisson_loss(y_true):
     #lambda = expec
     # k = y_true
     expec = np.mean( y_true )
-    return np.exp(-1 * expec)*np.power(expec,y_true)/factorial(y_true)
+    poisson_factor = np.exp(-1 * expec)*np.power(expec,y_true)/factorial(y_true)
+    return 1-poisson_factor
 
 
 
