@@ -19,7 +19,9 @@ extra_name=""
 bins=32
 
 #Standard, plot acc vs energy plots of these:
-which_ones=("4_200_enc",)
+which_ones=("1_unf","1_enc","4_unf","4_enc")
+#If not None: Change the y range of all plots to this one (to make unit looks)
+y_lims_override = None
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
@@ -32,7 +34,7 @@ which_broken_study=4
 
 extra_name="_"+ str(bins)+"_bins" + extra_name
 
-def get_info(which_one, extra_name=""):
+def get_info(which_one, extra_name="", y_lims_override=None):
     if which_one=="1_unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -59,7 +61,7 @@ def get_info(which_one, extra_name=""):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken1_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.7,1.0)
+        y_lims=(0.4,1.05)
     
     elif which_one=="2_unf":
         #vgg_3_broken2_unf
@@ -113,7 +115,7 @@ def get_info(which_one, extra_name=""):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.7,0.95)
+        y_lims=(0.5,1.0)
         
     elif which_one=="4_pic_enc":
         modelidents = ("vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
@@ -170,6 +172,9 @@ def get_info(which_one, extra_name=""):
         print(which_one, "is not known!")
         raise(TypeError)
         
+    if y_lims_override != None:
+        y_lims = y_lims_override
+        
     return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
 
 #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
@@ -193,7 +198,7 @@ plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
 if make_difference_plot == False or make_difference_plot == "both":
     for which_one in which_ones:
         
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name)
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name, y_lims_override=y_lims_override)
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
@@ -242,7 +247,7 @@ if make_difference_plot == True or make_difference_plot == "both":
     
     for i in range(len(make_diff_of_list)):
         #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[0])
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[0], y_lims_override=y_lims_override)
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
@@ -252,7 +257,7 @@ if make_difference_plot == True or make_difference_plot == "both":
         hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
         
         
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[1])
+        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[1], y_lims_override=y_lims_override)
         
         modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
         #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
