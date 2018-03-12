@@ -18,11 +18,10 @@ from scipy.special import factorial
 
 
 def setup_simple_model():
-    global model
     model=Sequential()
     model.add(Dense(32, activation='relu', input_dim=100))
     model.add(Dense(1, activation='sigmoid'))
-    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
     
     
 def setup_conv_model():
@@ -123,11 +122,20 @@ def mean_squared_error_poisson(y_true, y_pred):
     #the mean of y_true is the approximated poisson expectation value
     expec = tf.multiply(tf.ones_like(y_true), tf.reduce_mean(y_true))
     #The probability to get a certain bin of y_true from poisson
+    #ranges from   0: definitly not Poisson    to 1: definitly poisson
     poisson_factor = tf.exp(-1*expec) * tf.pow(expec, y_true) / tf.exp(tf.lgamma(y_true+1))
     #return weighted mean squared error
     return tf.reduce_mean(tf.squared_difference(y_true, y_pred) * (1-poisson_factor))
   
 
+model = setup_simple_model()
+model.compile(optimizer='adam', loss=mean_squared_error_poisson)
+
+test_in = np.ones((1,100,))
+test_out = np.zeros((1,))
+history = model.test_on_batch(test_in, test_out)
+
+"""
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
@@ -137,7 +145,7 @@ with tf.Session() as sess:
     x = tf.constant(a, shape=a.shape, dtype="float32")
     y = tf.constant(b, shape=b.shape, dtype="float32")
     print(sess.run(mean_squared_error_poisson(x,y)))
-
+"""
 
 
 

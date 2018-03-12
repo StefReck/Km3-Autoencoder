@@ -191,7 +191,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #the loss that is used for the autoencoder
     #usually "mse", "mae", or mean_squared_error_poisson
-    ae_loss = "mse"
+    ae_loss = mean_squared_error_poisson
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
