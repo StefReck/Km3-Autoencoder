@@ -19,9 +19,11 @@ extra_name=""
 bins=32
 
 #Standard, plot acc vs energy plots of these:
-which_ones=("1_unf","1_enc","4_unf","4_enc")
+which_ones=("1_unf","1_enc")
 #If not None: Change the y range of all plots to this one (to make unit looks)
 y_lims_override = None
+#Override default location of legend ("best")
+legend_loc="center right"
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
@@ -212,7 +214,7 @@ if make_difference_plot == False or make_difference_plot == "both":
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Accuracy"
-            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array) 
+            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
         elif plot_type == "loss":
             y_label_of_plot="Loss"
             make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 

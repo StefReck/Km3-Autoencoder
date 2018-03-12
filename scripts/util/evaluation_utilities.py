@@ -320,7 +320,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[]):
+def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
     """
     Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
     :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
@@ -342,7 +342,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
     plt.xticks(x_ticks_major)
     plt.minorticks_on()
 
-    plt.legend()
+    plt.legend(loc=legend_loc)
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
     plt.ylim((y_lims[0], y_lims[1]))
