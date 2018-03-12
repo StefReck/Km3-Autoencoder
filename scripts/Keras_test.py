@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Dropout, UpSampling3D, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.layers import LeakyReLU
 from keras.callbacks import Callback
 import numpy as np
@@ -19,8 +19,12 @@ from scipy.special import factorial
 
 def setup_simple_model():
     model=Sequential()
-    model.add(Dense(32, activation='relu', input_dim=100))
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Conv3D(filters=3, kernel_size=(3,3,3), padding='same', 
+                          activation='relu', input_shape=(10, 12, 18, 1)))
+    model.add(AveragePooling3D())
+    model.add(Conv3D(filters=3, kernel_size=(3,3,3), padding='same', activation='relu'))
+    model.add(UpSampling3D())
+    model.add(Conv3D(filters=1, kernel_size=(3,3,3), padding='same', activation='relu'))
     return model
     
     
@@ -127,13 +131,20 @@ def mean_squared_error_poisson(y_true, y_pred):
     #return weighted mean squared error
     return tf.reduce_mean(tf.squared_difference(y_true, y_pred) * (1-poisson_factor))
   
+def mean_squared_error_custom(y_true, y_pred):
+    #return mean squared error
+    return tf.reduce_mean(tf.squared_difference(y_true, y_pred))
+
+ae_loss = mean_squared_error_poisson
 
 model = setup_simple_model()
-model.compile(optimizer='adam', loss=mean_squared_error_poisson)
+model.compile(optimizer='adam', loss=ae_loss)
 
-test_in = np.ones((1,100,))
-test_out = np.zeros((1,))
-history = model.test_on_batch(test_in, test_out)
+test_in = np.random.randint(0,5,(320,10,12,18,1))
+
+pred1 = model.predict_on_batch(test_in)
+history = model.fit(test_in, test_in, 32, 5)
+pred2 = model.predict_on_batch(test_in)
 
 """
 init = tf.global_variables_initializer()

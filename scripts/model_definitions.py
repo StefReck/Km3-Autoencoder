@@ -129,21 +129,30 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     elif model_tag == "vgg_4_30c":
         model = setup_vgg_4_30c(autoencoder_stage, modelpath_and_name)
 
+
     elif model_tag == "vgg_5_picture":
         model = setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_channel":
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_morefilter":
         model = setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name)
+        
     elif model_tag == "vgg_5_200":
+        options_dict["filter_base_version"]="standard"
         model = setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name)   
+    elif model_tag == "vgg_5_200_large":
+        options_dict["filter_base_version"]="large"
+        model = setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name)  
     elif model_tag == "vgg_5_200_dense":
         model = setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name) 
+        
     elif model_tag == "vgg_5_64":
         model = setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name) 
+        
     elif model_tag == "vgg_5_32":
         model = setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name)    
      
+        
     elif model_tag == "channel_vgg":
         options_dict["number_of_filters_in_input"]=31
         model = setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name)
@@ -193,8 +202,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_picture", autoencoder_stage=2, 
-                      additional_options="add_conv_layer", modelpath_and_name=None)
+    model=setup_model(model_tag="vgg_5_200_large", autoencoder_stage=0, modelpath_and_name=None)
     model.summary()
 
 """
