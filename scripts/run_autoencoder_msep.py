@@ -193,6 +193,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #usually "mse", "mae", or mean_squared_error_poisson
     ae_loss = mean_squared_error_poisson
     
+    #custom loss functions have to be handed to load_model or it wont work
+    custom_objects={'mean_squared_error_poisson': mean_squared_error_poisson}
+    
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
     if not os.path.exists(model_folder):
@@ -308,7 +311,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             autoencoder_model_to_load=model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5'
             print("Loading existing autoencoder to continue training:", autoencoder_model_to_load)
             if lambda_comp==False:
-                model = load_model(autoencoder_model_to_load)
+                model = load_model(autoencoder_model_to_load, custom_objects=custom_objects)
             elif lambda_comp==True:
                 #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
                 print("Lambda mode enabled")
@@ -316,7 +319,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 model.load_weights(autoencoder_model_to_load)
                 model.compile(optimizer=adam, loss=ae_loss)
                 
-                opti_weights=load_model(autoencoder_model_to_load).optimizer.get_weights()
+                opti_weights=load_model(autoencoder_model_to_load, custom_objects=custom_objects).optimizer.get_weights()
                 model.optimizer.set_weights(opti_weights)
             
     #Encoder supervised training:
@@ -454,7 +457,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 print("Initializing model to", init_model)
                 autoencoder_epoch=2
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-                model_for_init = load_model(init_model)
+                model_for_init = load_model(init_model, , custom_objects=custom_objects)
                 for i,layer in enumerate(model.layers):
                     layer.set_weights(model_for_init.layers[i].get_weights())
             
@@ -498,7 +501,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 autoencoder_epoch+=1
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
                 print("Changing weights before epoch ",current_epoch+1," to ",autoencoder_model)
-                switch_encoder_weights(model, load_model(autoencoder_model), last_encoder_layer_index_override)
+                switch_encoder_weights(model, load_model(autoencoder_model, , custom_objects=custom_objects), last_encoder_layer_index_override)
             
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,

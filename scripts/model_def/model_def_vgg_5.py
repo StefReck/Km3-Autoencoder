@@ -114,7 +114,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     else: #Replacement for the decoder part for supervised training:
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder = Model(inputs=inputs, outputs=encoded)
-            autoencoder = load_model(modelpath_and_name)
+            autoencoder = load_model(modelpath_and_name, compile=False)
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
         #2x2x3 x50
@@ -349,7 +349,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
     else: #Replacement for the decoder part for supervised training:
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder = Model(inputs=inputs, outputs=encoded)
-            autoencoder = load_model(modelpath_and_name)
+            autoencoder = load_model(modelpath_and_name, compile=False) #no need to compile the model as long as only weights are read out
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
             
