@@ -179,7 +179,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #the loss that is used for the autoencoder
     #usually "mse", "mae", or mean_squared_error_poisson, msep_squared
-    ae_loss = mean_squared_error_poisson
+    ae_loss = msep_squared
     
     #custom loss functions have to be handed to load_model or it wont work
     custom_objects=get_custom_objects()

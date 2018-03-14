@@ -144,8 +144,10 @@ model.compile(optimizer='adam', loss=ae_loss)
 test_in = np.random.randint(0,5,(320,10,12,18,1))
 
 pred1 = model.predict_on_batch(test_in)
-history = model.fit(test_in, test_in, 32, 5)
+history = model.fit(test_in, test_in, 32, 2)
 pred2 = model.predict_on_batch(test_in)
+
+model2=load_model("test_model", custom_objects={'mean_squared_error_poisson': mean_squared_error_poisson} )
 
 """
 init = tf.global_variables_initializer()
