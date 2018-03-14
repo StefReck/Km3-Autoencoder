@@ -457,7 +457,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 print("Initializing model to", init_model)
                 autoencoder_epoch=2
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-                model_for_init = load_model(init_model, , custom_objects=custom_objects)
+                model_for_init = load_model(init_model, custom_objects=custom_objects)
                 for i,layer in enumerate(model.layers):
                     layer.set_weights(model_for_init.layers[i].get_weights())
             
