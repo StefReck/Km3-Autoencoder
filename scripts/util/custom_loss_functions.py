@@ -46,5 +46,18 @@ def msep_log(y_true, y_pred):
     #ranges from   0: definitly not Poisson    to 1: definitly poisson
     poisson_factor = tf.exp(-1*expec) * tf.pow(expec, y_true) / tf.exp(tf.lgamma(y_true+1))
     #return weighted mean squared error
-    return tf.reduce_mean(tf.squared_difference(y_true, y_pred) * (-1) * tf.log(poisson_factor))
+    return tf.clip_by_value(tf.reduce_mean(tf.squared_difference(y_true, y_pred) *(-1)*tf.log(poisson_factor)),0,100)
+
+
+if __name__=="__main__":
+    import numpy as np
+    init = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init)
+        #a=np.random.randint(0,4,10)
+        a=np.array([0,0,0,16]+[0,]*50)
+        b=np.array([1,1,0,15]+[0,]*50)
+        x = tf.constant(a, shape=a.shape, dtype="float32")
+        y = tf.constant(b, shape=b.shape, dtype="float32")
+        print(sess.run(msep_log(x,y)))
 

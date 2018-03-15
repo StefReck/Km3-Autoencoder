@@ -18,6 +18,11 @@ def reshape_3d_to_3d(hist_data, filter_small=None):
     for i in range(len(n_bins)):
         tot_bin_no=tot_bin_no*n_bins[i]
     """
+    #if the input shape is sth like (11,13,18,1), remove the 1 at the end
+    if n_bins[-1]==1:
+        hist_data = hist_data.reshape(n_bins[:-1])
+        print("reshape_3d_to_3d: Changed shape of hist_data from", n_bins, "to", n_bins[:-1])
+        n_bins=n_bins[:-1]
     #besser:
     tot_bin_no=np.prod(n_bins)
     
@@ -104,9 +109,10 @@ def make_3d_plots(hist_org, n_bins, suptitle, figsize, titles=["Original", "Pred
         ax2.set_zlim([0,n_bins[2]])
         ax2.set_title(titles[1])
     
-    if suptitle is not None: fig.suptitle(suptitle)
-    fig.tight_layout()   
     
+    if suptitle is not None: fig.suptitle(suptitle)
+    fig.tight_layout() 
+        
     return fig
 
 """
@@ -140,7 +146,7 @@ def make_3d_single_plot(hist_org, n_bins, title, figsize):
 
 def get_title_arrays(y):
     #input: y info from h5 file for a batch
-    #Ouput: Some infos for the title as strings
+    #Ouput: Multiple arrays with infos of each event for the title as strings
     ids = y[:,0].astype(int)
     particle_type = y[:,1] #Specifies the particle type, i.e. elec/muon/tau (12, 14, 16). Negative values for antiparticles.
     energies = y[:,2]
