@@ -21,8 +21,8 @@ from keras.models import load_model
 import numpy as np
 import matplotlib.pyplot as plt
 
-from histogramm_3d_utils import make_plots_from_array, get_some_hists_from_file
-from scripts.get_dataset_info import get_dataset_info
+from util.plotting.histogramm_3d_utils import make_plots_from_array, get_some_hists_from_file
+from get_dataset_info import get_dataset_info
 from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 from util.custom_loss_functions import get_custom_objects
 
@@ -45,24 +45,25 @@ filesize_factor=dataset_info_dict["filesize_factor"]
 filesize_factor_test=dataset_info_dict["filesize_factor_test"]
 batchsize=dataset_info_dict["batchsize"] #def 32
 
-if zero_center == 1:
-    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
-    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
-
 
 #array of how_many hists
-hists_org = get_some_hists_from_file(train_file, how_many, energy_threshold)
+hists_org, labels = get_some_hists_from_file(train_file, how_many, energy_threshold)
    
 #0 center them and add a 1 to shape
 if zero_center==1:
+    print("Zero centering active")
+    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
+    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
     hists_centered = np.subtract(hists_org.reshape((hists_org.shape+(1,))).astype(np.float32), xs_mean)
+    hists_pred = np.add(autoencoder.predict_on_batch(hists_centered), xs_mean)
 elif zero_center==0:
+    print("No zero centering")
     hists_centered = hists_org.reshape((hists_org.shape+(1,))).astype(np.float32)
-    
-hists_pred = autoencoder.predict_on_batch(hists_centered)
+    hists_pred = autoencoder.predict_on_batch(hists_centered)
+
 
 for event_no in range(len(hists_org)):
-    fig = make_plots_from_array(hists_org[event_no], hists_pred[event_no])
+    fig = make_plots_from_array(array1=hists_org[event_no], array2=hists_pred[event_no])
     plt.show(fig)
 
 
