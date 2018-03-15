@@ -22,7 +22,7 @@ def poisson_square_factor(y_true):
 def poisson_log_factor(y_true):
     expec = np.mean( y_true )
     poisson_factor = np.exp(-1 * expec)*np.power(expec,y_true)/factorial(y_true)
-    return -np.log(poisson_factor)
+    return -(1/100)*np.log(poisson_factor)
 
 home_path="../"
 data_path=home_path+"Daten/xzt/"

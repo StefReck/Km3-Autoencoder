@@ -6,7 +6,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
+import h5py
 
 def reshape_3d_to_3d(hist_data, filter_small=None):
     #input z.B. 11x13x18  (x,y,z)
@@ -216,6 +216,25 @@ def make_plots_from_array( array1, array2=[], suptitle=None, min_counts=0.3, tit
                         titles=titles)
         
     return fig
+
+#Get some event hists from a dataset
+def get_some_hists_from_file(filepath, how_many, energy_threshold=0):
+    with h5py.File(filepath, 'r') as file:
+        if energy_threshold > 0:
+            #Only take events with an energy over a certain threshold
+            minimum_energy = energy_threshold #GeV
+            only_load_this_many_events=10000 #takes forever otherwise
+            print("Applying threshold of", minimum_energy," GeV; only events with higher energy will be considered")
+            where=file["y"][:only_load_this_many_events][:, 2]>minimum_energy
+            labels=file["y"][:only_load_this_many_events][where,:][:how_many,:]
+            hists = file["x"][:only_load_this_many_events][where,:][:how_many,:]
+        else:
+            #manually select events
+            # event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
+            print("No energy threshold applied")
+            labels = file["y"][:how_many]
+            hists = file["x"][:how_many]
+    return hists, labels
 
 
 def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file, min_counts, n_bins, compare_histograms, energy_threshold):
