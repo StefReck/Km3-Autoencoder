@@ -5,12 +5,12 @@ Make some plots of original event vs autoencoder reco and show them.
 import argparse
 def parse_input():
     parser = argparse.ArgumentParser(description='Make some plots of original event vs autoencoder reco and show them.')
-    parser.add_argument('model', type=str, help='The model that does the predictions.')
-    parser.add_argument('dataset_tag', type=str, help='Dataset to use.')
+    parser.add_argument('model', metavar="m", type=str, help='The model that does the predictions.')
+    parser.add_argument('dataset_tag', metavar="d", type=str, help='Dataset to use.')
     
-    parser.add_argument('zero_center', type=int, nargs="?", default=1, help='Use zero-centering? 0 or 1')
-    parser.add_argument('how_many', type=int, nargs="?", default=4, help='How many plots of events will be in the pdf')
-    parser.add_argument('energy_threshold', type=float, nargs="?", default=0, help='Minimum energy of events for them to be considered')
+    parser.add_argument('how_many', metavar="h", type=int, nargs="?", default=4, help='How many plots of events will be in the pdf')
+    parser.add_argument('energy_threshold', metavar="e", type=float, nargs="?", default=0, help='Minimum energy of events for them to be considered')
+    parser.add_argument('-z', '--zero_center', action="store_true", help='Use zero-centering?')
     
     return vars(parser.parse_args())
 params = parse_input()
