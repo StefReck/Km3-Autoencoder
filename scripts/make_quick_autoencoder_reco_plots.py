@@ -34,7 +34,7 @@ dataset_tag = params["dataset_tag"]
 energy_threshold = params["energy_threshold"]
 how_many = params["how_many"]
 no_zero_center = params["no_zero_center"]
-       
+
 autoencoder = load_model(model_file, custom_objects=get_custom_objects())
 
 dataset_info_dict = get_dataset_info(dataset_tag)

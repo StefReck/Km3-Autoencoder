@@ -15,15 +15,15 @@ from util.evaluation_utilities import make_or_load_files, make_energy_to_accurac
 
 #extra string to be included in file names
 extra_name=""
-#number of bins; default is 97; backward compatibility with 98 bins
+#number of bins of the histogram plot; default is 97; backward compatibility with 98 bins
 bins=32
 
 #Standard, plot acc vs energy plots of these:
-which_ones=("1_unf","1_enc")
+which_ones=("4_64_enc",)
 #If not None: Change the y range of all plots to this one (to make unit looks)
 y_lims_override = None
 #Override default location of legend ("best")
-legend_loc="center right"
+legend_loc="best"
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
@@ -142,6 +142,19 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         title_of_plot='200 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
         #in the results/plots folder:
         plot_file_name = "vgg_5_200_broken4_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
+    
+    elif which_one=="4_64_enc":
+        modelidents = ("vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_epoch57.h5",
+                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_epoch57.h5",
+                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='64 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_64_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,0.95)
     
