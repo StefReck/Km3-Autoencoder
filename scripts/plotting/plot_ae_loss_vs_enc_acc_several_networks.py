@@ -4,26 +4,26 @@ Plot of AE loss vs Encoder acc of several networks.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-#TODO Bugfix, because picture parallel does not look here like it does with the plot_parallel script
+
 from plot_statistics import make_data_from_files, get_last_prl_epochs, get_default_labels
 
 test_files_ae = ["models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt",
-                 "vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt",
+                 "models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt",
                  
                  "models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",
                  "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt",
                  
-                 "vgg_5_64/trained_vgg_5_64_autoencoder_test.txt",
-                 "vgg_5_32/trained_vgg_5_32_autoencoder_test.txt"]
+                 "models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt",
+                 "models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"]
 
 test_files_prl = ["models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_up_down_new_test.txt",
-                  "vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt",
+                  "models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt",
                   
                   "models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",
                   "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt",
                   
-                  "vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt",
-                  "vgg_5_32/trained_vgg_5_32_autoencoder_supervised_parallel_up_down_test.txt"]
+                  "models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt",
+                  "models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"]
 
 how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*194,
                                        [10,]*1+[2,]*5+[1,]*194, 
@@ -62,13 +62,13 @@ for ae_number in range(len(test_files_ae)):
     loss_acc_list.append(loss_acc)
 
 def make_plot(loss_acc_list, labels):
-    fig, ax = plt.subplots(figsize=(8,8))
+    fig, ax = plt.subplots(figsize=(10,7))
     for i,model_loss_acc in enumerate(loss_acc_list):
         ax.plot(model_loss_acc[0], model_loss_acc[1], "o", label=labels[i])
     ax.set_xlabel("Autoencoder loss")
     ax.set_ylabel("Encoder accuracy")
     ax.grid()
-    ax.legend()
+    ax.legend(pos="lower left")
     return fig, ax
 
 fig, ax = make_plot(loss_acc_list, default_label_array_ae)
