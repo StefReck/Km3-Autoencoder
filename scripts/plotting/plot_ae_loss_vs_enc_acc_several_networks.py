@@ -8,14 +8,27 @@ import matplotlib.pyplot as plt
 from plot_statistics import make_data_from_files, get_last_prl_epochs, get_default_labels
 
 test_files_ae = ["models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt",
+                 "vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt",
+                 
                  "models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt",
-                 "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt",]
+                 "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt",
+                 
+                 "vgg_5_64/trained_vgg_5_64_autoencoder_test.txt",
+                 "vgg_5_32/trained_vgg_5_32_autoencoder_test.txt"]
 
 test_files_prl = ["models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_up_down_new_test.txt",
+                  "vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt",
+                  
                   "models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt",
-                  "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt",]
+                  "models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt",
+                  
+                  "vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt",
+                  "vgg_5_32/trained_vgg_5_32_autoencoder_supervised_parallel_up_down_test.txt"]
 
-how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*94,
+how_many_epochs_each_to_train_list = [ [10,]*1+[2,]*5+[1,]*194,
+                                       [10,]*1+[2,]*5+[1,]*194, 
+                                       [10,]*1+[2,]*5+[1,]*194,
+                                       [10,]*1+[2,]*5+[1,]*194,
                                        [10,]*1+[2,]*5+[1,]*194, 
                                        [10,]*1+[2,]*5+[1,]*194,]
 
