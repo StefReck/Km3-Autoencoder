@@ -160,6 +160,13 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
         every_n_epochs = 15
         lr = start_lr * multiply_with**np.floor((before_epoch-1)/every_n_epochs)
         
+    elif lr_schedule_number=="c15red":
+        # constant 0.1, after epoch 15 increase by 10% per epoch
+        if before_epoch<=15:
+            lr = 0.1
+        else:
+            lr = 0.1 * 1.1**(before_epoch-15)
+        
     print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
 
