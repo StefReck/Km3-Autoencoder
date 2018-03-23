@@ -16,7 +16,7 @@ epochs_of_model=np.arange(1,100)
 dataset_tag="xzt"
 threshold_greater_then=3
 
-model_name=model_base.split("/")[-1][-6]
+model_name=model_base.split("/")[-1][:-6]
 name_of_log_file = home_path+"results/data/mse_"+model_name+"s.txt"
 
 batchsize_for_testing=128
@@ -65,7 +65,7 @@ with open(name_of_log_file, 'a') as logfile:
         
         print("Starting testing on epoch",epoch)
         for batch_no in range(int(file_size/batchsize_for_testing)):
-            data=next(generator)
+            data=next(generator)[0]
             prediction = autoencoder.predict_on_batch(data)
             se = ( (prediction-data)**2 )
             
