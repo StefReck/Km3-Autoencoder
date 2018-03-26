@@ -22,8 +22,9 @@ from util.custom_loss_functions import msep_log, mean_squared_error_poisson, mse
 
 
 # start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
-def parse_input():
-    parser = argparse.ArgumentParser(description='Process some integers.')
+# read out input arguments and return them as a tuple for the training
+def unpack_parsed_args():
+    parser = argparse.ArgumentParser(description='The main function for training autoencoder-base networks.')
     parser.add_argument('modeltag', type=str, help='e.g vgg_3-sgd; -XXX indicates version number and is ommited when looking up model by modeltag')
     parser.add_argument('runs', type=int)
     parser.add_argument("autoencoder_stage", type=int)
@@ -36,7 +37,7 @@ def parse_input():
     parser.add_argument("dataset", type=str, help="Name of test/training dataset to be used, eg xzt. n_bins is automatically selected")
     parser.add_argument("learning_rate", type=float)
     parser.add_argument("learning_rate_decay")
-    parser.add_argument("epsilon", default=-1, type=int, help="Exponent of the epsilon used for adam.") #exponent of epsilon, adam default: 1e-08
+    parser.add_argument("epsilon", type=int, help="Exponent of the epsilon used for adam.") #adam default: 1e-08
     parser.add_argument("lambda_comp", type=int)
     parser.add_argument("optimizer", type=str)
     parser.add_argument("options", type=str)
@@ -44,9 +45,27 @@ def parse_input():
     
     args = parser.parse_args()
     params = vars(args)
-
-    return params
-
+    print(params)
+    
+    modeltag = params["modeltag"]
+    runs=params["runs"]
+    autoencoder_stage=params["autoencoder_stage"]
+    autoencoder_epoch=params["autoencoder_epoch"]
+    encoder_epoch=params["encoder_epoch"]
+    class_type = (params["class_type_bins"], params["class_type_name"])
+    zero_center = params["zero_center"]
+    verbose=params["verbose"]
+    dataset = params["dataset"]
+    learning_rate = params["learning_rate"]
+    learning_rate_decay = params["learning_rate_decay"]
+    epsilon = params["epsilon"]
+    lambda_comp = params["lambda_comp"]
+    use_opti = params["optimizer"]
+    options = params["options"]
+    encoder_version=params["encoder_version"]
+    
+    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options
+   
 """
 # Tag for the model used; Identifies both autoencoder and encoder
 # This also defines the name of the folder where everything is saved
@@ -108,27 +127,6 @@ cd $WOODYHOME/Km3-Autoencoder
 python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
 """
 
-def unpack_parsed_args():
-    params = parse_input()
-    print(params)
-    modeltag = params["modeltag"]
-    runs=params["runs"]
-    autoencoder_stage=params["autoencoder_stage"]
-    autoencoder_epoch=params["autoencoder_epoch"]
-    encoder_epoch=params["encoder_epoch"]
-    class_type = (params["class_type_bins"], params["class_type_name"])
-    zero_center = params["zero_center"]
-    verbose=params["verbose"]
-    dataset = params["dataset"]
-    learning_rate = params["learning_rate"]
-    learning_rate_decay = params["learning_rate_decay"]
-    epsilon = params["epsilon"]
-    lambda_comp = params["lambda_comp"]
-    use_opti = params["optimizer"]
-    options = params["options"]
-    encoder_version=params["encoder_version"]
-    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options
-    
 
 def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
     #learning rate is the original lr input
