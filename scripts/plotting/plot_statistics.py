@@ -46,7 +46,7 @@ def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.tx
     if "Accuracy" in data:
         losses = data["Accuracy"]
     else:
-        losses = data["loss"]
+        losses = data["Loss"]
     
     #old version
     """

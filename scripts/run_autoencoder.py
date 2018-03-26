@@ -18,6 +18,7 @@ import argparse
 from util.run_cnn import train_and_test_model, load_zero_center_data, h5_get_number_of_rows
 from model_definitions import setup_model
 from get_dataset_info import get_dataset_info
+from util.custom_loss_functions import msep_log, mean_squared_error_poisson, msep_squared, get_custom_objects
 
 
 # start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
@@ -45,25 +46,6 @@ def parse_input():
     params = vars(args)
 
     return params
-
-params = parse_input()
-modeltag = params["modeltag"]
-runs=params["runs"]
-autoencoder_stage=params["autoencoder_stage"]
-autoencoder_epoch=params["autoencoder_epoch"]
-encoder_epoch=params["encoder_epoch"]
-class_type = (params["class_type_bins"], params["class_type_name"])
-zero_center = params["zero_center"]
-verbose=params["verbose"]
-dataset = params["dataset"]
-learning_rate = params["learning_rate"]
-learning_rate_decay = params["learning_rate_decay"]
-epsilon = params["epsilon"]
-lambda_comp = params["lambda_comp"]
-use_opti = params["optimizer"]
-options = params["options"]
-encoder_version=params["encoder_version"]
-print(params)
 
 """
 # Tag for the model used; Identifies both autoencoder and encoder
@@ -126,6 +108,28 @@ cd $WOODYHOME/Km3-Autoencoder
 python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
 """
 
+def unpack_parsed_args():
+    params = parse_input()
+    print(params)
+    modeltag = params["modeltag"]
+    runs=params["runs"]
+    autoencoder_stage=params["autoencoder_stage"]
+    autoencoder_epoch=params["autoencoder_epoch"]
+    encoder_epoch=params["encoder_epoch"]
+    class_type = (params["class_type_bins"], params["class_type_name"])
+    zero_center = params["zero_center"]
+    verbose=params["verbose"]
+    dataset = params["dataset"]
+    learning_rate = params["learning_rate"]
+    learning_rate_decay = params["learning_rate_decay"]
+    epsilon = params["epsilon"]
+    lambda_comp = params["lambda_comp"]
+    use_opti = params["optimizer"]
+    options = params["options"]
+    encoder_version=params["encoder_version"]
+    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options
+    
+
 def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
     #learning rate is the original lr input
     #return the desired lr of an epoch according to a lr schedule.
@@ -161,17 +165,21 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
         lr = start_lr * multiply_with**np.floor((before_epoch-1)/every_n_epochs)
         
     elif lr_schedule_number=="c15red":
-        # constant 0.1, after epoch 15 increase by 10% per epoch
+        # used for e.g. vgg5 200 large and vgg5 200 deep
+        # constant 0.1, after epoch 15 increase by 10% per epoch for 5 epochs,
+        # then constant again
         if before_epoch<=15:
             lr = 0.1
-        else:
+        elif before_epoch<=20:
             lr = 0.1 * 1.1**(before_epoch-15)
-        
+        else:
+            lr = 0.1 * 1.1**5
+            
     print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
     home_path=dataset_info_dict["home_path"]
@@ -183,9 +191,20 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     batchsize=dataset_info_dict["batchsize"] #def 32
     
-    #the loss that is used for the autoencoder
-    #usually "mse", "mae", or mean_squared_error_poisson
-    ae_loss = "mse"
+    
+    custom_objects=None
+    #define loss function to use for new AEs
+    print("Using AE loss:", ae_loss_name)
+    if ae_loss_name=="mse":
+        ae_loss="mse"
+    elif ae_loss_name=="mae":
+        ae_loss="mae"
+    else:
+        #custom loss functions have to be handed to load_model or it wont work
+        custom_objects=get_custom_objects()
+        ae_loss=custom_objects[ae_loss_name]
+    
+    
     
     #All models are now saved in their own folder   models/"modeltag"/
     model_folder = home_path + "models/" + modeltag + "/"
@@ -302,7 +321,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             autoencoder_model_to_load=model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5'
             print("Loading existing autoencoder to continue training:", autoencoder_model_to_load)
             if lambda_comp==False:
-                model = load_model(autoencoder_model_to_load)
+                model = load_model(autoencoder_model_to_load, custom_objects=custom_objects)
             elif lambda_comp==True:
                 #in case of lambda layers: Load model structure and insert weights, because load model is bugged for lambda layers
                 print("Lambda mode enabled")
@@ -310,7 +329,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 model.load_weights(autoencoder_model_to_load)
                 model.compile(optimizer=adam, loss=ae_loss)
                 
-                opti_weights=load_model(autoencoder_model_to_load).optimizer.get_weights()
+                opti_weights=load_model(autoencoder_model_to_load, custom_objects=custom_objects).optimizer.get_weights()
                 model.optimizer.set_weights(opti_weights)
             
     #Encoder supervised training:
@@ -337,7 +356,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Load an existing trained encoder network and train that
             encoder_network_to_load=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
             print("Loading existing encoder network", encoder_network_to_load)
-            model = load_model(encoder_network_to_load)
+            model = load_model(encoder_network_to_load, custom_objects=custom_objects)
     
     
     #Unfrozen Encoder supervised training with completely unfrozen model:
@@ -361,7 +380,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Load an existing trained encoder network and train that
             load_this=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
             print("Loading existing unfrozen encoder network", load_this)
-            model = load_model(load_this)
+            model = load_model(load_this, custom_objects=custom_objects)
     
     #Training of the supervised network on several different autoencoder epochs
     #epoch is calculated automatically and not used from user input
@@ -448,7 +467,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 print("Initializing model to", init_model)
                 autoencoder_epoch=2
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-                model_for_init = load_model(init_model)
+                model_for_init = load_model(init_model, custom_objects=custom_objects)
                 for i,layer in enumerate(model.layers):
                     layer.set_weights(model_for_init.layers[i].get_weights())
             
@@ -460,7 +479,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             
         else:
             #Load an existing trained encoder network and train that
-            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5')
+            model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5', custom_objects=custom_objects)
         
                 
         #Own execution of training
@@ -492,7 +511,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 autoencoder_epoch+=1
                 autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
                 print("Changing weights before epoch ",current_epoch+1," to ",autoencoder_model)
-                switch_encoder_weights(model, load_model(autoencoder_model), last_encoder_layer_index_override)
+                switch_encoder_weights(model, load_model(autoencoder_model, custom_objects=custom_objects), last_encoder_layer_index_override)
             
             #Train network, write logfile, save network, evaluate network, save evaluation to file
             lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
@@ -551,6 +570,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                              save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)    
     
     
+if "__name__" == "__main__":
+    #the loss that is used for the autoencoder
+    #usually "mse", "mae", or "mean_squared_error_poisson"
+    ae_loss_name = "mse"
     
-
-execute_training(modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay=learning_rate_decay, epsilon=epsilon, lambda_comp=lambda_comp, use_opti=use_opti, encoder_version=encoder_version, options=options)
+    execute_training(*unpack_parsed_args(), ae_loss_name)
