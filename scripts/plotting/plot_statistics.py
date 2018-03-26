@@ -3,22 +3,36 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.lines as mlines
+import csv
 
 """
 Contains all the utility to read in log files and plot them.
 """    
 
+def read_out_file(logfile_path):
+    #Input: Filepath of logfile
+    #Output:Contents of this file as a dict, with the first item per column as the keywords
+    raw = []
+    with open(logfile_path, "r") as f:
+        for line in csv.reader(f, delimiter="\t"):
+            if len(line) <= 1:
+                #Skip notes and empty lines (they dont have tabs)
+                continue
+            if line[0][0]=="#":
+                line[0]=line[0][1:]
+            raw.append(line)
+    raw=list(zip(*raw))
+    data = {}
+    for column in raw:   
+        data[column[0]]=column[1:]
+    return data
 
 def make_dicts_from_files(test_files):
     #Read in multiple test files and for each, sort all columns in their own dict entry
     # returns list of dicts of length len(test_files)
     dict_array=[]
     for test_file in test_files:
-        with open(test_file, "r") as f:
-            k = list(zip(*(line.strip().split('\t') for line in f)))
-        data = {}
-        for column in k:
-            data[column[0]]=column[1:]
+        data = read_out_file(test_file)
         dict_array.append(data)
     return dict_array
 
@@ -27,6 +41,15 @@ def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.tx
     #lin-spaced epoch data is added (slightly off)
     loss_epoch_file=test_file[:-8]+"epoch"+str(epoch)+"_log.txt"
 
+    data = read_out_file(loss_epoch_file)
+    #should have: Batch, Loss (,Accuracy)
+    if "Accuracy" in data:
+        losses = data["Accuracy"]
+    else:
+        losses = data["loss"]
+    
+    #old version
+    """
     with open(loss_epoch_file, "r") as f:
         losses=[]
         use_column = 1 #0 is samples, 1 is loss, 2 is accuracy if supervised model
@@ -36,7 +59,8 @@ def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.tx
                     use_column=2
                 continue
             losses.append( float(line.strip().split('\t')[use_column]) )
-            
+    """
+    
     epoch_points = np.linspace(epoch-1,epoch,len(losses), endpoint=False)
     return [epoch_points, losses]
 

@@ -48,7 +48,7 @@ def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yiel
 
 with open(name_of_log_file, 'a') as logfile:
     if epochs_of_model[0]==1:
-        logfile.write("Epoch\t"+"MSE above"+str(threshold_greater_then)+"\t"+"MSE below""\t"+"MSE")
+        logfile.write("#Epoch\t"+"MSE above"+str(threshold_greater_then)+"\t"+"MSE below""\t"+"MSE")
     
     for epoch in epochs_of_model:
         print("Loading model:", model_base+str(epoch)+".h5")
@@ -81,7 +81,7 @@ with open(name_of_log_file, 'a') as logfile:
         
         line=str(epoch)+"\t"+str(mse_above_list.mean())+"\t"+str(mse_below_list.mean())+"\t"+str(mse_list.mean())
         print(line)
-        logfile.write(line)
+        logfile.write(line+"\n")
         
         
         
