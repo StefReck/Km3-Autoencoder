@@ -568,7 +568,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                              save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)    
     
     
-if "__name__" == "__main__":
+if __name__ == "__main__":
     #the loss that is used for the autoencoder
     #usually "mse", "mae", or "mean_squared_error_poisson"
     ae_loss_name = "mse"

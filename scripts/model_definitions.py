@@ -204,7 +204,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_200_deep", autoencoder_stage=0, modelpath_and_name=None)
+    model=setup_model(model_tag="channel_3n_m3", autoencoder_stage=0, modelpath_and_name=None)
     model.summary()
 
 """
