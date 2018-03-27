@@ -1,7 +1,8 @@
 import h5py
 import numpy as np
 
-original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+#original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+original_train_file="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
 original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
 
 #outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
@@ -16,13 +17,13 @@ outfile_test ="channel/elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5
 #11,13,18,31
 
 #percentage of events to keep
-fraction=0.02
+fraction=1
 #which axis including filesize to sum over, None if no sum
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
 sum_over_axis=None
 #
 reshape_to_channel_and_shuffle=True
-only_doms_with_more_then=1
+only_doms_with_more_then=2
 
 #show how often certain total number of hits in a dom occur; No files will be generated
 make_statistics = True

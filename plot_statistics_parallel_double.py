@@ -23,16 +23,16 @@ test_files = [ params["autoencoder_model"], params["parallel_model"], params["pa
 
 
 xlabel="Epoch"
-title="Parallel Training"
+title="Parallel Training with additional convolution"
 figsize = (13,8)
 #Override default labels (names of the models); must be one for every test file, otherwise default
-labels_override=[]
+labels_override=["Autoencoder", "Two dense layers", "Convolution and two dense layers"]
 #legend location for the labels and the test/train box
 legend_locations=(1, "upper left")
 #Override xtick locations; None for automatic
 xticks=None
 # override line colors; must be one color for every test file, otherwise automatic
-colors=["blue", "orange"] # = automatic
+colors=["blue", "orange", "green"] # = automatic
 #Name of file in the results/dumped_statistics folder to save the numpy array 
 #with the plot data to; None will skip saving
 dump_to_file=None

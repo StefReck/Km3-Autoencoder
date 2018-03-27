@@ -31,9 +31,9 @@ def parse_input():
     return params
 
 #calculate mean and std for 100 batches
-calc_mean=False
+calc_mean=True
 #make a hist for 1 batch of the flattened encoder output
-plot_it=True
+plot_it=False
 #name of pdf, None if no save
 to_pdf = "out.pdf"
 

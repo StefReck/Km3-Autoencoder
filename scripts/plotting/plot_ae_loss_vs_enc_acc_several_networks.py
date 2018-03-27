@@ -76,7 +76,7 @@ def make_plot(loss_acc_list, labels):
     ax.set_ylabel("Encoder accuracy")
     ax.grid()
     ax.legend(loc="lower left")
-    fig.suptitle("Autoencoder loss and encoder accuracy\nfor different autoencoder models")
+    fig.suptitle("Autoencoder loss and encoder accuracy for different autoencoder models")
     return fig, ax
 
 if len(label_array_overwrite)==len(default_label_array_ae):

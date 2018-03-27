@@ -28,7 +28,7 @@ mode="plot"
 zero_center = False
 
 #for plot mode, number of 32 batches of channel_id arrays should be read through for the plot
-how_many_dom_batches = 100
+how_many_dom_batches = 1000
 bins=100
 
 model=load_model(model_name)
