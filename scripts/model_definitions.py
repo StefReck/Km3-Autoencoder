@@ -21,6 +21,7 @@ def make_options_dict(additional_options):
     options_dict["encoded_penalty"]=0
     options_dict["dropout_for_conv"]=0.0
     options_dict["add_conv_layer"]=False
+    options_dict["make_stateful"]=False
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -185,6 +186,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     elif model_tag == "channel_3n_m3":
         options_dict["neurons_in_bottleneck"]=3
         options_dict["model_type"]=3
+        options_dict["make_stateful"]=True
         model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "channel_4n_m3":
         options_dict["neurons_in_bottleneck"]=4
@@ -204,7 +206,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="channel_3n_m3", autoencoder_stage=0, modelpath_and_name=None)
+    model=setup_model(model_tag="channel_3n_m3", autoencoder_stage=2, modelpath_and_name=None)
     model.summary()
 
 """

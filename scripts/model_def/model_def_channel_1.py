@@ -51,6 +51,7 @@ def setup_channel_vgg(autoencoder_stage, options_dict, modelpath_and_name=None):
     batchnorm_for_dense    = True
     number_of_filters_in_input = options_dict["number_of_filters_in_input"] #either 1 (no channel id) or 31
     
+    
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
@@ -88,6 +89,8 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
     #inputs = Input(shape=(31,11,13,18))
     #x = TimeDistributed( Dense(8), input_shape=(10, 16) )(inputs)
     encoder_only_mode=options_dict["encoder_only"]
+    make_stateful = options_dict["make_stateful"]
+    
     if encoder_only_mode==True:
         autoencoder_stage=1
         print("Autoencoder stage set to 1 for encoder only mode")
@@ -155,6 +158,12 @@ def setup_channel(autoencoder_stage, options_dict, modelpath_and_name=None):
             encoder = Model(inputs=inputs, outputs=encoded)
             autoencoder = load_model(modelpath_and_name)
             for i,layer in enumerate(encoder.layers):
+                
+                if make_stateful==True and isinstance(layer, BatchNormalization):
+                    #make it so that the test mean and variance is recalculated
+                    layer.stateful=True
+                    print("Made layer", layer.name, "stateful.")
+                    
                 layer.set_weights(autoencoder.layers[i].get_weights())
             
             if encoder_only_mode==True:
