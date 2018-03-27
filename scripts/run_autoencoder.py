@@ -168,10 +168,10 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
         # then constant again
         if before_epoch<=15:
             lr = 0.1
-        elif before_epoch<=20:
+        elif before_epoch<=27:
             lr = 0.1 * 1.1**(before_epoch-15)
         else:
-            lr = 0.1 * 1.1**5
+            lr = 0.1 * 1.1**12
             
     print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
