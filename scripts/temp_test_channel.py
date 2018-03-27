@@ -4,14 +4,17 @@ C
 """
 from keras.models import load_model
 import keras.backend as K
+from keras.layers import BatchNormalization
 import h5py
+import numpy as np
 
 from get_dataset_info import get_dataset_info
 
 
-how_many_events=32
+how_many_events=1
 encoded_layer_no=14
 modelpath = "models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch96_supervised_up_down_epoch1.h5"
+
 datatag1="xyzc"
 datatag2="xyzc_flat_event"
 
@@ -37,9 +40,29 @@ def layer_output(input_data, layer_no, model, is_train_mode):
     layer_output = get_layer_output([input_data, is_train_mode])[0]
     return layer_output
 
-encoded_train = layer_output(data1, encoded_layer_no, model, True)
-encoded_test = layer_output(data1, encoded_layer_no, model, False)
+def print_info(data1, model, encoded_layer_no):
+    print("Layer:", model.layers[encoded_layer_no].name)
+    encoded_train = layer_output(data1, encoded_layer_no, model, True)
+    encoded_test = layer_output(data1, encoded_layer_no, model, False)
+    for event_no in range(len(encoded_train)):
+        print("Train:", np.mean(encoded_train[event_no]), "\tTest:",np.mean(encoded_test[event_no]))
 
-print("Train:", encoded_train)
-print("Test:", encoded_test)
+def scan_layers(data, model, encoded_layer_no):
+    for layer_no in range(encoded_layer_no):
+        print_info(data,model,layer_no)
+    
+    
+print(datatag1)
+
+#print_info(data1,model,encoded_layer_no)
+scan_layers(data1, model, encoded_layer_no)
+
+for layer_no in range(encoded_layer_no):
+    layer = model.layers[layer_no]
+    if isinstance(layer, BatchNormalization):
+        print(layer.name)
+        layer._per_input_updates={}
+
+scan_layers(data1, model, encoded_layer_no)
+
 
