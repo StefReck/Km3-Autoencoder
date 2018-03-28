@@ -43,7 +43,7 @@ dump_to_file=None
 
 #Which epochs from the parallel encoder history to take:
 if params["channel"]==True:
-    how_many_epochs_each_to_train = np.ones(100)
+    how_many_epochs_each_to_train = np.ones(100).astype(int)
 else:
     how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")

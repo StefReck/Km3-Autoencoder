@@ -60,7 +60,7 @@ def make_options_dict(additional_options):
     return options_dict
 
 
-def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options=""):
+def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options="", number_of_output_neurons=2):
     #model tags can have version numbers, e.g. vgg_1-different_lr
     #for this, load model without the version number
     splitted_tag = model_tag.split("-")
@@ -69,6 +69,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         print("Creating model "+model_tag+" in version "+splitted_tag[1])
     
     options_dict = make_options_dict(additional_options)
+    options_dict["number_of_output_neurons"]=number_of_output_neurons
     
     if model_tag == "vgg_1":
         model = setup_vgg_1(autoencoder_stage, modelpath_and_name)
@@ -206,7 +207,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="channel_3n_m3", autoencoder_stage=2, modelpath_and_name=None)
+    model=setup_model(model_tag="vgg_5_200", autoencoder_stage=2, modelpath_and_name=None, number_of_output_neurons=1)
     model.summary()
 
 """

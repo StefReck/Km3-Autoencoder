@@ -26,17 +26,17 @@ from util.custom_loss_functions import get_custom_objects
 def unpack_parsed_args():
     parser = argparse.ArgumentParser(description='The main function for training autoencoder-base networks.')
     parser.add_argument('modeltag', type=str, help='e.g vgg_3-sgd; -XXX indicates version number and is ommited when looking up model by modeltag')
-    parser.add_argument('runs', type=int)
-    parser.add_argument("autoencoder_stage", type=int)
-    parser.add_argument("autoencoder_epoch", type=int)
-    parser.add_argument("encoder_epoch", type=int)
+    parser.add_argument('runs', help="How many new epochs should be trained by executing this script..", type=int)
+    parser.add_argument("autoencoder_stage", help="Stage of autoencoder training: 0 for AE, 1 for enc, 2 for unfrozen, 3 for parallel", type=int)
+    parser.add_argument("autoencoder_epoch", help="Epoch of AE network to be used", type=int)
+    parser.add_argument("encoder_epoch", help="Epoch of encoder network to be used", type=int)
     parser.add_argument("class_type_bins", type=int)
-    parser.add_argument("class_type_name", type=str)
+    parser.add_argument("class_type_name", help="Name of target", type=str)
     parser.add_argument("zero_center", type=int)
     parser.add_argument("verbose", type=int)    
     parser.add_argument("dataset", type=str, help="Name of test/training dataset to be used, eg xzt. n_bins is automatically selected")
     parser.add_argument("learning_rate", type=float)
-    parser.add_argument("learning_rate_decay")
+    parser.add_argument("learning_rate_decay", help="LR decay per epoch (multipl.), or name of lr schedule")
     parser.add_argument("epsilon", type=int, help="Exponent of the epsilon used for adam.") #adam default: 1e-08
     parser.add_argument("lambda_comp", type=int)
     parser.add_argument("optimizer", type=str)
@@ -189,6 +189,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     batchsize=dataset_info_dict["batchsize"] #def 32
     
+    #Only for the encoder-types. Autoencoders ignore this:
+    number_of_output_neurons = class_type[0]
     
     custom_objects=None
     #define loss function to use for new AEs
@@ -343,7 +345,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if encoder_epoch == 0:
             #Create a new encoder network:
             print("Creating new encoder network", modeltag, "from autoencoder", autoencoder_model)
-            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options, number_of_output_neurons=number_of_output_neurons)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -367,7 +369,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if encoder_epoch == 0:
             #Create a new encoder network:
             print("Creating new unfrozen encoder network:", modelname)
-            model = setup_model(model_tag=modeltag, autoencoder_stage=2, additional_options=options)
+            model = setup_model(model_tag=modeltag, autoencoder_stage=2, additional_options=options, number_of_output_neurons=number_of_output_neurons)
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
@@ -387,7 +389,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     elif autoencoder_stage==3:
-        #Always using custom lr schedule now, parser values are ignored
         #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
         #if first epoch is 0, then the trained supervised network will be used
         if modeltag[:7] == "channel":
@@ -453,7 +454,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
         if encoder_epoch == 0:
             #Create a new encoder network:
-            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options )
+            model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options, number_of_output_neurons=number_of_output_neurons )
             model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
             
             #Custom model is loaded as initialization

@@ -55,6 +55,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
     encoded_penalty        = options_dict["encoded_penalty"]
     additional_conv_layer_for_encoder = options_dict["add_conv_layer"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -126,7 +127,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -137,6 +138,7 @@ def setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name=None
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -196,7 +198,7 @@ def setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name=None
         units=[100,16] #256,16
         x = dense_block(x, units=units[0], channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=units[1], channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -207,6 +209,7 @@ def setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name=N
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -273,7 +276,7 @@ def setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name=N
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -286,6 +289,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
     
     filter_base_version    = options_dict["filter_base_version"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -357,7 +361,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -367,6 +371,7 @@ def setup_vgg_5_200_deep(autoencoder_stage, options_dict, modelpath_and_name=Non
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -447,7 +452,7 @@ def setup_vgg_5_200_deep(autoencoder_stage, options_dict, modelpath_and_name=Non
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -458,6 +463,7 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -527,7 +533,7 @@ def setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name=No
         else:
             x = dense_block(encoded, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -538,6 +544,7 @@ def setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name=None):
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -613,7 +620,7 @@ def setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name=None):
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
@@ -624,6 +631,7 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -699,7 +707,7 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
         x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation='softmax', kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
