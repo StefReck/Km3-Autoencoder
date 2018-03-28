@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-C
+This was used to find out why channel AEs would not work properly in test mode once moved from one 
+dataset to another. Answer: Batchnorm frozen still uses statistics from old dataset.
+Set stateful to True to fix.
 """
 from keras.models import load_model
 import keras.backend as K
@@ -31,6 +33,8 @@ test_file2=h5py.File(dataset_dict2["test_file"] , 'r')
 model=load_model(homepath+modelpath)
 
 data1=test_file1["x"][:how_many_events]
+data1_formed = test_file1["x"][:how_many_events][0][0][0]
+
 data2=test_file2["x"][:how_many_events]
 
 def layer_output(input_data, layer_no, model, is_train_mode):
@@ -52,17 +56,17 @@ def scan_layers(data, model, encoded_layer_no):
         print_info(data,model,layer_no)
     
     
-print(datatag1)
-
+#print(datatag1)
 #print_info(data1,model,encoded_layer_no)
-scan_layers(data1, model, encoded_layer_no)
+        
+scan_layers(data1_formed, model, encoded_layer_no)
 
 for layer_no in range(encoded_layer_no):
     layer = model.layers[layer_no]
     if isinstance(layer, BatchNormalization):
-        print(layer.name)
+        print("Working on ",layer.name)
         layer._per_input_updates={}
 
-scan_layers(data1, model, encoded_layer_no)
+scan_layers(data1_formed, model, encoded_layer_no)
 
 

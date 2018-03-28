@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, UpSampling3D, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Input, Dense, Lambda, Dropout, UpSampling3D, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
 from keras.layers import LeakyReLU
 from keras.callbacks import Callback
 import numpy as np
@@ -17,16 +17,13 @@ from scipy.special import factorial
 #from util.Loggers import *
 
 
+
 def setup_simple_model():
     model=Sequential()
-    model.add(Conv3D(filters=3, kernel_size=(3,3,3), padding='same', 
-                          activation='relu', input_shape=(10, 12, 18, 1)))
-    model.add(AveragePooling3D())
-    model.add(Conv3D(filters=3, kernel_size=(3,3,3), padding='same', activation='relu'))
-    model.add(UpSampling3D())
-    model.add(Conv3D(filters=1, kernel_size=(3,3,3), padding='same', activation='relu'))
+    model.add(Lambda(ndconv, input_shape=(5,5,5,1)))
     return model
     
+
     
 def setup_conv_model():
     #Test autoencoder im sequential style
@@ -122,7 +119,6 @@ def poisson_loss(y_true):
 
 
 
-
 def mean_squared_error_poisson(y_true, y_pred):
     #the mean of y_true is the approximated poisson expectation value
     expec = tf.multiply(tf.ones_like(y_true), tf.reduce_mean(y_true))
@@ -135,7 +131,7 @@ def mean_squared_error_poisson(y_true, y_pred):
 def mean_squared_error_custom(y_true, y_pred):
     #return mean squared error
     return tf.reduce_mean(tf.squared_difference(y_true, y_pred))
-
+"""
 ae_loss = mean_squared_error_poisson
 
 model = setup_simple_model()
@@ -148,6 +144,9 @@ history = model.fit(test_in, test_in, 32, 2)
 pred2 = model.predict_on_batch(test_in)
 
 model2=load_model("test_model", custom_objects={'mean_squared_error_poisson': mean_squared_error_poisson} )
+"""
+
+
 
 """
 init = tf.global_variables_initializer()
