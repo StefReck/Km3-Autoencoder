@@ -2,22 +2,26 @@
 """
 Plot autoencoder and supervised parallel performance in one plot.
 """
-#TODO display train loss of parallel where possible (when schedule is at 1 AE E/1 par E)
-import argparse
-import matplotlib.pyplot as plt
-import numpy as np
 
-from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y_parallel, get_last_prl_epochs
+import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Make overview plots of model training.')
     parser.add_argument('autoencoder_model', type=str, help='name of _test.txt files to plot.')
     parser.add_argument('parallel_model', type=str, help='name of _test.txt files to plot.')
+    
+    parser.add_argument('-c', '--channel', action="store_true", help='Use the channel parallel schedule (1 enc epoch per AE epoch)')
     args = parser.parse_args()
     params = vars(args)
     return params
-
 params = parse_input()
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y_parallel, get_last_prl_epochs
+
+
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
 
@@ -37,6 +41,14 @@ colors=["blue", "orange"] # = automatic
 dump_to_file=None
 
 
+#Which epochs from the parallel encoder history to take:
+if params["channel"]==True:
+    how_many_epochs_each_to_train = np.ones(100)
+else:
+    how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
+print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
+
+
 
 #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list, default_label_array) 
 #for every test file
@@ -44,10 +56,6 @@ data_from_files, ylabel_list, default_label_array = make_data_from_files(test_fi
 
 data_autoencoder = data_from_files[0]
 data_parallel = data_from_files[1]
-
-
-#Which epochs from the parallel encoder history to take:
-how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 
 data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train)
 
