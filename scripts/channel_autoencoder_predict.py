@@ -212,16 +212,19 @@ elif mode=="statistics":
         counts=np.unique(total_counts_measured_in_dom).astype(int)
         
         for count in counts:
-            positions = np.where(data==count)
+            positions = np.where(total_counts_measured_in_dom==count)
             predicted_correct_there = np.sum(dom_correct[positions]).astype(int)
-            total_doms_with_these_counts = len(positions)
+            total_doms_with_these_counts = len(positions[0])
             
             if count not in counts_dict:
                 counts_dict[count]=[[],[]]
                 
             counts_dict[count][0].append(predicted_correct_there)
             counts_dict[count][1].append(total_doms_with_these_counts)
-                
+    
+        for keyword in counts_dict:
+            predicted_correct, total = counts_dict[keyword]
+            counts_dict[keyword] = [[np.sum(predicted_correct)], [np.sum(total)]]
     print(counts_dict)
             
             
