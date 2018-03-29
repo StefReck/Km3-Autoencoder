@@ -55,12 +55,13 @@ def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yiel
                                     swap_col=None, is_in_test_mode = False)
     return generator
 
-def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, threshold_greater_then):
+def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, threshold_greater_then, zero_center):
     batchsize_for_testing=128
     class_type=None #not needed for AE
     is_autoencoder=True
     dataset_info_dict = get_dataset_info(dataset_tag)
     dataset_info_dict["batchsize"] = batchsize_for_testing
+    print("Using zerocentering:", zero_center)
     
     custom_objects=get_custom_objects()
     
@@ -71,7 +72,7 @@ def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, thr
         for epoch in epochs_of_model:
             print("Loading model:", model_base+str(epoch)+".h5")
             autoencoder = load_model(model_base+str(epoch)+".h5", custom_objects=custom_objects)
-            generator = setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict)
+            generator = setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, zero_center)
             
             test_file=dataset_info_dict["test_file"]
             filesize_factor_test=dataset_info_dict["filesize_factor_test"]
@@ -110,7 +111,6 @@ for model_no in range(len(model_bases)):
     zero_center = zero_centers[model_no]
     
     print("Working on model base", model_base)
-    print("Using zerocentering:", zero_center)
-    make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, threshold_greater_then)
+    make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, threshold_greater_then, zero_center)
     print("Saved data to", name_of_log_file)
             
