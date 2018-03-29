@@ -177,7 +177,7 @@ elif mode=="statistics":
     if zero_center==True:
         xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
     else:
-        xs_mean=0
+        xs_mean=None
     
     generator = generate_batches_from_hdf5_file(test_file, batchsize, n_bins, class_type, 
                                     is_autoencoder, dataset_info_dict, broken_simulations_mode=0,
@@ -185,8 +185,9 @@ elif mode=="statistics":
                                     swap_col=None, is_in_test_mode = False)
     
     total_number_of_batches = int(test_tuple[0][1]/batchsize)
-    print("Filesize:",test_tuple[0][1], "Total number of batches:", total_number_of_batches)
     total_number_of_batches=10
+    print("Filesize:",test_tuple[0][1], "Total number of batches:", total_number_of_batches)
+    
     
     #a dict with entries: total_counts_per_dom : [[correct_from_batch_0, ...],[total_from_batch_0,...]]
     #e.g.                 0 : [[70,75,...],[96,94,...]]
@@ -194,6 +195,7 @@ elif mode=="statistics":
     
     for batchno in range(total_number_of_batches):
         data = next(generator)[0]
+        print("data shape", data.shape)
         prediction = np.round(model.predict_on_batch(data))
         
         #shape (batchsize,)
