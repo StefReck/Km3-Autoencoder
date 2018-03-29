@@ -17,7 +17,8 @@ model_bases=[home_path+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_pi
              home_path+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_epoch"]
 #name of logfiles (auto generated)
 names_of_log_files = [home_path+"results/data/mse_"+model_bases[i].split("/")[-1][:-6]+"s.txt" for i in range(len(model_bases))]
-
+#Wheter to apply 0 centering or no
+zero_centers = [ False, False ]
 
 #epochs to make datapoints for (if 1 is the first entry, the head line will be printed in the logfile)
 epochs_of_model=np.arange(1,100)
@@ -32,7 +33,7 @@ threshold_greater_then=3
 
 
 
-def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False):
+def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False, zero_center=True):
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
@@ -44,8 +45,10 @@ def setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yiel
     train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
     #test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
     
-    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
-    
+    if zero_center==True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
+    else:
+        xs_mean = None
     generator = generate_batches_from_hdf5_file(test_file, batchsize, n_bins, class_type, 
                                     is_autoencoder, dataset_info_dict, broken_simulations_mode=0,
                                     f_size=None, zero_center_image=xs_mean, yield_mc_info=yield_mc_info,
@@ -104,7 +107,10 @@ def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, thr
 for model_no in range(len(model_bases)):
     model_base = model_bases[model_no]
     name_of_log_file = names_of_log_files[model_no]
+    zero_center = zero_centers[model_no]
+    
     print("Working on model base", model_base)
+    print("Using zerocentering:", zero_center)
     make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, threshold_greater_then)
     print("Saved data to", name_of_log_file)
             

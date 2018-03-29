@@ -204,6 +204,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         custom_objects=get_custom_objects()
         ae_loss=custom_objects[ae_loss_name]
     
+    #define loss function to use for new supervised networks
+    if number_of_output_neurons>=2:
+        supervised_loss = 'categorical_crossentropy'
+    else:
+        #for energy regression
+        supervised_loss = 'mae'
+    print("Using supervised loss:", supervised_loss)
     
     
     #All models are now saved in their own folder   models/"modeltag"/
@@ -214,7 +221,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     #Optimizer used in all the networks:
     lr = learning_rate # 0.01 default for SGD, 0.001 for Adam
     #lr_decay can either be a float, e.g. 0.05 for 5% decay of lr per epoch,
-    #or it can be a string like s1 for lr schedule 1. In this case, lr is ignored
+    #or it can be a string like s1 for lr schedule 1. 
+    #The original learning rate is still passed to the lr schedule function.
     try:
         lr_decay=float(learning_rate_decay) # % decay for each epoch, e.g. if 0.05 -> lr_new = lr*(1-0.05)=0.95*lr
         lr_schedule_number=None # no schedule
@@ -279,7 +287,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         print("Optimizer ", use_opti, " unknown!")
         raise NameError(use_opti)
     
-    #fit_model and evaluate_model take lists of tuples, so that you can give many single files (here just one)
+    #fit_model and evaluate_model take lists of tuples, so that you can give many single files (doesnt work?)
     train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
     test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
     
@@ -290,7 +298,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             sys.exit(proposed_filename+ "exists already!")
     
     #Zero-Center with precalculated mean image
-    #xs_mean = np.load(zero_center_file) if zero_center is True else None
     n_gpu=(1, 'avolkov')
     if zero_center == True:
         xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=n_gpu[0])
@@ -346,7 +353,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create a new encoder network:
             print("Creating new encoder network", modeltag, "from autoencoder", autoencoder_model)
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options, number_of_output_neurons=number_of_output_neurons)
-            model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            model.compile(loss=supervised_loss, optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
@@ -370,7 +377,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create a new encoder network:
             print("Creating new unfrozen encoder network:", modelname)
             model = setup_model(model_tag=modeltag, autoencoder_stage=2, additional_options=options, number_of_output_neurons=number_of_output_neurons)
-            model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            model.compile(loss=supervised_loss, optimizer=adam, metrics=['accuracy'])
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
@@ -455,7 +462,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if encoder_epoch == 0:
             #Create a new encoder network:
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options, number_of_output_neurons=number_of_output_neurons )
-            model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+            model.compile(loss=supervised_loss, optimizer=adam, metrics=['accuracy'])
             
             #Custom model is loaded as initialization
             if switch_autoencoder_model[0]==0:
@@ -554,14 +561,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             lr=lr_schedule(current_epoch+1, lr_schedule_number, learning_rate )
             K.set_value(model.optimizer.lr, lr)
             
-        #print all the input for train_and_test_model for debugging
-        """
-        print("model=",model, "modelname=",modelname, "train_files=",train_tuple, "test_files=",test_tuple,
-                             "batchsize=batchsize, n_bins=",n_bins, "class_type=",class_type, "xs_mean=",xs_mean, "epoch=",current_epoch,
-                             "shuffle=False, lr=",lr, "lr_decay=",lr_decay, "tb_logger=False, swap_4d_channels=None,",
-                             "save_path=",model_folder, "is_autoencoder=",is_autoencoder, "verbose=",verbose)
-        """
-        
         #Train network, write logfile, save network, evaluate network, save evaluation to file
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                              batchsize=batchsize, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,

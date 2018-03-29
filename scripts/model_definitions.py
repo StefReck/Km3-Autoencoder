@@ -189,13 +189,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         options_dict["model_type"]=3
         options_dict["make_stateful"]=True
         model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)
-    elif model_tag == "channel_4n_m3":
-        options_dict["neurons_in_bottleneck"]=4
-        options_dict["model_type"]=3
-        model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "channel_5n_m3":
         options_dict["neurons_in_bottleneck"]=5
         options_dict["model_type"]=3
+        options_dict["make_stateful"]=True
+        model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "channel_10n_m3":
+        options_dict["neurons_in_bottleneck"]=10
+        options_dict["model_type"]=3
+        options_dict["make_stateful"]=True
         model = setup_channel(autoencoder_stage, options_dict, modelpath_and_name)
         
     elif model_tag == "channel_tiny":
@@ -207,7 +209,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_200", autoencoder_stage=2, modelpath_and_name=None, number_of_output_neurons=1)
+    model=setup_model(model_tag="channel_10n_m3", autoencoder_stage=0, modelpath_and_name=None)
     model.summary()
 
 """
