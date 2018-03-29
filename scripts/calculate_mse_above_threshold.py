@@ -3,6 +3,7 @@
 Calculate the mse and the mse of bins above and below a threshold for some autoencoders.
 """
 from keras.models import load_model
+from os import fsync
 import numpy as np
 
 from util.run_cnn import load_zero_center_data, generate_batches_from_hdf5_file, h5_get_number_of_rows
@@ -96,6 +97,8 @@ def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, thr
             line=str(epoch)+"\t"+str(mse_above_list.mean())+"\t"+str(mse_below_list.mean())+"\t"+str(mse_list.mean())
             print(line)
             logfile.write(line+"\n")
+            logfile.flush()
+            fsync(logfile.fileno())
             
             
 for model_no in range(len(model_bases)):
