@@ -164,9 +164,11 @@ elif mode=="statistics":
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
     filesize_factor=dataset_info_dict["filesize_factor"]
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
-    batchsize=dataset_info_dict["batchsize"] #def 32
+    
     #higher for testing
-    batchsize=128
+    batchsize=32
+    dataset_info_dict["batchsize"]=batchsize #def 32
+    
 
     class_type=(2,"up_down")
     is_autoencoder=True
@@ -207,11 +209,11 @@ elif mode=="statistics":
         print("dom_correct shape",dom_correct.shape)
         
         #which count numbers were measured in all the doms
-        counts=np.unique(total_counts_measured_in_dom)
+        counts=np.unique(total_counts_measured_in_dom).astype(int)
         
         for count in counts:
             positions = np.where(data==count)
-            predicted_correct_there = np.sum(prediction[positions])
+            predicted_correct_there = np.sum(dom_correct[positions]).astype(int)
             total_doms_with_these_counts = len(positions)
             
             if count not in counts_dict:
