@@ -2,11 +2,23 @@
 """
 Plot logfile made from calculate mse.
 """
+import argparse
+
+def unpack_parsed_args():
+    parser = argparse.ArgumentParser(description='Plot logfile made from calculate mse.')
+    parser.add_argument('logfile_path', type=str, help='Path to the logfile created by calculate_mse')
+    
+    args = parser.parse_args()
+    params = vars(args)
+    return params["logfile_path"]
+
+file=unpack_parsed_args()
+
 import matplotlib.pyplot as plt
 
 from plotting.plot_statistics import read_out_file
 
-file="../results/data/mse__s.txt"
+
 data_dict=read_out_file(file)
 
 whats_there = ("MSE above3","MSE below","MSE")
