@@ -24,7 +24,7 @@ def parse_input():
 
 params = parse_input()
 model_name = params["model_name"]
-mode="plot"
+mode="statistics"
 zero_center = False
 
 #for plot mode, number of 32 batches of channel_id arrays should be read through for the plot
@@ -154,4 +154,70 @@ elif mode=="plot":
     plt.show()
         
     
+elif mode=="statistics":
+    #evaluate on test set. Check wheter doms with n hits in total were reconstructed correctly.
+    #For this, predictions are rounded to next integer
+    
+    train_file=dataset_info_dict["train_file"]
+    test_file=dataset_info_dict["test_file"]
+    n_bins=dataset_info_dict["n_bins"]
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
+    filesize_factor=dataset_info_dict["filesize_factor"]
+    filesize_factor_test=dataset_info_dict["filesize_factor_test"]
+    batchsize=dataset_info_dict["batchsize"] #def 32
+    #higher for testing
+    batchsize=128
 
+    class_type=(2,"up_down")
+    is_autoencoder=True
+    
+    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
+    test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
+    
+    if zero_center==True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
+    else:
+        xs_mean=0
+    
+    generator = generate_batches_from_hdf5_file(test_file, batchsize, n_bins, class_type, 
+                                    is_autoencoder, dataset_info_dict, broken_simulations_mode=0,
+                                    f_size=None, zero_center_image=xs_mean, yield_mc_info=False,
+                                    swap_col=None, is_in_test_mode = False)
+    
+    total_number_of_batches = int(test_tuple[0][1]/batchsize)
+    print("Filesize:",test_tuple[0][1], "Total number of batches:", total_number_of_batches)
+    total_number_of_batches=10
+    
+    #a dict with entries: total_counts_per_dom : [[correct_from_batch_0, ...],[total_from_batch_0,...]]
+    #e.g.                 0 : [[70,75,...],[96,94,...]]
+    counts_dict={}
+    
+    for batchno in range(total_number_of_batches):
+        data = next(generator)[0]
+        prediction = np.round(model.predict_on_batch(data))
+        
+        #shape (batchsize,)
+        total_counts_measured_in_dom = np.sum(data, axis=1)
+        print("total_counts shape",total_counts_measured_in_dom.shape)
+        
+        #Should result in a (batchsize,) array that states wheter the whole dom was predicted correctly
+        dom_correct = np.logical_and.reduce(data==prediction, axis=1)
+        print("dom_correct shape",dom_correct.shape)
+        
+        #which count numbers were measured in all the doms
+        counts=np.unique(total_counts_measured_in_dom)
+        
+        for count in counts:
+            positions = np.where(data==count)
+            predicted_correct_there = np.sum(prediction[positions])
+            total_doms_with_these_counts = len(positions)
+            
+            if count not in counts_dict:
+                counts_dict[count]=[[],[]]
+                
+            counts_dict[count][0].append(predicted_correct_there)
+            counts_dict[count][1].append(total_doms_with_these_counts)
+                
+    print(counts_dict)
+            
+            
