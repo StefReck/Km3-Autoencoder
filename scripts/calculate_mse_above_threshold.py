@@ -6,14 +6,14 @@ import argparse
 
 def unpack_parsed_args():
     parser = argparse.ArgumentParser(description='Calculate the mse and the mse of bins above and below a threshold for some autoencoders.')
-    parser.add_argument("modelbases", type=str, nargs="?", type=str, help="base name of model, e.g. models/xxx/yyy_epoch")
+    parser.add_argument("modelbases", type=str, nargs="?", help="base name of model, e.g. models/xxx/yyy_epoch")
     
     args = parser.parse_args()
     params = vars(args)
     models = params["modelbases"]
     return models
 
-modelbases = unpack_parsed_args()
+model_bases = unpack_parsed_args()
 
 
 
@@ -27,10 +27,12 @@ from util.custom_loss_functions import get_custom_objects
 
 home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
+if type(model_bases) != list:
+    model_bases=[model_bases,]
 #array of strings that identifiy the models, up to the epoch
-for i,modelbase in enumerate(modelbases):
-    modelbases[i] = home_path+modelbase
-print(modelbases)
+for i,modelbase in enumerate(model_bases):
+    model_bases[i] = home_path+modelbase
+print(model_bases)
 """
 model_bases=[home_path+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_epoch",
              home_path+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_epoch"]

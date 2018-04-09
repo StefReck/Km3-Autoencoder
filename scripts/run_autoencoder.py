@@ -439,6 +439,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if modeltag[:7] == "channel":
             #channel id autoencoders need less epochs per AE epoch, their modeltag starts with channel
             how_many_epochs_each_to_train =[1,]*100
+            #Dataset is switched when moving to encoder training, so stateful has to be active
+            make_stateful=True
         else:
             how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*194
         #model to initialize from if first epoch is 0
@@ -516,7 +518,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5', custom_objects=custom_objects)
-            model = make_encoder_stateful(model)
+            if make_stateful==True:
+                model = make_encoder_stateful(model)
                 
         #Own execution of training
         #Set LR of loaded model to new lr
