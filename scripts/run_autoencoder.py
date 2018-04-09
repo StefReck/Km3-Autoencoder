@@ -8,6 +8,7 @@ It also contatins the adress of the training files and the epoch
 
 
 from keras.models import load_model
+from keras.layers import BatchNormalization
 from keras import optimizers
 from keras import backend as K
 import numpy as np
@@ -175,6 +176,43 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
             
     print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
     return lr
+
+def get_index_of_bottleneck(model):
+    #smallest_layer_neurons = np.prod(model.layers[0].output_shape[1:])
+    for i,layer in enumerate(model.layers):
+        #Sometimes keywords tell where the botn is
+        if layer.name == "encoded":
+            last_encoder_layer_index = i
+            break
+        elif layer.name == "after_encoded":
+            last_encoder_layer_index = i-1
+            break
+        #otherwise take the flatten layer
+        elif "flatten" in layer.name:
+            last_encoder_layer_index = i
+            
+        """
+        #if not, take the last layer with the smallest number of output neurons as the bottleneck
+        #only works for AEs
+        layer_neurons = np.prod(model.layers[i].output_shape[1:])
+        if layer_neurons<=smallest_layer_neurons:
+            smallest_layer_neurons=layer_neurons
+            last_encoder_layer_index = i
+        """
+        
+    print("Bottleneck is", np.prod(model.layers[last_encoder_layer_index].output_shape[1:])," neurons at layer", model.layers[last_encoder_layer_index].name)
+    return last_encoder_layer_index
+
+def make_encoder_stateful(model):
+    #Set all batchnorm layers in the encoder part to be stateful
+    #this does not get saved with save_model, so it has to be done again whenever the model is loaded
+    last_encoder_layer = get_index_of_bottleneck(model)
+    for layer in model.layers[:last_encoder_layer+1]:
+        if isinstance(layer, BatchNormalization):
+            #make it so that the test mean and variance is recalculated
+            layer.stateful=True
+            print("Made layer", layer.name, "stateful.")
+    return model
 
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name):
@@ -416,15 +454,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #look for last encoder layer = last flatten layer in the network / layer with name encoded if present
             last_encoder_layer_index = 1
             if last_encoder_layer_index_override == None:
-                for i,layer in enumerate(encoder_model.layers):
-                    if layer.name == "encoded":
-                        last_encoder_layer_index = i
-                        break
-                    elif layer.name == "after_encoded":
-                        last_encoder_layer_index = i-1
-                        break
-                    elif "flatten" in layer.name:
-                        last_encoder_layer_index = i
+                last_encoder_layer_index=get_index_of_bottleneck(encoder_model)
             else:
                 last_encoder_layer_index = last_encoder_layer_index_override
             
@@ -486,7 +516,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5', custom_objects=custom_objects)
-        
+            model = make_encoder_stateful(model)
                 
         #Own execution of training
         #Set LR of loaded model to new lr
