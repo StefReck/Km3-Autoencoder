@@ -2,6 +2,21 @@
 """
 Calculate the mse and the mse of bins above and below a threshold for some autoencoders.
 """
+import argparse
+
+def unpack_parsed_args():
+    parser = argparse.ArgumentParser(description='Calculate the mse and the mse of bins above and below a threshold for some autoencoders.')
+    parser.add_argument("modelbases", type=str, nargs="?", type=str, help="base name of model, e.g. models/xxx/yyy_epoch")
+    
+    args = parser.parse_args()
+    params = vars(args)
+    models = params["modelbases"]
+    return models
+
+modelbases = unpack_parsed_args()
+
+
+
 from keras.models import load_model
 from os import fsync
 import numpy as np
@@ -13,8 +28,15 @@ from util.custom_loss_functions import get_custom_objects
 home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
 
 #array of strings that identifiy the models, up to the epoch
+for i,modelbase in enumerate(modelbases):
+    modelbases[i] = home_path+modelbase
+print(modelbases)
+"""
 model_bases=[home_path+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_epoch",
              home_path+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_epoch"]
+"""
+
+
 #name of logfiles (auto generated)
 names_of_log_files = [home_path+"results/data/mse_"+model_bases[i].split("/")[-1][:-6]+"s.txt" for i in range(len(model_bases))]
 #Wheter to apply 0 centering or no
@@ -72,7 +94,7 @@ def make_logfile(name_of_log_file, epochs_of_model, model_base, dataset_tag, thr
         for epoch in epochs_of_model:
             print("Loading model:", model_base+str(epoch)+".h5")
             autoencoder = load_model(model_base+str(epoch)+".h5", custom_objects=custom_objects)
-            generator = setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, zero_center)
+            generator = setup_generator_testfile(class_type, is_autoencoder, dataset_info_dict, yield_mc_info=False, zero_center=zero_center)
             
             test_file=dataset_info_dict["test_file"]
             filesize_factor_test=dataset_info_dict["filesize_factor_test"]
