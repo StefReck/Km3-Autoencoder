@@ -18,26 +18,37 @@ import matplotlib.pyplot as plt
 
 from plotting.plot_statistics import read_out_file
 
+ylim=None
+
+def make_plot(data_dict, ylim=None):
+    #whats_there = ("MSE above3","MSE below","MSE")
+    labels = ("MSE of high count bins", "MSE of low count bins", "Total MSE")
+    colors = ("green","orange","blue")
+    
+    fig, ax = plt.subplots()
+    plt.title("Constituents of the test MSE")
+    plt.grid()
+    
+    ax.plot(data_dict["Epoch"], data_dict["MSE below"], "o-", label=labels[1], c=colors[1])
+    ax.plot(data_dict["Epoch"], data_dict["MSE"], "o-", label=labels[2], c=colors[2])
+    ax.set_xlabel("Autoencoder epoch")
+    ax.set_ylabel("Test MSE")
+    plt.legend(loc="upper left")
+    
+    if ylim is not None: ax.set_ylim(ylim) 
+    
+    ax2 = ax.twinx()
+    ax2.plot(data_dict["Epoch"], data_dict["MSE above3"], "o-", label=labels[0], c=colors[0])
+    ax2.set_ylabel("Test MSE")
+    
+    
+    
+    plt.legend(loc="upper right")
+    plt.show()
+
 
 data_dict=read_out_file(file)
+make_plot(data_dict, ylim)
 
-whats_there = ("MSE above3","MSE below","MSE")
-labels = ("MSE of high count bins", "MSE of low count bins", "Total MSE")
-colors = ("green","orange","blue")
 
-fig, ax = plt.subplots()
-plt.title("Constituents of the test MSE")
-plt.grid()
 
-ax.plot(data_dict["Epoch"], data_dict["MSE below"], "o-", label=labels[1], c=colors[1])
-ax.plot(data_dict["Epoch"], data_dict["MSE"], "o-", label=labels[2], c=colors[2])
-ax.set_xlabel("Autoencoder epoch")
-ax.set_ylabel("Test MSE")
-plt.legend(loc="upper left")
-
-ax2 = ax.twinx()
-ax2.plot(data_dict["Epoch"], data_dict["MSE above3"], "o-", label=labels[0], c=colors[0])
-ax2.set_ylabel("Test MSE")
-
-plt.legend(loc="upper right")
-plt.show()
