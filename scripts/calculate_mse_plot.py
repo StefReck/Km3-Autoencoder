@@ -16,16 +16,15 @@ file=unpack_parsed_args()
 
 import matplotlib.pyplot as plt
 
-from plotting.plot_statistics import read_out_file
+from plotting.plot_statistics import read_out_file, get_proper_range
 
-ylim=None
 
-def make_plot(data_dict, ylim=None):
+def make_plot(data_dict, figsize=(9,7)):
     #whats_there = ("MSE above3","MSE below","MSE")
     labels = ("MSE of high count bins", "MSE of low count bins", "Total MSE")
     colors = ("green","orange","blue")
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     plt.title("Constituents of the test MSE")
     plt.grid()
     
@@ -35,20 +34,20 @@ def make_plot(data_dict, ylim=None):
     ax.set_ylabel("Test MSE")
     plt.legend(loc="upper left")
     
-    if ylim is not None: ax.set_ylim(ylim) 
     
     ax2 = ax.twinx()
     ax2.plot(data_dict["Epoch"], data_dict["MSE above3"], "o-", label=labels[0], c=colors[0])
     ax2.set_ylabel("Test MSE")
     
-    
+    ax.set_ylim(get_proper_range(data_dict["MSE"]))
+    ax2.set_ylim(get_proper_range(data_dict["MSE above3"]))
     
     plt.legend(loc="upper right")
     plt.show()
 
 
 data_dict=read_out_file(file)
-make_plot(data_dict, ylim)
+make_plot(data_dict)
 
 
 
