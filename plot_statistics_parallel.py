@@ -47,7 +47,8 @@ def get_props_for_plot(tag):
         print("Tag", tag, "unknown.")
         raise()
     test_files=[ae_model, prl_model]
-    return test_files, title, labels_override
+    save_as=home+"results/plots/statistics/statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
+    return test_files, title, labels_override, save_as
 
 
 xlabel="Epoch"
@@ -65,9 +66,10 @@ colors=["blue", "orange"] # = automatic
 #with the plot data to; None will skip saving
 dump_to_file=None
 
-
+#save plot as
+save_as=None
 if test_files[0]=="saved":
-    test_files, title, labels_override = get_props_for_plot(test_files[1])
+    test_files, title, labels_override, save_as = get_props_for_plot(test_files[1])
 
 
 
@@ -93,3 +95,7 @@ data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, 
 fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
                  title, legend_locations, labels_override, colors, xticks, figsize)
 plt.show(fig)
+
+if save_as != None:
+    plt.savefig(save_as)
+    print("Saved plot as",save_as)
