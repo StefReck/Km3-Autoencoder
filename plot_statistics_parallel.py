@@ -94,8 +94,9 @@ data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, 
 
 fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
                  title, legend_locations, labels_override, colors, xticks, figsize)
-plt.show(fig)
 
 if save_as != None:
     plt.savefig(save_as)
     print("Saved plot as",save_as)
+    
+plt.show(fig)

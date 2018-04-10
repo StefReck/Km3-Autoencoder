@@ -16,7 +16,9 @@ from scipy.special import factorial
 #from compare_hists import *
 #from util.Loggers import *
 
-
+model=Sequential()
+model.add(BatchNormalization(input_shape=(10,)))
+model.compile("adam","mse")
 
 def setup_simple_model():
     model=Sequential()

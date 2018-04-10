@@ -66,7 +66,7 @@ if file=="auto":
     for i,f in enumerate(files):
         data_dict=read_out_file(f)
         fig = make_plot(data_dict, title=titles[i])
-        plt.savefig(fig, filenames[i])
+        plt.savefig(filenames[i])
 else:
     data_dict=read_out_file(file)
     fig = make_plot(data_dict)
