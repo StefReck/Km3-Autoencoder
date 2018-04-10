@@ -41,7 +41,50 @@ def get_props_for_plot(tag):
         title = "Parallel training with MSEp autoencoder loss (low lr)"
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_supervised_parallel_up_down_test.txt"
-        labels_override = ["Autoencoder", "Encoder"]     
+        labels_override = ["Autoencoder", "Encoder"] 
+        
+    elif tag=="channel_3n":
+        title = "Parallel training with channel autoencoder (3 neurons)"
+        ae_model =  home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_test.txt"
+        prl_model = home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+    elif tag=="channel_5n":
+        title = "Parallel training with channel autoencoder (5 neurons)"
+        ae_model =  home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_test.txt"
+        prl_model = home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]  
+    elif tag=="channel_10n":
+        title = "Parallel training with channel autoencoder (10 neurons)"
+        ae_model =  home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_test.txt"
+        prl_model = home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]  
+        
+    elif tag=="vgg_5_200":
+        title = "Parallel training with model '200'"
+        ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]  
+    elif tag=="vgg_5_200_dense":
+        title = "Parallel training with model '200 dense'"
+        ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]       
+        
+    elif tag=="vgg_5_64":
+        title = "Parallel training with model '64'"
+        ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+    elif tag=="vgg_5_32":
+        title = "Parallel training with model '32' and $\epsilon=10^{-8}$"
+        ae_model =  home+"models/vgg_5_32/trained_vgg_5_32_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_32/trained_vgg_5_32_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+    elif tag=="vgg_5_32-eps01":
+        title = "Parallel training with model '32'"
+        ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
         
     else:
         print("Tag", tag, "unknown.")
