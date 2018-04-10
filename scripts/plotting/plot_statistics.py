@@ -181,14 +181,16 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
     #how_many_epochs e.g. [10,2,2,1,1]
     #take_these_prl e.g.  [10,12,14,15,16]
     for index,(i, j) in enumerate(zip(take_these_prl_epochs[:-1], take_these_prl_epochs[1:])):
-        print(j-i)
         if (j-i)==1:
             is_1=take_these_prl_epochs[index:] #e.g. [15,16]
-            
-
-    #shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
-    shift_epochs_by = is_1[0] #e.g. 15
-
+            #shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
+            shift_epochs_by = is_1[0]-(index+1) #e.g. 15-(3+1)=11
+            break
+    """
+    print("take_these_prl_epochs", take_these_prl_epochs)
+    print("is_1",is_1)
+    print("shift_epochs_by",shift_epochs_by)
+    """
     #data_parallel_train=[train_epoch, train_ydata]
     data_parallel_train=[[],[]]
     for epoch in is_1:
