@@ -6,9 +6,9 @@ Plot autoencoder and supervised parallel performance in one plot.
 import argparse
 
 def parse_input():
-    parser = argparse.ArgumentParser(description='Make overview plots of model training.')
-    parser.add_argument('autoencoder_model', type=str, help='name of _test.txt files to plot.')
-    parser.add_argument('parallel_model', type=str, help='name of _test.txt files to plot.')
+    parser = argparse.ArgumentParser(description='Make overview plots of model training. Can also enter "saved" and a tag to restore saved plot properties.')
+    parser.add_argument('autoencoder_model', type=str, help='name of _test.txt files to plot (or "saved")')
+    parser.add_argument('parallel_model', type=str, help='name of _test.txt files to plot. (or a tag)')
     
     parser.add_argument('-c', '--channel', action="store_true", help='Use the channel parallel schedule (1 enc epoch per AE epoch)')
     args = parser.parse_args()
@@ -25,6 +25,31 @@ from scripts.plotting.plot_statistics import make_data_from_files, make_plot_sam
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
 
+def get_props_for_plot(tag):
+    home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
+    if tag=="msep":
+        title = "Parallel training with MSEp autoencoder loss"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]
+    elif tag=="msepsq":
+        title = r"Parallel training with MSEp$^2$ autoencoder loss"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]    
+    elif tag=="msep2":
+        title = "Parallel training with MSEp autoencoder loss (low lr)"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]     
+        
+    else:
+        print("Tag", tag, "unknown.")
+        raise()
+    test_files=[ae_model, prl_model]
+    return test_files, title, labels_override
+
+
 xlabel="Epoch"
 title="Parallel Training"
 figsize = (13,8)
@@ -39,6 +64,11 @@ colors=["blue", "orange"] # = automatic
 #Name of file in the results/dumped_statistics folder to save the numpy array 
 #with the plot data to; None will skip saving
 dump_to_file=None
+
+
+if test_files[0]=="saved":
+    test_files, title, labels_override = get_props_for_plot(test_files[1])
+
 
 
 #Which epochs from the parallel encoder history to take:
