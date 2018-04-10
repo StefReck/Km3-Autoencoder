@@ -178,20 +178,25 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
 
 
     #train: Only take epochs that were trained for one Epoch on an AE Epoch
-    is_1=np.where(how_many_epochs_each_to_train==1)[0][0]-1
-    take_these_train_epochs = take_these_prl_epochs[is_1:]
+    #how_many_epochs e.g. [10,2,2,1,1]
+    #take_these_prl e.g.  [10,12,14,15,16]
+    for index,(i, j) in enumerate(zip(take_these_prl_epochs[:-1], take_these_prl_epochs[1:])):
+        print(j-i)
+        if (j-i)==1:
+            is_1=take_these_prl_epochs[index:] #e.g. [15,16]
+            
+
     #shift epochs, so that it will be plotted over the AE epoch and not the spvsd epoch
-    shift_epochs_by = take_these_prl_epochs[is_1] - (is_1+1) 
+    shift_epochs_by = is_1[0] #e.g. 15
 
     #data_parallel_train=[train_epoch, train_ydata]
     data_parallel_train=[[],[]]
-    for epoch in take_these_train_epochs:
+    for epoch in is_1:
         take_these = np.logical_and(data_parallel[2]>=epoch, data_parallel[2]<epoch+1)
         data_parallel_train[0].extend( (np.array(data_parallel[2])-shift_epochs_by)[take_these])
         data_parallel_train[1].extend( np.array(data_parallel[3])[take_these])
     
     return np.array(data_parallel_test), np.array(data_parallel_train)
-
 
 
 def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
