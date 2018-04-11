@@ -1,36 +1,97 @@
 import h5py
 import numpy as np
 
-#original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
-original_train_file="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
-original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
-
-#outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
-#outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
-
-outfile_train="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
-outfile_test ="channel/elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5"
-   
 # x, y, z, t, c
 #11,13,18,50,31
 
-#11,13,18,31
+mode="channel_up_manip"
 
+#original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
+    
+#outfile_train="channel/elec-CC_and_muon-CC_c_train_1_to_240_shuffled_0.h5"
+#outfile_test= "channel/elec-CC_and_muon-CC_c_test_481_to_540_shuffled_0.h5"
+
+#Default values:
 #percentage of events to keep
 fraction=1
 #which axis including filesize to sum over, None if no sum
 #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
 sum_over_axis=None
-#
-reshape_to_channel_and_shuffle=True
-only_doms_with_more_then=2
+reshape_to_channel_and_shuffle=False
+only_doms_with_more_then=0
+broken_mode=None
+
+
+if mode=="channel_event":
+    #
+    
+    original_train_file="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
+    original_test_file ="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
+    
+    outfile_train="channel/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
+    outfile_test ="channel/elec-CC_and_muon-CC_c_event_test_481_to_540_shuffled_0.h5"
+       
+    #11,13,18,31
+    
+    #percentage of events to keep
+    fraction=1
+    #which axis including filesize to sum over, None if no sum
+    #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
+    sum_over_axis=None
+
+    reshape_to_channel_and_shuffle=True
+    only_doms_with_more_then=2
+
+elif mode=="channel_up_manip":
+    #all channel ids that are looking upward have reduced counts (expectat.)
+    #Input: xztc (11,18,50,31)
+    #Output: xzt (11,18,50)
+    original_train_file="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc/elec-CC_and_muon-CC_xyzt_train_1_to_240_shuffled_0.h5"
+    original_test_file ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc/elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+    
+    outfile_train="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc_broken5/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
+    outfile_test ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc_broken5/elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+       
+    #percentage of events to keep
+    fraction=1
+    #which axis including filesize to sum over, None if no sum
+    #e.g. X,11,13,18,50 --> X,11,18,50 axis=2
+    sum_over_axis=4
+
+    reshape_to_channel_and_shuffle=False
+    only_doms_with_more_then=0
+    broken_mode=5
+
 
 #show how often certain total number of hits in a dom occur; No files will be generated
-make_statistics = True
+make_statistics = False
 #save it as a npy file
 save_statistics_name = original_train_file.split("/")[-1][:-3]+"_statistics_fraction_"+str(fraction)+".npy"
 
-def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then):     
+
+def make_broken5_manip(hists_temp):
+    #Input (X,11,18,50,31) xztc hists
+    #Output: (X,11,18,50) manipulated xzt hists
+    
+    #all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    
+    #1=upwards facing, taken from the paper
+    up_mask=np.array([True,]*12 + [False,]*19) 
+    #chance for upward facing doms with >0 counts to have one count removed:
+    chance=0.3
+        
+    #the counts to subtract: upwards facing doms have a 30% chance of getting one count removed
+    subt = np.multiply(up_mask, np.random.choice([0,1],size=hists_temp.shape, p=[1-chance,chance]))
+    #only remove one count when there is one to begin with
+    subt=np.multiply(subt,hists_temp>=1)
+    #Ultimately, all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    hists_temp=hists_temp-subt
+    #sum over channel axis to get X,11,18,50 xzt data
+    hists_temp=np.sum(hists_temp, axis=4)
+    
+    return hists_temp
+
+def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then, broken_mode=None):     
     print("Generating file", save_to)
     f=h5py.File(file, "r")
     shape=f["x"].shape #e.g. (X,11,13,18,50)
@@ -38,10 +99,24 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
     up_to_which=int(shape[0]*fraction)
     print("Events left after cut:", up_to_which)
 
-    if sum_over_axis is not None:
-        hists=np.sum(f["x"][:up_to_which], axis=sum_over_axis)
+    if broken_mode==5:
+        #do the task in several steps
+        how_many_steps=50
+        per_step=int(up_to_which/how_many_steps)
+        
+        hists = np.zeros(shape=[per_step*how_many_steps,]+f["x"].shape[1:-1]) #e.g. 11,18,50
+        
+        for step in range(how_many_steps):
+            part_of_datafile = (per_step*step, per_step*(step+1))
+        
+            hists_temp=f["x"][part_of_datafile[0]:part_of_datafile[1]] #X,11,18,50,31
+            hists[part_of_datafile[0]:part_of_datafile[1]]=make_broken5_manip(hists_temp)
+            
     else:
-        hists=f["x"][:up_to_which]
+        if sum_over_axis is not None:
+            hists=np.sum(f["x"][:up_to_which], axis=sum_over_axis)
+        else:
+            hists=f["x"][:up_to_which]
         
         
     if reshape_to_channel_and_shuffle == True:
@@ -117,6 +192,6 @@ def store_histograms_as_hdf5(hists, mc_infos, filepath_output, compression=(None
 if make_statistics==True:
     make_channel_statistics(original_train_file, fraction, save_statistics_name)
 else:
-    generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
-    generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then)
+    generate_file(original_train_file, outfile_train, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then, broken_mode)
+    generate_file(original_test_file,  outfile_test,  fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then, broken_mode)
     print("Done.")

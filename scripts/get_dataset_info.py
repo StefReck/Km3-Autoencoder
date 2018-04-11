@@ -47,7 +47,7 @@ def get_dataset_info(dataset_tag):
         #with old spatial binning and very old time binning (relative)
         data_path = home_path+"data/xztc/"
         train_data = "elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xyzt_train_1_to_480.h5"
+        test_data = "elec-CC_and_muon-CC_xyzt_train_1_to_240_shuffled_0.h5"
         n_bins = (11,18,50,31)
         
     elif dataset_tag=="xzt_new":

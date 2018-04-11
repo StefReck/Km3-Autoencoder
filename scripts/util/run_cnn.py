@@ -204,7 +204,7 @@ def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values
             
         # if swap_col is not None, zero_center_image is already swapped
         if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
-            
+        
         
     else:
         # if swap_col is not None, zero_center_image is already swapped
