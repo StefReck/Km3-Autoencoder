@@ -149,7 +149,13 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_200_deep(autoencoder_stage, options_dict, modelpath_and_name)  
     elif model_tag == "vgg_5_200_dense":
         model = setup_vgg_5_200_dense(autoencoder_stage, options_dict, modelpath_and_name) 
-        
+    elif model_tag == "vgg_5_200_small":
+        options_dict["filter_base_version"]="small"
+        model = setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name) 
+    elif model_tag == "vgg_5_200_shallow":
+        model = setup_vgg_5_200_shallow(autoencoder_stage, options_dict, modelpath_and_name)  
+    
+    
     elif model_tag == "vgg_5_64":
         model = setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name) 
         
@@ -209,7 +215,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="channel_10n_m3", autoencoder_stage=0, modelpath_and_name=None)
+    model=setup_model(model_tag="vgg_5_200_shallow", autoencoder_stage=0, modelpath_and_name=None)
     model.summary()
 
 """
