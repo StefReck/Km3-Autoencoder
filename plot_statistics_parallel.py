@@ -24,9 +24,18 @@ from scripts.plotting.plot_statistics import make_data_from_files, make_plot_sam
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
+#Epoch schedule that was used during training:
+if params["channel"]==True:
+    #used for channel AE
+    epoch_schedule="1-1-1"
+else:
+    #used for everything else
+    epoch_schedule="10-2-1"
+    
 
 def get_props_for_plot(tag):
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
+    epoch_schedule="10-2-1"
     if tag=="msep":
         title = "Parallel training with MSEp autoencoder loss"
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_test.txt"
@@ -48,16 +57,19 @@ def get_props_for_plot(tag):
         ae_model =  home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
+        epoch_schedule="1-1-1"
     elif tag=="channel_5n":
         title = "Parallel training with channel autoencoder (5 neurons)"
         ae_model =  home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         labels_override = ["Autoencoder", "Encoder"]  
+        epoch_schedule="1-1-1"
     elif tag=="channel_10n":
         title = "Parallel training with channel autoencoder (10 neurons)"
         ae_model =  home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         labels_override = ["Autoencoder", "Encoder"]  
+        epoch_schedule="1-1-1"
         
     elif tag=="vgg_5_200":
         title = "Parallel training with model '200'"
@@ -69,6 +81,18 @@ def get_props_for_plot(tag):
         ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt"
         labels_override = ["Autoencoder", "Encoder"]       
+        
+    elif tag=="vgg_5_200_deep":
+        title = "Parallel training with model '200 deep'"
+        ae_model =  home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+    elif tag=="vgg_5_200_large":
+        title = "Parallel training with model '200 large'"
+        ae_model =  home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+    
         
     elif tag=="vgg_5_64":
         title = "Parallel training with model '64'"
@@ -91,7 +115,7 @@ def get_props_for_plot(tag):
         raise()
     test_files=[ae_model, prl_model]
     save_as=home+"results/plots/statistics/statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
-    return test_files, title, labels_override, save_as
+    return test_files, title, labels_override, save_as, epoch_schedule
 
 
 xlabel="Epoch"
@@ -109,17 +133,19 @@ colors=["blue", "orange"] # = automatic
 #with the plot data to; None will skip saving
 dump_to_file=None
 
+
+
 #save plot as
 save_as=None
 if test_files[0]=="saved":
-    test_files, title, labels_override, save_as = get_props_for_plot(test_files[1])
+    test_files, title, labels_override, save_as, epoch_schedule = get_props_for_plot(test_files[1])
 
 
 
 #Which epochs from the parallel encoder history to take:
-if params["channel"]==True:
+if epoch_schedule=="1-1-1":
     how_many_epochs_each_to_train = np.ones(100).astype(int)
-else:
+elif epoch_schedule=="10-2-1":
     how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
 print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
 

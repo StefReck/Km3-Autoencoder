@@ -443,6 +443,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             make_stateful=True
         else:
             how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*194
+            make_stateful=False
+            
         #model to initialize from if first epoch is 0
         #this one is only used for vgg_3_eps modeltag
         init_model_eps=model_folder + "trained_vgg_3_eps_autoencoder_epoch1_supervised_up_down_accdeg2_epoch26.h5"
