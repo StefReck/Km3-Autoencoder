@@ -49,8 +49,8 @@ elif mode=="channel_up_manip":
     original_train_file="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc/elec-CC_and_muon-CC_xyzt_train_1_to_240_shuffled_0.h5"
     original_test_file ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc/elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
     
-    outfile_train="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc_broken5/elec-CC_and_muon-CC_c_event_train_1_to_240_shuffled_0.h5"
-    outfile_test ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xztc_broken5/elec-CC_and_muon-CC_xyzt_test_481_to_600_shuffled_0.h5"
+    outfile_train="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken5/elec-CC_and_muon-CC_xzt_broken5_event_train_1_to_240_shuffled_0.h5"
+    outfile_test ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken5/elec-CC_and_muon-CC_xzt_broken5_test_481_to_600_shuffled_0.h5"
        
     #percentage of events to keep
     fraction=1

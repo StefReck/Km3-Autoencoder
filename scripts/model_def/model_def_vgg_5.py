@@ -294,14 +294,18 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
+    input_shape=(11,18,50,1)
     if filter_base_version == "standard":
         filter_base=[32,51,50,25]
     elif filter_base_version == "large":
         filter_base=[64,75,75,25]
     elif filter_base_version == "small":
         filter_base=[32,32,25,25]
+    elif filter_base_version == "xztc":
+        filter_base=[32,32,64,64]
+        input_shape=(11,18,50,31)
         
-    inputs = Input(shape=(11,18,50,1))
+    inputs = Input(shape=input_shape)
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48

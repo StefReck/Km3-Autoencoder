@@ -121,6 +121,14 @@ def get_dataset_info(dataset_tag):
         broken_simulations_mode=4
         print("Warning: GENERATING BROKEN SIMULATED DATA")
     
+    elif dataset_tag=="xzt_broken5":
+        #with old spatial binning and very old time binning (relative)
+        data_path = home_path+"data/xzt_broken5/"
+        train_data = "elec-CC_and_muon-CC_xzt_broken5_event_train_1_to_240_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_broken5_test_481_to_600_shuffled_0.h5"
+        n_bins = (11,18,50,1)  
+        print("Warning: GENERATING BROKEN SIMULATED DATA")
+    
     elif dataset_tag=="xyz":
         #xyz- generated from xyzc by summing over channel
         #11x13x18
