@@ -149,8 +149,8 @@ def make_data_from_files(test_files, dump_to_file=None):
 
     
 def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
-    mini = min(np.ravel(ydata))
-    maxi = max(np.ravel(ydata))
+    mini = min(np.ravel(ydata).astype(float))
+    maxi = max(np.ravel(ydata).astype(float))
     span = maxi - mini
     ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
     return ranges
@@ -292,13 +292,13 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     #plot the data in one plot
     #autoencoder
     if color_override==True:
-        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o", color=colors[0])
+        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o", color=colors[0], zorder=10)
     else:
-        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o")
+        test_plot = ax.plot(data_autoencoder[0], data_autoencoder[1], marker="o", zorder=10)
     
     #the train plot
     ax.plot(data_autoencoder[2], data_autoencoder[3], linestyle="-", 
-            color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
+            color=test_plot[0].get_color(), alpha=0.5, lw=0.6, zorder=1)
     
     
     #parallel enc
@@ -306,13 +306,13 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     #data_parallel_epochs = data_autoencoder[0][:len(data_parallel_test[0])]
     
     if color_override==True:#        21                      22
-        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o", color=colors[1])
+        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o", color=colors[1], zorder=11)
     else:
-        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o")
+        test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o", zorder=11)
     
     #train plot
     ax2.plot(data_parallel_train[0], data_parallel_train[1], linestyle="-", 
-            color=test_plot_prl[0].get_color(), alpha=0.5, lw=0.6)
+            color=test_plot_prl[0].get_color(), alpha=0.5, lw=0.6, zorder=2)
     
     #custom handles for all the lines of both axes
     handle_for_legend_array=[]
