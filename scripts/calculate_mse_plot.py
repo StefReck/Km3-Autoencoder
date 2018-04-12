@@ -6,7 +6,7 @@ import argparse
 
 def unpack_parsed_args():
     parser = argparse.ArgumentParser(description='Plot logfile made from calculate mse.')
-    parser.add_argument('logfile_path', type=str, help='Path to the logfile created by calculate_mse')
+    parser.add_argument('logfile_path', type=str, help='Path to the logfile created by calculate_mse, or "auto" to make and save all plots.')
     
     args = parser.parse_args()
     params = vars(args)
@@ -48,9 +48,11 @@ def make_plot(data_dict, figsize=(9,7), title="Constituents of the test MSE"):
 def get_data_infos():
     loss_analysis=["mse_trained_vgg_5_picture-instanthighlr_autoencoders.txt",
                    "mse_trained_vgg_5_picture-instanthighlr_msep_autoencoders.txt",
+                   "mse_trained_vgg_5_picture-instanthighlr_msep2_autoencoders.txt",
                    "mse_trained_vgg_5_picture-instanthighlr_msepsq_autoencoders.txt"]
     titles=["Constituents of the test MSE",
             "Constituents of the test MSE (MSEp training)",
+            "Constituents of the test MSE (MSEp training, low lr)",
             r"Constituents of the test MSE (MSEp$^2$ training)"]
     
     
