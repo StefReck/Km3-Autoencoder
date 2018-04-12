@@ -149,8 +149,8 @@ def make_data_from_files(test_files, dump_to_file=None):
 
     
 def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
-    mini = min(ydata)
-    maxi = max(ydata)
+    mini = min(np.ravel(ydata))
+    maxi = max(np.ravel(ydata))
     span = maxi - mini
     ranges = (mini-span*relative_spacing[0], maxi+span*relative_spacing[1])
     return ranges
@@ -352,7 +352,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     
     #y range
     ax.set_ylim(get_proper_range(data_autoencoder[1]))
-    ax2.set_ylim(get_proper_range(data_parallel_test[1]))
+    ax2.set_ylim(get_proper_range(np.concatenate((data_parallel_test[1],data_parallel_train[1]))))
     
     if xticks is not None:
         plt.xticks( xticks )
