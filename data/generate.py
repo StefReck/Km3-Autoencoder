@@ -101,12 +101,15 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
 
     if broken_mode==5:
         #do the task in several steps
-        how_many_steps=50
+        how_many_steps=500
         per_step=int(up_to_which/how_many_steps)
+        print("Taking", how_many_steps,"steps with", per_step,"events each.")
+        print("New file will have shape",(per_step*how_many_steps,)+f["x"].shape[1:-1])
         
         hists = np.zeros(shape=(per_step*how_many_steps,)+f["x"].shape[1:-1]) #e.g. 11,18,50
         
         for step in range(how_many_steps):
+            print("Step", step, "/", how_many_steps)
             part_of_datafile = (per_step*step, per_step*(step+1))
         
             hists_temp=f["x"][part_of_datafile[0]:part_of_datafile[1]] #X,11,18,50,31
