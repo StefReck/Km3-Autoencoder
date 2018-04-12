@@ -37,9 +37,10 @@ def get_cum_number_of_rows(file_list, cuts=False):
     for file_name in file_list:
         f = h5py.File(file_name, 'r')
         # get number of rows from the first folder of the file -> each folder needs to have the same number of rows
-        total_number_of_rows += f[f.keys()[0]].shape[0]
+        
+        total_number_of_rows += f[list(f.keys())[0]].shape[0]
         cum_number_of_rows_list.append(total_number_of_rows)
-        number_of_rows_list.append(f[f.keys()[0]].shape[0])
+        number_of_rows_list.append(f[list(f.keys())[0]].shape[0])
 
         f.close()
 
