@@ -104,7 +104,7 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
         how_many_steps=50
         per_step=int(up_to_which/how_many_steps)
         
-        hists = np.zeros(shape=[per_step*how_many_steps,]+f["x"].shape[1:-1]) #e.g. 11,18,50
+        hists = np.zeros(shape=(per_step*how_many_steps,)+f["x"].shape[1:-1]) #e.g. 11,18,50
         
         for step in range(how_many_steps):
             part_of_datafile = (per_step*step, per_step*(step+1))

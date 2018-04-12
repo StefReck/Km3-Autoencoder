@@ -295,6 +295,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
     input_shape=(11,18,50,1)
+    output_filters=1
     if filter_base_version == "standard":
         filter_base=[32,51,50,25]
     elif filter_base_version == "large":
@@ -304,6 +305,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
     elif filter_base_version == "xztc":
         filter_base=[32,32,64,64]
         input_shape=(11,18,50,31)
+        output_filters=31
         
     inputs = Input(shape=input_shape)
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
@@ -352,7 +354,7 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
         x=Cropping3D(((1,1),(1,1),(0,0)))(x) #11x18x48
         x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #13x20x50
         x=Cropping3D(((1,1),(1,1),(0,0)))(x)#11x18x50
-        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        decoded = Conv3D(filters=output_filters, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
         #Output 11x13x18 x 1
         autoencoder = Model(inputs, decoded)
         return autoencoder
