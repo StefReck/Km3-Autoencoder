@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from get_dataset_info import get_dataset_info
 from plotting.histogramm_3d_utils import make_3d_plots, reshape_3d_to_3d, get_title_arrays
-from plotting.histogramm_3d_utils import get_event_no_from_file, get_some_hists_from_file, make_plots_from_array
+from plotting.histogramm_3d_utils import get_event_no_from_file, get_title_arrays, get_some_hists_from_file, make_plots_from_array
 
 datainfo_xzt = get_dataset_info("xztc")
 datainfo_xzt_broken5 = get_dataset_info("xzt_broken5")
@@ -25,6 +25,9 @@ print(labels, labels_b)
 #xztc hists haben shape (11,18,50,31)
 hists=np.sum(hists[0], axis=-1)
 
-fig = make_plots_from_array(hists, hists_b[0], suptitle="Broken 5", min_counts=0, titles=["Original","Manipulation"])
+title_array=get_title_arrays(labels)
+title=title_array[0][0]+title_array[0][1]+title_array[0][2]
+
+fig = make_plots_from_array(hists, hists_b[0], suptitle=title, min_counts=0, titles=["Original","Manipulation"])
 plt.show(fig)
 
