@@ -237,6 +237,31 @@ def get_some_hists_from_file(filepath, how_many, energy_threshold=0):
     return hists, labels
 
 
+def get_event_no_from_file(filepath, target_event_id):
+    #Get an event with a specific event id from a file
+    hists=[]
+    labels=[]
+    with h5py.File(filepath, 'r') as file:
+        only_load_this_many_events=10000 #takes forever otherwise
+        step=0
+        while True:
+            ids = file["y"][step*only_load_this_many_events:(step+1)*only_load_this_many_events,0]
+            if len(ids)==0:
+                print(target_event_id, " was not found.")
+                raise()
+            
+            if np.isin(target_event_id, ids)==True:
+                location = step*only_load_this_many_events + np.where(target_event_id==ids)
+                hists.append(file["x"][location])
+                labels.append(file["y"][location])
+                break
+            else:
+                step+=1
+                
+    return hists, labels
+
+
+
 def save_some_plots_to_pdf(autoencoder, file, zero_center_file, which, plot_file, min_counts, n_bins, compare_histograms, energy_threshold):
     #Only bins with abs. more then min_counts are plotted
     #Open files

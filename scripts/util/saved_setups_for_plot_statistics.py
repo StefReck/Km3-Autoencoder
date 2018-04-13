@@ -103,7 +103,7 @@ def get_props_for_plot_parser(tag):
                     home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_epoch17_supervised_up_down_stateful_convdrop_test.txt",
                     home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_epoch23_supervised_up_down_stateful_convdrop_test.txt"]
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
-        legend_locations=(1, "lower right")
+        legend_locations=("lower right", "upper left")
     
     else:
         print("Tag", tag, "unknown.")
