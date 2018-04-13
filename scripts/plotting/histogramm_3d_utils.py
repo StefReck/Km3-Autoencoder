@@ -250,9 +250,9 @@ def get_event_no_from_file(filepath, target_event_id):
             if len(ids)==0:
                 print(target_event_id, " was not found.")
                 raise()
-            location_locale=np.where(target_event_id==ids)
-            if len(location_locale[0])!=0:
-                location = step*only_load_this_many_events + np.where(target_event_id==ids)
+            location_locale=np.where(target_event_id==ids)[0]
+            if len(location_locale)!=0:
+                location = step*only_load_this_many_events + location_locale
                 hists.append(file["x"][location])
                 labels.append(file["y"][location])
                 break
