@@ -238,28 +238,50 @@ def get_some_hists_from_file(filepath, how_many, energy_threshold=0):
     return hists, labels
 
 
-def get_event_no_from_file(filepath, target_event_id):
+def get_event_no_from_file(filepath, target_event_id=None, event_track=None):
     #Get an event with a specific event id from a file
+    #or alternatively look for an event with the same event track
     hists=[]
     labels=[]
     with h5py.File(filepath, 'r') as file:
         only_load_this_many_events=10000 #takes forever otherwise
         step=0
         while True:
-            ids = file["y"][step*only_load_this_many_events:(step+1)*only_load_this_many_events,0]
-            if len(ids)==0:
-                print(target_event_id, " was not found.")
-                raise()
-            location_locale=np.where(target_event_id==ids)[0]
-            if len(location_locale)!=0:
-                location = step*only_load_this_many_events + location_locale
-                hists.append(file["x"][location])
-                labels.append(file["y"][location])
-                break
-            else:
-                step+=1
+            if event_track==None:
+                ids = file["y"][step*only_load_this_many_events:(step+1)*only_load_this_many_events,0]
+                if len(ids)==0:
+                    print(target_event_id, " was not found.")
+                    raise()
+                location_locale=np.where(target_event_id==ids)[0]
                 
+                if len(location_locale)!=0:
+                    location = list(step*only_load_this_many_events + location_locale)
+                    hists.extend(file["x"][location])
+                    labels.extend(file["y"][location])
+                    break
+                else:
+                    step+=1
+                
+                
+            else:
+                tracks = file["y"][step*only_load_this_many_events:(step+1)*only_load_this_many_events,1:]
+                if len(ids)==0:
+                    print(tracks, " was not found.")
+                    raise()
+                    
+                if event_track[1:] not in tracks:
+                    step+=1
+                    continue
+                else:
+                    for location_locale in range(len(tracks)):
+                        if event_track[1:]==tracks:
+                            location = list(step*only_load_this_many_events + location_locale)
+                            hists.extend(file["x"][location])
+                            labels.extend(file["y"][location])
+                            break
     return hists, labels
+
+
 
 
 

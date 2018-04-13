@@ -18,7 +18,7 @@ train_file_xzt = datainfo_xzt["train_file"]
 train_file_xzt_broken5 = datainfo_xzt_broken5["train_file"]
 
 hists, labels = get_some_hists_from_file(train_file_xzt, 1, 50)
-hists_b, labels_b = get_event_no_from_file(train_file_xzt_broken5, labels[0][0])
+hists_b, labels_b = get_event_no_from_file(train_file_xzt_broken5, event_track=labels[0])
 
 print(labels, labels_b)
 fig = make_plots_from_array(hists, hists_b, suptitle="Broken 5", min_counts=0, titles=["Original","Manipulation"])
