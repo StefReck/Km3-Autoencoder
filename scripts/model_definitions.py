@@ -3,6 +3,7 @@
 """
 Functions that return models are defined in this file
 """
+
 from model_def.model_def_vgg_1 import setup_vgg_1, setup_vgg_1_xzt, setup_vgg_1_xzt_max, setup_vgg_1_xzt_stride
 from model_def.model_def_vgg_2_xzt import setup_vgg_2,setup_vgg_2_dropout, setup_vgg_2_max, setup_vgg_2_stride
 from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall, setup_vgg_3_reg
@@ -90,7 +91,11 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_2_stride(autoencoder_stage, modelpath_and_name)
     
     elif model_tag == "vgg_3" or model_tag=="vgg_3_eps":
+        options_dict["filter_base_version"]="std"
         model = setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "vgg_3_xztc":
+        options_dict["filter_base_version"]="xztc"
+        model = setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name)  
     elif model_tag == "vgg_3_small":
         model = setup_vgg_3_small(autoencoder_stage, modelpath_and_name)
     elif model_tag == "vgg_3_verysmall":
@@ -217,7 +222,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_200_xztc", autoencoder_stage=0, modelpath_and_name=None)
+    model=setup_model(model_tag="vgg_3_xztc", autoencoder_stage=0, modelpath_and_name=None)
     model.summary()
 
 """

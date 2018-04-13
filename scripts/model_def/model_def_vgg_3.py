@@ -76,11 +76,18 @@ def setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name=None):
     zero_center_before_dense=False #should not be used together with normalize
     normalize_before_dense=False
     
+    if options_dict["filter_base_version"]=="std":
+        input_shape=(11,18,50,1)
+        output_filters=1
+    elif options_dict["filter_base_version"]=="xztc":
+        input_shape=(11,18,50,31)
+        output_filters=31
+    
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    inputs = Input(shape=(11,18,50,1))
+    inputs = Input(shape=input_shape)
     x=conv_block(inputs, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
     x=conv_block(x, filters=32, kernel_size=(3,3,3), padding="same", trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x50
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x25
@@ -113,7 +120,7 @@ def setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name=None):
         x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x50
         x=convT_block(x, filters=32, kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #11x18x50
         
-        decoded = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        decoded = Conv3D(filters=output_filters, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
         #Output 11x13x18 x 1
         autoencoder = Model(inputs, decoded)
         return autoencoder

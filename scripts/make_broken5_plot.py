@@ -18,6 +18,10 @@ train_file_xzt = datainfo_xzt["train_file"]
 train_file_xzt_broken5 = datainfo_xzt_broken5["train_file"]
 
 hists, labels = get_some_hists_from_file(train_file_xzt, 1, 50)
+
+title_array=get_title_arrays(labels)
+title=title_array[0][0]+title_array[0][1]+title_array[0][2]
+
 hists_b, labels_b = get_event_no_from_file(train_file_xzt_broken5, target_event_id=labels[0][0], event_track=None)
 
 print(labels, labels_b)
@@ -25,8 +29,6 @@ print(labels, labels_b)
 #xztc hists haben shape (11,18,50,31)
 hists=np.sum(hists[0], axis=-1)
 
-title_array=get_title_arrays(labels)
-title=title_array[0][0]+title_array[0][1]+title_array[0][2]
 
 fig = make_plots_from_array(hists, hists_b[0], suptitle=title, min_counts=0, titles=["Original","Manipulation"])
 plt.show(fig)
