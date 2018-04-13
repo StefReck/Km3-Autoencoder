@@ -217,8 +217,9 @@ def make_plots_from_array( array1, array2=[], suptitle=None, min_counts=0.3, tit
         
     return fig
 
-#Get some event hists from a dataset
+
 def get_some_hists_from_file(filepath, how_many, energy_threshold=0):
+    #Get some event hists from a dataset
     with h5py.File(filepath, 'r') as file:
         if energy_threshold > 0:
             #Only take events with an energy over a certain threshold
@@ -249,8 +250,8 @@ def get_event_no_from_file(filepath, target_event_id):
             if len(ids)==0:
                 print(target_event_id, " was not found.")
                 raise()
-            
-            if np.isin(target_event_id, ids)==True:
+            location_locale=np.where(target_event_id==ids)
+            if len(location_locale[0])!=0:
                 location = step*only_load_this_many_events + np.where(target_event_id==ids)
                 hists.append(file["x"][location])
                 labels.append(file["y"][location])
