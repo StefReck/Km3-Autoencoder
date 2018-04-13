@@ -95,17 +95,19 @@ def get_props_for_plot_parallel(tag):
 def get_props_for_plot_parser(tag):
     #For the script plots_statistics_parser
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
-
+    legend_locations=(1, "upper left")
+    
     if tag=="channel-encs":
         title = "Encoder performance of channel autoencoder networks"
         test_files=[home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
                     home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_epoch17_supervised_up_down_stateful_convdrop_test.txt",
                     home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_epoch23_supervised_up_down_stateful_convdrop_test.txt"]
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
+        legend_locations=(1, "lower right")
     
     else:
         print("Tag", tag, "unknown.")
         raise()
     save_as=home+"results/plots/statistics/statistics_parser_"+tag+".pdf"
         
-    return test_files, title, labels_override, save_as
+    return test_files, title, labels_override, save_as, legend_locations
