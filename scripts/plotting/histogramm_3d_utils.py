@@ -265,8 +265,8 @@ def get_event_no_from_file(filepath, target_event_id=None, event_track=None):
                 
             else:
                 tracks = file["y"][step*only_load_this_many_events:(step+1)*only_load_this_many_events,1:]
-                if len(ids)==0:
-                    print(tracks, " was not found.")
+                if len(tracks)==0:
+                    print(event_track, " was not found.")
                     raise()
                     
                 if event_track[1:] not in tracks:
