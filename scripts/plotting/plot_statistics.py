@@ -160,18 +160,24 @@ def get_proper_range(ydata, relative_spacing=(0.05, 0.2)):
 def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train):
     #Input: data from an autoenocoder and the parallel training that was made with it
     #       how many epochs of parallel training were done on each AE epoch
+    #       data_parallel = [test_epochs, test_yacc, train_epochs, train_acc]
+    
     #Output:train and test data of the last prl epoch that was trained on each AE epoch
     #           each containing [epoch, ydata]
 
     
     #The test data:
+    #how_many_epochs_each_to_train = e.g. [10,2,2,2,2,2,1,1,...]
     take_these_prl_epochs=np.cumsum(how_many_epochs_each_to_train)
     #only take epochs that have actually been made:
     highest_prl_epoch = max(data_parallel[0])
+    #if the highest prl epoch was e.g. 21, take_these_p will now be [10,12,14,16,18,20,21]
     take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
     
     #contains [epoch, ydata]
-    data_parallel_test = [np.arange(1,len(take_these_prl_epochs)+1), np.array(data_parallel[1])[take_these_prl_epochs-1]]
+    data_parallel_test_ydata = np.array(data_parallel[1])[take_these_prl_epochs-1]
+    data_parallel_test_epoch = np.arange(1, len(data_parallel_test_ydata)+1)
+    data_parallel_test = [data_parallel_test_epoch, data_parallel_test_ydata]
     #formerly, it contained the epoch of the supervised training, and not the one from the autoencoder,
     #which it will be plotted against later:
     #data_parallel_test = np.array(data_parallel[0:2])[:,take_these_prl_epochs-1]
