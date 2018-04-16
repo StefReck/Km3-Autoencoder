@@ -460,7 +460,7 @@ def encode_targets(y_val, class_type):
         
     elif class_type[1] == 'energy':
         #always has one neuron as the output
-        train_y[0] = y_val[2:3] # energy
+        train_y = y_val[2:3] # energy
 
     else:
         print ("Class type " + str(class_type) + " not supported!")
