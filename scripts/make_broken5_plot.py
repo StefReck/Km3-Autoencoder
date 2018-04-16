@@ -22,7 +22,7 @@ theta = {56.289: [0,4,5,7,8,9],
              148.212: [14,18,19,24,25,26],
              180.0: [22,]}
 
-def make_broken5_manip(hists_temp, chance):
+def make_broken5_manip(hists_temp, chance, sum_channel = True):
     #Input (X,11,18,50,31) xztc hists
     #Output: (X,11,18,50) manipulated xzt hists
     
@@ -40,7 +40,8 @@ def make_broken5_manip(hists_temp, chance):
     #Ultimately, all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
     hists_temp=hists_temp-subt
     #sum over channel axis to get X,11,18,50 xzt data
-    hists_temp=np.sum(hists_temp, axis=-1)
+    if sum_channel == True:
+        hists_temp=np.sum(hists_temp, axis=-1)
     
     return hists_temp
 
@@ -96,35 +97,51 @@ elif mode=="influence":
     
     #shape: xztc
     hists, labels = get_some_hists_from_file(train_file_xzt, how_many, energy_threshold)
-    up_going = labels[:,7]>0
-
-    up_hists=hists[up_going]
-    down_hists=hists[np.invert(up_going)]
     
-    average_counts = np.zeros((31,2))
-    for channel_id in range(31):
-        up_channel = up_hists[:,:,:,:,channel_id]
-        down_channel = down_hists[:,:,:,:,channel_id]
-        counts = [np.mean(up_channel), np.mean(down_channel)]
-        average_counts[channel_id] = counts
+    def make_stats_of_influence(hists, labels):
+        up_going = labels[:,7]>0
     
-    print("Channel",channel_id, "up and down")
-    for channel_id in average_counts:
-        print (channel_id[0], channel_id[1])
+        up_hists=hists[up_going]
+        down_hists=hists[np.invert(up_going)]
+        
+        average_counts = np.zeros((31,2))
+        for channel_id in range(31):
+            #counts from up/down going events in a specific channel
+            up_channel = up_hists[:,:,:,:,channel_id]
+            down_channel = down_hists[:,:,:,:,channel_id]
+            
+            counts = [np.mean(up_channel), np.mean(down_channel)]
+            average_counts[channel_id] = counts
+        
+        for channel_id in average_counts:
+            print ("Channel",channel_id,"\tup and down:",channel_id[0], channel_id[1])
+        
+        angle_counts = [[],[],[]]
+        for angle in theta:
+            #channels with this theta angle
+            channels = theta[angle]
+            #avg counts of these channels
+            this_theta = average_counts[channels]
+            this_theta_up = np.mean(this_theta[:,0])
+            this_theta_down = np.mean(this_theta[:,1])
+            print("Theta", angle,": Up ", this_theta_up, "Down ", this_theta_down)
+            angle_counts[0].append(angle)
+            angle_counts[1].append(this_theta_up)
+            angle_counts[2].append(this_theta_down)
+        return angle_counts
     
-    angle_counts = [[],[],[]]
-    for angle in theta:
-        channels = theta[angle]
-        this_theta = average_counts[channels]
-        this_theta_up = np.mean(this_theta[:,0])
-        this_theta_down = np.mean(this_theta[:,1])
-        print("Theta", angle,": Up ", this_theta_up, "Down ", this_theta_down)
-        angle_counts[0].append(angle)
-        angle_counts[1].append(this_theta_up)
-        angle_counts[2].append(this_theta_down)
+    angle_counts = make_stats_of_influence(hists,labels)
+    manip_hists = make_broken5_manip(hists, chance)
+    manip_angle_counts=make_stats_of_influence(manip_hists,labels)
     
     plt.plot(angle_counts[0], angle_counts[1], "o-", label="Up")
     plt.plot(angle_counts[0], angle_counts[2], "o-", label="Down")
+    
+    plt.plot(manip_angle_counts[0], manip_angle_counts[1], "o-", label="Up manip")
+    plt.plot(manip_angle_counts[0], manip_angle_counts[2], "o-", label="Down manip")
+    
+    plt.xlabel("Polar angle")
+    plt.ylabel("Mean counts")
     plt.legend()
     plt.grid()
     plt.show()
