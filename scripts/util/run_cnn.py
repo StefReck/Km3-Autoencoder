@@ -46,7 +46,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
-        if is_autoencoder==False:
+        if "acc" in training_hist.history:
             #loss and accuracy
             test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6:.4g}'.format(epoch , str(evaluation[0])[:10], str(training_hist.history["loss"][0])[:10], str(evaluation[1])[:10], str(training_hist.history["acc"][0])[:10], elapsed_time, K.get_value(model.optimizer.lr) ))
         else:
@@ -79,7 +79,9 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
     validation_data, validation_steps, callbacks = None, None, None
 
     history = None
-
+    
+    metrics = model.metrics_names #e.g. ['loss', 'acc'] or ['loss']
+    
     for i, (f, f_size) in enumerate(train_files):  # process all h5 files, full epoch
         if epoch > 1 and shuffle is True: # just for convenience, we don't want to wait before the first epoch each time
             print ('Shuffling file ', f, ' before training in epoch ', epoch)
@@ -91,10 +93,10 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         
         with open(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
             
-            if is_autoencoder == True:
-                BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
-            else:
+            if "acc" in metrics:
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
+            else:
+                BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
                 
             history = model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset_info_dict=dataset_info_dict),
