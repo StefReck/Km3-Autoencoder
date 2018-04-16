@@ -172,8 +172,7 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
     #only take epochs that have actually been made:
     highest_prl_epoch = max(data_parallel[0])
     #if the highest prl epoch was e.g. 21, take_these_p will now be [10,12,14,16,18,20,21]
-    take_these_prl_epochs=take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch]
-    
+    take_these_prl_epochs=np.array(take_these_prl_epochs[take_these_prl_epochs<=highest_prl_epoch])
     #contains [epoch, ydata]
     data_parallel_test_ydata = np.array(data_parallel[1])[take_these_prl_epochs-1]
     data_parallel_test_epoch = np.arange(1, len(data_parallel_test_ydata)+1)
