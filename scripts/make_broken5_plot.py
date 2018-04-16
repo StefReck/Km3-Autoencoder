@@ -112,15 +112,36 @@ elif mode=="influence":
     for channel_id in average_counts:
         print (channel_id[0], channel_id[1])
     
+    angle_counts = [[],[],[]]
     for angle in theta:
         channels = theta[angle]
         this_theta = average_counts[channels]
-        this_theta_up = np.mean(this_theta[0])
-        this_theta_down = np.mean(this_theta[1])
+        this_theta_up = np.mean(this_theta[:,0])
+        this_theta_down = np.mean(this_theta[:,1])
         print("Theta", angle,": Up ", this_theta_up, "Down ", this_theta_down)
+        angle_counts[0].append(angle)
+        angle_counts[1].append(this_theta_up)
+        angle_counts[2].append(this_theta_down)
     
+    plt.plot(angle_counts[0], angle_counts[1], "o-", label="Up")
+    plt.plot(angle_counts[0], angle_counts[2], "o-", label="Down")
+    plt.legend()
+    plt.grid()
+    plt.show()
     
-    
-    
+    """
+    theta_counts_array=[[],[],[]]
+    for angel in theta:
+        for channel in theta[angle]:
+            theta_counts_array[0].append(angel)
+            theta_counts_array[1].append(average_counts[channel][0])
+            theta_counts_array[2].append(average_counts[channel][1])
+            
+    plt.plot(theta_counts_array[0], theta_counts_array[1], "o-", label="Up")
+    plt.plot(theta_counts_array[0], theta_counts_array[2], "o-", label="Down")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    """
     
     
