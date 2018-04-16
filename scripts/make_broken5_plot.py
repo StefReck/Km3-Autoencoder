@@ -113,8 +113,8 @@ elif mode=="influence":
             counts = [np.mean(up_channel), np.mean(down_channel)]
             average_counts[channel_id] = counts
         
-        for channel_id in average_counts:
-            print ("Channel",channel_id,"\tup and down:",channel_id[0], channel_id[1])
+        for i,channel_id in enumerate(average_counts):
+            print ("Channel",i,"\tup and down:",channel_id[0], channel_id[1])
         
         angle_counts = [[],[],[]]
         for angle in theta:
@@ -131,14 +131,14 @@ elif mode=="influence":
         return angle_counts
     
     angle_counts = make_stats_of_influence(hists,labels)
-    manip_hists = make_broken5_manip(hists, chance)
+    manip_hists = make_broken5_manip(hists, chance, sum_channel=False)
     manip_angle_counts=make_stats_of_influence(manip_hists,labels)
     
-    plt.plot(angle_counts[0], angle_counts[1], "o-", label="Up")
-    plt.plot(angle_counts[0], angle_counts[2], "o-", label="Down")
+    plt.plot(angle_counts[0], angle_counts[1], "o", label="Up")
+    plt.plot(angle_counts[0], angle_counts[2], "o", label="Down")
     
-    plt.plot(manip_angle_counts[0], manip_angle_counts[1], "o-", label="Up manip")
-    plt.plot(manip_angle_counts[0], manip_angle_counts[2], "o-", label="Down manip")
+    plt.plot(manip_angle_counts[0], manip_angle_counts[1], "o", label="Up manip")
+    plt.plot(manip_angle_counts[0], manip_angle_counts[2], "o", label="Down manip")
     
     plt.xlabel("Polar angle")
     plt.ylabel("Mean counts")

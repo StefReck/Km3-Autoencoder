@@ -402,7 +402,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
-                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
+                if len(metrics)==2:
+                    line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1])
+                elif len(metrics)==1:
+                    line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0])
+                else:
+                    sys.exit("Warning: Only 1 or 2 metrics are supported for logfile headers. Given was", metrics, "Exiting...")
+                test_log_file.write(line)
             
         else:
             #Load an existing trained encoder network and train that
@@ -426,8 +432,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
-                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
-            
+                if len(metrics)==2:
+                    line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1])
+                elif len(metrics)==1:
+                    line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0])
+                else:
+                    sys.exit("Warning: Only 1 or 2 metrics are supported for logfile headers. Given was", metrics, "Exiting...")
+                test_log_file.write(line)
         else:
             #Load an existing trained encoder network and train that
             load_this=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
@@ -522,8 +533,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #['loss', 'acc']
-                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1]))
-            
+                if len(metrics)==2:
+                    line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1])
+                elif len(metrics)==1:
+                    line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0])
+                else:
+                    sys.exit("Warning: Only 1 or 2 metrics are supported for logfile headers. Given was", metrics, "Exiting...")
+                test_log_file.write(line)
         else:
             #Load an existing trained encoder network and train that
             model = load_model(model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5', custom_objects=custom_objects)
