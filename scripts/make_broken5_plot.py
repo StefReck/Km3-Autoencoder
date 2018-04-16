@@ -10,7 +10,7 @@ from get_dataset_info import get_dataset_info
 from plotting.histogramm_3d_utils import make_3d_plots, reshape_3d_to_3d, get_title_arrays
 from plotting.histogramm_3d_utils import get_event_no_from_file, get_some_hists_from_file, make_plots_from_array
 
-mode="develop"
+mode="influence"
 
 datainfo_xzt = get_dataset_info("xztc")
 train_file_xzt = datainfo_xzt["train_file"]
@@ -83,23 +83,22 @@ elif mode=="develop":
         plt.show(fig)
 
 elif mode=="influence":
-    how_many=10
+    how_many=10000
     energy_threshold=0
     chance=0.3
     
     #shape: xztc
     hists, labels = get_some_hists_from_file(train_file_xzt, how_many, energy_threshold)
     up_going = labels[:,7]>0
-    
+
     up_hists=hists[up_going]
     down_hists=hists[np.invert(up_going)]
     
     for channel_id in range(31):
         print("Channel",channel_id, "up and down")
-        print(np.mean(up_hists[:,:,:,:,channel_id]>3))
-        print(np.mean(down_hists[:,:,:,:,channel_id]>3))
-
-    
+        up_channel = up_hists[:,:,:,:,channel_id]
+        down_channel = down_hists[:,:,:,:,channel_id]
+        print(np.mean(up_channel)-np.mean(down_channel))
     
     
     
