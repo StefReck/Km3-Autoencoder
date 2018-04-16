@@ -70,12 +70,39 @@ elif mode=="develop":
     energy_threshold=50
     chance=0.3
     
+    #shape: xztc
     hists, labels = get_some_hists_from_file(train_file_xzt, how_many, energy_threshold)
     title_array=get_title_arrays(labels)
     
+    org_hists = np.sum(hists, axis=-1)
     manip_hists = make_broken5_manip(hists, chance)
     
     for i in range(len(hists)):
         title=title_array[0][i]+title_array[1][i]+title_array[2][i]
-        fig = make_plots_from_array(hists[i], manip_hists[i], suptitle=title, min_counts=0, titles=["Original","Manipulation"])
+        fig = make_plots_from_array(org_hists[i], manip_hists[i], suptitle=title, min_counts=0, titles=["Original","Manipulation"])
         plt.show(fig)
+
+elif mode=="influence":
+    how_many=10
+    energy_threshold=0
+    chance=0.3
+    
+    #shape: xztc
+    hists, labels = get_some_hists_from_file(train_file_xzt, how_many, energy_threshold)
+    up_going = labels[:,7]>0
+    
+    up_hists=hists[up_going]
+    down_hists=hists[np.invert(up_going)]
+    
+    for channel_id in range(31):
+        print("Channel",channel_id, "up and down")
+        print(np.mean(up_hists[:,:,:,:,channel_id]>3))
+        print(np.mean(down_hists[:,:,:,:,channel_id]>3))
+
+    
+    
+    
+    
+    
+    
+    
