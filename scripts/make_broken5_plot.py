@@ -15,6 +15,12 @@ mode="influence"
 datainfo_xzt = get_dataset_info("xztc")
 train_file_xzt = datainfo_xzt["train_file"]
 
+theta = {56.289: [0,4,5,7,8,9],
+             72.842: [1,2,3,6,10,11],
+             107.158: [12,15,16,23,27,30],
+             123.711: [13,17,20,21,28,29],
+             148.212: [14,18,19,24,25,26],
+             180.0: [22,]}
 
 def make_broken5_manip(hists_temp, chance):
     #Input (X,11,18,50,31) xztc hists
@@ -83,7 +89,8 @@ elif mode=="develop":
         plt.show(fig)
 
 elif mode=="influence":
-    how_many=10000
+    #Show the average count number for every channel for up and down going events.
+    how_many=1000
     energy_threshold=0
     chance=0.3
     
@@ -94,11 +101,23 @@ elif mode=="influence":
     up_hists=hists[up_going]
     down_hists=hists[np.invert(up_going)]
     
+    average_counts = np.zeros((31,2))
     for channel_id in range(31):
-        print("Channel",channel_id, "up and down")
         up_channel = up_hists[:,:,:,:,channel_id]
         down_channel = down_hists[:,:,:,:,channel_id]
-        print(np.mean(up_channel)-np.mean(down_channel))
+        counts = [np.mean(up_channel), np.mean(down_channel)]
+        average_counts[channel_id] = counts
+    
+    print("Channel",channel_id, "up and down")
+    for channel_id in average_counts:
+        print (channel_id[0], channel_id[1])
+    
+    for angle in theta:
+        channels = theta[angle]
+        this_theta = average_counts[channels]
+        this_theta_up = np.mean(this_theta[0])
+        this_theta_down = np.mean(this_theta[1])
+        print("Theta", angle,": Up ", this_theta_up, "Down ", this_theta_down)
     
     
     
