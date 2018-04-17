@@ -167,9 +167,8 @@ with tf.Session() as sess:
 
 
 def test_model():
-    inputs = Input(shape=(10,))
-    x = Dense(10, activation="relu")(inputs)
-    x = Dense(1, activation="linear")(x)
+    inputs = Input(shape=(1,))
+    x = Dense(1, activation="softmax")(inputs)
     #12,14,18
 
     #stride 1/valid             stride 1/same = 1pad --> 13,15,20
@@ -197,7 +196,8 @@ def test_model():
 
 
 model = test_model()
-#model.compile(optimizer='adam', loss='mse')
+model.compile(optimizer='adam', loss='mse')
+model.predict(np.ones((1,)))
 
 """
 inputs1=np.zeros((500,10))

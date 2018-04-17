@@ -12,7 +12,7 @@ from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import make_performance_array_energy_energy, calculate_2d_hist, make_2d_hist_plot
 from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 
-model_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch1.h5"
+model_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
 dataset_tag="xzt"
 zero_center=True
 energy_bins=np.arange(3,101,1)
@@ -20,7 +20,7 @@ energy_bins=np.arange(3,101,1)
 
 
 #name of the file that the 2d hist data will get dumped to (or loaded from)
-modelname = model_path.split("trained_")[1].split("_epoch")[0]
+modelname = model_path.split("trained_")[1][:-3]
 dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
 name_of_file= dump_path + modelname + "_" + dataset_tag + "_2dhist_data.txt"
         

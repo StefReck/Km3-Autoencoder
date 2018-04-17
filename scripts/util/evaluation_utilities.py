@@ -631,12 +631,12 @@ def make_2d_hist_plot(hist_2d):
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
     """
-    x=hist_2d[1]
-    y=hist_2d[2]
-    z=hist_2d[0]
+    x=hist_2d[1] #mc energy
+    y=hist_2d[2] #reco energy
+    z=hist_2d[0] #counts
     
     fig, ax = plt.subplots()
-    plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=z.min(), vmax=z.max()))
+    plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
     
     ax.set_title("Energy reconstruction")
     ax.set_xlabel("True energy (GeV)")
