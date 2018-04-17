@@ -26,19 +26,22 @@ def make_broken5_manip(hists_temp, chance, sum_channel = True):
     #Input (X,11,18,50,31) xztc hists
     #Output: (X,11,18,50) manipulated xzt hists
     
-    #all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    #all doms facing upwards AND having >0 counts have a chance% of getting reduced by one
     
     #1=upwards facing, taken from the paper
     up_mask=np.array([True,]*12 + [False,]*19) 
     #chance for upward facing doms with >0 counts to have one count removed:
-    #chance=0.3
+    #chance
         
-    #the counts to subtract: upwards facing doms have a 30% chance of getting one count removed
-    subt = np.multiply(up_mask, np.random.choice([0,1],size=hists_temp.shape, p=[1-chance,chance]))
-    #only remove one count when there is one to begin with
-    subt=np.multiply(subt,hists_temp>=1)
-    #Ultimately, all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    #the counts to subtract: upwards facing doms have a chance% chance of getting one count removed
+    #subt = np.random.choice([0,1,2],size=hists_temp.shape, p=[0.3,0.5,0.2])
+    subt = np.random.binomial(2, 0.4, size=hists_temp.shape)
+    subt = np.multiply(up_mask, subt)
+    #subtract
     hists_temp=hists_temp-subt
+    #negative counts are not allowed, they are set to 0 instead
+    hists_temp = np.clip(hists_temp, 0, None)
+    
     #sum over channel axis to get X,11,18,50 xzt data
     if sum_channel == True:
         hists_temp=np.sum(hists_temp, axis=-1)
@@ -73,9 +76,9 @@ if mode=="compare_datasets":
 
 elif mode=="develop":
     #used for finding a suitable manipulation of the data
-    how_many=2
-    energy_threshold=50
-    chance=0.3
+    how_many=5
+    energy_threshold=0
+    chance=0.5
     
     #shape: xztc
     hists, labels = get_some_hists_from_file(train_file_xzt, how_many, energy_threshold)
@@ -85,7 +88,7 @@ elif mode=="develop":
     manip_hists = make_broken5_manip(hists, chance)
     
     for i in range(len(hists)):
-        title=title_array[0][i]+title_array[1][i]+title_array[2][i]
+        title=title_array[0][i]+"   "+title_array[1][i]+"   "+title_array[2][i]
         fig = make_plots_from_array(org_hists[i], manip_hists[i], suptitle=title, min_counts=0, titles=["Original","Manipulation"])
         plt.show(fig)
 

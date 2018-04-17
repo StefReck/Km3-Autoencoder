@@ -25,7 +25,7 @@ from keras.layers import Lambda
 from keras import backend as K
 from keras import regularizers
 
-from util.custom_layers import MaxUnpooling3D
+#from util.custom_layers import MaxUnpooling3D
 
 #Standard Conv Blocks
 def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, ac_reg_penalty=0, BNunlock=False):
