@@ -69,25 +69,29 @@ make_statistics = False
 save_statistics_name = original_train_file.split("/")[-1][:-3]+"_statistics_fraction_"+str(fraction)+".npy"
 
 
-def make_broken5_manip(hists_temp):
+def make_broken5_manip(hists_temp, sum_channel = True):
     #Input (X,11,18,50,31) xztc hists
     #Output: (X,11,18,50) manipulated xzt hists
     
-    #all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    #all doms facing upwards AND having >0 counts have a chance% of getting reduced by one
     
     #1=upwards facing, taken from the paper
     up_mask=np.array([True,]*12 + [False,]*19) 
     #chance for upward facing doms with >0 counts to have one count removed:
-    chance=0.3
+    #chance
         
-    #the counts to subtract: upwards facing doms have a 30% chance of getting one count removed
-    subt = np.multiply(up_mask, np.random.choice([0,1],size=hists_temp.shape, p=[1-chance,chance]))
-    #only remove one count when there is one to begin with
-    subt=np.multiply(subt,hists_temp>=1)
-    #Ultimately, all doms facing upwards AND having >0 counts have a 30% of getting reduced by one
+    #the counts to subtract: upwards facing doms have a chance% chance of getting one count removed
+    #subt = np.random.choice([0,1,2],size=hists_temp.shape, p=[0.3,0.5,0.2])
+    subt = np.random.binomial(2, 0.4, size=hists_temp.shape)
+    subt = np.multiply(up_mask, subt)
+    #subtract
     hists_temp=hists_temp-subt
+    #negative counts are not allowed, they are set to 0 instead
+    hists_temp = np.clip(hists_temp, 0, None)
+    
     #sum over channel axis to get X,11,18,50 xzt data
-    hists_temp=np.sum(hists_temp, axis=4)
+    if sum_channel == True:
+        hists_temp=np.sum(hists_temp, axis=-1)
     
     return hists_temp
 
