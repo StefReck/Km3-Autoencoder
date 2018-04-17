@@ -12,8 +12,8 @@ import numpy as np
 #import keras as ks
 import pickle
 import os
-
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 from keras.models import load_model
 
 import sys
@@ -561,7 +561,7 @@ def make_and_save_hist_data_autoencoder(modelpath, dataset, modelident, class_ty
 
 
 
-    
+# ------------- Functions used for energy-energy evaluation -------------#
 
 def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None):
     """
@@ -593,7 +593,8 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
         if s % 300 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, y_true, mc_info = next(generator)
-        reco_energy = model.predict_on_batch(xs)
+        reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
+        reco_energy = np.reshape(reco_energy, reco_energy.shape[0]) #shape (batchsize,)
 
         # check if the predictions were correct
         #correct = check_if_prediction_is_correct(y_pred, y_true)
@@ -602,7 +603,7 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
         is_cc = mc_info[:, 3]
 
         ax = np.newaxis
-
+        
         # make a temporary energy_correct array for this batch
         arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax]], axis=1)
 
@@ -618,8 +619,8 @@ def calculate_2d_hist(arr_energy_correct, energy_bins=np.arange(3,101,1)):
     Take a list of [mc_energy, reco_energy, particle_type, is_cc] for many events
     and generate a 2d numpy histogram from it.
     """  
-    mc_energy = arr_energy_correct[0]
-    reco_energy = arr_energy_correct[1]
+    mc_energy = arr_energy_correct[:,0]
+    reco_energy = arr_energy_correct[:,1]
     
     hist_2d = np.histogram2d(mc_energy, reco_energy, energy_bins)
     return hist_2d
@@ -635,10 +636,10 @@ def make_2d_hist_plot(hist_2d):
     z=hist_2d[0]
     
     fig, ax = plt.subplots()
-    plot = ax.pcolormesh(x,y,z)
+    plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=z.min(), vmax=z.max()))
     
-    ax.set_title("Energy reconsturuction")
-    ax.set_xlabel("MC energy (GeV)")
+    ax.set_title("Energy reconstruction")
+    ax.set_xlabel("True energy (GeV)")
     ax.set_ylabel("Reconstructed energy (GeV)")
     
     cbar = plt.colorbar(plot)
@@ -646,9 +647,12 @@ def make_2d_hist_plot(hist_2d):
     
     return(fig)
 
-
-
-
+"""
+arr_energy_correct=np.random.rand(1000,2)*100
+a = calculate_2d_hist(arr_energy_correct)
+fig = make_2d_hist_plot(a)
+plt.show()
+"""
 
 # ------------- Functions used in making Matplotlib plots -------------#
 

@@ -12,7 +12,7 @@ from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import make_performance_array_energy_energy, calculate_2d_hist, make_2d_hist_plot
 from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 
-model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch1_log.txt"
+model_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch1.h5"
 dataset_tag="xzt"
 zero_center=True
 energy_bins=np.arange(3,101,1)
@@ -52,7 +52,7 @@ else:
 if os.path.isfile(name_of_file)==True:
     print("Opening exiting file", name_of_file)
     with open(name_of_file, "rb") as dump_file:
-        hist_data = pickle.load(dump_file)
+        hist_data_2d = pickle.load(dump_file)
 else:
     print("Generating energy array...")
     arr_energy_correct = make_performance_array_energy_energy(model, test_file, [1,"energy"], 
