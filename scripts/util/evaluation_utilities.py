@@ -561,6 +561,90 @@ def make_and_save_hist_data_autoencoder(modelpath, dataset, modelident, class_ty
 
 
 
+    
+
+def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None):
+    """
+    Use a model to predict the energy reco on a dataset.
+    :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
+    :param str f: Filepath of the file that is used for making predctions.
+    :param (int, str) class_type: The number of output classes and a string identifier to specify the exact output classes.
+                                  I.e. (2, 'muon-CC_to_elec-CC')
+    :param ndarray xs_mean: mean_image of the x dataset if zero-centering is enabled.
+    :param None/str swap_4d_channels: For 4D data input (3.5D models). Specifies, if the channels for the 3.5D net should be swapped in the generator.
+    :param None/int samples: Number of events that should be predicted. If samples=None, the whole file will be used.
+    :return: ndarray arr_energy_correct: Array that contains the mc_energy, reco_energy, particle_type, is_cc for each event.
+    """
+    # TODO only works for a single test_file till now
+    n_bins = dataset_info_dict["n_bins"]
+    batchsize = dataset_info_dict["batchsize"]
+    broken_simulations_mode = dataset_info_dict["broken_simulations_mode"]
+    
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict) # f_size=samples prob not necessary
+    
+    if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    steps = samples/batchsize
+
+
+    #Output is for every event: [mc_energy, reco_energy, particle_type, is_cc]
+    arr_energy_correct=None
+    
+    for s in range(int(steps)):
+        if s % 300 == 0:
+            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
+        xs, y_true, mc_info = next(generator)
+        reco_energy = model.predict_on_batch(xs)
+
+        # check if the predictions were correct
+        #correct = check_if_prediction_is_correct(y_pred, y_true)
+        mc_energy = mc_info[:, 2]
+        particle_type = mc_info[:, 1]
+        is_cc = mc_info[:, 3]
+
+        ax = np.newaxis
+
+        # make a temporary energy_correct array for this batch
+        arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax]], axis=1)
+
+        if arr_energy_correct is None:
+            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
+        arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
+
+    return arr_energy_correct
+
+
+def calculate_2d_hist(arr_energy_correct, energy_bins=np.arange(3,101,1)):
+    """
+    Take a list of [mc_energy, reco_energy, particle_type, is_cc] for many events
+    and generate a 2d numpy histogram from it.
+    """  
+    mc_energy = arr_energy_correct[0]
+    reco_energy = arr_energy_correct[1]
+    
+    hist_2d = np.histogram2d(mc_energy, reco_energy, energy_bins)
+    return hist_2d
+
+
+def make_2d_hist_plot(hist_2d):
+    """
+    Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
+    a plot.
+    """
+    x=hist_2d[1]
+    y=hist_2d[2]
+    z=hist_2d[0]
+    
+    fig, ax = plt.subplots()
+    plot = ax.pcolormesh(x,y,z)
+    
+    ax.set_title("Energy reconsturuction")
+    ax.set_xlabel("MC energy (GeV)")
+    ax.set_ylabel("Reconstructed energy (GeV)")
+    
+    cbar = plt.colorbar(plot)
+    cbar.ax.set_ylabel('Number of events')
+    
+    return(fig)
 
 
 

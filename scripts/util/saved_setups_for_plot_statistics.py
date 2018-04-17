@@ -25,12 +25,25 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_supervised_parallel_up_down_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
         
-    elif tag=="channel_3n":
-        title = "Parallel training with channel autoencoder (3 neurons)"
+    elif tag=="channel_3n_noZeroEvent":
+        title = "Parallel training with channel autoencoder (3 neurons) and balanced dataset"
         ae_model =  home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
         epoch_schedule="1-1-1"
+    elif tag=="channel_3n":
+        title = "Parallel training with channel autoencoder (3 neurons)"
+        ae_model =  home+"models/channel_3n_m3/trained_channel_3n_m3_autoencoder_test.txt" 
+        prl_model = home+"models/channel_3n_m3/trained_channel_3n_m3_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+        epoch_schedule="1-1-1"    
+    elif tag=="channel_3n_noZero":
+        title = "Parallel training with channel autoencoder (3 neurons) and no zero centering"
+        ae_model =  home+"models/channel_3n_m3-noZero/trained_channel_3n_m3-noZero_autoencoder_test.txt" 
+        prl_model = home+"models/channel_3n_m3-noZero/trained_channel_3n_m3-noZero_autoencoder_supervised_parallel_up_down_dropout_stateful_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+        epoch_schedule="1-1-1"  
+        
     elif tag=="channel_5n":
         title = "Parallel training with channel autoencoder (5 neurons)"
         ae_model =  home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_test.txt"
@@ -65,8 +78,12 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_supervised_parallel_up_down_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
-    
-        
+    elif tag=="vgg_5_200_shallow":
+        title = "Parallel training with model '200 shallow'"
+        ae_model =  home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+         
     elif tag=="vgg_5_64":
         title = "Parallel training with model '64'"
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
