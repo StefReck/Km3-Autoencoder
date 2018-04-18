@@ -613,8 +613,39 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
 
     return arr_energy_correct
 
+def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None):   
+    """
+    Comfprt function to setup everything that is needed for generating the arr_energy_correct 
+    for energy evaluation, and then generate it.
+    """
+    #The model that does the prediction
+    model=load_model(model_path)
+    #The dataset to be used to predict on; the prediction is done on the test file
+    #home_path=dataset_info_dict["home_path"]
+    train_file=dataset_info_dict["train_file"]
+    test_file=dataset_info_dict["test_file"]
+    n_bins=dataset_info_dict["n_bins"]
+    #broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
+    filesize_factor=dataset_info_dict["filesize_factor"]
+    #filesize_factor_test=dataset_info_dict["filesize_factor_test"]
+    batchsize=dataset_info_dict["batchsize"] #def 32
+        
+    #Zero-Center with precalculated mean image
+    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
+    #test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
+    n_gpu=(1, 'avolkov')
+    if zero_center == True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=n_gpu[0])
+    else:
+        xs_mean = None
+        
+    arr_energy_correct = make_performance_array_energy_energy(model, test_file, [1,"energy"], 
+                                                                  xs_mean, None, dataset_info_dict, samples)
+    return arr_energy_correct
+    
 
-def calculate_2d_hist(arr_energy_correct, energy_bins=np.arange(3,101,1)):
+
+def calculate_2d_hist_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
     """
     Take a list of [mc_energy, reco_energy, particle_type, is_cc] for many events
     and generate a 2d numpy histogram from it.
@@ -622,18 +653,17 @@ def calculate_2d_hist(arr_energy_correct, energy_bins=np.arange(3,101,1)):
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     
-    hist_2d = np.histogram2d(mc_energy, reco_energy, energy_bins)
-    return hist_2d
+    hist_2d_data = np.histogram2d(mc_energy, reco_energy, energy_bins)
+    return hist_2d_data
 
-
-def make_2d_hist_plot(hist_2d):
+def make_2d_hist_plot(hist_2d_data):
     """
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
     """
-    z=hist_2d[0].T #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
-    x=hist_2d[1] #mc energy bin edges
-    y=hist_2d[2] #reco energy bin edges
+    z=hist_2d_data[0].T #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
+    x=hist_2d_data[1] #mc energy bin edges
+    y=hist_2d_data[2] #reco energy bin edges
     
     
     fig, ax = plt.subplots()
@@ -648,12 +678,42 @@ def make_2d_hist_plot(hist_2d):
     
     return(fig)
 
-"""
-arr_energy_correct=np.random.rand(1000,2)*100
-a = calculate_2d_hist(arr_energy_correct)
-fig = make_2d_hist_plot(a)
-plt.show()
-"""
+
+def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
+    # Generate the data for a plot in which mc_energy vs mae is shown.
+    mc_energy = arr_energy_correct[:,0]
+    
+    reco_energy = arr_energy_correct[:,1]
+    mae = np.abs(mc_energy - reco_energy).mean()
+
+    hist_energy_losses=np.zeros((len(energy_bins)-1))
+    #In which bin does each event belong, according to its mc energy:
+    bin_indices = np.digitize(mc_energy, bins=energy_bins)
+    #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
+    for bin_no in range(min(bin_indices), max(bin_indices)+1):
+        hist_energy_losses[bin_no-1] = np.mean(mae[bin_indices==bin_no])
+        
+    #For proper plotting with plt.step where="post"
+    hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
+    energy_mae_plot_data = [energy_bins, hist_energy_losses]
+    return energy_mae_plot_data
+
+def make_energy_mae_plot(energy_mae_plot_data):
+    fig, ax = plt.subplots()
+    plt.step(energy_mae_plot_data[0], energy_mae_plot_data[1], where='post')
+    x_ticks_major = np.arange(0, 101, 10)
+    plt.xticks(x_ticks_major)
+    plt.minorticks_on()
+
+    plt.legend()
+    plt.xlabel('True energy (GeV)')
+    plt.ylabel('Mean absolute error (GeV)')
+    #plt.ylim((0, 0.2))
+    plt.title("Model reconstruction performance")
+    plt.grid(True)
+
+    return fig
+
 
 # ------------- Functions used in making Matplotlib plots -------------#
 

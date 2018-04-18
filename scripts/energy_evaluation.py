@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Take a model that predicts energy of events and do the evaluation for that.
+Take a model that predicts energy of events and do the evaluation for that, either
+in the form of a 2d histogramm (mc energy vs reco energy), 
+or as a 1d histogram (mc_energy vs mean absolute error).
 """
-from keras.models import load_model
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-#import pickle
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import make_performance_array_energy_energy, calculate_2d_hist, make_2d_hist_plot
-from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot
+
+samples=None
+identifiers = ["2000_unf",]
 
 def get_saved_plots_info(identifier):
+    #Info about plots that have been generated for the thesis are listed here.
     dataset_tag="xzt"
     zero_center=True
     energy_bins=np.arange(3,101,1)
@@ -26,72 +29,87 @@ def get_saved_plots_info(identifier):
         raise NameError(identifier+" unknown!")
         
     print("Working on model", model_path)
-    save_as = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]+"_2d_hist_plot.pdf"
+    
+    save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
     model_path=home_path+model_path
-    return [model_path, dataset_tag, zero_center, energy_bins], save_as
+    return [model_path, dataset_tag, zero_center, energy_bins], save_as_base
 
-def make_or_load_2d_hist_data(model_path, dataset_tag, zero_center, energy_bins, samples=None):
+
+def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
     #This function outputs a np array with the 2d hist data, either by loading a saved one, or by
     #generating a new one if no saved one exists.
-    
-    #name of the file that the 2d hist data will get dumped to (or loaded from)
+    #Also outputs the 1d histogram of mc energy over mae.
+ 
+    #name of the files that the hist data will get dumped to (or loaded from)
     modelname = model_path.split("trained_")[1][:-3]
     dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
-    name_of_file= dump_path + modelname + "_" + dataset_tag + "_2dhist_data.npy"
-            
-    #The model that does the prediction
-    model=load_model(model_path)
-    #The dataset to be used to predict on; the prediction is done on the test file
-    dataset_info_dict = get_dataset_info(dataset_tag)
-    #home_path=dataset_info_dict["home_path"]
-    train_file=dataset_info_dict["train_file"]
-    test_file=dataset_info_dict["test_file"]
-    n_bins=dataset_info_dict["n_bins"]
-    #broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
-    filesize_factor=dataset_info_dict["filesize_factor"]
-    #filesize_factor_test=dataset_info_dict["filesize_factor_test"]
-    batchsize=dataset_info_dict["batchsize"] #def 32
-        
-    #Zero-Center with precalculated mean image
-    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
-    #test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
-    n_gpu=(1, 'avolkov')
-    if zero_center == True:
-        xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=n_gpu[0])
+    name_of_file_2d= dump_path + modelname + "_" + dataset_tag + "_2dhist_data.npy"
+    name_of_file_1d= dump_path + modelname + "_" + dataset_tag + "_mae_data.npy"
+    
+    arr_energy_correct = None
+    
+    if os.path.isfile(name_of_file_2d)==True:
+        print("Loading existing file of 2d histogram data", name_of_file_2d)
+        hist_data_2d = np.load(name_of_file_2d)
     else:
-        xs_mean = None
+        print("No saved 2d histogram data for this model found. New one will be generated.\nGenerating energy array...")
+        dataset_info_dict = get_dataset_info(dataset_tag)
+        arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
+        print("Generating 2d histogram...")
+        hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins)
+        print("Saving 2d histogram data as", name_of_file_2d)
+        np.save(name_of_file_2d, hist_data_2d)
+    print("Done.")
     
     
-    if os.path.isfile(name_of_file)==True:
-        print("Opening existing file of histogram data", name_of_file)
-        hist_data_2d = np.load(name_of_file)
-        #with open(name_of_file, "rb") as dump_file:
-        #    hist_data_2d = pickle.load(dump_file)
-            
+    if os.path.isfile(name_of_file_1d)==True:
+        print("Loading existing file of mae data", name_of_file_1d)
+        energy_mae_plot_data = np.load(name_of_file_1d)
     else:
-        print("No saved histogram data for this model found. New one will be generated.\nGenerating energy array...")
-        arr_energy_correct = make_performance_array_energy_energy(model, test_file, [1,"energy"], 
-                                                                  xs_mean, None, dataset_info_dict, samples)
-        print("Generating histogram...")
-        hist_data_2d = calculate_2d_hist(arr_energy_correct, energy_bins)
+        print("No saved mae data for this model found. New one will be generated.\nGenerating energy array...")
+        dataset_info_dict = get_dataset_info(dataset_tag)
+        if arr_energy_correct == None:
+            arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
+        else:
+            print("Energy array from before is reused.")
+        print("Generating mae histogramm...")
+        energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins)
         
-        print("Saving histogram data as", name_of_file)
-        np.save(name_of_file, hist_data_2d)
-        #with open(name_of_file, "wb") as dump_file:
-        #    pickle.dump(hist_data_2d, dump_file)
+        print("Saving mae histogram data as", name_of_file_1d)
+        np.save(name_of_file_1d, energy_mae_plot_data)
         
     print("Done.")
-    return(hist_data_2d)
-    
-input_for_make_hist_data, save_as = get_saved_plots_info("2000_unf")
-hist_data_2d = make_or_load_2d_hist_data(*input_for_make_hist_data)
-fig = make_2d_hist_plot(hist_data_2d)
-plt.show(fig)
+    return(hist_data_2d, energy_mae_plot_data)
 
-if save_as != None:
-    fig.savefig(save_as)
-    print("Saved plot as", save_as)
+
+for identifier in identifiers:
+    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
+    save_as_2d = save_as_base+"_2dhist_plot.pdf"
+    save_as_1d = save_as_base+"_mae_plot.pdf"
+        
+    
+    hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
+    
+    print("Generating hist2d plot...")
+    fig_hist2d = make_2d_hist_plot(hist_data_2d)
+    
+    plt.show(fig_hist2d)
+    if save_as_2d != None:
+        print("Saving plot as", save_as_2d)
+        fig_hist2d.savefig(save_as_2d)
+        print("Done.")
+        
+    
+    print("Generating mae plot...")
+    fig_mae = make_energy_mae_plot(energy_mae_plot_data)
+    
+    plt.show(fig_mae)
+    if save_as_1d != None:
+        print("Saving plot as", save_as_1d)
+        fig_mae.savefig(save_as_1d)
+        print("Done.")
+
 
 
 
