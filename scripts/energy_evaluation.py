@@ -16,18 +16,19 @@ def get_saved_plots_info(identifier):
     dataset_tag="xzt"
     zero_center=True
     energy_bins=np.arange(3,101,1)
-    model_folder_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+    home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
     if identifier=="200_linear":
-        model_path="vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
-    elif identifier="2000_unf":
-        model_path = "vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
+        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
+    elif identifier=="2000_unf":
+        model_path = "models/vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
     else:
         raise NameError(identifier+" unknown!")
         
     print("Working on model", model_path)
-    model_path=model_folder_path+model_path
-    return model_path, dataset_tag, zero_center, energy_bins
+    save_as = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]+"_2d_hist_plot.pdf"
+    model_path=home_path+model_path
+    return [model_path, dataset_tag, zero_center, energy_bins], save_as
 
 def make_or_load_2d_hist_data(model_path, dataset_tag, zero_center, energy_bins, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
@@ -83,8 +84,14 @@ def make_or_load_2d_hist_data(model_path, dataset_tag, zero_center, energy_bins,
     print("Done.")
     return(hist_data_2d)
     
-input_for_make_hist_data = get_saved_plots_info("200_linear")
+input_for_make_hist_data, save_as = get_saved_plots_info("2000_unf")
 hist_data_2d = make_or_load_2d_hist_data(*input_for_make_hist_data)
 fig = make_2d_hist_plot(hist_data_2d)
 plt.show(fig)
+
+if save_as != None:
+    fig.savefig(save_as)
+    print("Saved plot as", save_as)
+
+
 
