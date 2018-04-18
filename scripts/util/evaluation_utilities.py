@@ -631,9 +631,10 @@ def make_2d_hist_plot(hist_2d):
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
     """
-    x=hist_2d[1] #mc energy
-    y=hist_2d[2] #reco energy
-    z=hist_2d[0] #counts
+    z=hist_2d[0].T #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
+    x=hist_2d[1] #mc energy bin edges
+    y=hist_2d[2] #reco energy bin edges
+    
     
     fig, ax = plt.subplots()
     plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
