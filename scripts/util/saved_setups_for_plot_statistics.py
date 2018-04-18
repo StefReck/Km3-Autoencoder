@@ -83,6 +83,12 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_supervised_parallel_up_down_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
+    elif tag=="vgg_5_200_small":
+        title = "Parallel training with model '200 small'"
+        ae_model =  home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_supervised_parallel_up_down_test.txt"
+        labels_override = ["Autoencoder", "Encoder"] 
+        
          
     elif tag=="vgg_5_64":
         title = "Parallel training with model '64'"
@@ -104,6 +110,11 @@ def get_props_for_plot_parallel(tag):
         print("Tag", tag, "unknown.")
         raise()
     test_files=[ae_model, prl_model]
+    
+    print("Loaded the following files:")
+    for file in test_files:
+        print(file.split(home)[1]) 
+        
     save_as=home+"results/plots/statistics/statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
     return test_files, title, labels_override, save_as, epoch_schedule
 
@@ -125,6 +136,10 @@ def get_props_for_plot_parser(tag):
     else:
         print("Tag", tag, "unknown.")
         raise()
-    save_as=home+"results/plots/statistics/statistics_parser_"+tag+".pdf"
         
+    print("Loaded the following files:")
+    for file in test_files:
+        print(file.split(home)[1]) 
+        
+    save_as=home+"results/plots/statistics/statistics_parser_"+tag+".pdf"
     return test_files, title, labels_override, save_as, legend_locations

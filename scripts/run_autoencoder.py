@@ -43,6 +43,9 @@ def unpack_parsed_args():
     parser.add_argument("optimizer", type=str)
     parser.add_argument("options", type=str)
     parser.add_argument("encoder_version", default="", nargs="?", type=str, help="e.g. -LeLu; Str added to the supervised file names to allow multiple runs on the same model.")
+    parser.add_argument("--ae_loss_name", default="mse", nargs="?", type=str, help="Loss that is used during AE training. Default is mse.")
+    parser.add_argument("--supervised_loss", default="auto", nargs="?", type=str, help="Loss that is used during supervised training. Default is 'auto', which is based on the number of output neurons.")
+    
     
     args = parser.parse_args()
     params = vars(args)
@@ -67,9 +70,11 @@ def unpack_parsed_args():
     lambda_comp = params["lambda_comp"]
     use_opti = params["optimizer"]
     options = params["options"]
-    encoder_version=params["encoder_version"]
+    encoder_version = params["encoder_version"]
+    ae_loss_name=params["ae_loss_name"]
+    supervised_loss=params["supervised_loss"]
     
-    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options
+    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss
    
 """
 # Tag for the model used; Identifies both autoencoder and encoder
@@ -219,7 +224,7 @@ def make_encoder_stateful(model):
     return model
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss="auto"):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
     home_path=dataset_info_dict["home_path"]
@@ -247,14 +252,27 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         ae_loss=custom_objects[ae_loss_name]
     
     #define loss function and metrics to use for new supervised networks
-    if number_of_output_neurons>=2:
-        #e.g. up-down, PID, ...
-        supervised_loss = 'categorical_crossentropy'
-        supervised_metrics=['accuracy']
+    if supervised_loss == "auto":
+        #automatically choose the supervised loss based on the number of output neurons;
+        #otherwise use the user defined one (mse or mae)
+        if number_of_output_neurons>=2:
+            #e.g. up-down, PID, ...
+            supervised_loss = 'categorical_crossentropy'
+            supervised_metrics=['accuracy']
+        else:
+            #for energy regression
+            supervised_loss = 'mae'
+            supervised_metrics=None
     else:
-        #for energy regression
-        supervised_loss = 'mae'
-        supervised_metrics=None
+        if supervised_loss=='categorical_crossentropy':
+            supervised_metrics=['accuracy']
+        elif supervised_loss=='mae':
+            supervised_metrics=None
+        elif supervised_loss=='mse':
+            supervised_metrics=None
+        else:
+            raise NameError("supervised_loss: "+supervised_loss+" unknown.")
+            
     print("Using supervised loss:", supervised_loss)
     
     
@@ -628,8 +646,4 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     
 if __name__ == "__main__":
-    #the loss that is used for the autoencoder
-    #usually "mse", "mae", or "mean_squared_error_poisson"
-    ae_loss_name = "mse"
-    
-    execute_training(*unpack_parsed_args(), ae_loss_name)
+    execute_training(*unpack_parsed_args())
