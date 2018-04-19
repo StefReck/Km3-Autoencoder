@@ -733,15 +733,6 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
         ax2.set_aspect("equal")
         
     return(fig)
-"""
-how_many = 500000
-dummy_hits_1 = np.random.rand(how_many,1)*100
-dummy_hits_2 = np.random.rand(how_many,1)*100
-dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
-dummy_cc = np.ones((how_many,1))
-dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
-make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
-"""
 
 def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
     # Generate the data for a plot in which mc_energy vs mae is shown,
@@ -765,8 +756,8 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
         hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
         energy_mae_plot_data = [energy_bins, hist_energy_losses]
         return energy_mae_plot_data
-    energy_mae_plot_data_track = bin_abs_error(energy_bins, mc_energy, abs_err[is_track])
-    energy_mae_plot_data_shower = bin_abs_error(energy_bins, mc_energy, abs_err[is_shower])
+    energy_mae_plot_data_track = bin_abs_error(energy_bins, mc_energy[is_track], abs_err[is_track])
+    energy_mae_plot_data_shower = bin_abs_error(energy_bins, mc_energy[is_shower], abs_err[is_shower])
     energy_mae_plot_data = [energy_mae_plot_data_track, energy_mae_plot_data_shower]
     return energy_mae_plot_data
 
@@ -778,8 +769,9 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
         summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
         plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
     else:
-        plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], "-", where='post', label="Track")
-        plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], "--", where='post', label="Shower")
+        shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label="Track")
+        plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
+                 linestyle="-", where='post', label="Shower", color=shower[0].get_color())
     
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
@@ -793,6 +785,17 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
     plt.grid(True)
 
     return fig
+
+"""
+how_many = 50000
+dummy_hits_1 = np.random.rand(how_many,1)*100
+dummy_hits_2 = np.random.rand(how_many,1)*100
+dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
+dummy_cc = np.ones((how_many,1))
+dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
+#make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
+make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
+"""
 
 
 # ------------- Functions used in making Matplotlib plots -------------#
