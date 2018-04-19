@@ -4,6 +4,19 @@ Take a model that predicts energy of events and do the evaluation for that, eith
 in the form of a 2d histogramm (mc energy vs reco energy), 
 or as a 1d histogram (mc_energy vs mean absolute error).
 """
+import argparse
+
+def parse_input():
+    parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
+    parser.add_argument('model', type=str, help='Name of a model .h5 file, or a identifier for a saved setup.')
+
+    args = parser.parse_args()
+    params = vars(args)
+    return params
+
+params = parse_input()
+identifier = params["model"]
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -11,31 +24,40 @@ import os
 from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot
 
+#Which model to use (see below)
+#identifiers = ["2000_unf",]
+
+#only go through parts of the file (for testing)
 samples=None
-identifiers = ["2000_unf",]
 
 def get_saved_plots_info(identifier):
     #Info about plots that have been generated for the thesis are listed here.
     dataset_tag="xzt"
     zero_center=True
-    energy_bins=np.arange(3,101,1)
+    energy_bins_2d=np.arange(3,101,1)
+    energy_bins_1d=np.linspace(3,100,32)
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
     if identifier=="200_linear":
         model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
     elif identifier=="2000_unf":
         model_path = "models/vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
+    elif identifier=="2000_unf_mse":
+        model_path = "models/vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
     else:
-        raise NameError(identifier+" unknown!")
+        print("Input is not a known identifier. Opening as model instead.")
+        model_path = identifier
+        save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
         
     print("Working on model", model_path)
     
     save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
     model_path=home_path+model_path
-    return [model_path, dataset_tag, zero_center, energy_bins], save_as_base
+    return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
 
 
-def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins, samples=None):
+def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
     #This function outputs a np array with the 2d hist data, either by loading a saved one, or by
     #generating a new one if no saved one exists.
@@ -57,7 +79,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins, sa
         dataset_info_dict = get_dataset_info(dataset_tag)
         arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
         print("Generating 2d histogram...")
-        hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins)
+        hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins_2d)
         print("Saving 2d histogram data as", name_of_file_2d)
         np.save(name_of_file_2d, hist_data_2d)
     print("Done.")
@@ -74,7 +96,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins, sa
         else:
             print("Energy array from before is reused.")
         print("Generating mae histogramm...")
-        energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins)
+        energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
         
         print("Saving mae histogram data as", name_of_file_1d)
         np.save(name_of_file_1d, energy_mae_plot_data)
@@ -83,32 +105,32 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins, sa
     return(hist_data_2d, energy_mae_plot_data)
 
 
-for identifier in identifiers:
-    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
-    save_as_2d = save_as_base+"_2dhist_plot.pdf"
-    save_as_1d = save_as_base+"_mae_plot.pdf"
-        
+
+input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
+save_as_2d = save_as_base+"_2dhist_plot.pdf"
+save_as_1d = save_as_base+"_mae_plot.pdf"
     
-    hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
+
+hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
+
+print("Generating hist2d plot...")
+fig_hist2d = make_2d_hist_plot(hist_data_2d)
+
+plt.show(fig_hist2d)
+if save_as_2d != None:
+    print("Saving plot as", save_as_2d)
+    fig_hist2d.savefig(save_as_2d)
+    print("Done.")
     
-    print("Generating hist2d plot...")
-    fig_hist2d = make_2d_hist_plot(hist_data_2d)
-    
-    plt.show(fig_hist2d)
-    if save_as_2d != None:
-        print("Saving plot as", save_as_2d)
-        fig_hist2d.savefig(save_as_2d)
-        print("Done.")
-        
-    
-    print("Generating mae plot...")
-    fig_mae = make_energy_mae_plot(energy_mae_plot_data)
-    
-    plt.show(fig_mae)
-    if save_as_1d != None:
-        print("Saving plot as", save_as_1d)
-        fig_mae.savefig(save_as_1d)
-        print("Done.")
+
+print("Generating mae plot...")
+fig_mae = make_energy_mae_plot(energy_mae_plot_data)
+
+plt.show(fig_mae)
+if save_as_1d != None:
+    print("Saving plot as", save_as_1d)
+    fig_mae.savefig(save_as_1d)
+    print("Done.")
 
 
 

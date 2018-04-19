@@ -615,8 +615,8 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
 
 def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None):   
     """
-    Comfprt function to setup everything that is needed for generating the arr_energy_correct 
-    for energy evaluation, and then generate it.
+    Comfort function to setup everything that is needed for generating the arr_energy_correct 
+    for energy evaluation, and then generates it.
     """
     #The model that does the prediction
     model=load_model(model_path)
@@ -639,8 +639,9 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
     else:
         xs_mean = None
         
-    arr_energy_correct = make_performance_array_energy_energy(model, test_file, [1,"energy"], 
-                                                                  xs_mean, None, dataset_info_dict, samples)
+    arr_energy_correct = make_performance_array_energy_energy(model, test_file, 
+                        class_type=[1,"energy"], xs_mean=xs_mean, swap_4d_channels=None, 
+                        dataset_info_dict=dataset_info_dict, samples=samples)
     return arr_energy_correct
     
 
@@ -692,7 +693,7 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
     #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
     for bin_no in range(min(bin_indices), max(bin_indices)+1):
         hist_energy_losses[bin_no-1] = np.mean(mae[bin_indices==bin_no])
-        
+    print("Average mean squared error over all energies:", hist_energy_losses.mean())
     #For proper plotting with plt.step where="post"
     hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
     energy_mae_plot_data = [energy_bins, hist_energy_losses]
@@ -709,7 +710,7 @@ def make_energy_mae_plot(energy_mae_plot_data):
     plt.xlabel('True energy (GeV)')
     plt.ylabel('Mean absolute error (GeV)')
     #plt.ylim((0, 0.2))
-    plt.title("Model reconstruction performance")
+    plt.title("Energy reconstruction performance")
     plt.grid(True)
 
     return fig
