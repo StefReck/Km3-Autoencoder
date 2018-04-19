@@ -693,7 +693,7 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
     #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
     for bin_no in range(min(bin_indices), max(bin_indices)+1):
         hist_energy_losses[bin_no-1] = np.mean(abs_err[bin_indices==bin_no])
-    print("Average mean squared error over all energies:", hist_energy_losses.mean())
+    print("Average mean absolute error over all energies:", abs_err.mean())
     #For proper plotting with plt.step where="post"
     hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
     energy_mae_plot_data = [energy_bins, hist_energy_losses]
