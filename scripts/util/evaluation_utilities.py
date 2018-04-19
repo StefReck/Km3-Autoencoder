@@ -715,16 +715,16 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
 
         fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
         plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
+        ax1.set_title("Track like")
         cbar1 = fig.colorbar(plot1, ax=ax1)
         #cbar1.ax.set_ylabel(cbar_label)
         
         plot2 = ax2.pcolormesh(x,y,z2, norm=colors.LogNorm(vmin=1, vmax=z2.max()))
+        ax2.set_title("Shower like")
         cbar2 = fig.colorbar(plot2, ax=ax2)
         cbar2.ax.set_ylabel(cbar_label)
         
         fig.suptitle(title)
-        ax1.set_title("Track like")
-        ax2.set_title("Shower like")
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
         ax1.set_aspect("equal")
@@ -769,9 +769,9 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
         summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
         plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
     else:
-        shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label="Track")
+        shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label="Shower")
         plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
-                 linestyle="-", where='post', label="Shower", color=shower[0].get_color())
+                 linestyle="-", where='post', label="Track", color=shower[0].get_color())
     
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
