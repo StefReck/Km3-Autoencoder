@@ -69,7 +69,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     name_of_file_2d= dump_path + modelname + "_" + dataset_tag + "_2dhist_data.npy"
     name_of_file_1d= dump_path + modelname + "_" + dataset_tag + "_mae_data.npy"
     
-    arr_energy_correct = None
+    arr_energy_correct = []
     
     if os.path.isfile(name_of_file_2d)==True:
         print("Loading existing file of 2d histogram data", name_of_file_2d)
@@ -91,7 +91,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     else:
         print("No saved mae data for this model found. New one will be generated.\nGenerating energy array...")
         dataset_info_dict = get_dataset_info(dataset_tag)
-        if arr_energy_correct == None:
+        if len(arr_energy_correct) == 0:
             arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
         else:
             print("Energy array from before is reused.")

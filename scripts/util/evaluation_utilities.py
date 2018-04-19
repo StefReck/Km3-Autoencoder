@@ -596,8 +596,6 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
         reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
         reco_energy = np.reshape(reco_energy, reco_energy.shape[0]) #shape (batchsize,)
 
-        # check if the predictions were correct
-        #correct = check_if_prediction_is_correct(y_pred, y_true)
         mc_energy = mc_info[:, 2]
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
