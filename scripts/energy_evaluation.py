@@ -66,8 +66,8 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     #name of the files that the hist data will get dumped to (or loaded from)
     modelname = model_path.split("trained_")[1][:-3]
     dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
-    name_of_file_2d= dump_path + modelname + "_" + dataset_tag + "_2dhist_data.npy"
-    name_of_file_1d= dump_path + modelname + "_" + dataset_tag + "_mae_data.npy"
+    name_of_file_2d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_2dhist_data.npy"
+    name_of_file_1d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_mae_data.npy"
     
     arr_energy_correct = []
     
@@ -105,33 +105,36 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     return(hist_data_2d, energy_mae_plot_data)
 
 
-
-input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
-save_as_2d = save_as_base+"_2dhist_plot.pdf"
-save_as_1d = save_as_base+"_mae_plot.pdf"
+def save_and_show_plots(identifier):
+    #Main function
+    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
+    save_as_2d = save_as_base+"_2dhist_plot.pdf"
+    save_as_1d = save_as_base+"_mae_plot.pdf"
+        
     
-
-hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
-
-print("Generating hist2d plot...")
-fig_hist2d = make_2d_hist_plot(hist_data_2d)
-
-plt.show(fig_hist2d)
-if save_as_2d != None:
-    print("Saving plot as", save_as_2d)
-    fig_hist2d.savefig(save_as_2d)
-    print("Done.")
+    hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
     
+    print("Generating hist2d plot...")
+    fig_hist2d = make_2d_hist_plot(hist_data_2d)
+    
+    plt.show(fig_hist2d)
+    if save_as_2d != None:
+        print("Saving plot as", save_as_2d)
+        fig_hist2d.savefig(save_as_2d)
+        print("Done.")
+        
+    
+    print("Generating mae plot...")
+    fig_mae = make_energy_mae_plot(energy_mae_plot_data)
+    
+    plt.show(fig_mae)
+    if save_as_1d != None:
+        print("Saving plot as", save_as_1d)
+        fig_mae.savefig(save_as_1d)
+        print("Done.")
 
-print("Generating mae plot...")
-fig_mae = make_energy_mae_plot(energy_mae_plot_data)
 
-plt.show(fig_mae)
-if save_as_1d != None:
-    print("Saving plot as", save_as_1d)
-    fig_mae.savefig(save_as_1d)
-    print("Done.")
-
+save_and_show_plots(identifier)
 
 
 

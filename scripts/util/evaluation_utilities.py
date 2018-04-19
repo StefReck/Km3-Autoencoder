@@ -595,7 +595,11 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
         xs, y_true, mc_info = next(generator)
         reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
         reco_energy = np.reshape(reco_energy, reco_energy.shape[0]) #shape (batchsize,)
-
+        
+        #track info:
+        #[event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, 
+        # dir_x/y/z -> 5/6/7, time -> 8]
+        
         mc_energy = mc_info[:, 2]
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
@@ -647,59 +651,136 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
 def calculate_2d_hist_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
     """
     Take a list of [mc_energy, reco_energy, particle_type, is_cc] for many events
-    and generate a 2d numpy histogram from it.
+    and generate 2d numpy histograms for track/shower events from it.
     """  
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
+    is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
-    hist_2d_data = np.histogram2d(mc_energy, reco_energy, energy_bins)
+    hist_2d_data_track = np.histogram2d(mc_energy[is_track], reco_energy[is_track], energy_bins)
+    hist_2d_data_shower = np.histogram2d(mc_energy[is_shower], reco_energy[is_shower], energy_bins)
+    
+    hist_2d_data = [hist_2d_data_track, hist_2d_data_shower]
     return hist_2d_data
 
-def make_2d_hist_plot(hist_2d_data):
+
+def track_shower_seperation(particle_type, is_cc):
+    #Input: np arrays from mc_info
+    #Output: np arrays type bool which identify track/shower like events
+    
+    #track: muon/a-muon CC --> 14, True
+    #shower: elec/a-elec; muon/a-muon NC
+    #particle type, i.e. elec/muon/tau (12, 14, 16). Negative values for antiparticles.
+    # In my dataset, there are actually no NC events
+    
+    abs_particle_type = np.abs(particle_type)
+    track  = np.logical_and(abs_particle_type == 14, is_cc==True)
+    shower = np.logical_or(np.logical_and(abs_particle_type == 14, is_cc==False), 
+                           abs_particle_type==12)
+    
+    return track, shower
+
+
+def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
     """
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
     """
-    z=hist_2d_data[0].T #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
-    x=hist_2d_data[1] #mc energy bin edges
-    y=hist_2d_data[2] #reco energy bin edges
+    hist_2d_data_track, hist_2d_data_shower = hist_2d_data
+    #Bin edges are the same for both histograms
+    x=hist_2d_data_track[1] #mc energy bin edges
+    y=hist_2d_data_track[2] #reco energy bin edges
     
-    
-    fig, ax = plt.subplots()
-    plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
-    
-    ax.set_title("Energy reconstruction")
-    ax.set_xlabel("True energy (GeV)")
-    ax.set_ylabel("Reconstructed energy (GeV)")
-    
-    cbar = plt.colorbar(plot)
-    cbar.ax.set_ylabel('Number of events')
-    
-    return(fig)
+    title="Energy reconstruction"
+    xlabel = "True energy (GeV)"
+    ylabel = "Reconstructed energy (GeV)"
+    cbar_label = 'Number of events'
+    if seperate_track_shower == False:
+        #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
+        z=hist_2d_data_track[0].T + hist_2d_data_shower[0].T
 
+        fig, ax = plt.subplots()
+        plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
+        
+        fig.suptitle(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.set_aspect("equal")
+        cbar = plt.colorbar(plot)
+        cbar.ax.set_ylabel(cbar_label)
+        
+    else:
+        z1=hist_2d_data_track[0].T 
+        z2=hist_2d_data_shower[0].T
+
+        fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
+        plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
+        cbar1 = fig.colorbar(plot1, ax=ax1)
+        #cbar1.ax.set_ylabel(cbar_label)
+        
+        plot2 = ax2.pcolormesh(x,y,z2, norm=colors.LogNorm(vmin=1, vmax=z2.max()))
+        cbar2 = fig.colorbar(plot2, ax=ax2)
+        cbar2.ax.set_ylabel(cbar_label)
+        
+        fig.suptitle(title)
+        ax1.set_title("Track like")
+        ax2.set_title("Shower like")
+        ax1.set_xlabel(xlabel)
+        ax1.set_ylabel(ylabel)
+        ax1.set_aspect("equal")
+        ax2.set_xlabel(xlabel)
+        ax2.set_ylabel(ylabel)
+        ax2.set_aspect("equal")
+        
+    return(fig)
+"""
+how_many = 500000
+dummy_hits_1 = np.random.rand(how_many,1)*100
+dummy_hits_2 = np.random.rand(how_many,1)*100
+dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
+dummy_cc = np.ones((how_many,1))
+dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
+make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
+"""
 
 def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
-    # Generate the data for a plot in which mc_energy vs mae is shown.
+    # Generate the data for a plot in which mc_energy vs mae is shown,
+    # seperate for track and shower events
     mc_energy = arr_energy_correct[:,0]
-    
     reco_energy = arr_energy_correct[:,1]
+    is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
+    
     abs_err = np.abs(mc_energy - reco_energy)
-
-    hist_energy_losses=np.zeros((len(energy_bins)-1))
-    #In which bin does each event belong, according to its mc energy:
-    bin_indices = np.digitize(mc_energy, bins=energy_bins)
-    #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
-    for bin_no in range(min(bin_indices), max(bin_indices)+1):
-        hist_energy_losses[bin_no-1] = np.mean(abs_err[bin_indices==bin_no])
     print("Average mean absolute error over all energies:", abs_err.mean())
-    #For proper plotting with plt.step where="post"
-    hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
-    energy_mae_plot_data = [energy_bins, hist_energy_losses]
+    
+    def bin_abs_error(energy_bins, mc_energy, abs_err):
+        #bin the abs_err, depending on their mc_energy, into energy_bins
+        hist_energy_losses=np.zeros((len(energy_bins)-1))
+        #In which bin does each event belong, according to its mc energy:
+        bin_indices = np.digitize(mc_energy, bins=energy_bins)
+        #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
+        for bin_no in range(min(bin_indices), max(bin_indices)+1):
+            hist_energy_losses[bin_no-1] = np.mean(abs_err[bin_indices==bin_no])
+        #For proper plotting with plt.step where="post"
+        hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
+        energy_mae_plot_data = [energy_bins, hist_energy_losses]
+        return energy_mae_plot_data
+    energy_mae_plot_data_track = bin_abs_error(energy_bins, mc_energy, abs_err[is_track])
+    energy_mae_plot_data_shower = bin_abs_error(energy_bins, mc_energy, abs_err[is_shower])
+    energy_mae_plot_data = [energy_mae_plot_data_track, energy_mae_plot_data_shower]
     return energy_mae_plot_data
 
-def make_energy_mae_plot(energy_mae_plot_data):
+
+def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
+    energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
     fig, ax = plt.subplots()
-    plt.step(energy_mae_plot_data[0], energy_mae_plot_data[1], where='post')
+    if seperate_track_shower == False:
+        summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
+        plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
+    else:
+        plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], "-", where='post', label="Track")
+        plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], "--", where='post', label="Shower")
+    
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
     plt.minorticks_on()
