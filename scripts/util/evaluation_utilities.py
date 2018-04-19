@@ -715,22 +715,25 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
 
         fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
         plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
-        ax1.set_title("Track like")
+        ax1.set_title("Track like events")
         cbar1 = fig.colorbar(plot1, ax=ax1)
-        #cbar1.ax.set_ylabel(cbar_label)
+        cbar1.ax.set_ylabel(cbar_label)
         
         plot2 = ax2.pcolormesh(x,y,z2, norm=colors.LogNorm(vmin=1, vmax=z2.max()))
-        ax2.set_title("Shower like")
+        ax2.set_title("Shower like events")
         cbar2 = fig.colorbar(plot2, ax=ax2)
         cbar2.ax.set_ylabel(cbar_label)
         
-        fig.suptitle(title)
+        
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
         ax1.set_aspect("equal")
         ax2.set_xlabel(xlabel)
         ax2.set_ylabel(ylabel)
         ax2.set_aspect("equal")
+        #plt.tight_layout(pad=2)
+        plt.subplots_adjust(top=0.85, left=0.05, right=0.97)
+        fig.suptitle(title, fontsize=18, y=0.98)
         
     return(fig)
 
@@ -781,20 +784,20 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
     plt.xlabel('True energy (GeV)')
     plt.ylabel('Mean absolute error (GeV)')
     #plt.ylim((0, 0.2))
-    plt.title("Energy reconstruction performance")
+    plt.title("Energy reconstruction", fontsize=16)
     plt.grid(True)
 
     return fig
 
 """
-how_many = 50000
+how_many = 500000
 dummy_hits_1 = np.random.rand(how_many,1)*100
 dummy_hits_2 = np.random.rand(how_many,1)*100
 dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
 dummy_cc = np.ones((how_many,1))
 dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
-#make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
-make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
+make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
+#make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
 """
 
 
