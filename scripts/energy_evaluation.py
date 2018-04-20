@@ -52,7 +52,11 @@ def get_saved_plots_info(identifier):
         label_list  = ["Optimized for mean absolute error", "Optimized for mean squared error"]
         save_plot_as = home_path+"/results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
         compare_plots(identifiers, label_list, save_plot_as)
-        
+    elif identifier == "bottleneck":
+        identifiers = ["2000_unf", "200_linear"]
+        label_list  = ["Unfrozen 2000", "Encoder 200"]
+        save_plot_as = home_path+"/results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+        compare_plots(identifiers, label_list, save_plot_as)
     #-------------------------------------------------------
         
     else:
