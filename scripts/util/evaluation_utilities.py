@@ -680,8 +680,15 @@ def track_shower_seperation(particle_type, is_cc):
     
     return track, shower
 
+def norm_columns_of_2d_hist_data(z):
+    """
+    Takes the output [0] of np.hist2d and normalizes each column.
+    """
+    #z shape e.g. 97,97
+    z = z/np.sum(z,axis=0)
+    return z
 
-def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
+def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_columns=True):
     """
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
@@ -694,11 +701,18 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
     title="Energy reconstruction"
     xlabel = "True energy (GeV)"
     ylabel = "Reconstructed energy (GeV)"
-    cbar_label = 'Number of events'
+    
+    if normalize_columns==False:
+        cbar_label = 'Number of events'
+    else:
+        cbar_label = "Fraction of counts"
+        
     if seperate_track_shower == False:
         #counts; this needs to be transposed to be displayed properly for reasons unbeknownst
         z=hist_2d_data_track[0].T + hist_2d_data_shower[0].T
-
+        if normalize_columns == True:
+            z=norm_columns_of_2d_hist_data(z)
+        
         fig, ax = plt.subplots()
         plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
         
@@ -712,6 +726,10 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True):
     else:
         z1=hist_2d_data_track[0].T 
         z2=hist_2d_data_shower[0].T
+
+        if normalize_columns == True:
+            z1=norm_columns_of_2d_hist_data(z1)
+            z2=norm_columns_of_2d_hist_data(z2)
 
         fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
         plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
@@ -789,16 +807,25 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
 
     return fig
 
-"""
+
 how_many = 500000
-dummy_hits_1 = np.random.rand(how_many,1)*100
-dummy_hits_2 = np.random.rand(how_many,1)*100
+#dummy_hits_1 = np.random.rand(how_many,1)*100
+#dummy_hits_2 = np.random.rand(how_many,1)*100
+
+dummy_hits_1 = np.logspace(0,100,how_many) 
+dummy_hits_1 = np.reshape(dummy_hits_1, dummy_hits_1.shape+(1,))
+dummy_hits_2 = np.logspace(0,100,how_many)+np.random.rand(how_many)*10
+dummy_hits_2 = np.reshape(dummy_hits_2, dummy_hits_2.shape+(1,))
+
+
 dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
 dummy_cc = np.ones((how_many,1))
 dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
-make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=1)
+make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=1)
+make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=0)
+
 #make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
-"""
+
 
 
 # ------------- Functions used in making Matplotlib plots -------------#

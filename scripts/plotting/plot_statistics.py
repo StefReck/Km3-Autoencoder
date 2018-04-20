@@ -246,12 +246,13 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         ax.plot(data_of_model[2], data_of_model[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
         handles1.append(handle_for_legend)
-        #for proper yrange, look for min/max of ydata, but not for the first epoch train,
+        #for proper yrange, look for min/max of ydata, but not for the first epochs train,
         #since loss is often extreme here
-        train_y = np.array(data_of_model[3])
-        train_y = train_y[train_y>=2]
+        train_epoch_select = np.array(data_of_model[2]).astype(float)
+        train_epoch = np.array(data_of_model[3]).astype(float)
+        train_epoch_select = train_epoch_select>=3
         y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1]),
-                                 max(train_y), min(train_y)] )
+                                 max(train_epoch[train_epoch_select]), min(train_epoch[train_epoch_select])] )
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
