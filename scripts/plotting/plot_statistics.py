@@ -207,6 +207,10 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
 
 
 def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+    """
+    Makes a plot of one or more graphs, each with the same y-axis (e.g. loss, acc)
+    """
+    
     fig, ax=plt.subplots(figsize=figsize)
     
     all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
@@ -230,10 +234,10 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         print("color array does not have the rights size (", len(label_array), "), using default colors.")
     
     handles1=[]
-    y_value_extrema=[]
+    #y_value_extrema=[]
     #plot the data in one plot
     for i,data_of_model in enumerate(data_for_plots):
-        # [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
+        # data_of_model: [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
         if color_override==True:
             test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o", color=colors[i])
         else:
@@ -242,7 +246,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         ax.plot(data_of_model[2], data_of_model[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
         handles1.append(handle_for_legend)
-        y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1])] )
+        #y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1])] )
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
@@ -262,9 +266,10 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         plt.xticks( xticks )
     else:
         plt.xticks( np.arange(0, max_epoch+1,5) )
-    
+
     #yrange
-    plt.ylim(get_proper_range(y_value_extrema))
+    #plt.ylim(get_proper_range(y_value_extrema))
+    plt.ylim(get_proper_range(np.concatenate((data_of_model[:,1],data_of_model[:,3]))))
     
     ax.set_xlabel(xlabel)
     plt.title(title)
@@ -273,10 +278,13 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
 
 
 def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2=None): 
-    #data autoencoder 
-    #[Test Epoch, Test ydata, Epoch train, ydata train]
-    #and data_parallel:
-    #[Epoch, ydata]
+    """
+    Makes a plot of autoencoder loss and supervised acc of parallel training.
+    data autoencoder :
+    [Test Epoch, Test ydata, Epoch train, ydata train]
+    and data_parallel:
+    [Epoch, ydata]
+    """
     fig, ax=plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     
