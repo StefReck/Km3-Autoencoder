@@ -22,7 +22,7 @@ theta = {56.289: [0,4,5,7,8,9],
              148.212: [14,18,19,24,25,26],
              180.0: [22,]}
 
-def make_broken5_manip(hists_temp, chance, sum_channel = True):
+def make_broken5_manip(hists_temp, sum_channel = True):
     #Input (X,11,18,50,31) xztc hists
     #Output: (X,11,18,50) manipulated xzt hists
     
@@ -107,6 +107,7 @@ elif mode=="influence":
         up_hists=hists[up_going]
         down_hists=hists[np.invert(up_going)]
         
+        #counts for every channel, seperate for up and down going events
         average_counts = np.zeros((31,2))
         for channel_id in range(31):
             #counts from up/down going events in a specific channel
