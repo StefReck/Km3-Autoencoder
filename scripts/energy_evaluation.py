@@ -50,12 +50,12 @@ def get_saved_plots_info(identifier):
     elif identifier == "2000":
         identifiers = ["2000_unf", "2000_unf_mse"]
         label_list  = ["Optimized for mean absolute error", "Optimized for mean squared error"]
-        save_plot_as = home_path+"/results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
         compare_plots(identifiers, label_list, save_plot_as)
     elif identifier == "bottleneck":
         identifiers = ["2000_unf", "200_linear"]
         label_list  = ["Unfrozen 2000", "Encoder 200"]
-        save_plot_as = home_path+"/results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
         compare_plots(identifiers, label_list, save_plot_as)
     #-------------------------------------------------------
         
@@ -162,7 +162,6 @@ def compare_plots(identifiers, label_list, save_plot_as):
     print("Loading the saved files of the following models:")
     for identifier in identifiers:
         [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base = get_saved_plots_info(identifier)
-        print(model_path, "on", dataset_tag, "data")
         name_of_file_1d, name_of_file_2d = get_dump_names(model_path, dataset_tag)
         
         mae_plot_data = np.load(name_of_file_1d)

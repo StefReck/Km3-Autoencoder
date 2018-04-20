@@ -91,12 +91,12 @@ def make_data_for_plot(dict_array, test_files):
         #train_y_data =     list(map(float,   train_y_data))
         
         if "Test acc" in data_dict:
-            #This is an encoder network
+            #This is an encoder network with categorical output
             ylabel = "Accuracy"
             test_acc    = list(map(float, data_dict["Test acc"])) 
             return_list = [test_epochs, test_acc, train_epoch_data, train_y_data]   
         else:
-            #This is an autoencoder network
+            #This is an autoencoder network (or an encoder network doing regression)
             ylabel = "Loss"
             test_loss    = list(map(float, data_dict["Test loss"])) 
             return_list = [test_epochs, test_loss, train_epoch_data, train_y_data]

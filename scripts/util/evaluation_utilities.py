@@ -791,7 +791,7 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     """
     Takes a list of mae_plot_data (e.g. for different models) and makes a single plot.
     """
-    
+    fig, ax = plt.subplots()
     for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
         energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
         
@@ -800,10 +800,9 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
         except IndexError:
             label = ""
             
-        fig, ax = plt.subplots()
         if seperate_track_shower == False:
             summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
-            plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
+            plt.step(energy_mae_plot_data_track[0], summed_error, where='post', label=label)
         else:
             shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label=label+" shower")
             plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
