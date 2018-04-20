@@ -234,7 +234,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         print("color array does not have the rights size (", len(label_array), "), using default colors.")
     
     handles1=[]
-    #y_value_extrema=[]
+    y_value_extrema=[]
     #plot the data in one plot
     for i,data_of_model in enumerate(data_for_plots):
         # data_of_model: [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
@@ -246,7 +246,8 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         ax.plot(data_of_model[2], data_of_model[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
         handles1.append(handle_for_legend)
-        #y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1])] )
+        y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1]),
+                                 max(data_of_model[3]), min(data_of_model[3])] )
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
@@ -268,9 +269,8 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         plt.xticks( np.arange(0, max_epoch+1,5) )
 
     #yrange
-    #plt.ylim(get_proper_range(y_value_extrema))
-    plt.ylim(get_proper_range(np.concatenate((data_of_model[:,1],data_of_model[:,3]))))
-    
+    plt.ylim(get_proper_range(y_value_extrema))
+
     ax.set_xlabel(xlabel)
     plt.title(title)
     plt.grid(True)
