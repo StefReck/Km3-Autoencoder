@@ -72,7 +72,13 @@ def setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name=None):
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    number_of_output_neurons=options_dict["number_of_output_neurons"]
     
+    if number_of_output_neurons > 1:
+        supervised_last_activation='softmax'
+    else:
+        supervised_last_activation='linear'
+        
     zero_center_before_dense=False #should not be used together with normalize
     normalize_before_dense=False
     
@@ -146,7 +152,7 @@ def setup_vgg_3(autoencoder_stage, options_dict, modelpath_and_name=None):
         #x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         
 
-        outputs = Dense(2, activation='softmax', kernel_initializer='he_normal')(x)
+        outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
