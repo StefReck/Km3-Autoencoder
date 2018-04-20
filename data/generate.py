@@ -73,7 +73,8 @@ def make_broken5_manip(hists_temp, sum_channel = True):
     #Input (X,11,18,50,31) xztc hists
     #Output: (X,11,18,50) manipulated xzt hists
     
-    #all doms facing upwards AND having >0 counts have a chance% of getting reduced by one
+    #all doms facing upwards AND having >0 counts get reduced by a
+    #binomial distribution with n=2,p=0.4 (but not below 0!)
     
     #1=upwards facing, taken from the paper
     up_mask=np.array([True,]*12 + [False,]*19) 

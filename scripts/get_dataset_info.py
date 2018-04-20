@@ -124,6 +124,8 @@ def get_dataset_info(dataset_tag):
     
     elif dataset_tag=="xzt_broken5":
         #with old spatial binning and very old time binning (relative)
+        #all channels facing upwards AND have >0 counts get reduced by a
+        #binomial distribution with n=2,p=0.4 (but not below 0!)
         data_path = home_path+"data/xzt_broken5/"
         train_data = "elec-CC_and_muon-CC_xzt_broken5_event_train_1_to_240_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xzt_broken5_test_481_to_600_shuffled_0.h5"

@@ -11,15 +11,15 @@ import matplotlib.pyplot as plt
 
 from util.evaluation_utilities import make_or_load_files, make_energy_to_accuracy_plot_comp_data, make_energy_to_loss_plot_comp_data
 
+#Standard, plot acc vs energy plots of these saved setups:
+which_ones=("4_64_enc",)
 
 
 #extra string to be included in file names
 extra_name=""
-#number of bins of the histogram plot; default is 97; backward compatibility with 98 bins
+#number of bins of the histogram plot; default (is 97) is 32 now; backward compatibility with 98 bins
 bins=32
 
-#Standard, plot acc vs energy plots of these:
-which_ones=("4_64_enc",)
 #If not None: Change the y range of all plots to this one (to make unit looks)
 y_lims_override = None
 #Override default location of legend ("best")
@@ -28,6 +28,7 @@ legend_loc="best"
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
 #can be True, False or "both"
+#TODO Rework
 make_difference_plot=False
 which_broken_study=4
 
@@ -37,6 +38,9 @@ which_broken_study=4
 extra_name="_"+ str(bins)+"_bins" + extra_name
 
 def get_info(which_one, extra_name="", y_lims_override=None):
+    """
+    Saved setups of plots
+    """
     if which_one=="1_unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -182,6 +186,11 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_3_broken4_flip_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.75,1)
+        
+    elif which_one=="5_enc":
+        pass
+    elif which_one=="5_unf":
+        pass
     
     else:
         print(which_one, "is not known!")
@@ -191,8 +200,6 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims = y_lims_override
         
     return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
-
-#label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -210,7 +217,13 @@ class_type = (2, 'up_down')
 modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
 plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
 
+
+
 if make_difference_plot == False or make_difference_plot == "both":
+    """
+    A plot that shows acc or loss over the mc energy in a histogram, evaluated on different 
+    datasets.
+    """
     for which_one in which_ones:
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name, y_lims_override=y_lims_override)
@@ -231,13 +244,16 @@ if make_difference_plot == False or make_difference_plot == "both":
         elif plot_type == "loss":
             y_label_of_plot="Loss"
             make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
+        
         elif plot_type == None:
             print("plot_type==None: Not generating plots")
         else:
             print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
         
         print("Plot saved to", save_plot_as)
-            
+      
+        
+        
     
 if make_difference_plot == True or make_difference_plot == "both":
     #which plots to make diff of; (first - second) / first
