@@ -19,7 +19,7 @@ identifier = params["model"]
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import os, sys
 
 from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot
@@ -44,6 +44,17 @@ def get_saved_plots_info(identifier):
         model_path = "models/vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
     elif identifier=="2000_unf_mse":
         model_path = "models/vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
+        
+    #----------------Sets for mae comparison----------------
+    # Will exit after completion
+    elif identifier == "2000":
+        identifiers = ["2000_unf", "2000_unf_mse"]
+        label_list  = ["Optimized for mean absolute error", "Optimized for mean squared error"]
+        save_plot_as = home_path+"/results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+        compare_plots(identifiers, label_list, save_plot_as)
+        
+    #-------------------------------------------------------
+        
     else:
         print("Input is not a known identifier. Opening as model instead.")
         model_path = identifier
@@ -56,6 +67,13 @@ def get_saved_plots_info(identifier):
     model_path=home_path+model_path
     return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
 
+def get_dump_names(model_path, dataset_tag):
+    #Returns the name of the saved statistics files
+    modelname = model_path.split("trained_")[1][:-3]
+    dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
+    name_of_file_2d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_2dhist_data.npy"
+    name_of_file_1d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_mae_data.npy"
+    return name_of_file_1d, name_of_file_2d
 
 def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
@@ -64,10 +82,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     #Also outputs the 1d histogram of mc energy over mae.
  
     #name of the files that the hist data will get dumped to (or loaded from)
-    modelname = model_path.split("trained_")[1][:-3]
-    dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
-    name_of_file_2d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_2dhist_data.npy"
-    name_of_file_1d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_mae_data.npy"
+    name_of_file_1d, name_of_file_2d = get_dump_names(model_path, dataset_tag)
     
     arr_energy_correct = []
     
@@ -106,8 +121,10 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
 
 
 def save_and_show_plots(identifier):
-    #Main function
+    #Main function. Generate or load the data for the plots, and make them.
     input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
+    #This function ill exit after completion if a set was chosen
+    
     save_as_2d = save_as_base+"_2dhist_plot.pdf"
     save_as_1d = save_as_base+"_mae_plot.pdf"
         
@@ -125,7 +142,7 @@ def save_and_show_plots(identifier):
         
     
     print("Generating mae plot...")
-    fig_mae = make_energy_mae_plot(energy_mae_plot_data)
+    fig_mae = make_energy_mae_plot([energy_mae_plot_data,])
     
     plt.show(fig_mae)
     if save_as_1d != None:
@@ -133,8 +150,29 @@ def save_and_show_plots(identifier):
         fig_mae.savefig(save_as_1d)
         print("Done.")
 
+def compare_plots(identifiers, label_list, save_plot_as):
+    """
+    Plot several saved mae data files and plot them in a single figure.
+    """
+    mae_plot_data_list = []
+    print("Loading the saved files of the following models:")
+    for identifier in identifiers:
+        [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base = get_saved_plots_info(identifier)
+        print(model_path, "on", dataset_tag, "data")
+        name_of_file_1d, name_of_file_2d = get_dump_names(model_path, dataset_tag)
+        
+        mae_plot_data = np.load(name_of_file_1d)
+        mae_plot_data_list.append(mae_plot_data)
 
+    print("Done. Generating plot...")
+    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_list)
+    print("Saving plot as", save_plot_as)
+    fig_mae.savefig(save_plot_as)
+    plt.show(fig_mae)
+    sys.exit()
+    
+    
 save_and_show_plots(identifier)
 
-
+   
 

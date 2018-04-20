@@ -683,12 +683,16 @@ def track_shower_seperation(particle_type, is_cc):
 def norm_columns_of_2d_hist_data(z):
     """
     Takes the output [0] of np.hist2d and normalizes each column.
+    Looks bad when plotted, so not used.
     """
     #z shape e.g. 97,97
-    z = z/np.sum(z,axis=0)
+    #z = z/np.sum(z,axis=1)
+    for column_index in range(len(z)):
+        z[column_index] = z[column_index]/np.sum(z[column_index])
+    
     return z
 
-def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_columns=True):
+def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_columns=False):
     """
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
@@ -734,7 +738,7 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
         plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
         ax1.set_title("Track like events")
-        cbar1 = fig.colorbar(plot1, ax=ax1)
+        cbar1 = fig.colorbar(plot1, ax=ax1, )
         cbar1.ax.set_ylabel(cbar_label)
         
         plot2 = ax2.pcolormesh(x,y,z2, norm=colors.LogNorm(vmin=1, vmax=z2.max()))
@@ -783,16 +787,28 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
     return energy_mae_plot_data
 
 
-def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
-    energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
-    fig, ax = plt.subplots()
-    if seperate_track_shower == False:
-        summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
-        plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
-    else:
-        shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label="Shower")
-        plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
-                 linestyle="-", where='post', label="Track", color=shower[0].get_color())
+def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, label_list=[]):
+    """
+    Takes a list of mae_plot_data (e.g. for different models) and makes a single plot.
+    """
+    
+    for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
+        energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
+        
+        try:
+            label = label_list[i]
+        except IndexError:
+            label = ""
+            
+        fig, ax = plt.subplots()
+        if seperate_track_shower == False:
+            summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
+            plt.step(energy_mae_plot_data_track[0], summed_error, where='post')
+        else:
+            shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label=label+" shower")
+            plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
+                     linestyle="-", where='post', label=label+" track", color=shower[0].get_color())
+        
     
     x_ticks_major = np.arange(0, 101, 10)
     plt.xticks(x_ticks_major)
@@ -807,7 +823,7 @@ def make_energy_mae_plot(energy_mae_plot_data, seperate_track_shower=True):
 
     return fig
 
-
+"""
 how_many = 500000
 #dummy_hits_1 = np.random.rand(how_many,1)*100
 #dummy_hits_2 = np.random.rand(how_many,1)*100
@@ -823,10 +839,12 @@ dummy_cc = np.ones((how_many,1))
 dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
 make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=1)
 make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=0)
-
+"""
 #make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
 
 
+#data2d = np.load("temp.npy")
+#make_2d_hist_plot(data2d, normalize_columns=1)
 
 # ------------- Functions used in making Matplotlib plots -------------#
 
