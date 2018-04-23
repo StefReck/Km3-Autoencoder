@@ -161,7 +161,7 @@ def get_props_for_plot_parallel(tag):
     elif tag=="vgg_5_200_energy":
         title = "Parallel training with model '200'"
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
-        prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_test.txt"
+        prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_test.txt"
         save_to_folder = "bottleneck_energy/"
     elif tag=="vgg_5_64_energy":
         title = "Parallel training with model '64'"

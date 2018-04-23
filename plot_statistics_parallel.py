@@ -78,7 +78,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     if save_as != None:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)
         plt.savefig(save_as)
-        print("Saved plot as",save_as)
+        print("Saved plot as",save_as,"\n")
     
     return fig
 
