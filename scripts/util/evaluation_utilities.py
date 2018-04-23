@@ -771,8 +771,8 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
     is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
     abs_err = np.abs(mc_energy - reco_energy)
-    print("Average mean absolute error over all energies:", abs_err.mean())
-    print("Median absolute error over all energies:", np.median(abs_err))
+    print("\nAverage mean absolute error over all energies:", abs_err.mean())
+    print("Median relative error over all energies:", np.median(abs_err/mc_energy), "\n")
     
     def bin_abs_error(energy_bins, mc_energy, abs_err, operation="median_relative"):
         #bin the abs_err, depending on their mc_energy, into energy_bins
