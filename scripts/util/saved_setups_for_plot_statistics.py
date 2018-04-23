@@ -106,6 +106,19 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
         labels_override = ["Autoencoder", "Encoder"] 
         
+        
+    elif tag=="vgg_3_energy":
+        title = "Parallel training with model '2000'"
+        ae_model =  home+"models/vgg_3/trained_vgg_3_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_energy_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]
+    elif tag=="vgg_5_200_energy":
+        title = "Parallel training with model '200'"
+        ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_test.txt"
+        labels_override = ["Autoencoder", "Encoder"]
+    
+        
     else:
         print("Tag", tag, "unknown.")
         raise()

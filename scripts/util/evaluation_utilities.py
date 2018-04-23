@@ -15,6 +15,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from keras.models import load_model
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 
 import sys
 sys.path.append('../')
@@ -760,27 +762,44 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
     return(fig)
 
 def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
-    # Generate the data for a plot in which mc_energy vs mae is shown,
-    # seperate for track and shower events
+    """
+    Generate binned statistics for the energy mae, or the relative mae.
+    seperate for track and shower events.
+    """
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
     abs_err = np.abs(mc_energy - reco_energy)
     print("Average mean absolute error over all energies:", abs_err.mean())
+    print("Median absolute error over all energies:", np.median(abs_err))
     
-    def bin_abs_error(energy_bins, mc_energy, abs_err):
+    def bin_abs_error(energy_bins, mc_energy, abs_err, operation="median_relative"):
         #bin the abs_err, depending on their mc_energy, into energy_bins
         hist_energy_losses=np.zeros((len(energy_bins)-1))
+        hist_energy_variance=np.zeros((len(energy_bins)-1))
         #In which bin does each event belong, according to its mc energy:
         bin_indices = np.digitize(mc_energy, bins=energy_bins)
+        
         #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
         for bin_no in range(min(bin_indices), max(bin_indices)+1):
-            hist_energy_losses[bin_no-1] = np.mean(abs_err[bin_indices==bin_no])
+            current_abs_err = abs_err[bin_indices==bin_no]
+            current_mc_energy = mc_energy[bin_indices==bin_no]
+            
+            if operation=="mae":
+                #calculate mean absolute error (outdated)
+                hist_energy_losses[bin_no-1] = np.mean(current_abs_err)
+            elif operation=="median_relative":
+                #calculate the median of the relative error: |E_true-E_reco|/E_true
+                median_relative_error = current_abs_err/current_mc_energy
+                hist_energy_losses[bin_no-1]   = np.median(median_relative_error)
+                hist_energy_variance[bin_no-1] = np.var(median_relative_error)
         #For proper plotting with plt.step where="post"
         hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
-        energy_mae_plot_data = [energy_bins, hist_energy_losses]
+        hist_energy_variance=np.append(hist_energy_variance, hist_energy_variance[-1])
+        energy_mae_plot_data = [energy_bins, hist_energy_losses, hist_energy_variance]
         return energy_mae_plot_data
+    
     energy_mae_plot_data_track = bin_abs_error(energy_bins, mc_energy[is_track], abs_err[is_track])
     energy_mae_plot_data_shower = bin_abs_error(energy_bins, mc_energy[is_shower], abs_err[is_shower])
     energy_mae_plot_data = [energy_mae_plot_data_track, energy_mae_plot_data_shower]
@@ -791,59 +810,104 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     """
     Takes a list of mae_plot_data (e.g. for different models) and makes a single plot.
     """
-    fig, ax = plt.subplots()
+    fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
+    legend_handles = []
     for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
         energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
+        bins = energy_mae_plot_data_track[0]
+        mean_track  = energy_mae_plot_data_track[1]
+        mean_shower = energy_mae_plot_data_shower[1]
+        var_track  = energy_mae_plot_data_track[2]
+        var_shower = energy_mae_plot_data_shower[2]
         
         try:
             label = label_list[i]
         except IndexError:
-            label = ""
+            label = "unknown"
             
         if seperate_track_shower == False:
-            summed_error=energy_mae_plot_data_track[1]+energy_mae_plot_data_shower[1]
-            plt.step(energy_mae_plot_data_track[0], summed_error, where='post', label=label)
+            summed_error=mean_track+mean_shower
+            summed_var = var_shower+var_track
+            plot1 = ax1.step(bins, summed_error, where='post')
+            color_of_this_model = plot1[0].get_color()
+            ax2.step(bins, summed_var, where='post', color=color_of_this_model)
+            
+            #Get an entry for the legend
+            legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
+            legend_handles.append(legend_entry)
         else:
-            shower = plt.step(energy_mae_plot_data_shower[0], energy_mae_plot_data_shower[1], linestyle="--", where='post', label=label+" shower")
-            plt.step(energy_mae_plot_data_track[0], energy_mae_plot_data_track[1], 
-                     linestyle="-", where='post', label=label+" track", color=shower[0].get_color())
+            #Plot the mean in left plot
+            shower = ax1.step(bins, mean_shower, linestyle="--", where='post')
+            color_of_this_model = shower[0].get_color()
+            ax1.step(bins, mean_track, linestyle="-", where='post', color=color_of_this_model)
+            
+            #Plot the variance in right plot
+            ax2.step(bins, var_shower, linestyle="--", where='post', color=color_of_this_model)
+            ax2.step(bins, var_track, linestyle="-", where='post', color=color_of_this_model)
+            
+            #Get an entry for the legend
+            legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
+            legend_handles.append(legend_entry)
         
-    
     x_ticks_major = np.arange(0, 101, 10)
-    plt.xticks(x_ticks_major)
-    plt.minorticks_on()
-
-    plt.legend()
-    plt.xlabel('True energy (GeV)')
-    plt.ylabel('Mean absolute error (GeV)')
+    ax1.set_xticks(x_ticks_major)
+    ax1.minorticks_on()
+    ax2.set_xticks(x_ticks_major)
+    ax2.minorticks_on()
+    
+    ax1.set_xlabel('True energy (GeV)')
+    ax1.set_ylabel('Median fractional energy resolution')
+    
+    ax2.set_xlabel('True energy (GeV)')
+    ax2.set_ylabel(r'Variance (GeV$^2$)')
+    
     #plt.ylim((0, 0.2))
-    plt.title("Energy reconstruction", fontsize=16)
-    plt.grid(True)
-
+    fig.suptitle("Energy reconstruction", fontsize=16)
+    ax1.grid(True)
+    ax2.grid(True)
+    
+    #Get control over the legend entries
+    #legend1 = ax2.legend(handles=legend_handles, loc="upper right")
+    #ax2.add_artist(legend1)
+    
+    #Make a second legend box
+    track_line  = mlines.Line2D([], [], color='grey', linestyle="-",  label='Track')
+    shower_line = mlines.Line2D([], [], color='grey', linestyle="--", label='Shower')
+    empty_line = mlines.Line2D([], [], color='white', linestyle="", label='')
+    legend2_handles = [track_line,shower_line,empty_line]
+    #legend2 = ax2.legend(handles=legend2_handles, loc="best")
+    #ax2.add_artist(legend2)
+   
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend2_handles+legend_handles)
+    
+    plt.subplots_adjust(top=0.85, left=0.05, right=0.85)
+    
     return fig
 
-"""
-how_many = 500000
-#dummy_hits_1 = np.random.rand(how_many,1)*100
-#dummy_hits_2 = np.random.rand(how_many,1)*100
+def test_energy_evaluation_functions(mode="real"):
+    """
+    Generate some random noise and plot it with the energy evaluation functions.
+    """ 
+    if mode=="noise":
+        how_many = 50000
+        dummy_hits_1 = np.random.rand(how_many,1)*100
+        dummy_hits_2 = np.random.rand(how_many,1)*100
+        #dummy_hits_1 = np.logspace(0,100,how_many) 
+        #dummy_hits_1 = np.reshape(dummy_hits_1, dummy_hits_1.shape+(1,))
+        #dummy_hits_2 = np.logspace(0,100,how_many)+np.random.rand(how_many)*10
+        #dummy_hits_2 = np.reshape(dummy_hits_2, dummy_hits_2.shape+(1,))
+        
+        dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
+        dummy_cc = np.ones((how_many,1))
+        dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
+        
+        #make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=0)
+        make_energy_mae_plot([calculate_energy_mae_plot_data(dummy_input),])
+    elif mode=="real":
+        data2d = np.load("temp.npy")
+        make_2d_hist_plot(data2d)
+        make_energy_mae_plot(data2d)
 
-dummy_hits_1 = np.logspace(0,100,how_many) 
-dummy_hits_1 = np.reshape(dummy_hits_1, dummy_hits_1.shape+(1,))
-dummy_hits_2 = np.logspace(0,100,how_many)+np.random.rand(how_many)*10
-dummy_hits_2 = np.reshape(dummy_hits_2, dummy_hits_2.shape+(1,))
-
-
-dummy_types = np.ones((how_many,1))*12 + np.random.randint(0,2,size=(how_many,1))*2
-dummy_cc = np.ones((how_many,1))
-dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
-make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=1)
-make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=0)
-"""
-#make_energy_mae_plot(calculate_energy_mae_plot_data(dummy_input))
-
-
-#data2d = np.load("temp.npy")
-#make_2d_hist_plot(data2d, normalize_columns=1)
 
 # ------------- Functions used in making Matplotlib plots -------------#
 
