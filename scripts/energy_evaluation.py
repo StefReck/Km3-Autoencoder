@@ -49,7 +49,7 @@ def get_saved_plots_info(identifier):
     # Will exit after completion
     elif identifier == "2000":
         identifiers = ["2000_unf", "2000_unf_mse"]
-        label_list  = ["Optimized for mean absolute error", "Optimized for mean squared error"]
+        label_list  = ["With MAE", "With MSE"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
         compare_plots(identifiers, label_list, save_plot_as)
     elif identifier == "bottleneck":

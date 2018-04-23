@@ -592,7 +592,7 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
     arr_energy_correct=None
     
     for s in range(int(steps)):
-        if s % 300 == 0:
+        if s % 600 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, y_true, mc_info = next(generator)
         reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
@@ -615,6 +615,20 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
+
+    print("\nStatistics of this reconstruction:")
+    mc_energy = arr_energy_correct[:,0]
+    reco_energy = arr_energy_correct[:,1]
+    abs_err = np.abs(mc_energy - reco_energy)
+    total_abs_mean = abs_err.mean()
+    total_relative_median = np.median(abs_err/mc_energy)
+    total_relative_variance = np.var(abs_err/mc_energy)
+    print("Average mean absolute error over all energies:", total_abs_mean)
+    print("Median relative error over all energies:",total_relative_median)
+    print("Variance in relative error over all energies:", total_relative_variance)
+    print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
+    
+    
     return arr_energy_correct
 
 def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None):   
@@ -771,10 +785,7 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
     is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
     abs_err = np.abs(mc_energy - reco_energy)
-    print("\nAverage mean absolute error over all energies:", abs_err.mean())
-    print("Median relative error over all energies:", np.median(abs_err/mc_energy))
-    print("Variance in relative error over all energies:", np.var(abs_err/mc_energy), "\n")
-    
+
     def bin_abs_error(energy_bins, mc_energy, abs_err, operation="median_relative"):
         #bin the abs_err, depending on their mc_energy, into energy_bins
         hist_energy_losses=np.zeros((len(energy_bins)-1))
@@ -789,12 +800,13 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,1
             
             if operation=="mae":
                 #calculate mean absolute error (outdated)
-                hist_energy_losses[bin_no-1] = np.mean(current_abs_err)
+                hist_energy_losses[bin_no-1]   = np.mean(current_abs_err)
             elif operation=="median_relative":
                 #calculate the median of the relative error: |E_true-E_reco|/E_true
-                median_relative_error = current_abs_err/current_mc_energy
-                hist_energy_losses[bin_no-1]   = np.median(median_relative_error)
-                hist_energy_variance[bin_no-1] = np.var(median_relative_error)
+                #and also its variance
+                relative_error = current_abs_err/current_mc_energy
+                hist_energy_losses[bin_no-1]   = np.median(relative_error)
+                hist_energy_variance[bin_no-1] = np.var(relative_error)
         #For proper plotting with plt.step where="post"
         hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
         hist_energy_variance=np.append(hist_energy_variance, hist_energy_variance[-1])
@@ -860,7 +872,7 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     ax1.set_ylabel('Median fractional energy resolution')
     
     ax2.set_xlabel('True energy (GeV)')
-    ax2.set_ylabel(r'Variance (GeV$^2$)')
+    ax2.set_ylabel(r'Variance of relative Error (GeV$^2$)')
     
     #plt.ylim((0, 0.2))
     fig.suptitle("Energy reconstruction", fontsize=16)
@@ -881,7 +893,7 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
    
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend2_handles+legend_handles)
     
-    plt.subplots_adjust(top=0.85, left=0.05, right=0.85)
+    plt.subplots_adjust(top=0.85, left=0.06, right=0.85)
     
     return fig
 

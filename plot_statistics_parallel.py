@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y_parallel, get_last_prl_epochs
-from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel
+from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
@@ -59,12 +59,7 @@ if test_files[0]=="saved":
 
 
 #Which epochs from the parallel encoder history to take:
-if epoch_schedule=="1-1-1":
-    how_many_epochs_each_to_train = np.ones(100).astype(int)
-elif epoch_schedule=="10-2-1":
-    how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
-print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
-
+how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
 
 
 #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list, default_label_array) 
