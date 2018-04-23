@@ -38,12 +38,17 @@ def get_saved_plots_info(identifier):
     energy_bins_1d=np.linspace(3,100,32)
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     
-    if identifier=="200_linear":
-        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
-    elif identifier=="2000_unf":
+    #----------------Single unfrozen datafiles----------------
+    if identifier=="2000_unf":
         model_path = "models/vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
     elif identifier=="2000_unf_mse":
         model_path = "models/vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
+    elif identifier=="200_linear":
+        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
+   
+    
+    #----------------Single encoder datafiles----------------
+        
         
     #----------------Sets for mae comparison----------------
     # Will exit after completion
