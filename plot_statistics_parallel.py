@@ -17,10 +17,9 @@ def parse_input():
 params = parse_input()
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y_parallel, get_last_prl_epochs
-from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train
+from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train, get_list_of_all_parallel_tags
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
@@ -47,36 +46,57 @@ colors=["blue", "orange"] # = automatic
 #Name of file in the results/dumped_statistics folder to save the numpy array 
 #with the plot data to; None will skip saving
 dump_to_file=None
-
-
-
 #save plot as
 save_as=None
+
+
+
+def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=None):
+    #Save and return the plot
+    #Input: Either infos about what to plot, or a tag to load it automatically
+    
+    if tag != None:
+        test_files, title, labels_override, save_as, epoch_schedule = get_props_for_plot_parallel(tag)
+        
+    #Which epochs from the parallel encoder history to take:
+    how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
+    
+    #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list, default_label_array) 
+    #for every test file
+    data_from_files, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file)
+    
+    data_autoencoder = data_from_files[0]
+    data_parallel = data_from_files[1]
+    
+    data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train)
+    
+    
+    fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
+                     title, legend_locations, labels_override, colors, xticks, figsize)
+    
+    if save_as != None:
+        plt.savefig(save_as)
+        print("Saved plot as",save_as)
+    
+    return fig
+
 if test_files[0]=="saved":
     #overwrite some of the above options from a saved setup
-    test_files, title, labels_override, save_as, epoch_schedule = get_props_for_plot_parallel(test_files[1])
-
-
-
-#Which epochs from the parallel encoder history to take:
-how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
-
-
-#Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list, default_label_array) 
-#for every test file
-data_from_files, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file)
-
-data_autoencoder = data_from_files[0]
-data_parallel = data_from_files[1]
-
-data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train)
-
-
-fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                 title, legend_locations, labels_override, colors, xticks, figsize)
-
-if save_as != None:
-    plt.savefig(save_as)
-    print("Saved plot as",save_as)
+    tag = test_files[1]
     
-plt.show(fig)
+    if tag == "all":
+        #make and save all the plots whose setup is saved, without displaying them.
+        list_of_all_tags = get_list_of_all_parallel_tags()
+        for tag in list_of_all_tags:
+            fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)
+            plt.close(fig)
+    else:
+        #make, save and show a single plot whose setup is saved
+        fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)
+        plt.show(fig)
+
+else:
+    #Plot the files that were given to the parser directly
+    tag = None
+    fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)
+    plt.show(fig)
