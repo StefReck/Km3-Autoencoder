@@ -4,6 +4,7 @@ Plot autoencoder and supervised parallel performance in one plot.
 """
 
 import argparse
+import os
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Make overview plots of model training. Can also enter "saved" and a tag to restore saved plot properties.')
@@ -75,6 +76,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
                      title, legend_locations, labels_override, colors, xticks, figsize)
     
     if save_as != None:
+        os.makedirs(os.path.dirname(save_as), exist_ok=True)
         plt.savefig(save_as)
         print("Saved plot as",save_as)
     
