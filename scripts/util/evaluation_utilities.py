@@ -322,6 +322,8 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
+    
+    
 def make_binned_data_plot(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
     """
     Makes and saves a plot based on multiple binned acc or loss data.
@@ -351,6 +353,7 @@ def make_binned_data_plot(hist_data_array, label_array, title, filepath, y_label
     plt.savefig(filepath)
     plt.close()
  
+    
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
     """
@@ -440,6 +443,7 @@ def select_class(arr_energy_correct_classes, class_vector):
     return selected_rows_of_class
 
 #------------- Code for evaluation dataset script --------------------
+    
 def get_name_of_dump_files_for_evaluation_dataset(modelname, dataset, bins, class_type):
     dump_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
     if class_type is None:
@@ -470,7 +474,8 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
         class_type:     Class type of the prediction. None for autoencoders.
     Output:
         hist_data_array: A list of the evaluation for every model, that is: the binned data that
-                         is used for making the plot (can contain binned acc, mse,... )
+                         is used for making the plot (can contain binned acc,
+                         mse, mre for track/shower ... )
     """
     #Extract the names of the models from their paths
     modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 

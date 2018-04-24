@@ -39,8 +39,7 @@ bins=32
 
 #If not None: Change the y range of all plots to this one (to make unit looks)
 y_lims_override = None
-#Override default location of legend ("best")
-legend_loc="best"
+
 #instead of plotting acc vs. energy, one can also make a compare plot, 
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
@@ -64,6 +63,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     class_type = (2, 'up_down')
     #mse, acc, mre
     plot_type = "acc"
+    #Default location of legend ("best")
+    legend_loc="best"
     
     if which_one=="1_unf":
         #vgg_3_broken1_unf
@@ -93,6 +94,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_3_broken1_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.4,1.05)
+        legend_loc="lower rigth"
     
     elif which_one=="2_unf":
         #vgg_3_broken2_unf
@@ -226,7 +228,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         
     modelidents = [modelpath + modelident for modelident in modelidents]
         
-    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type
+    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -246,13 +248,18 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
     Make an evaluation based on the info_tag (Generate+Save or load evaluation data, save plot).
     A plot that shows acc or loss over the mc energy in a histogram, evaluated on different 
     datasets.
+    Often, there will be three models plotted: 
+        0: On 'simulations'
+        1: On 'measured' data
+        2: Upper limit on 'measured' data
     """
-    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
+    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
     save_plot_as = plot_path + plot_file_name
     
     #generate or load data automatically:
     #this will be a list of binned evaluations, one for every model
     hist_data_array = make_or_load_files(modelidents, dataset_array, class_type=class_type, bins=bins)
+    print_statistics_in_numbers(hist_data_array, plot_type)
     
     #make plot of multiple data:
     if plot_type == "acc":
@@ -278,6 +285,29 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
     print("Plot saved to", save_plot_as)
     return
 
+def print_statistics_in_numbers(hist_data_array, plot_type):
+    """
+    Prints the average overall loss of performance, 
+    middled over all bins (not all events).
+    """
+    if plot_type == "acc":
+        #hist_data contains [energy, binned_acc] for every model
+        on_simulations_data = hist_data_array[0][1]
+        on_measured_data    = hist_data_array[1][1]
+        upper_limit_data    = hist_data_array[2][1]
+        
+        dropoff_sim_measured = np.abs(on_simulations_data - on_measured_data).mean()
+        dropoff_upper_limit_measured = np.abs(upper_limit_data - on_measured_data).mean()
+        
+        print("Average acc reduction across all bins:")
+        print("From simulation to measured:", dropoff_sim_measured)
+        print("From upper lim to measured:", dropoff_upper_limit_measured)
+    elif plot_type=="mre":
+        pass
+    
+    else:
+        raise NameError("Unknown plottype"+plot_type)
+    
 
 if make_difference_plot == False or make_difference_plot == "both":
     for info_tag in which_ones:
