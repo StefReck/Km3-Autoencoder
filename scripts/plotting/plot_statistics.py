@@ -205,6 +205,14 @@ def get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to
     
     return np.array(data_parallel_test), np.array(data_parallel_train)
 
+def print_extrema(epochs, ydata):
+    #Print the maximum and the minimum of the ydata, together with their epoch
+    maximum_epoch = np.argmax(ydata)
+    minimum_epoch = np.argmin(ydata)
+    print("Test data extrema:")
+    print("Maximum:\t",epochs[maximum_epoch],"\t",ydata[maximum_epoch])
+    print("Minimum:\t",epochs[minimum_epoch],"\t",ydata[minimum_epoch])
+    return
 
 def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
     """
@@ -238,6 +246,8 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     #plot the data in one plot
     for i,data_of_model in enumerate(data_for_plots):
         # data_of_model: [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
+        print(label_array[i])
+        print_extrema(data_of_model[0],data_of_model[1])
         if color_override==True:
             test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o", color=colors[i])
         else:
@@ -322,7 +332,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     #parallel enc
     #parallel training might not have been done for all AE epochs:
     #data_parallel_epochs = data_autoencoder[0][:len(data_parallel_test[0])]
-    
+    print_extrema(data_parallel_test[0], data_parallel_test[1])
     if color_override==True:#        21                      22
         test_plot_prl = ax2.plot(data_parallel_test[0], data_parallel_test[1], marker="o", color=colors[1], zorder=11)
     else:

@@ -583,6 +583,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #Execute Training:
         for current_epoch in range(running_epoch,running_epoch+runs):
             #Does the model we are about to save exist already?
+            print("\n")
             check_for_file(model_folder + "trained_" + modelname + '_epoch' + str(current_epoch+1) + '.h5')
             #custom lr schedule; lr_decay was set to 0 already
             if lr_schedule_number != None:
