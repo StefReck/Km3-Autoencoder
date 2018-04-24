@@ -266,11 +266,11 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
     #make plot of multiple data:
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
-        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
     
     elif plot_type == "mse":
         y_label_of_plot="Loss"
-        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
     
     elif plot_type == "mre":
         #Median relative error
