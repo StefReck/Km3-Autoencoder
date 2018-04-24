@@ -324,11 +324,12 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     
     
     
-def make_binned_data_plot(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
+def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
     """
-    Makes and saves a plot based on multiple binned acc or loss data.
+    Makes a plot based on multiple binned acc or loss data.
     Will plot for every hist data in the array: [1] over [0]
     """
+    fig, ax = plt.subplots()
     for i, hist in enumerate(hist_data_array):
         #Use user defined colors, if given in proper length; else default palette
         energy=hist_data_array[i][0]
@@ -350,8 +351,7 @@ def make_binned_data_plot(hist_data_array, label_array, title, filepath, y_label
     plt.title(title)
     plt.grid(True)
 
-    plt.savefig(filepath)
-    plt.close()
+    return fig
  
     
 

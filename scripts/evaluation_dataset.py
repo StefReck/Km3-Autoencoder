@@ -65,6 +65,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     plot_type = "acc"
     #Default location of legend ("best")
     legend_loc="best"
+    #Whether to show the plots during plotting or not
+    show_the_plot = True
     
     if which_one=="1_unf":
         #vgg_3_broken1_unf
@@ -94,7 +96,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_3_broken1_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.4,1.05)
-        legend_loc="lower rigth"
+        legend_loc="lower right"
     
     elif which_one=="2_unf":
         #vgg_3_broken2_unf
@@ -228,7 +230,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         
     modelidents = [modelpath + modelident for modelident in modelidents]
         
-    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc
+    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc, show_the_plot
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -253,7 +255,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
         1: On 'measured' data
         2: Upper limit on 'measured' data
     """
-    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
+    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc, show_the_plot = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
     save_plot_as = plot_path + plot_file_name
     
     #generate or load data automatically:
@@ -264,25 +266,29 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
     #make plot of multiple data:
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
-        make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
     
     elif plot_type == "mse":
         y_label_of_plot="Loss"
-        make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
     
     elif plot_type == "mre":
         #Median relative error
         y_label_of_plot='Median fractional energy resolution'
         fig = make_energy_mae_plot(hist_data_array, label_list=label_array)
-        fig.savefig(save_plot_as)
-        plt.close(fig)
         
-    elif plot_type == None:
-        print("plot_type==None: Not generating plots")
     else:
         print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
     
+    
+    fig.savefig(save_plot_as)
     print("Plot saved to", save_plot_as)
+    
+    if show_the_plot == True:
+        plt.show(fig)
+    else:
+        plt.close(fig)
+    
     return
 
 def print_statistics_in_numbers(hist_data_array, plot_type):
@@ -309,10 +315,16 @@ def print_statistics_in_numbers(hist_data_array, plot_type):
         raise NameError("Unknown plottype"+plot_type)
     
 
+
+
 if make_difference_plot == False or make_difference_plot == "both":
     for info_tag in which_ones:
         make_evaluation(info_tag, extra_name, y_lims_override)
       
+        
+        
+        
+        
         
 if make_difference_plot == True  or make_difference_plot == "both":
     #which plots to make diff of; (first - second) / first
