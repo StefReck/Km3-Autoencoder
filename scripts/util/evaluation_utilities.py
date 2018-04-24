@@ -49,7 +49,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
 
     arr_energy_correct = None
     for s in range(int(steps)):
-        if s % 300 == 0:
+        if s % 1000 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, y_true, mc_info = next(generator)
         y_pred = model.predict_on_batch(xs)
@@ -71,7 +71,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
 
 
     total_accuracy=np.sum(arr_energy_correct[:,1])/len(arr_energy_correct[:,1])
-    print("Total accuracy:", total_accuracy, "(", np.sum(arr_energy_correct[:,1]), "of",len(arr_energy_correct[:,1]) , "events)")
+    print("\nTotal accuracy:", total_accuracy, "(", np.sum(arr_energy_correct[:,1]), "of",len(arr_energy_correct[:,1]) , "events)\n")
     return arr_energy_correct
 
 def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels, dataset_info_dict, broken_simulations_mode=0, samples=None):
@@ -96,7 +96,7 @@ def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_m
     
     arr_energy_correct = None
     for s in range(int(steps)):
-        if s % 300 == 0:
+        if s % 1000 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, xs_2, mc_info  = next(generator)
         y_pred = model.predict_on_batch(xs) #(32, 11, 18, 50, 1) 
@@ -156,7 +156,7 @@ def make_autoencoder_energy_data(model, f, n_bins, class_type, batchsize, xs_mea
     
     arr_energy_correct = None
     for s in range(int(steps)):
-        if s % 300 == 0:
+        if s % 1000 == 0:
             print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
         xs, xs_2, mc_info  = next(generator)
         y_pred = model.predict_on_batch(xs) #(32, 11, 18, 50, 1) 
@@ -487,7 +487,7 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
     hist_data_array=[]
     for i,modelname in enumerate(modelnames):
         dataset=dataset_array[i]
-        print("Working on ",modelname,"using dataset", dataset, "with", bins, "bins")
+        print("\nWorking on ",modelname,"\n   using dataset", dataset, "with", bins, "bins\n")
         #Name of the dump file
         name_of_file=get_name_of_dump_files_for_evaluation_dataset(modelname, 
                                                        dataset, bins, class_type)
@@ -530,7 +530,7 @@ def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins)
     train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
     xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
 
-    print("Making energy_correct_array of ", modelident)
+    print("Making energy_correct_array...")
     
     if class_type is None:
         #This is for Autoencoders. Take MSE of original image vs predicted image

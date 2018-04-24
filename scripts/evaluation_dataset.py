@@ -30,8 +30,6 @@ from util.evaluation_utilities import make_or_load_files, make_binned_data_plot,
 #which_ones=("4_64_enc",)
 
 
-
-
 #extra string to be included in file names
 extra_name=""
 #number of bins of the histogram plot; default (is 97) is 32 now; backward compatibility with 98 bins
@@ -50,13 +48,12 @@ which_broken_study=4
 
 
 
-#Add the number of bins to the name of the plot file (usually 32)
-extra_name="_"+ str(bins)+"_bins" + extra_name
-
 def get_info(which_one, extra_name="", y_lims_override=None):
     """
-    Saved setups of plots
+    Saved setups of plots. 
+    Returns all relevant infos to exactly produce (or reproduce) these plots.
     """
+    #DEFAULT VALUES (overwritten when necessary)
     #This will be added before all modelidents
     modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     #Default class type the evaluation is done for. None for autoencoders.
@@ -70,6 +67,14 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     #Where to save the plots
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
     folder_in_the_plots_path = "broken_study/"
+    
+    #Labels for the plot
+    label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+    #Overwrite default color palette. Leave empty for auto
+    color_array=["orange", "blue", "navy"]
+    
+    #Add the number of bins to the name of the plot file (usually 32)
+    extra_name="_"+ str(bins)+"_bins" + extra_name
     
     if which_one=="1_unf":
         #vgg_3_broken1_unf
@@ -241,8 +246,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
     
     else:
-        print(which_one, "is not known!")
-        raise(TypeError)
+        raise NameError(str(which_one) + " is not known!")
         
     if y_lims_override != None:
         y_lims = y_lims_override
@@ -250,17 +254,10 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     modelidents = [modelpath + modelident for modelident in modelidents]
     save_plot_as = plot_path + folder_in_the_plots_path + plot_file_name    
     
-    return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot
+    return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot, label_array, color_array
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    
-
-label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
-#Overwrite default color palette. Leave empty for auto
-color_array=["orange", "blue", "navy"]
-
-
 
 
 
@@ -274,7 +271,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
         0: On 'simulations'
         1: On 'measured' data
     """
-    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
+    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot, label_array, color_array = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
     
     #generate or load data automatically:
     #this will be a list of binned evaluations, one for every model
@@ -342,9 +339,11 @@ if make_difference_plot == False or make_difference_plot == "both":
         
         
         
-        
-        
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#not supported anymore...
+
 if make_difference_plot == True  or make_difference_plot == "both":
+    raise
     #which plots to make diff of; (first - second) / first
     make_diff_of_list=((0,1),(2,1))
     title_list=("Relative loss of accuracy: 'simulations' to 'measured' data",

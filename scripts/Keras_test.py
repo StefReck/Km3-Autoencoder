@@ -195,6 +195,8 @@ def test_model():
     return autoencoder
 
 
+
+
 model = test_model()
 model.compile(optimizer='adam', loss='mse')
 model.predict(np.ones((1,)))
