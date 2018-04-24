@@ -6,13 +6,30 @@ This is for comparison of supervised accuracy on different datasets.
 Especially for the plots for the broken data comparison.
 """
 
+import argparse
+
+def parse_input():
+    parser = argparse.ArgumentParser(description='Evaluate model performance after training. This is for comparison of supervised accuracy on different datasets. Especially for the plots for the broken data comparison.')
+    parser.add_argument('info_tags', nargs="+", type=str, help='Names of identifiers for a saved setup.')
+
+    args = parser.parse_args()
+    params = vars(args)
+    return params
+
+params = parse_input()
+which_ones = params["info_tags"]
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-from util.evaluation_utilities import make_or_load_files, make_energy_to_accuracy_plot_comp_data, make_energy_to_loss_plot_comp_data
+from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot
 
-#Standard, plot acc vs energy plots of these saved setups:
-which_ones=("4_64_enc",)
+
+#Standard, plot acc vs energy plots of these saved setups (taken from parser now)
+#which_ones=("4_64_enc",)
+
+
 
 
 #extra string to be included in file names
@@ -34,13 +51,20 @@ which_broken_study=4
 
 
 
-
+#Add the number of bins to the name of the plot file (usually 32)
 extra_name="_"+ str(bins)+"_bins" + extra_name
 
 def get_info(which_one, extra_name="", y_lims_override=None):
     """
     Saved setups of plots
     """
+    #This will be added before all modelidents
+    modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+    #Default class type the evaluation is done for. None for autoencoders.
+    class_type = (2, 'up_down')
+    #mse, acc, mre
+    plot_type = "acc"
+    
     if which_one=="1_unf":
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -54,6 +78,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_3_broken1_unf"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.4,1.05)
+        
     
     elif which_one=="1_enc":
         #vgg_3_broken1_enc
@@ -199,7 +224,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     if y_lims_override != None:
         y_lims = y_lims_override
         
-    return modelidents,dataset_array,title_of_plot,plot_file_name,y_lims
+    modelidents = [modelpath + modelident for modelident in modelidents]
+        
+    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -208,54 +235,56 @@ def get_info(which_one, extra_name="", y_lims_override=None):
 label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
 #Overwrite default color palette. Leave empty for auto
 color_array=["orange", "blue", "navy"]
-#loss, acc, None
-plot_type = "acc"
-#Info about model
-class_type = (2, 'up_down')
-
-
-modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
 
 
 
-if make_difference_plot == False or make_difference_plot == "both":
+plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/broken_study/"
+
+
+def make_evaluation(info_tag, extra_name, y_lims_override):
     """
+    Make an evaluation based on the info_tag (Generate+Save or load evaluation data, save plot).
     A plot that shows acc or loss over the mc energy in a histogram, evaluated on different 
     datasets.
     """
-    for which_one in which_ones:
+    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
+    save_plot_as = plot_path + plot_file_name
+    
+    #generate or load data automatically:
+    #this will be a list of binned evaluations, one for every model
+    hist_data_array = make_or_load_files(modelidents, dataset_array, class_type=class_type, bins=bins)
+    
+    #make plot of multiple data:
+    if plot_type == "acc":
+        y_label_of_plot="Accuracy"
+        make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+    
+    elif plot_type == "mse":
+        y_label_of_plot="Loss"
+        make_binned_data_plot(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
+    
+    elif plot_type == "mre":
+        #Median relative error
+        y_label_of_plot='Median fractional energy resolution'
+        fig = make_energy_mae_plot(hist_data_array, label_list=label_array)
+        fig.savefig(save_plot_as)
+        plt.close(fig)
         
-        modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_one, extra_name=extra_name, y_lims_override=y_lims_override)
-        
-        modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
-        #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
-        for modelident in modelidents:
-            modelnames.append(modelident.split("trained_")[1][:-3])
-            
-        save_plot_as = plot_path + plot_file_name
-        
-        #generate or load data automatically:
-        hist_data_array = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
-        #make plot of multiple data:
-        if plot_type == "acc":
-            y_label_of_plot="Accuracy"
-            make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
-        elif plot_type == "loss":
-            y_label_of_plot="Loss"
-            make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title_of_plot, filepath=save_plot_as, y_label=y_label_of_plot, color_array=color_array) 
-        
-        elif plot_type == None:
-            print("plot_type==None: Not generating plots")
-        else:
-            print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
-        
-        print("Plot saved to", save_plot_as)
+    elif plot_type == None:
+        print("plot_type==None: Not generating plots")
+    else:
+        print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
+    
+    print("Plot saved to", save_plot_as)
+    return
+
+
+if make_difference_plot == False or make_difference_plot == "both":
+    for info_tag in which_ones:
+        make_evaluation(info_tag, extra_name, y_lims_override)
       
         
-        
-    
-if make_difference_plot == True or make_difference_plot == "both":
+if make_difference_plot == True  or make_difference_plot == "both":
     #which plots to make diff of; (first - second) / first
     make_diff_of_list=((0,1),(2,1))
     title_list=("Relative loss of accuracy: 'simulations' to 'measured' data",
@@ -285,7 +314,7 @@ if make_difference_plot == True or make_difference_plot == "both":
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
         
-        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
+        hist_data_array_unf = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, class_type=class_type, bins=bins)
         
         
         modelidents,dataset_array,title_of_plot,plot_file_name,y_lims = get_info(which_ones[1], y_lims_override=y_lims_override)
@@ -295,7 +324,7 @@ if make_difference_plot == True or make_difference_plot == "both":
         for modelident in modelidents:
             modelnames.append(modelident.split("trained_")[1][:-3])
             
-        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, modelpath=modelpath, class_type=class_type, bins=bins)
+        hist_data_array_enc = make_or_load_files(modelnames, dataset_array, modelidents=modelidents, class_type=class_type, bins=bins)
         
         
         label_array=["Unfrozen", "Autoencoder-encoder"]

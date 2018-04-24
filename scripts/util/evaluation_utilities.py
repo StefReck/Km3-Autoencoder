@@ -322,13 +322,10 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     plt.savefig(filepath+"_comp.pdf")
     return(bin_edges_centered, hist_1d_energy_accuracy_bins, hist_1d_energy_accuracy_bins2)
     
-def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
+def make_binned_data_plot(hist_data_array, label_array, title, filepath, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
     """
-    Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
-    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
-    :param str title: Title of the mpl step plot.
-    :param str filepath: Filepath of the resulting plot.
-    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
+    Makes and saves a plot based on multiple binned acc or loss data.
+    Will plot for every hist data in the array: [1] over [0]
     """
     for i, hist in enumerate(hist_data_array):
         #Use user defined colors, if given in proper length; else default palette
@@ -353,30 +350,7 @@ def make_energy_to_accuracy_plot_comp_data(hist_data_array, label_array, title, 
 
     plt.savefig(filepath)
     plt.close()
-    
-def make_energy_to_loss_plot_comp_data(hist_data_array, label_array, title, filepath, y_label="Loss"):
-    """
-    Makes a mpl step plot with Energy vs. Accuracy based on a [Energy, correct] array.
-    :param ndarray(ndim=2) arr_energy_correct: 2D array with the content [Energy, correct, ptype, is_cc, y_pred].
-    :param str title: Title of the mpl step plot.
-    :param str filepath: Filepath of the resulting plot.
-    :param (int, int) plot_range: Plot range that should be used in the step plot. E.g. (3, 100) for 3-100GeV Data.
-    """
-    for i, hist in enumerate(hist_data_array):
-        plt.step(hist_data_array[i][0], hist_data_array[i][1], where='post', label=label_array[i])
-    
-    x_ticks_major = np.arange(0, 101, 10)
-    plt.xticks(x_ticks_major)
-    plt.minorticks_on()
-
-    plt.legend()
-    plt.xlabel('Energy [GeV]')
-    plt.ylabel(y_label)
-    #plt.ylim((0, 0.2))
-    plt.title(title)
-    plt.grid(True)
-
-    plt.savefig(filepath)
+ 
 
 def make_energy_to_accuracy_plot_multiple_classes(arr_energy_correct_classes, title, filename, plot_range=(3,100)):
     """
@@ -465,35 +439,59 @@ def select_class(arr_energy_correct_classes, class_vector):
 
     return selected_rows_of_class
 
-#------------- My Code --------------------
+#------------- Code for evaluation dataset script --------------------
+def get_name_of_dump_files_for_evaluation_dataset(modelname, dataset, bins, class_type):
+    dump_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
+    if class_type is None:
+        class_string = "_autoencoder"
+    elif class_type[1]=="up_down":
+        #for backward compatibility
+        class_string = ""
+    else:
+        #e.g. energy, ...
+        class_string = "_"+class_type[1]
+        
+    name_of_file= dump_path + modelname + "_" + dataset + class_string + "_"+str(bins)+"_bins_hist_data.txt"
+    return name_of_file
 
-#Takes a bunch of models and returns the hist data for plotting, either
-#by loading if it exists already or by generating it from scratch
-#can also evaluate the performance of an autoencoder 
+
+
 #TODO: not bugfixed
-def make_or_load_files(modelnames, dataset_array, bins, modelidents=None, modelpath=None, class_type=None, is_autoencoder_list=None):
-    if is_autoencoder_list==None:
-        #default: no autoencoders
-        is_autoencoder_list=np.zeros_like(modelnames)
+def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
+    """
+    Takes a bunch of models and returns the hist data for plotting, either
+    by loading if it exists already or by generating it from scratch.
+    Can also evaluate the performance of an autoencoder.
+        
+    Input:
+        modelidents:    List of strs of the path to the models on which the evaluation is done on.
+        dataset_array:  List of dataset tags on which the models will be evaluated on.
+        bins:           Number of bins the evaluation will be binned to.
+        class_type:     Class type of the prediction. None for autoencoders.
+    Output:
+        hist_data_array: A list of the evaluation for every model, that is: the binned data that
+                         is used for making the plot (can contain binned acc, mse,... )
+    """
+    #Extract the names of the models from their paths
+    modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
+    #           (created from   "trained_vgg_1_xzt_supervised_up_down_epoch6.h5"   )
+    for modelident in modelidents:
+        modelnames.append(modelident.split("trained_")[1][:-3])
         
     hist_data_array=[]
     for i,modelname in enumerate(modelnames):
         dataset=dataset_array[i]
-        is_autoencoder = is_autoencoder_list[i]
         print("Working on ",modelname,"using dataset", dataset, "with", bins, "bins")
-        
-        name_of_file="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/" + modelname + "_" + dataset + "_"+str(bins)+"_bins_hist_data.txt"
-        
+        #Name of the dump file
+        name_of_file=get_name_of_dump_files_for_evaluation_dataset(modelname, 
+                                                       dataset, bins, class_type)
         
         if os.path.isfile(name_of_file)==True:
+            #File was created before, just open and load
             hist_data_array.append(open_hist_data(name_of_file))
         else:
-            
-            if is_autoencoder == 1:
-                hist_data = make_and_save_hist_data_autoencoder(modelpath, dataset, modelidents[i], class_type, name_of_file, bins)
-            else:
-                hist_data = make_and_save_hist_data(modelpath, dataset, modelidents[i], class_type, name_of_file, bins)
-            
+            #File has not been created before, generate new one
+            hist_data = make_and_save_hist_data(dataset, modelidents[i], class_type, name_of_file, bins)
             hist_data_array.append(hist_data)
         print("Done.")
     return hist_data_array
@@ -509,53 +507,50 @@ def open_hist_data(name_of_file):
     return hist_data
 
 
-#Accuracy as a function of energy binned to a histogramm. It is dumped automatically into the
-#results/data folder, so that it has not to be generated again
-def make_and_save_hist_data(modelpath, dataset, modelident, class_type, name_of_file, bins):
-    model = load_model(modelpath + modelident)
-    
+
+def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins):
+    """
+    Calculate the evaluation of a model on a dataset, and then bin it energy wise.
+    It is dumped automatically into the
+    results/data folder, so that it has not to be generated again.
+    """
+    #Load necessary data
+    model = load_model(modelident)
     dataset_info_dict = get_dataset_info(dataset)
-    #home_path=dataset_info_dict["home_path"]
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
-    
     train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
     xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
 
-    
     print("Making energy_correct_array of ", modelident)
-    arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
-    #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
-    hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
-    #save to file
-    print("Saving hist_data as", name_of_file)
-    with open(name_of_file, "wb") as dump_file:
-        pickle.dump(hist_data, dump_file)
-    return hist_data
-
-
-
-#Loss of an AE as a function of energy, rest like above
-def make_and_save_hist_data_autoencoder(modelpath, dataset, modelident, class_type, name_of_file, bins):
-    model = load_model(modelpath + modelident)
     
-    dataset_info_dict = get_dataset_info(dataset)
-    #home_path=dataset_info_dict["home_path"]
-    train_file=dataset_info_dict["train_file"]
-    test_file=dataset_info_dict["test_file"]
-    n_bins=dataset_info_dict["n_bins"]
-    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"]
+    if class_type is None:
+        #This is for Autoencoders. Take MSE of original image vs predicted image
+        
+        #arr_energy_correct: [energy, Mean Squared error between original image and reconstructed one]
+        arr_energy_correct = make_loss_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
+        #hist_data = [bin_edges_centered, hist_1d_energy_bins]:
+        hist_data = make_energy_to_loss_data(arr_energy_correct, plot_range=(3,100), bins=bins)
     
-    train_tuple=[[train_file, h5_get_number_of_rows(train_file)]]
-    xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=32, n_bins=n_bins, n_gpu=1)
+    elif class_type == (1, "energy"):
+        #This is for energy encoders. Take median relative error.
+        swap_4d_channels = None
+        #arr_energy_correct: [mc_energy, reco_energy, particle_type, is_cc]
+        arr_energy_correct = make_performance_array_energy_energy(model, test_file, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None)
+        # list len 2 of [energy_bins, hist_energy_losses, hist_energy_variance] 
+        # for track and shower events
+        hist_data = calculate_energy_mae_plot_data(arr_energy_correct)
+        
+    else:
+        #For encoders with accuracy. Calculate accuracy.
+        
+        #arr_energy_correct: [energy, correct, particle_type, is_cc, y_pred] for every event
+        arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
+        #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
+        hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
     
-    
-    print("Making energy_correct_array of ", modelident)
-    arr_energy_correct = make_loss_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
-    hist_data = make_energy_to_loss_data(arr_energy_correct, plot_range=(3,100), bins=bins)
-    #save to file
     print("Saving hist_data as", name_of_file)
     with open(name_of_file, "wb") as dump_file:
         pickle.dump(hist_data, dump_file)
