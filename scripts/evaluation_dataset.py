@@ -305,9 +305,9 @@ def print_statistics_in_numbers(hist_data_array, plot_type):
         dropoff_sim_measured = np.abs(on_simulations_data - on_measured_data).mean()
         dropoff_upper_limit_measured = np.abs(upper_limit_data - on_measured_data).mean()
         
-        print("Average acc reduction across all bins:")
-        print("From simulation to measured:", dropoff_sim_measured)
-        print("From upper lim to measured:", dropoff_upper_limit_measured)
+        print("Average %-acc reduction across all bins:")
+        print("From simulation to measured\tFrom upper lim to measured:")
+        print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
     elif plot_type=="mre":
         pass
     
