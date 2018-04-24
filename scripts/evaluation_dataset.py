@@ -67,6 +67,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     legend_loc="best"
     #Whether to show the plots during plotting or not
     show_the_plot = True
+    #Where to save the plots
+    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+    folder_in_the_plots_path = "broken_study/"
     
     if which_one=="1_unf":
         #vgg_3_broken1_unf
@@ -110,7 +113,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken2_unf"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.73,0.96)
+        y_lims=(0.68,0.96)
+        legend_loc="lower right"
         
     elif which_one=="2_enc":
         #vgg_3_broken2_enc
@@ -124,7 +128,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken2_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.68,0.92)
+        y_lims=(0.68,0.96)
+        legend_loc="lower right"
     
     elif which_one=="4_unf":
         modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
@@ -191,6 +196,17 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
+    elif which_one=="4_32_enc":
+        modelidents = ("vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_broken4_epoch1.h5",
+                       "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_broken4_epoch1.h5",
+                       "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_epoch48.h5")
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        title_of_plot='32 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_32_broken4_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
+    
     elif which_one=="4flip_unf":
         modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
@@ -221,6 +237,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     elif which_one=="5_unf":
         pass
     
+    elif which_one=="energy":
+        folder_in_the_plots_path = "broken_study_energy/"
+    
     else:
         print(which_one, "is not known!")
         raise(TypeError)
@@ -229,8 +248,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims = y_lims_override
         
     modelidents = [modelpath + modelident for modelident in modelidents]
-        
-    return modelidents, dataset_array ,title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc, show_the_plot
+    save_plot_as = plot_path + folder_in_the_plots_path + plot_file_name    
+    
+    return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -242,7 +262,7 @@ color_array=["orange", "blue", "navy"]
 
 
 
-plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/broken_study/"
+
 
 
 def make_evaluation(info_tag, extra_name, y_lims_override):
@@ -253,10 +273,8 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
     Often, there will be three models plotted: 
         0: On 'simulations'
         1: On 'measured' data
-        2: Upper limit on 'measured' data
     """
-    modelidents, dataset_array, title_of_plot, plot_file_name, y_lims, class_type, plot_type, legend_loc, show_the_plot = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
-    save_plot_as = plot_path + plot_file_name
+    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
     
     #generate or load data automatically:
     #this will be a list of binned evaluations, one for every model

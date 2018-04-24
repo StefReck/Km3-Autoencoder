@@ -446,6 +446,7 @@ def select_class(arr_energy_correct_classes, class_vector):
     
 def get_name_of_dump_files_for_evaluation_dataset(modelname, dataset, bins, class_type):
     dump_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
+    #Give a seperate name for different class types
     if class_type is None:
         class_string = "_autoencoder"
     elif class_type[1]=="up_down":
