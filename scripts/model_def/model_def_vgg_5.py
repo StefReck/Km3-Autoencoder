@@ -134,6 +134,7 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
     encoded_penalty        = options_dict["encoded_penalty"]
     additional_conv_layer_for_encoder = options_dict["add_conv_layer"]
     number_of_output_neurons=options_dict["number_of_output_neurons"]
+    dense_setup = options_dict["dense_setup"]
     
     if number_of_output_neurons > 1:
         supervised_last_activation='softmax'
@@ -207,11 +208,21 @@ def setup_vgg_5_picture(autoencoder_stage, options_dict, modelpath_and_name=None
              x = Flatten()(x)
         else:
             x = Flatten()(encoded)
+            
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         
+        #For testing how additional dense layers affect the acc drop off at some specific AE loss:
+        if dense_setup == "standard":
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        elif dense_setup == "deep":
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        elif dense_setup == "shallow":
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            
+        outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         model = Model(inputs=inputs, outputs=outputs)
         return model
 

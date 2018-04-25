@@ -125,6 +125,13 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
         
+     #-------------------vgg_5_600_picture Instant high lr Schmu---------------------------  
+     elif tag=="vgg_5_600_picture-instanthighlr":
+        title = "Parallel training with model '600 picture' and high lr"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt"
+        save_to_folder = "instanthighlr/"
+        
     #-------------------vgg_5_200 Parameter Erhöhung---------------------------
     elif tag=="vgg_5_200_deep":
         title = "Parallel training with model '200 deep'"

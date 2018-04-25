@@ -23,6 +23,7 @@ def make_options_dict(additional_options):
     options_dict["dropout_for_conv"]=0.0
     options_dict["add_conv_layer"]=False
     options_dict["make_stateful"]=False
+    options_dict["dense_setup"]="standard"
         
     if additional_options == "unlock_BN":
         #Always unlock the BN layers in the encoder part.
@@ -57,6 +58,13 @@ def make_options_dict(additional_options):
         #Change dropout of dense layers
         options_dict["encoder_only"]=True
         print("Encoder only mode enabled! Not compatible with all models (you might get an error)")
+    
+    if "dense_setup=" in additional_options:
+        #change the encoder part, only supported for vgg5picture
+        #possible setups: standard, deep, shallow
+        dense_setup = additional_options.split("=")[1]
+        options_dict["dense_setup"]=dense_setup
+        print("Using dense setup:",dense_setup, "(only supported for vgg5picture)")
     
     return options_dict
 
@@ -226,7 +234,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_xztc", autoencoder_stage=0, modelpath_and_name=None)
+    model=setup_model(model_tag="vgg_5_picture", autoencoder_stage=2, modelpath_and_name=None, 
+                      additional_options="dense_setup=shallow")
     model.summary()
 
 """
