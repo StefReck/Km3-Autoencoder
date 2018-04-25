@@ -24,7 +24,7 @@ from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_par
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
-#Epoch schedule that was used during training:
+#Epoch schedule that was used during training as defined by the parser:
 if params["channel"]==True:
     #used for channel AE
     epoch_schedule="1-1-1"
@@ -32,7 +32,7 @@ else:
     #used for everything else
     epoch_schedule="10-2-1"
     
-
+#Default Values for plotting:
 xlabel="Epoch"
 title="Parallel Training"
 figsize = (13,8)

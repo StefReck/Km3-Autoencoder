@@ -297,7 +297,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     Makes a plot of autoencoder loss and supervised acc of parallel training.
     data autoencoder :
     [Test Epoch, Test ydata, Epoch train, ydata train]
-    and data_parallel:
+    and data_parallel_test/_train:
     [Epoch, ydata]
     """
     fig, ax=plt.subplots(figsize=figsize)

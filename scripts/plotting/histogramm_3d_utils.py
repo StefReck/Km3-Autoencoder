@@ -98,8 +98,11 @@ def make_3d_plots(hist_org, n_bins, suptitle, figsize, titles=["Original", "Pred
     if hist_pred != []:
         ax2 = fig.add_subplot(122, projection='3d')
         plot2 = ax2.scatter(hist_pred[0],hist_pred[1],hist_pred[2], c=hist_pred[3], s=size_of_circles(hist_pred), rasterized=True)
-        
-        cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1, ticks=[hist_pred[3].min(),]+np.arange(int(hist_pred[3].min()),hist_pred[3].max()+1,1).tolist())
+        #Ticks of the color bar: The data can be e.g. from 0.3 to 10, ticks will be at 1,2,...,10
+        cbar_ticks = np.arange( np.ceil(hist_pred[3].min()), np.ceil(hist_pred[3].max())+1 ).tolist()
+        #old version
+        #cbar_ticks = [hist_pred[3].min(),]+np.arange(int(hist_pred[3].min()),hist_pred[3].max()+1,1).tolist()
+        cbar2=fig.colorbar(plot2,fraction=0.046, pad=0.1, ticks=cbar_ticks)
         cbar2.ax.set_title('Hits')
         ax2.set_xlabel(binsize_to_name_dict[n_bins[0]])
         ax2.set_xlim([0,n_bins[0]])

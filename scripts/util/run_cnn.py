@@ -133,7 +133,11 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
 
 
 def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values=None):
-    #Makes changes to the data as read from h5 file, e.g. adding noise, ...
+    """
+    Makes changes to the data as read from h5 file, e.g. adding noise, ...
+        xs:         Batch of event data, shape (batchsize, xzt, 1)
+        y_values:   The mc_info vector, containing all infos about the event.
+    """
     broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] 
     
     if broken_simulations_mode==1:
@@ -207,6 +211,32 @@ def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values
         # if swap_col is not None, zero_center_image is already swapped
         if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
         
+        #Broken 5 mode was precalculated in its own files
+        
+    elif broken_simulations_mode==12:
+        #Add poisson noise that is proportional to 1/energy
+        #y_values are needed for this
+        #Zero center first; the noise that will be added is 0 centered itself
+        if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
+        #Get the mc energy of the events:
+        ys = y_values[:,2]
+        
+        #poisson_noise_expectation_value=0.08866 for 10kHz noise
+        
+        """This expectation value is proportional to 1/mc_energy, 
+        ranging between 10 kHz at 3 GeV and 0.3 kHz at 100 GeV
+        this means that there is little change happening after 20 GeV or so"""
+        #poisson_noise_expectation_value = 0.08866 * 3/ys
+        
+        """Expectation value linearly decreasing from 10 kHz at 3 GeV to 0 kHz at 100 GeV"""
+        poisson_noise_expectation_value = 0.08866 * (100-ys)/97
+        
+        #zero centered noise, has the shape (dims, batchsize), while xs has the shape (batchsize, dims)
+        noise = np.random.poisson(poisson_noise_expectation_value, size=xs.shape[1:]+ys.shape) - poisson_noise_expectation_value
+        #permute so that noise has shape (batchsize, dims), just as xs
+        noise = np.transpose(noise, np.roll(np.arange(len(noise.shape)), shift=1) )
+        
+        xs = xs + noise
         
     else:
         # if swap_col is not None, zero_center_image is already swapped
@@ -242,7 +272,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
     
     dimensions = get_dimensions_encoding(n_bins, batchsize)
     
-    if broken_simulations_mode == 2 or broken_simulations_mode == 4:
+    if broken_simulations_mode == 2 or broken_simulations_mode == 4 or broken_simulations_mode == 12:
         #make it so the noise is always the same on the same histogramm
         #also use different noise on test and train data
         if is_in_test_mode == False:
