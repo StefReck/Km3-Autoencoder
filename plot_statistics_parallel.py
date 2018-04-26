@@ -96,6 +96,7 @@ if test_files[0]=="saved":
                 current_tag_number+=1
             except NameError:
                 print("Done. Generated a total of",current_tag_number,"plots.")
+                break
     else:
         #make, save and show a single plot whose setup is saved
         fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)

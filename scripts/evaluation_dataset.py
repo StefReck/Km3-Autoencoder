@@ -334,8 +334,10 @@ if "all" in which_ones:
     while True:
         try:
             make_evaluation(current_tag, extra_name, y_lims_override, show_the_plot)
+            current_tag+=1
         except NameError:
             print("Done. Made a total of", current_tag, "plots.")
+            break
             
 else:
     show_the_plot = True
