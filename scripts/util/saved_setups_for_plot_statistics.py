@@ -4,17 +4,6 @@ Some saved setups for the plot ststistics scripts.
 """
 import numpy as np
 
-def get_list_of_all_parallel_tags():
-    the_list = ["msep","msepsq","msep2",
-                "channel_3n_noZeroEvent","channel_3n","channel_3n_noZero",
-                "channel_5n", "channel_10n", 
-                "vgg_3", "vgg_5_600_picture", "vgg_5_600_morefilter",
-                "vgg_5_600_channel", "vgg_5_200", "vgg_5_200_dense", "vgg_5_64", "vgg_5_32", 
-                "vgg_5_32-eps01", 
-                "vgg_5_200_deep", "vgg_5_200_large", "vgg_5_200_shallow", "vgg_5_200_small", 
-                "vgg_3_energy", "vgg_5_200_energy", "vgg_5_64_energy", "vgg_5_32-eps01_energy",]
-    return the_list
-
 def get_props_for_plot_parallel(tag):
     #For the script plots_statistics_parallel, which takes exactly two models
     #as an input (AE and parallel encoder)
@@ -23,49 +12,49 @@ def get_props_for_plot_parallel(tag):
     labels_override = ["Autoencoder", "Encoder"] 
     save_to_folder = ""
     #-------------------vgg5 picture loss functions tests---------------------------
-    if tag=="msep":
+    if tag=="msep" or tag==0:
         title = "Parallel training with MSEp autoencoder loss"
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "loss_functions/"
-    elif tag=="msepsq":
+    elif tag=="msepsq" or tag==1:
         title = r"Parallel training with MSEp$^2$ autoencoder loss"
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "loss_functions/"   
-    elif tag=="msep2":
+    elif tag=="msep2" or tag==2:
         title = "Parallel training with MSEp autoencoder loss (low lr)"
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "loss_functions/"
         
     #-------------------Channel Encoders---------------------------
-    elif tag=="channel_3n_noZeroEvent":
+    elif tag=="channel_3n_noZeroEvent" or tag==3:
         title = "Parallel training with channel autoencoder (3 neurons) and balanced dataset"
         ae_model =  home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         save_to_folder = "channel/"
         epoch_schedule="1-1-1"
-    elif tag=="channel_3n":
+    elif tag=="channel_3n" or tag==4:
         title = "Parallel training with channel autoencoder (3 neurons)"
         ae_model =  home+"models/channel_3n_m3/trained_channel_3n_m3_autoencoder_test.txt" 
         prl_model = home+"models/channel_3n_m3/trained_channel_3n_m3_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         save_to_folder = "channel/"
         epoch_schedule="1-1-1"    
-    elif tag=="channel_3n_noZero":
+    elif tag=="channel_3n_noZero" or tag==5:
         title = "Parallel training with channel autoencoder (3 neurons) and no zero centering"
         ae_model =  home+"models/channel_3n_m3-noZero/trained_channel_3n_m3-noZero_autoencoder_test.txt" 
         prl_model = home+"models/channel_3n_m3-noZero/trained_channel_3n_m3-noZero_autoencoder_supervised_parallel_up_down_dropout_stateful_test.txt"
         save_to_folder = "channel/"
         epoch_schedule="1-1-1"  
         
-    elif tag=="channel_5n":
+    elif tag=="channel_5n" or tag==6:
         title = "Parallel training with channel autoencoder (5 neurons)"
         ae_model =  home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
         save_to_folder = "channel/"
         epoch_schedule="1-1-1"
-    elif tag=="channel_10n":
+    elif tag=="channel_10n" or tag==7:
         title = "Parallel training with channel autoencoder (10 neurons)"
         ae_model =  home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_test.txt"
         prl_model = home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_supervised_parallel_up_down_stateful_convdrop_test.txt"
@@ -73,124 +62,124 @@ def get_props_for_plot_parallel(tag):
         epoch_schedule="1-1-1"
         
     #-------------------Up Down classifications vgg_5---------------------------
-    elif tag=="vgg_3":
+    elif tag=="vgg_3" or tag==8:
         title = "Parallel training with model '2000'"
         ae_model =  home+"models/vgg_3/trained_vgg_3_autoencoder_test.txt" 
         prl_model = home+"models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt"
         epoch_schedule="10-1-1"
         save_to_folder = "bottleneck/"
     
-    elif tag=="vgg_5_600_picture":
+    elif tag=="vgg_5_600_picture" or tag==9:
         title = "Parallel training with model '600 picture'"
         ae_model =  home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_up_down_new_test.txt"
         save_to_folder = "bottleneck/"
-    elif tag=="vgg_5_600_morefilter":
+    elif tag=="vgg_5_600_morefilter" or tag==10:
         title = "Parallel training with model '600 morefilter'"
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
-    elif tag=="vgg_5_600_channel":
+    elif tag=="vgg_5_600_channel" or tag==11:
         title = "Parallel training with model '600 channel'"
         ae_model =  home+"models/vgg_5_channel/trained_vgg_5_channel_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_channel/trained_vgg_5_channel_autoencoder_supervised_parallel_up_down_dropout06_test.txt"
         print("60 % Dropout was used for this model. Others are available, but the overfitting is best seen here.")
         save_to_folder = "bottleneck/"
         
-    elif tag=="vgg_5_200":
+    elif tag=="vgg_5_200" or tag==12:
         title = "Parallel training with model '200'"
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
-    elif tag=="vgg_5_200_dense":
+    elif tag=="vgg_5_200_dense" or tag==13:
         title = "Parallel training with model '200 dense'"
         ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"      
         
-    elif tag=="vgg_5_64":
+    elif tag=="vgg_5_64" or tag==14:
         title = "Parallel training with model '64'"
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
         
-    elif tag=="vgg_5_32":
+    elif tag=="vgg_5_32" or tag==15:
         title = "Parallel training with model '32' and $\epsilon=10^{-8}$"
         ae_model =  home+"models/vgg_5_32/trained_vgg_5_32_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32/trained_vgg_5_32_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
-    elif tag=="vgg_5_32-eps01":
+    elif tag=="vgg_5_32-eps01" or tag==16:
         title = "Parallel training with model '32'"
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
         
     #-------------------vgg_5_600_picture Instant high lr Schmu---------------------------  
-    elif tag=="vgg_5_600-ihlr":
+    elif tag=="vgg_5_600-ihlr" or tag==17:
         title = "Parallel training with model '600 picture' and high lr"
         ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt"
         save_to_folder = "instanthighlr/"
-    elif tag=="vgg_5_600-ihlr_dense_deep":
+    elif tag=="vgg_5_600-ihlr_dense_deep" or tag==18:
         title = "Parallel training with model '600 picture', high lr and additional dense layer"
         ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt"
         save_to_folder = "instanthighlr/"
-    elif tag=="vgg_5_600-ihlr_dense_shallow":
+    elif tag=="vgg_5_600-ihlr_dense_shallow" or tag==19:
         title = "Parallel training with model '600 picture', high lr and removed dense layer"
         ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt"
         save_to_folder = "instanthighlr/"
-    elif tag=="vgg_5_600-ihlr_add_conv":
+    elif tag=="vgg_5_600-ihlr_add_conv" or tag==20:
         title = "Parallel training with model '600 picture', high lr and additional convolutional layer"
         ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt"
         save_to_folder = "instanthighlr/"
         
     #-------------------vgg_5_200 Parameter Erhöhung---------------------------
-    elif tag=="vgg_5_200_deep":
+    elif tag=="vgg_5_200_deep" or tag==21:
         title = "Parallel training with model '200 deep'"
         ae_model =  home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "vgg_5_200_params/"
-    elif tag=="vgg_5_200_large":
+    elif tag=="vgg_5_200_large" or tag==22:
         title = "Parallel training with model '200 large'"
         ae_model =  home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "vgg_5_200_params/"
-    elif tag=="vgg_5_200_shallow":
+    elif tag=="vgg_5_200_shallow" or tag==23:
         title = "Parallel training with model '200 shallow'"
         ae_model =  home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "vgg_5_200_params/"
-    elif tag=="vgg_5_200_small":
+    elif tag=="vgg_5_200_small" or tag==24:
         title = "Parallel training with model '200 small'"
         ae_model =  home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "vgg_5_200_params/"
         
     #-------------------Energy reconstructions---------------------------
-    elif tag=="vgg_3_energy":
+    elif tag=="vgg_3_energy" or tag==25:
         title = "Parallel training with model '2000'"
         ae_model =  home+"models/vgg_3/trained_vgg_3_autoencoder_test.txt" 
         prl_model = home+"models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_600_picture_energy":
+    elif tag=="vgg_5_600_picture_energy" or tag==26:
         title = "Parallel training with model '600 picture'"
         ae_model =  home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_200_energy":
+    elif tag=="vgg_5_200_energy" or tag==27:
         title = "Parallel training with model '200'"
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_64_energy":
+    elif tag=="vgg_5_64_energy" or tag==28:
         title = "Parallel training with model '64'"
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_32-eps01_energy":
+    elif tag=="vgg_5_32-eps01_energy" or tag==29:
         title = "Parallel training with model '32'"
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_energy_test.txt"

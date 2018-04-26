@@ -10,7 +10,7 @@ import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Evaluate model performance after training. This is for comparison of supervised accuracy on different datasets. Especially for the plots for the broken data comparison.')
-    parser.add_argument('info_tags', nargs="+", type=str, help='Names of identifiers for a saved setup.')
+    parser.add_argument('info_tags', nargs="+", type=str, help='Names of identifiers for a saved setup. All for making all available ones.')
 
     args = parser.parse_args()
     params = vars(args)
@@ -62,8 +62,6 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     plot_type = "acc"
     #Default location of legend ("best")
     legend_loc="best"
-    #Whether to show the plots during plotting or not
-    show_the_plot = True
     #Where to save the plots
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
     folder_in_the_plots_path = "broken_study/"
@@ -76,7 +74,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     #Add the number of bins to the name of the plot file (usually 32)
     extra_name="_"+ str(bins)+"_bins" + extra_name
     
-    if which_one=="1_unf":
+    if which_one=="1_unf" or which_one==0:
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
                        "vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -91,7 +89,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.4,1.05)
         
     
-    elif which_one=="1_enc":
+    elif which_one=="1_enc" or which_one==1:
         #vgg_3_broken1_enc
         modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken1_epoch14.h5",
@@ -106,7 +104,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.4,1.05)
         legend_loc="lower right"
     
-    elif which_one=="2_unf":
+    elif which_one=="2_unf" or which_one==2:
         #vgg_3_broken2_unf
         modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
@@ -121,7 +119,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.68,0.96)
         legend_loc="lower right"
         
-    elif which_one=="2_enc":
+    elif which_one=="2_enc" or which_one==3:
         #vgg_3_broken2_enc
         modelidents = ("vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
                        "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch10_supervised_up_down_epoch9.h5",
@@ -136,7 +134,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.68,0.96)
         legend_loc="lower right"
     
-    elif which_one=="4_unf":
+    elif which_one=="4_unf" or which_one==4:
         modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
@@ -149,7 +147,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.5,1.0)
     
-    elif which_one=="4_enc":
+    elif which_one=="4_enc" or which_one==5:
         modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken4_epoch52.h5",
                        "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
@@ -162,7 +160,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.5,1.0)
         
-    elif which_one=="4_pic_enc":
+    elif which_one=="4_pic_enc" or which_one==6:
         modelidents = ("vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
                        "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_broken4_epoch53.h5",
                        "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch74.h5")
@@ -175,7 +173,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
-    elif which_one=="4_200_enc":
+    elif which_one=="4_200_enc" or which_one==7:
         modelidents = ("vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_broken4_epoch59.h5",
                        "vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_broken4_epoch59.h5",
                        "vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5")
@@ -188,7 +186,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
-    elif which_one=="4_64_enc":
+    elif which_one=="4_64_enc" or which_one==8:
         modelidents = ("vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_epoch57.h5",
                        "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_epoch57.h5",
                        "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5")
@@ -201,7 +199,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
-    elif which_one=="4_32_enc":
+    elif which_one=="4_32_enc" or which_one==9:
         modelidents = ("vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_broken4_epoch1.h5",
                        "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_broken4_epoch1.h5",
                        "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_epoch48.h5")
@@ -212,7 +210,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.7,0.95)
     
-    elif which_one=="4flip_unf":
+    elif which_one=="4flip_unf" or which_one==10:
         modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                        "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_supervised_up_down_epoch4.h5")
@@ -224,7 +222,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_3_broken4_flip_unf"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.75,1.0)
-    elif which_one=="4flip_enc":
+    elif which_one=="4flip_enc" or which_one==11:
         modelidents = ("vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch12_supervised_up_down_xzt_epoch62.h5",
                        "vgg_3-broken4/trained_vgg_3-broken4_autoencoder_epoch10_supervised_up_down_broken4_epoch59.h5")
@@ -237,12 +235,14 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.75,1)
         
-    elif which_one=="5_enc":
-        pass
-    elif which_one=="5_unf":
-        pass
+    elif which_one=="5_enc" or which_one==12:
+        raise NameError("Not there yet...")
+        
+    elif which_one=="5_unf" or which_one==13:
+        raise NameError("Not there yet...")
     
-    elif which_one=="energy":
+    elif which_one=="energy" or which_one==14:
+        raise NameError("Not there yet...")
         folder_in_the_plots_path = "broken_study_energy/"
     
     else:
@@ -254,15 +254,13 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     modelidents = [modelpath + modelident for modelident in modelidents]
     save_plot_as = plot_path + folder_in_the_plots_path + plot_file_name    
     
-    return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot, label_array, color_array
+    return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, label_array, color_array
 
 
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
-
-
-def make_evaluation(info_tag, extra_name, y_lims_override):
+def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     """
     Make an evaluation based on the info_tag (Generate+Save or load evaluation data, save plot).
     A plot that shows acc or loss over the mc energy in a histogram, evaluated on different 
@@ -271,7 +269,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override):
         0: On 'simulations'
         1: On 'measured' data
     """
-    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, show_the_plot, label_array, color_array = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
+    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, label_array, color_array = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
     
     #generate or load data automatically:
     #this will be a list of binned evaluations, one for every model
@@ -330,11 +328,19 @@ def print_statistics_in_numbers(hist_data_array, plot_type):
         raise NameError("Unknown plottype"+plot_type)
     
 
-
-
-if make_difference_plot == False or make_difference_plot == "both":
+if "all" in which_ones:
+    show_the_plot = False
+    current_tag=0
+    while True:
+        try:
+            make_evaluation(current_tag, extra_name, y_lims_override, show_the_plot)
+        except NameError:
+            print("Done. Made a total of", current_tag, "plots.")
+            
+else:
+    show_the_plot = True
     for info_tag in which_ones:
-        make_evaluation(info_tag, extra_name, y_lims_override)
+        make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot)
       
         
         

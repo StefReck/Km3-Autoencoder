@@ -20,7 +20,7 @@ params = parse_input()
 import matplotlib.pyplot as plt
 
 from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y_parallel, get_last_prl_epochs
-from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train, get_list_of_all_parallel_tags
+from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
 
@@ -88,10 +88,14 @@ if test_files[0]=="saved":
     
     if tag == "all":
         #make and save all the plots whose setup is saved, without displaying them.
-        list_of_all_tags = get_list_of_all_parallel_tags()
-        for tag in list_of_all_tags:
-            fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)
-            plt.close(fig)
+        current_tag_number=0
+        while True:
+            try:
+                fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=current_tag_number)
+                plt.close(fig)
+                current_tag_number+=1
+            except NameError:
+                print("Done. Generated a total of",current_tag_number,"plots.")
     else:
         #make, save and show a single plot whose setup is saved
         fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag)
