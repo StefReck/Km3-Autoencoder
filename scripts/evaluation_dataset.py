@@ -307,7 +307,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
 def print_statistics_in_numbers(hist_data_array, plot_type):
     """
     Prints the average overall loss of performance, 
-    middled over all bins (not all events).
+    averaged over all bins (not all events).
     """
     if plot_type == "acc":
         #hist_data contains [energy, binned_acc] for every model
@@ -315,10 +315,10 @@ def print_statistics_in_numbers(hist_data_array, plot_type):
         on_measured_data    = hist_data_array[1][1]
         upper_limit_data    = hist_data_array[2][1]
         
-        dropoff_sim_measured = np.abs( (on_simulations_data - on_measured_data)/on_measured_data ).mean()
-        dropoff_upper_limit_measured = np.abs( (upper_limit_data - on_measured_data)/on_measured_data ).mean()
+        dropoff_sim_measured = ( (on_simulations_data - on_measured_data)/on_measured_data ).mean()
+        dropoff_upper_limit_measured = ((upper_limit_data - on_measured_data)/on_measured_data ).mean()
         
-        print("Average relative %-acc reduction across all bins: 100 * |x - measured| / measured")
+        print("Average relative %-acc reduction across all bins: 100 * (x - measured) / measured")
         print("From simulation to measured\tFrom upper lim to measured:")
         print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
     elif plot_type=="mre":
