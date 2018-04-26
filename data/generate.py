@@ -4,7 +4,7 @@ import numpy as np
 # x, y, z, t, c
 #11,13,18,50,31
 
-mode="channel_up_manip"
+mode="broken12"
 
 #original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
     
