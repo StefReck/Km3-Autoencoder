@@ -45,6 +45,7 @@ def unpack_parsed_args():
     parser.add_argument("encoder_version", default="", nargs="?", type=str, help="e.g. -LeLu; Str added to the supervised file names to allow multiple runs on the same model.")
     parser.add_argument("--ae_loss_name", default="mse", nargs="?", type=str, help="Loss that is used during AE training. Default is mse.")
     parser.add_argument("--supervised_loss", default="auto", nargs="?", type=str, help="Loss that is used during supervised training. Default is 'auto', which is based on the number of output neurons.")
+    parser.add_argument("--init_model", default=None, nargs="?", help="Path to a model that is used for initializing.")
     
     
     args = parser.parse_args()
@@ -73,8 +74,9 @@ def unpack_parsed_args():
     encoder_version = params["encoder_version"]
     ae_loss_name=params["ae_loss_name"]
     supervised_loss=params["supervised_loss"]
+    init_model_path=params["init_model"]
     
-    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss
+    return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path
    
 """
 # Tag for the model used; Identifies both autoencoder and encoder
@@ -224,7 +226,7 @@ def make_encoder_stateful(model):
     return model
 
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss="auto"):
+def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
     home_path=dataset_info_dict["home_path"]
@@ -607,6 +609,12 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         
+    if init_model_path is not None:
+        print("Initializing model weights to", init_model_path)
+        init_model = load_model(init_model_path, custom_objects=custom_objects)
+        for i,layer in enumerate(model.layers):
+                layer.set_weights(init_model.layers[i].get_weights())
+    
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
         running_epoch=epoch #Stage 0
