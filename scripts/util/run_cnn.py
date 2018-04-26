@@ -212,8 +212,9 @@ def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values
         if zero_center_image is not None: xs = np.subtract(xs, zero_center_image)
         
         #Broken 5 mode was precalculated in its own files
-        
+    
     elif broken_simulations_mode==12:
+        raise NameError("Broken mode 12 is not generated on the fly anymore, use the generated files instead!")
         #Add poisson noise that is proportional to 1/energy
         #y_values are needed for this
         #Zero center first; the noise that will be added is 0 centered itself
