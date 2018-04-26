@@ -64,7 +64,7 @@ def make_options_dict(additional_options):
         #possible setups: standard, deep, shallow
         dense_setup = additional_options.split("=")[1]
         options_dict["dense_setup"]=dense_setup
-        print("Using dense setup:",dense_setup, "(only supported for vgg5picture)")
+        print("Using dense setup:",dense_setup, "(only supported for vgg5picture, vgg5_32)")
     
     return options_dict
 
@@ -234,8 +234,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_picture", autoencoder_stage=2, modelpath_and_name=None, 
-                      additional_options="dense_setup=shallow")
+    model=setup_model(model_tag="vgg_5_32", autoencoder_stage=2, modelpath_and_name=None, 
+                      additional_options="dense_setup=small")
     model.summary()
 
 """

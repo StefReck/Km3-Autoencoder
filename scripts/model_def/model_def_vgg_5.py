@@ -841,6 +841,7 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
     number_of_output_neurons=options_dict["number_of_output_neurons"]
+    dense_setup = options_dict["dense_setup"]
     
     if number_of_output_neurons > 1:
         supervised_last_activation='softmax'
@@ -919,8 +920,14 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
             
         x = Flatten()(encoded)
         if batchnorm_before_dense==True: x = BatchNormalization(axis=channel_axis)(x)
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        
+        if dense_setup=="standard":
+            x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        elif dense_setup=="small":
+            x = dense_block(x, units=64, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        
         outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         
         model = Model(inputs=inputs, outputs=outputs)
