@@ -126,10 +126,25 @@ def get_props_for_plot_parallel(tag):
         save_to_folder = "bottleneck/"
         
     #-------------------vgg_5_600_picture Instant high lr Schmu---------------------------  
-    elif tag=="vgg_5_600_picture-instanthighlr":
+    elif tag=="vgg_5_600-ihlr":
         title = "Parallel training with model '600 picture' and high lr"
         ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt"
+        save_to_folder = "instanthighlr/"
+    elif tag=="vgg_5_600-ihlr_dense_deep":
+        title = "Parallel training with model '600 picture', high lr and additional dense layer"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt"
+        save_to_folder = "instanthighlr/"
+    elif tag=="vgg_5_600-ihlr_dense_shallow":
+        title = "Parallel training with model '600 picture', high lr and removed dense layer"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt"
+        save_to_folder = "instanthighlr/"
+    elif tag=="vgg_5_600-ihlr_add_conv":
+        title = "Parallel training with model '600 picture', high lr and additional convolutional layer"
+        ae_model =  home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt"
         save_to_folder = "instanthighlr/"
         
     #-------------------vgg_5_200 Parameter Erhöhung---------------------------
@@ -219,6 +234,15 @@ def get_props_for_plot_parser(tag):
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
     
+    if tag=="pic_ihlr_enc_test":
+        #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
+        title = "Variation of unfrozen encoder layers"
+        test_files=["models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt",
+                    "models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt",
+                    "models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt" ,
+                    "models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
+        labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
+        
     else:
         raise NameError("Tag "+tag+" unknown.")
         
