@@ -128,7 +128,7 @@ def make_broken12_manip(xs, y_values):
     poisson_noise_expectation_value = 0.08866 * (100-ys)/97
     
     #zero centered noise, has the shape (dims, batchsize), while xs has the shape (batchsize, dims)
-    noise = np.random.poisson(poisson_noise_expectation_value, size=xs.shape[1:]+ys.shape) - poisson_noise_expectation_value
+    noise = np.random.poisson(poisson_noise_expectation_value, size=xs.shape[1:]+ys.shape)
     #permute so that noise has shape (batchsize, dims), just as xs
     noise = np.transpose(noise, np.roll(np.arange(len(noise.shape)), shift=1) )
     
