@@ -8,7 +8,7 @@ It also contatins the adress of the training files and the epoch
 
 
 from keras.models import load_model
-from keras.layers import BatchNormalization
+from keras.layers import BatchNormalization, Conv3D
 from keras import optimizers
 from keras import backend as K
 import numpy as np
@@ -164,6 +164,16 @@ def make_encoder_stateful(model):
             print("Made layer", layer.name, "stateful.")
     return model
 
+
+def unfreeze_conv_layers(model, how_many):
+    """
+    Makes the last how_many conv blocks in the network trainable.
+    """
+    conv_layer_indices = []
+    for layer_index, layer in enumerate(model.layers):
+        if isinstance(layer, Conv3D):
+            conv_layer_indices.append(layer_index)
+    return conv_layer_indices
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path):
     #Get info like path of trainfile etc.

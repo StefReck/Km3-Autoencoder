@@ -234,9 +234,15 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_32", autoencoder_stage=2, modelpath_and_name=None, 
+    model=setup_model(model_tag="vgg_5_64", autoencoder_stage=0, modelpath_and_name=None, 
                       additional_options="dense_setup=small")
     model.summary()
+    
+    conv_layer_indices = []
+    for layer_index, layer in enumerate(model.layers):
+        if isinstance(layer, Conv3D):
+            conv_layer_indices.append(layer_index)
+    print(len(conv_layer_indices))
 
 """
 import numpy as np

@@ -164,21 +164,35 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_3/trained_vgg_3_autoencoder_test.txt" 
         prl_model = home+"models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+        
     elif tag=="vgg_5_600_picture_energy" or tag==26:
         title = "Parallel training with model '600 picture'"
         ae_model =  home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_600_morefilter_energy" or tag==31:
+        title = "Parallel training with model '600 morefilter'"
+        ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
+        
     elif tag=="vgg_5_200_energy" or tag==27:
         title = "Parallel training with model '200'"
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_test.txt"
         save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_200_dense_energy" or tag==30:
+        title = "Parallel training with model '200 dense'"
+        ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
+        
     elif tag=="vgg_5_64_energy" or tag==28:
         title = "Parallel training with model '64'"
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+        
     elif tag=="vgg_5_32-eps01_energy" or tag==29:
         title = "Parallel training with model '32'"
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"

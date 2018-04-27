@@ -758,12 +758,12 @@ def setup_vgg_5_64(autoencoder_stage, options_dict, modelpath_and_name=None):
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    filter_base=[32,40,44,46,64]
+    filter_base=[32,40,42,45,64]
     
     inputs = Input(shape=(11,18,50,1))
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
-    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #13x20x48
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
     
@@ -851,12 +851,12 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    filter_base=[32,32,60,44,32]
+    filter_base=[32,32,57,44,32]
     
     inputs = Input(shape=(11,18,50,1))
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
-    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #13x20x48
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
     
