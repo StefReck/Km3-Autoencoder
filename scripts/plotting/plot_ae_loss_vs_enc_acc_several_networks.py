@@ -76,12 +76,13 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
 def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
     fig, ax = plt.subplots(figsize=(9,7))
     for i,model_loss_ydata in enumerate(loss_ydata_list):
-        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=5, label=labels[i])
+        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "-", ms=5, label=labels[i])
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
     ax.legend(loc="lower left")
     fig.suptitle(title)
+    #plt.gcf().subplots_adjust(left=0., right=1.05, bottom=0, top=1)
     return fig
 
 
