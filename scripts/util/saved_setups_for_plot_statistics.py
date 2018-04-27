@@ -212,7 +212,8 @@ def get_props_for_plot_parallel(tag):
 
 
 def get_how_many_epochs_each_to_train(epoch_schedule):
-    #Which epochs from the parallel encoder history to take:
+    #Which epochs from the parallel encoder history to take, depending on the 
+    #string that get_props... returns
     if epoch_schedule=="1-1-1":
         how_many_epochs_each_to_train = np.ones(100).astype(int)
     elif epoch_schedule=="10-2-1":
