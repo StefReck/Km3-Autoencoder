@@ -927,6 +927,10 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
         elif dense_setup=="small":
             x = dense_block(x, units=64, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
             x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        elif dense_setup=="very_small":
+            x = dense_block(x, units=32, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+        
         
         outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         

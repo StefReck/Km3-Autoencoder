@@ -78,67 +78,6 @@ def unpack_parsed_args():
     
     return modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path
    
-"""
-# Tag for the model used; Identifies both autoencoder and encoder
-# This also defines the name of the folder where everything is saved
-modeltag="vgg_3"
-#How many additinal epochs the network will be trained for by executing this script:
-runs=10
-#Type of training/network
-# 0: autoencoder
-# 1: encoder+ from autoencoder w/ frozen layers
-# 2: encoder+ from scratch, completely unfrozen
-# 3: Parallel supervised training (load in new frozen encoder epoch according to schedule)
-autoencoder_stage=1
-#Define starting epoch of autoencoder model (stage 1: which frozen encoder epoch to use)
-# not used for stage 2 and 3
-autoencoder_epoch=50
-#If in encoder stage (1 or 2), encoder_epoch is used to identify a possibly
-#existing supervised-trained encoder network; not used for stage 0
-encoder_epoch=-1
-#Define what the supervised encoder network is trained for, and how many neurons are in the output
-#This also defines the name of the saved model
-# class type names are currently "up_down", "muon-CC_to_elec-CC"
-class_type_bins=2
-class_type_name="up_down"
-#Wheter to use a precalculated zero-center image or not (1,0)
-#should typically be 1
-zero_center=1
-#Verbose bar during training?
-#0: silent, 1:verbose, 2: one log line per epoch
-verbose=2
-# which dataset to use; see get_dataset_info.py
-# x  y  z  t  c
-# 11 13 18 50 31
-#additional options can be appended via -XXX-YYY, e.g. "xzt-filesize=0.3"
-dataset="xzt"
-#Initial Learning rate, usually 0.001
-# negative lr= take the absolute as the lr at epoch 1, and apply the decay epoch-times
-learning_rate=-0.001
-#lr_decay can either be a float, e.g. 0.05 for 5% decay of lr per epoch,
-#or it can be a string like s1 for lr schedule 1. In this case, lr is ignored
-learning_rate_decay=0.05
-
-# exponent of epsilon for the adam optimizer (actualy epsilon is 10^this)
-epsilon=-8
-# lambda compatibility mode (0,1): Load the model manually from model definition,
-# and insert the weigths; can be used to overwrite parameters of the optimizer
-lambda_comp=0
-#optimizer to use, either "adam" or "sgd"
-optimizer="adam"
-# allows to create multiple supervised trainings from the same AE model
-# the version is added to the filename
-encoder_version=""
-# Additional options for the model, see model_definitions.py
-# e.g. "dropout=0.3" or "unlock_BN"
-options="None"
-
-cd $WOODYHOME/Km3-Autoencoder
-. ./../env_cnn.sh
-
-python scripts/run_autoencoder.py $modeltag $runs $autoencoder_stage $autoencoder_epoch $encoder_epoch $class_type_bins $class_type_name $zero_center $verbose $dataset $learning_rate $learning_rate_decay $epsilon $lambda_comp $optimizer $options $encoder_version
-"""
-
 
 def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
     #learning rate is the original lr input
@@ -274,7 +213,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             supervised_metrics=None
         else:
             raise NameError("supervised_loss: "+supervised_loss+" unknown.")
-            
     print("Using supervised loss:", supervised_loss)
     
     
@@ -373,6 +311,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     autoencoder_model=None
     #Setup network:
+    #If the corresponding epoch is 0, a new model is created. Otherwise, the existing model
+    #of the given epoch is loaded unchanged.
     #Autoencoder self-supervised training. Epoch is the autoencoder epoch, enc_epoch not relevant for this stage
     if autoencoder_stage==0:
         is_autoencoder=True
