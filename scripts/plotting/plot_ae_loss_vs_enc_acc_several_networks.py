@@ -19,14 +19,16 @@ def which_plot(do_you_want):
     base_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/loss_vs_ydata/"
     if do_you_want == "acc": 
         #tags of the models to plot, as defined in saved_setups_for_plots
-        tags=["vgg_5_600_picture","vgg_5_200",
+        tags=["vgg_5_600_morefilter", "vgg_3",
+                "vgg_5_600_picture","vgg_5_200",
               "vgg_5_200_dense","vgg_5_64",
-              "vgg_5_32-eps01"]
+              "vgg_5_32-eps01", "vgg_5_600-ihlr"]
         
         #Stuff for the plot
-        label_list = ["Autoencoder 600 (picture)", "Autoencoder 200",
+        label_list = ["Autoencoder 600 (morefilter)", "Autoencoder 2000",
+                "Autoencoder 600 (picture)", "Autoencoder 200",
                                  "Autoencoder 200 (dense)", "Autoencoder 64",
-                                 r"Autoencoder 32 ($\epsilon = 10^{-1}$)",]
+                                 r"Autoencoder 32 ($\epsilon = 10^{-1}$)", "Autoencoder 600 (picture) high lr"]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy for different autoencoder models"
         save_as = "vgg_5_acc.pdf"
@@ -41,7 +43,7 @@ def which_plot(do_you_want):
         title = "Autoencoder loss and encoder accuracy for different autoencoder models"
         save_as = None
     
-    save_as=base_path+save_as
+    if save_as is not None: save_as=base_path+save_as 
     return tags, label_list,xlabel,ylabel,title,save_as
 
 
@@ -72,7 +74,7 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
 
 
 def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
-    fig, ax = plt.subplots(figsize=(8,7))
+    fig, ax = plt.subplots(figsize=(9,7))
     for i,model_loss_ydata in enumerate(loss_ydata_list):
         ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=5, label=labels[i])
     ax.set_xlabel(xlabel)
