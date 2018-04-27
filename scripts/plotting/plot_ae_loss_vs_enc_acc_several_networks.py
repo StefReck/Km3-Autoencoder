@@ -33,6 +33,13 @@ def which_plot(do_you_want):
         
     elif do_you_want=="loss":
         raise NameError("Nothing is here yet...")
+        
+    elif do_you_want=="test":
+        tags=["vgg_5_600_picture",]
+        label_list = ["Autoencoder 600 (picture)",]
+        xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
+        title = "Autoencoder loss and encoder accuracy for different autoencoder models"
+        save_as = None
     
     save_as=base_path+save_as
     return tags, label_list,xlabel,ylabel,title,save_as
@@ -65,7 +72,7 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
 
 
 def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
-    fig, ax = plt.subplots(figsize=(7,7))
+    fig, ax = plt.subplots(figsize=(8,7))
     for i,model_loss_ydata in enumerate(loss_ydata_list):
         ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=5, label=labels[i])
     ax.set_xlabel(xlabel)
@@ -121,8 +128,10 @@ def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as):
         label_array = default_label_array_ae
     
     fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title)
-    fig.savefig(save_as)
-    print("Plot saved to", save_as)
+    
+    if save_as is not None:
+        fig.savefig(save_as)
+        print("Plot saved to", save_as)
     
     return fig
 
