@@ -168,12 +168,25 @@ def make_encoder_stateful(model):
 def unfreeze_conv_layers(model, how_many):
     """
     Makes the last how_many conv blocks in the network trainable.
+    The network is recompiled in the process (otherwise trainable is not recognized)
+        how_many:   ...C layers should be unfrozen, counting from the end
     """
-    conv_layer_indices = []
-    for layer_index, layer in enumerate(model.layers):
-        if isinstance(layer, Conv3D):
-            conv_layer_indices.append(layer_index)
-    return conv_layer_indices
+    if how_many==0:
+        print("Warning: unfreeze_conv_layers was executed with how_many=0. This has no effect!")
+    else:
+        conv_layer_indices = []
+        for layer_index, layer in enumerate(model.layers):
+            if isinstance(layer, Conv3D):
+                conv_layer_indices.append(layer_index)
+        layer_to_unfreeze_after = conv_layer_indices[-how_many]
+        modified_layers=0
+        for layer in model.layers[layer_to_unfreeze_after:]:
+            layer.trainable = True
+            modified_layers+=1
+        model.compile(loss=model.loss, optimizer=model.optimizer, metrics=model.metrics)
+        print("Unfroze the last", modified_layers, "layers.")
+    return model
+
 
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path):
     #Get info like path of trainfile etc.
@@ -189,6 +202,14 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     
     #Only for the encoder-types. Autoencoders ignore this:
     number_of_output_neurons = class_type[0]
+    
+    #If autoencoder stage 4 is selected (unfreeze C layers), set up everything like AE stage 1
+    if autoencoder_stage==4:
+        autoencoder_stage=1
+        unfreeze_layer_training = True
+        print("Autoencoder stage 4: Unfreeze Training. Setting up network like in AE stage 1...")
+    else:
+        unfreeze_layer_training = False
     
     custom_objects=None
     #define loss function to use for new AEs
@@ -596,6 +617,16 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if lr_schedule_number != None:
             lr=lr_schedule(current_epoch+1, lr_schedule_number, learning_rate )
             K.set_value(model.optimizer.lr, lr)
+            
+        if unfreeze_layer_training==True:
+            #Unfreeze C layers of the model according to schedule
+            #An additional C block is set trainable before these epochs
+            unfreeze_a_c_block_at = np.array([5,10,15,20,25,30,35,40,45])
+            
+            how_many = np.where(unfreeze_a_c_block_at==current_epoch)[0]
+            if len(how_many)>0:
+                how_many=how_many[0]+1
+                model = unfreeze_conv_layers(model, how_many)
             
         #Train network, write logfile, save network, evaluate network, save evaluation to file
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
