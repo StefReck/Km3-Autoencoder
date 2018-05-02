@@ -72,7 +72,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
 
     total_accuracy=np.sum(arr_energy_correct[:,1])/len(arr_energy_correct[:,1])
     print("\nTotal accuracy:", total_accuracy, "(", np.sum(arr_energy_correct[:,1]), "of",len(arr_energy_correct[:,1]) , "events)\n")
-    return arr_energy_correct
+    return arr_energy_correct, total_accuracy
 
 def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_mean, swap_4d_channels, dataset_info_dict, broken_simulations_mode=0, samples=None):
     """
@@ -462,7 +462,7 @@ def get_name_of_dump_files_for_evaluation_dataset(modelname, dataset, bins, clas
 
 
 #TODO: not bugfixed
-def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
+def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_return_stats=False):
     """
     Takes a bunch of models and returns the hist data for plotting, either
     by loading if it exists already or by generating it from scratch.
@@ -473,10 +473,17 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
         dataset_array:  List of dataset tags on which the models will be evaluated on.
         bins:           Number of bins the evaluation will be binned to.
         class_type:     Class type of the prediction. None for autoencoders.
+        also_return_stats: Whether or not to return stats acquired during 
+                            calculation of the array energy correct. Will only
+                            return sth if the array is actually calculated
+                            (and not loaded)
     Output:
         hist_data_array: A list of the evaluation for every model, that is: the binned data that
                          is used for making the plot (can contain binned acc,
                          mse, mre for track/shower ... )
+        optional: stats: Contains stats about the arr_enery_correct, like:
+                         Total acc, or [MSE,MRE,VAR] for energy,...
+                         Can also be empty if the arr_ergy_cor was not calculated but loaded
     """
     #Extract the names of the models from their paths
     modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
@@ -485,6 +492,7 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
         modelnames.append(modelident.split("trained_")[1][:-3])
         
     hist_data_array=[]
+    stats_array=[]
     for i,modelname in enumerate(modelnames):
         dataset=dataset_array[i]
         print("\nWorking on ",modelname,"\n   using dataset", dataset, "with", bins, "bins\n")
@@ -495,12 +503,20 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None):
         if os.path.isfile(name_of_file)==True:
             #File was created before, just open and load
             hist_data_array.append(open_hist_data(name_of_file))
+            stats_array.append([])
         else:
             #File has not been created before, generate new one
-            hist_data = make_and_save_hist_data(dataset, modelidents[i], class_type, name_of_file, bins)
+            hist_data, stats = make_and_save_hist_data(dataset, modelidents[i], class_type, name_of_file, bins, also_return_stats=True)
             hist_data_array.append(hist_data)
+            stats_array.append(stats)
         print("Done.")
-    return hist_data_array
+        
+    if also_return_stats:
+        if [] in stats_array:
+            print("Warning: Not all stats have been calculated as array was loaded!")
+        return hist_data_array, stats_array
+    else:
+        return hist_data_array
 
 
 #open dumped histogramm data, that was generated from the below functions
@@ -514,7 +530,7 @@ def open_hist_data(name_of_file):
 
 
 
-def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins):
+def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins, also_return_stats=False):
     """
     Calculate the evaluation of a model on a dataset, and then bin it energy wise.
     It is dumped automatically into the
@@ -544,23 +560,29 @@ def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins)
         #This is for energy encoders. Take median relative error.
         swap_4d_channels = None
         #arr_energy_correct: [mc_energy, reco_energy, particle_type, is_cc]
-        arr_energy_correct = make_performance_array_energy_energy(model, test_file, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None)
+        arr_energy_correct, performance_list = make_performance_array_energy_energy(model, test_file, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None)
         # list len 2 of [energy_bins, hist_energy_losses, hist_energy_variance] 
         # for track and shower events
         hist_data = calculate_energy_mae_plot_data(arr_energy_correct)
+        stats= performance_list
         
     else:
         #For encoders with accuracy. Calculate accuracy.
         
         #arr_energy_correct: [energy, correct, particle_type, is_cc, y_pred] for every event
-        arr_energy_correct = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
+        arr_energy_correct, total_accuracy = make_performance_array_energy_correct(model=model, f=test_file, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, batchsize = 32, broken_simulations_mode=broken_simulations_mode, swap_4d_channels=None, samples=None, dataset_info_dict=dataset_info_dict)
         #hist_data = [bin_edges_centered, hist_1d_energy_accuracy_bins]:
         hist_data = make_energy_to_accuracy_data(arr_energy_correct, plot_range=(3,100), bins=bins)
-    
+        stats = total_accuracy
+        
     print("Saving hist_data as", name_of_file)
     with open(name_of_file, "wb") as dump_file:
         pickle.dump(hist_data, dump_file)
-    return hist_data
+        
+    if also_return_stats:
+        return hist_data, stats
+    else:
+        return hist_data
 
 
 
@@ -628,9 +650,9 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
     print("Median relative error over all energies:",total_relative_median)
     print("Variance in relative error over all energies:", total_relative_variance)
     print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
+    performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
     
-    
-    return arr_energy_correct
+    return arr_energy_correct, performance_list
 
 def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None):   
     """

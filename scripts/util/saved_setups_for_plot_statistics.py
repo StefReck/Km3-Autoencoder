@@ -102,6 +102,12 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
+    elif tag=="vgg_5_64-new" or tag==32:
+        title = "Parallel training with model '64 new'"
+        ae_model =  home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "bottleneck/"
+         
         
     elif tag=="vgg_5_32" or tag==15:
         title = "Parallel training with model '32' and $\epsilon=10^{-8}$"
@@ -112,6 +118,11 @@ def get_props_for_plot_parallel(tag):
         title = "Parallel training with model '32'"
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "bottleneck/"
+    elif tag=="vgg_5_32-new" or tag==33:
+        title = "Parallel training with model '32 new'"
+        ae_model =  home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
         
     #-------------------vgg_5_600_picture Instant high lr Schmu---------------------------  

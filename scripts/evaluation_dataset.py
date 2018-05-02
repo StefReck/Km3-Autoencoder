@@ -7,6 +7,11 @@ Especially for the plots for the broken data comparison.
 """
 
 import argparse
+import numpy as np
+import matplotlib.pyplot as plt
+
+from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot
+
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Evaluate model performance after training. This is for comparison of supervised accuracy on different datasets. Especially for the plots for the broken data comparison.')
@@ -15,16 +20,6 @@ def parse_input():
     args = parser.parse_args()
     params = vars(args)
     return params
-
-params = parse_input()
-which_ones = params["info_tags"]
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot
-
 
 #Standard, plot acc vs energy plots of these saved setups (taken from parser now)
 #which_ones=("4_64_enc",)
@@ -244,6 +239,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     elif which_one=="energy" or which_one==14:
         raise NameError("Not there yet...")
         folder_in_the_plots_path = "broken_study_energy/"
+        plot_type = "mre"
     
     else:
         raise NameError(str(which_one) + " is not known!")
@@ -304,7 +300,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     
     return
 
-def print_statistics_in_numbers(hist_data_array, plot_type):
+def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
     """
     Prints the average overall loss of performance, 
     averaged over all bins (not all events).
@@ -321,29 +317,40 @@ def print_statistics_in_numbers(hist_data_array, plot_type):
         print("Average relative %-acc reduction across all bins: 100 * (x - measured) / measured")
         print("From simulation to measured\tFrom upper lim to measured:")
         print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
+        
+        header = "(Sim-Meas)/Meas\t(Upperlim-Meas)/Meas"
+        line=str(dropoff_sim_measured*100)+"\t"+str(dropoff_upper_limit_measured*100)
+        
     elif plot_type=="mre":
         pass
     
     else:
         raise NameError("Unknown plottype"+plot_type)
     
+    if return_line:
+        return header, line
+    
+    
+if __name__ == "__main__":
+    params = parse_input()
+    which_ones = params["info_tags"]
 
-if "all" in which_ones:
-    show_the_plot = False
-    current_tag=0
-    while True:
-        try:
-            make_evaluation(current_tag, extra_name, y_lims_override, show_the_plot)
-            current_tag+=1
-        except NameError:
-            print("Done. Made a total of", current_tag, "plots.")
-            break
-            
-else:
-    show_the_plot = True
-    for info_tag in which_ones:
-        make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot)
-      
+    if "all" in which_ones:
+        show_the_plot = False
+        current_tag=0
+        while True:
+            try:
+                make_evaluation(current_tag, extra_name, y_lims_override, show_the_plot)
+                current_tag+=1
+            except NameError:
+                print("Done. Made a total of", current_tag, "plots.")
+                break
+                
+    else:
+        show_the_plot = True
+        for info_tag in which_ones:
+            make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot)
+          
         
         
         
