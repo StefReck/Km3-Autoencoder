@@ -47,19 +47,19 @@ while True:
     modelidents, dataset_array = [],[]
     for modelbase, dataset in procedure:
         model_file = modelbase + "epoch"+str(epoch)+".h5"
-        if not os.path.isfile(modelfile):
-            print("Did not find the file", modelfile, ", exiting...")
+        if not os.path.isfile(model_file):
+            print("Did not find the file", model_file, ", exiting...")
             break 
-        modelidents.append(modelfile)
+        modelidents.append(model_file)
         dataset_array.append(dataset)
         
     #stats is Total acc for up_down class type of every model
     hist_data_array, stats_array = make_or_load_files(modelidents, dataset_array, bins, class_type=class_type, also_return_stats=True)
     #header/line contains: (Sim-Meas)/Meas\t(Upperlim-Meas)/Meas
-    header, line = print_statistics_in_numbers(hist_data_array, plot_type="acc", return_line==True)
+    header, line = print_statistics_in_numbers(hist_data_array, plot_type="acc", return_line=True)
     
     header="epoch\t"+header+"\tacc_sim\tacc_meas\tacc_ulim"
-    line=str(epoch)+"\t"+line+"\t"+str(stats[0])+"\t"+str(stats[1])+"\t"+str(stats[2])
+    line=str(epoch)+"\t"+line+"\t"+str(stats_array[0])+"\t"+str(stats_array[1])+"\t"+str(stats_array[2])
     
     with open(name_of_logfile, "a") as logfile:
         if new_logfile:
