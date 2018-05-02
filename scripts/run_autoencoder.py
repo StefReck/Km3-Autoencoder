@@ -191,7 +191,7 @@ def unfreeze_conv_layers(model, how_many):
 def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, class_type, zero_center, verbose, dataset, learning_rate, learning_rate_decay, epsilon, lambda_comp, use_opti, encoder_version, options, ae_loss_name, supervised_loss, init_model_path):
     #Get info like path of trainfile etc.
     dataset_info_dict = get_dataset_info(dataset)
-    home_path=dataset_info_dict["home_path"]
+    #home_path=dataset_info_dict["home_path"]
     train_file=dataset_info_dict["train_file"]
     test_file=dataset_info_dict["test_file"]
     n_bins=dataset_info_dict["n_bins"]
@@ -199,6 +199,10 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     filesize_factor=dataset_info_dict["filesize_factor"]
     filesize_factor_test=dataset_info_dict["filesize_factor_test"]
     batchsize=dataset_info_dict["batchsize"] #def 32
+    
+    #All models are now saved in their own folder   models/"modeltag"/
+    model_folder = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/" + modeltag + "/"
+    
     
     #Only for the encoder-types. Autoencoders ignore this:
     number_of_output_neurons = class_type[0]
@@ -246,9 +250,6 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             raise NameError("supervised_loss: "+supervised_loss+" unknown.")
     print("Using supervised loss:", supervised_loss)
     
-    
-    #All models are now saved in their own folder   models/"modeltag"/
-    model_folder = home_path + "models/" + modeltag + "/"
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
         print("Created model folder", model_folder)
