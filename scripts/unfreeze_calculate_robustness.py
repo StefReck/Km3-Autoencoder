@@ -16,7 +16,7 @@ model_base_ae = "models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencode
 model_base_real =  model_base_ae + "supervised_up_down_"
 model_base_broken= model_base_ae + "supervised_up_down_broken4_"
 #Datasets to test on
-dataset_broken  = "xzt_broken"
+dataset_broken  = "xzt_broken4"
 dataset_real    = "xzt"
 
 #Procedure:         model to use, dataset to test on
@@ -58,13 +58,19 @@ while True:
     #header/line contains: (Sim-Meas)/Meas\t(Upperlim-Meas)/Meas
     header, line = print_statistics_in_numbers(hist_data_array, plot_type="acc", return_line=True)
     
-    header="epoch\t"+header+"\tacc_sim\tacc_meas\tacc_ulim"
-    line=str(epoch)+"\t"+line+"\t"+str(stats_array[0])+"\t"+str(stats_array[1])+"\t"+str(stats_array[2])
+    #What will be logged to a file, seperated by tabs
+    stuff_to_log_head = ["#epoch",  header[0],header[1],"acc_sim",          "acc_meas",         "acc_ulim"]
+    stuff_to_log_data = [str(epoch),line[0],  line[1],  str(stats_array[0]),str(stats_array[1]),str(stats_array[2])]
     
+    logheader, logline = stuff_to_log_head[0], "\n"+stuff_to_log_data[0]
+    for i in range(1,len(stuff_to_log_head)):
+        logheader += "\t" + stuff_to_log_head[i][:10]
+        logline   += "\t" + stuff_to_log_data[i][:10]
+
     with open(name_of_logfile, "a") as logfile:
         if new_logfile:
-            logfile.write(header)
-        logfile.write(line)
+            logfile.write(logheader)
+        logfile.write(logline)
         print("Wrote into logfile")
         
     epoch+=1

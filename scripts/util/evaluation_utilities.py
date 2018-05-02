@@ -1024,3 +1024,100 @@ def make_prob_hist_class(arr_energy_correct, axes, particle_types_dict, particle
 
 
 
+#--------------------------- Functions for applying Pheid precuts to the events -------------------------------#
+
+def add_pid_column_to_array(array, particle_type_dict, key):
+    """
+    Takes an array and adds two pid columns (particle_type, is_cc) to it along axis_1.
+    :param ndarray(ndim=2) array: array to which the pid columns should be added.
+    :param dict particle_type_dict: dict that contains the pid tuple (e.g. for muon-CC: (14,1)) for each interaction type at pos[1].
+    :param str key: key of the dict that specifies which kind of pid tuple should be added to the array (dependent on interaction type).
+    :return: ndarray(ndim=2) array_with_pid: array with additional pid columns. ordering: [pid_columns, array_columns]
+    """
+    # add pid columns particle_type, is_cc to events
+    pid = np.array(particle_type_dict[key][1], dtype=np.float32).reshape((1,2))
+    pid_array = np.repeat(pid, array.shape[0] , axis=0)
+
+    array_with_pid = np.concatenate((pid_array, array), axis=1)
+    return array_with_pid
+
+
+def load_pheid_event_selection():
+    """
+    Loads the pheid event that survive the precuts from a .txt file, adds a pid column to them and returns it.
+    :return: ndarray(ndim=2) arr_pheid_sel_events: 2D array that contains [particle_type, is_cc, event_id, run_id]
+                                                   for each event that survives the precuts.
+    """
+    path = '/home/woody/capn/mppi033h/Code/HPC/cnns/results/plots/pheid_event_selection_txt/' # folder for storing the precut .txts
+
+    # Moritz's precuts
+    particle_type_dict = {'muon-CC': ['muon_cc_3_100_selectedEvents_forMichael_01_18.txt', (14,1)],
+                          'elec-CC': ['elec_cc_3_100_selectedEvents_forMichael_01_18.txt', (12,1)]}
+
+    # # Containment cut
+    # particle_type_dict = {'muon-CC': ['muon_cc_3_100_selectedEvents_Rsmaller100_abszsmaller90_forMichael.txt', (14,1)],
+    #                       'elec-CC': ['elec_cc_3_100_selectedEvents_Rsmaller100_abszsmaller90_forMichael.txt', (12,1)]}
+
+    arr_pheid_sel_events = None
+    for key in particle_type_dict:
+        txt_file = particle_type_dict[key][0]
+
+        if arr_pheid_sel_events is None:
+            arr_pheid_sel_events = np.loadtxt(path + txt_file, dtype=np.float32)
+            arr_pheid_sel_events = add_pid_column_to_array(arr_pheid_sel_events, particle_type_dict, key)
+        else:
+            temp_pheid_sel_events = np.loadtxt(path + txt_file, dtype=np.float32)
+            temp_pheid_sel_events = add_pid_column_to_array(temp_pheid_sel_events, particle_type_dict, key)
+
+            arr_pheid_sel_events = np.concatenate((arr_pheid_sel_events, temp_pheid_sel_events), axis=0)
+
+    # swap columns from run_id, event_id to event_id, run_id
+    arr_pheid_sel_events[:, [2,3]] = arr_pheid_sel_events[:, [3,2]] # particle_type, is_cc, event_id, run_id
+
+    return arr_pheid_sel_events
+
+
+def in_nd(a, b, absolute=True, assume_unique=False):
+    """
+    Function that generalizes the np in_1d function to nd.
+    Checks if entries in axis_0 of a exist in b and returns the bool array for all rows.
+    Kind of hacky by using str views on the np arrays.
+    :param ndarray(ndim=2) a: array where it should be checked whether each row exists in b or not.
+    :param ndarray(ndim=2) b: array upon which the rows of a are checked.
+    :param bool absolute: Specifies if absolute() should be called on the arrays before applying in_nd.
+                     Useful when e.g. in_nd shouldn't care about particle (+) or antiparticle (-).
+    :param bool assume_unique: ff True, the input arrays are both assumed to be unique, which can speed up the calculation.
+    :return: ndarray(ndim=1): Boolean array that specifies for each row of a if it also exists in b or not.
+    """
+    if a.dtype!=b.dtype: raise TypeError('The dtype of array a must be equal to the dtype of array b.')
+    a, b = np.asarray(a, order='C'), np.asarray(b, order='C')
+
+    if absolute is True: # we don't care about e.g. particles or antiparticles
+        a, b = np.absolute(a), np.absolute(b)
+
+    a = a.ravel().view((np.str, a.itemsize * a.shape[1]))
+    b = b.ravel().view((np.str, b.itemsize * b.shape[1]))
+    return np.in1d(a, b, assume_unique)
+
+
+def arr_energy_correct_select_pheid_events(arr_energy_correct, invert=False):
+    """
+    Function that applies the Pheid precuts to an arr_energy_correct.
+    :param ndarray(ndim=2) arr_energy_correct: array from the make_performance_array_energy_correct() function.
+    :param bool invert: Instead of selecting all events that survive the Pheid precut, it _removes_ all the Pheid events
+                        and leaves all the non-Pheid events.
+    :return: ndarray(ndim=2) arr_energy_correct: same array, but after applying the Pheid precuts on it.
+                                                 (events that don't survive the precuts are missing!)
+    """
+    pheid_evt_run_id = load_pheid_event_selection()
+
+    evt_run_id_in_pheid = in_nd(arr_energy_correct[:, [2,3,6,7]], pheid_evt_run_id, absolute=True) # 2,3,6,7: particle_type, is_cc, event_id, run_id
+
+    if invert is True: evt_run_id_in_pheid = np.invert(evt_run_id_in_pheid)
+
+    arr_energy_correct = arr_energy_correct[evt_run_id_in_pheid] # apply boolean in_pheid selection to the array
+
+    return arr_energy_correct
+
+
+

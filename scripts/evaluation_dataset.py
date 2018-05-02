@@ -318,8 +318,8 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         print("From simulation to measured\tFrom upper lim to measured:")
         print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
         
-        header = "(Sim-Meas)/Meas\t(Upperlim-Meas)/Meas"
-        line=str(dropoff_sim_measured*100)+"\t"+str(dropoff_upper_limit_measured*100)
+        header = ("(Sim-Meas)/Meas","(Upperlim-Meas)/Meas")
+        line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
         
     elif plot_type=="mre":
         pass
