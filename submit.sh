@@ -19,6 +19,7 @@ runs=100
 # 1: encoder+dense from autoencoder w/ frozen layers
 # 2: encoder+dense from scratch, completely unfrozen
 # 3: Parallel supervised training (load in new frozen encoder epoch according to schedule)
+# 4: Unfreeze training: Like stage 1, but conv blocks are unfrozen every few epochs.
 autoencoder_stage=1
 #Define starting epoch of autoencoder model 
 #(stage 1: the frozen encoder part of which autoencoder epoch to use)
@@ -54,6 +55,7 @@ learning_rate=-0.001
 learning_rate_decay=0.05
 
 # exponent of epsilon for the adam optimizer (actual epsilon is 10^this)
+# Autoencoder: should be -1
 epsilon=-8
 # lambda compatibility mode (0 or 1): Load the model manually from model definition,
 # and insert the weigths; can be used to overwrite parameters of the optimizer

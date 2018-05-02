@@ -2,7 +2,7 @@
 scripts/Daten/*
 scripts/__pycache__
 models/*
-results/*
+results/*/
 scripts/model_def/__pycache__
 scripts/util/__pycache__
 __pycache__/
