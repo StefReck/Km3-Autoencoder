@@ -60,12 +60,13 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
         event_id = mc_info[:, 0]
-        run_id = mc_info[:, 9]
+        #run id currently not present in xzt data
+        #run_id = mc_info[:, 9]
 
         ax = np.newaxis
 
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], correct[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax], ], axis=1)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], correct[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax],  ], axis=1) #run_id[:, ax],
         
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
@@ -109,12 +110,13 @@ def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_m
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
         event_id = mc_info[:, 0]
-        run_id = mc_info[:, 9]
+        #run id currently not present in xzt data
+        #run_id = mc_info[:, 9]
 
         ax = np.newaxis
 
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax], ], axis=1)
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], ], axis=1) #run_id[:, ax]
 
 
         if arr_energy_correct is None:
@@ -165,12 +167,13 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
         event_id = mc_info[:, 0]
-        run_id = mc_info[:, 9]
+        #run id currently not present in xzt data
+        #run_id = mc_info[:, 9]
 
         ax = np.newaxis
         
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax],], axis=1)
+        arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], ], axis=1) # run_id[:, ax]
 
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)

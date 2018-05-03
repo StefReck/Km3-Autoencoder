@@ -427,7 +427,7 @@ if make_difference_plot == True  or make_difference_plot == "both":
         hist_2=np.array(hist_data_array_enc[make_diff_of[1]])
         diff_hist=[hist_1[0], (hist_1[1]-hist_2[1])/hist_1[1]]
         hist_data_array_diff.append(diff_hist)
-    
+        
         #make plot of multiple data:
         if plot_type == "acc":
             y_label_of_plot="Difference in accuracy"
