@@ -581,7 +581,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         
-    if init_model_path is not None:
+    if init_model_path is not None and init_model_path is not "None":
         print("Initializing model weights to", init_model_path)
         init_model = load_model(init_model_path, custom_objects=custom_objects)
         for i,layer in enumerate(model.layers):
