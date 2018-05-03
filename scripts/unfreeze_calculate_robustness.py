@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-For every epoch of a model, calculate the up-down robustness, and log it into a file.
+For every epoch of a model, calculate the up-down robustness and a bunch of other infos,
+and log it into a file. The logfile will contain:
+    epoch, (Sim-Meas)/Meas, (Upperlim-Meas)/Meas ,"acc_sim", "acc_meas", "acc_ulim"
+
 For the robustness, the performance of the model has to be evaluated 3 times:
-    Broken model  auf Broken
-    Broken model  auf real
-    Real model    auf real
+    Broken model  auf Broken    (what you see when developing the model, acc_sim)
+    Broken model  auf real      (the actual performance on proper data, acc_meas)
+    Real model    auf real      (the best-case scenario of what the network can get, acc_ulim)
+
+Robustness indicators (calculated binwise per energy bin):
+    (acc_sim -acc_meas)/acc_meas    : How much worse is the model on actual data
+    (acc_ulim-acc_meas)/acc_meas    : How much worse is it then the best case
 """
 
 from evaluation_dataset import print_statistics_in_numbers
@@ -18,6 +25,10 @@ model_base_broken= model_base_ae + "supervised_up_down_broken4_"
 #Datasets to test on
 dataset_broken  = "xzt_broken4"
 dataset_real    = "xzt"
+#Name of the file the lines will be logged to, generated automatically
+name_of_logfile = model_base_ae + "unfreeze_broken4_log.txt"
+
+
 
 #Procedure:         model to use, dataset to test on
 procedure = ( (model_base_broken, dataset_broken),  #on simulations
@@ -31,8 +42,7 @@ bins=32
 #Class type
 class_type=(2,"up_down")
 
-#Name of the file the lines will be logged to, generated automatically
-name_of_logfile = model_base_ae + "unfreeze_broken4_log.txt"
+
 
 
 if not os.path.isfile(name_of_logfile):
@@ -60,8 +70,8 @@ while True:
     header, line = print_statistics_in_numbers(hist_data_array, plot_type="acc", return_line=True)
     
     #What will be logged to a file, seperated by tabs
-    stuff_to_log_head = ["#epoch",  header[0],header[1],"acc_sim",          "acc_meas",         "acc_ulim"]
-    stuff_to_log_data = [str(epoch),line[0],  line[1],  str(stats_array[0]),str(stats_array[1]),str(stats_array[2])]
+    stuff_to_log_head = ["#epoch",  header[0],   header[1],    "acc_sim",         "acc_meas",         "acc_ulim"]
+    stuff_to_log_data = [str(epoch),str(line[0]),str(line[1]), str(stats_array[0]),str(stats_array[1]),str(stats_array[2])]
     
     logheader, logline = stuff_to_log_head[0], "\n"+stuff_to_log_data[0]
     for i in range(1,len(stuff_to_log_head)):

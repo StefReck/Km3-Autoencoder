@@ -426,7 +426,7 @@ def encode_targets(y_val, class_type):
         up_down_class_value = int(np.sign(dir_z)) # returns -1 if dir_z < 0, 0 if dir_z==0, 1 if dir_z > 0
 
         if up_down_class_value == 0:
-            print ('Warning: Found an event with dir_z==0. Setting the up-down class randomly.')
+            #print ('Warning: Found an event with dir_z==0. Setting the up-down class randomly.')
             #TODO maybe [0.5, 0.5], but does it make sense with cat_crossentropy?
             up_down_class_value = np.random.randint(2)
 

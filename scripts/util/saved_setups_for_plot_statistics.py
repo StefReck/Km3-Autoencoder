@@ -203,11 +203,21 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_64_energy" or tag==34:
+        title = "Parallel training with model '64 new'"
+        ae_model =  home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
         
     elif tag=="vgg_5_32-eps01_energy" or tag==29:
         title = "Parallel training with model '32'"
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_32-eps01_energy" or tag==35:
+        title = "Parallel training with model '32 new'"
+        ae_model =  home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
         
     else:
