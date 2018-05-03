@@ -22,15 +22,18 @@ import numpy as np
 import os, sys
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events
 
 #Which model to use (see below)
 #identifiers = ["2000_unf",]
 
 #only go through parts of the file (for testing)
 samples=None
+#Should precuts be applied to the data; if so, the plot will be saved 
+#with a "_precut" added to the file name
+apply_precuts=False
 
-def get_saved_plots_info(identifier):
+def get_saved_plots_info(identifier, apply_precuts=False):
     #Info about plots that have been generated for the thesis are listed here.
     dataset_tag="xzt"
     zero_center=True
@@ -72,66 +75,62 @@ def get_saved_plots_info(identifier):
         
     print("Working on model", model_path)
     
+    #Where to save the plots to
     save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+    if apply_precuts:
+        save_as_base+="precut_"
+    
     model_path=home_path+model_path
-    return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
+    return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
 
-def get_dump_names(model_path, dataset_tag):
-    #Returns the name of the saved statistics files
+
+def get_dump_name_arr(model_path, dataset_tag, apply_precuts=False):
+    #Returns the name of the energy correct array
     modelname = model_path.split("trained_")[1][:-3]
     dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
-    name_of_file_2d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_2dhist_data.npy"
-    name_of_file_1d= dump_path + "energy_" + modelname + "_" + dataset_tag + "_mae_data.npy"
-    return name_of_file_1d, name_of_file_2d
+    
+    name_of_arr = dump_path + "energy_" + modelname + "_" + dataset_tag + "_arr_correct.npy"
+        
+    return name_of_arr
 
-def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None):
+
+def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts=False, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
-    #This function outputs a np array with the 2d hist data, either by loading a saved one, or by
-    #generating a new one if no saved one exists.
+    #This function outputs a np array with the 2d hist data, 
+    #either by loading a saved arr_energy_correct, or by generating a new one
     #Also outputs the 1d histogram of mc energy over mae.
  
     #name of the files that the hist data will get dumped to (or loaded from)
-    name_of_file_1d, name_of_file_2d = get_dump_names(model_path, dataset_tag)
-    
-    arr_energy_correct = []
-    
-    if os.path.isfile(name_of_file_2d)==True:
-        print("Loading existing file of 2d histogram data", name_of_file_2d)
-        hist_data_2d = np.load(name_of_file_2d)
+    name_of_arr = get_dump_name_arr(model_path, dataset_tag)
+
+    if os.path.isfile(name_of_arr)==True:
+        print("Loading existing file of correct array", name_of_arr)
+        arr_energy_correct = np.load(name_of_arr)
     else:
-        print("No saved 2d histogram data for this model found. New one will be generated.\nGenerating energy array...")
+        print("No saved correct array for this model found. New one will be generated.\nGenerating energy array...")
         dataset_info_dict = get_dataset_info(dataset_tag)
-        arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
-        print("Generating 2d histogram...")
-        hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins_2d)
-        print("Saving 2d histogram data as", name_of_file_2d)
-        np.save(name_of_file_2d, hist_data_2d)
+        arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples, apply_precuts)
+        print("Saving as", name_of_arr)
+        np.save(name_of_arr, arr_energy_correct)
+        
+    if apply_precuts:
+        print("Applying precuts to array...")
+        arr_energy_correct = arr_energy_correct_select_pheid_events(arr_energy_correct)
+
+    print("Generating 2d histogram...")
+    hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins_2d)
     print("Done.")
     
-    
-    if os.path.isfile(name_of_file_1d)==True:
-        print("Loading existing file of mae data", name_of_file_1d)
-        energy_mae_plot_data = np.load(name_of_file_1d)
-    else:
-        print("No saved mae data for this model found. New one will be generated.\nGenerating energy array...")
-        dataset_info_dict = get_dataset_info(dataset_tag)
-        if len(arr_energy_correct) == 0:
-            arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
-        else:
-            print("Energy array from before is reused.")
-        print("Generating mae histogramm...")
-        energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
-        
-        print("Saving mae histogram data as", name_of_file_1d)
-        np.save(name_of_file_1d, energy_mae_plot_data)
-        
+    print("Generating mae histogramm...")
+    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
     print("Done.")
+    
     return(hist_data_2d, energy_mae_plot_data)
 
 
-def save_and_show_plots(identifier):
+def save_and_show_plots(identifier, apply_precuts=False):
     #Main function. Generate or load the data for the plots, and make them.
-    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier)
+    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier, apply_precuts)
     #This function ill exit after completion if a set was chosen
     
     save_as_2d = save_as_base+"_2dhist_plot.pdf"
@@ -159,17 +158,16 @@ def save_and_show_plots(identifier):
         fig_mae.savefig(save_as_1d)
         print("Done.")
 
-def compare_plots(identifiers, label_list, save_plot_as):
+
+def compare_plots(identifiers, label_list, save_plot_as, apply_precuts=False):
     """
     Plot several saved mae data files and plot them in a single figure.
     """
     mae_plot_data_list = []
     print("Loading the saved files of the following models:")
     for identifier in identifiers:
-        [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base = get_saved_plots_info(identifier)
-        name_of_file_1d, name_of_file_2d = get_dump_names(model_path, dataset_tag)
-        
-        mae_plot_data = np.load(name_of_file_1d)
+        input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier, apply_precuts)
+        hist_data_2d, mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data)
         mae_plot_data_list.append(mae_plot_data)
 
     print("Done. Generating plot...")
@@ -180,7 +178,7 @@ def compare_plots(identifiers, label_list, save_plot_as):
     sys.exit()
     
     
-save_and_show_plots(identifier)
+save_and_show_plots(identifier, apply_precuts)
 
    
 

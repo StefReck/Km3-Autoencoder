@@ -59,12 +59,14 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
         energy = mc_info[:, 2]
         particle_type = mc_info[:, 1]
         is_cc = mc_info[:, 3]
+        event_id = mc_info[:, 0]
+        run_id = mc_info[:, 9]
 
         ax = np.newaxis
 
         # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], correct[:, ax], particle_type[:, ax], is_cc[:, ax], y_pred], axis=1)
-
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], correct[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax], ], axis=1)
+        
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
@@ -103,18 +105,92 @@ def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_m
 
         # calculate mean squared error between original image and autoencoded one
         mse = ((xs - y_pred) ** 2).mean(axis=(1,2,3,4)) #(32,)
-        energy = mc_info[:, 2] # (32,)
+        energy = mc_info[:, 2]
+        particle_type = mc_info[:, 1]
+        is_cc = mc_info[:, 3]
+        event_id = mc_info[:, 0]
+        run_id = mc_info[:, 9]
 
         ax = np.newaxis
 
-        # make a temporary energy_correct array for this batch, (32, 4)
-        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:,ax]], axis=1)
+        # make a temporary energy_correct array for this batch
+        arr_energy_correct_temp = np.concatenate([energy[:, ax], mse[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax], ], axis=1)
+
 
         if arr_energy_correct is None:
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
     return arr_energy_correct
+
+
+def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None, apply_precuts=False):
+    """
+    Use a model to predict the energy reco on a dataset.
+    :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
+    :param str f: Filepath of the file that is used for making predctions.
+    :param (int, str) class_type: The number of output classes and a string identifier to specify the exact output classes.
+                                  I.e. (2, 'muon-CC_to_elec-CC')
+    :param ndarray xs_mean: mean_image of the x dataset if zero-centering is enabled.
+    :param None/str swap_4d_channels: For 4D data input (3.5D models). Specifies, if the channels for the 3.5D net should be swapped in the generator.
+    :param None/int samples: Number of events that should be predicted. If samples=None, the whole file will be used.
+    :return: ndarray arr_energy_correct: Array that contains the mc_energy, reco_energy, particle_type, is_cc for each event.
+    """
+    # TODO only works for a single test_file till now
+    n_bins = dataset_info_dict["n_bins"]
+    batchsize = dataset_info_dict["batchsize"]
+    broken_simulations_mode = dataset_info_dict["broken_simulations_mode"]
+    
+    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict) # f_size=samples prob not necessary
+    
+    if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    steps = samples/batchsize
+
+
+    #Output is for every event: [mc_energy, reco_energy, particle_type, is_cc]
+    arr_energy_correct=None
+    
+    for s in range(int(steps)):
+        if s % 600 == 0:
+            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
+        xs, y_true, mc_info = next(generator)
+        reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
+        reco_energy = np.reshape(reco_energy, reco_energy.shape[0]) #shape (batchsize,)
+        
+        #track info:
+        #[event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, 
+        # dir_x/y/z -> 5/6/7, time -> 8]
+        
+        mc_energy = mc_info[:, 2]
+        particle_type = mc_info[:, 1]
+        is_cc = mc_info[:, 3]
+        event_id = mc_info[:, 0]
+        run_id = mc_info[:, 9]
+
+        ax = np.newaxis
+        
+        # make a temporary energy_correct array for this batch
+        arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax], event_id[:, ax], run_id[:, ax],], axis=1)
+
+        if arr_energy_correct is None:
+            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
+        arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
+
+    print("\nStatistics of this reconstruction:")
+    mc_energy = arr_energy_correct[:,0]
+    reco_energy = arr_energy_correct[:,1]
+    abs_err = np.abs(mc_energy - reco_energy)
+    total_abs_mean = abs_err.mean()
+    total_relative_median = np.median(abs_err/mc_energy)
+    total_relative_variance = np.var(abs_err/mc_energy)
+    print("Average mean absolute error over all energies:", total_abs_mean)
+    print("Median relative error over all energies:",total_relative_median)
+    print("Variance in relative error over all energies:", total_relative_variance)
+    print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
+    performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
+    
+    return arr_energy_correct, performance_list
+
 
 
 def check_if_prediction_is_correct(y_pred, y_true):
@@ -585,73 +661,7 @@ def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins,
 
 # ------------- Functions used for energy-energy evaluation -------------#
 
-def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None):
-    """
-    Use a model to predict the energy reco on a dataset.
-    :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
-    :param str f: Filepath of the file that is used for making predctions.
-    :param (int, str) class_type: The number of output classes and a string identifier to specify the exact output classes.
-                                  I.e. (2, 'muon-CC_to_elec-CC')
-    :param ndarray xs_mean: mean_image of the x dataset if zero-centering is enabled.
-    :param None/str swap_4d_channels: For 4D data input (3.5D models). Specifies, if the channels for the 3.5D net should be swapped in the generator.
-    :param None/int samples: Number of events that should be predicted. If samples=None, the whole file will be used.
-    :return: ndarray arr_energy_correct: Array that contains the mc_energy, reco_energy, particle_type, is_cc for each event.
-    """
-    # TODO only works for a single test_file till now
-    n_bins = dataset_info_dict["n_bins"]
-    batchsize = dataset_info_dict["batchsize"]
-    broken_simulations_mode = dataset_info_dict["broken_simulations_mode"]
-    
-    generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict) # f_size=samples prob not necessary
-    
-    if samples is None: samples = len(h5py.File(f, 'r')['y'])
-    steps = samples/batchsize
-
-
-    #Output is for every event: [mc_energy, reco_energy, particle_type, is_cc]
-    arr_energy_correct=None
-    
-    for s in range(int(steps)):
-        if s % 600 == 0:
-            print ('Predicting in step ' + str(s) + "/" + str(int(steps)))
-        xs, y_true, mc_info = next(generator)
-        reco_energy = model.predict_on_batch(xs) # shape (batchsize,1)
-        reco_energy = np.reshape(reco_energy, reco_energy.shape[0]) #shape (batchsize,)
-        
-        #track info:
-        #[event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, 
-        # dir_x/y/z -> 5/6/7, time -> 8]
-        
-        mc_energy = mc_info[:, 2]
-        particle_type = mc_info[:, 1]
-        is_cc = mc_info[:, 3]
-
-        ax = np.newaxis
-        
-        # make a temporary energy_correct array for this batch
-        arr_energy_correct_temp = np.concatenate([mc_energy[:, ax], reco_energy[:, ax], particle_type[:, ax], is_cc[:, ax]], axis=1)
-
-        if arr_energy_correct is None:
-            arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
-        arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
-
-
-    print("\nStatistics of this reconstruction:")
-    mc_energy = arr_energy_correct[:,0]
-    reco_energy = arr_energy_correct[:,1]
-    abs_err = np.abs(mc_energy - reco_energy)
-    total_abs_mean = abs_err.mean()
-    total_relative_median = np.median(abs_err/mc_energy)
-    total_relative_variance = np.var(abs_err/mc_energy)
-    print("Average mean absolute error over all energies:", total_abs_mean)
-    print("Median relative error over all energies:",total_relative_median)
-    print("Variance in relative error over all energies:", total_relative_variance)
-    print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
-    performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
-    
-    return arr_energy_correct, performance_list
-
-def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None):   
+def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None, apply_precuts=False ):   
     """
     Comfort function to setup everything that is needed for generating the arr_energy_correct 
     for energy evaluation, and then generates it.
@@ -666,8 +676,8 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
     #broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
     filesize_factor=dataset_info_dict["filesize_factor"]
     #filesize_factor_test=dataset_info_dict["filesize_factor_test"]
-    batchsize=dataset_info_dict["batchsize"] #def 32
-        
+    batchsize=dataset_info_dict["batchsize"] #def 32   
+    
     #Zero-Center with precalculated mean image
     train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
     #test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
@@ -679,7 +689,7 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
         
     arr_energy_correct = make_performance_array_energy_energy(model, test_file, 
                         class_type=[1,"energy"], xs_mean=xs_mean, swap_4d_channels=None, 
-                        dataset_info_dict=dataset_info_dict, samples=samples)
+                        dataset_info_dict=dataset_info_dict, samples=samples, apply_precuts=apply_precuts)
     return arr_energy_correct
     
 
@@ -1107,8 +1117,9 @@ def arr_energy_correct_select_pheid_events(arr_energy_correct, invert=False):
                                                  (events that don't survive the precuts are missing!)
     """
     pheid_evt_run_id = load_pheid_event_selection()
-
-    evt_run_id_in_pheid = in_nd(arr_energy_correct[:, [2,3,6,7]], pheid_evt_run_id, absolute=True) # 2,3,6,7: particle_type, is_cc, event_id, run_id
+    
+    # 2,3,6,7: particle_type, is_cc, event_id, run_id
+    evt_run_id_in_pheid = in_nd(arr_energy_correct[:, [2,3,4,5]], pheid_evt_run_id, absolute=True) 
 
     if invert is True: evt_run_id_in_pheid = np.invert(evt_run_id_in_pheid)
 

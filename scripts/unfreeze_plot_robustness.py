@@ -31,10 +31,10 @@ ax2.set_ylabel("Percent")
 
 for no,key in enumerate(keys_acc):
     ax.plot(data["epoch"], data[key], "o-", label=labels_acc[no], color=colors_acc[no])
-ax.legend()
+ax.legend(loc="lower left")
 for no,key in enumerate(keys_robust):
     ax2.plot(data["epoch"], data[key], "o--", label=labels_robust[no], color=colors_robust[no])
-ax2.legend()
+ax2.legend(loc="lower right")
 
 plt.show()
     
