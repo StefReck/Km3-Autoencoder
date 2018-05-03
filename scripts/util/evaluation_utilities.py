@@ -474,16 +474,14 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_r
         bins:           Number of bins the evaluation will be binned to.
         class_type:     Class type of the prediction. None for autoencoders.
         also_return_stats: Whether or not to return stats acquired during 
-                            calculation of the array energy correct. Will only
-                            return sth if the array is actually calculated
-                            (and not loaded)
+                            calculation of the array energy correct. Will always calculate the
+                            energy array, even if a save one was found.
     Output:
         hist_data_array: A list of the evaluation for every model, that is: the binned data that
                          is used for making the plot (can contain binned acc,
                          mse, mre for track/shower ... )
         optional: stats: Contains stats about the arr_enery_correct, like:
                          Total acc, or [MSE,MRE,VAR] for energy,...
-                         Can also be empty if the arr_ergy_cor was not calculated but loaded
     """
     #Extract the names of the models from their paths
     modelnames=[] # a tuple of eg       "vgg_1_xzt_supervised_up_down_epoch6" 
@@ -500,20 +498,17 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_r
         name_of_file=get_name_of_dump_files_for_evaluation_dataset(modelname, 
                                                        dataset, bins, class_type)
         
-        if os.path.isfile(name_of_file)==True:
+        if os.path.isfile(name_of_file)==True and also_return_stats==False:
             #File was created before, just open and load
             hist_data_array.append(open_hist_data(name_of_file))
-            stats_array.append([])
         else:
-            #File has not been created before, generate new one
+            #File has not been created before, or stats are required. Generate new one
             hist_data, stats = make_and_save_hist_data(dataset, modelidents[i], class_type, name_of_file, bins, also_return_stats=True)
             hist_data_array.append(hist_data)
             stats_array.append(stats)
         print("Done.")
         
     if also_return_stats:
-        if [] in stats_array:
-            print("Warning: Not all stats have been calculated as array was loaded!")
         return hist_data_array, stats_array
     else:
         return hist_data_array
@@ -576,6 +571,8 @@ def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins,
         stats = total_accuracy
         
     print("Saving hist_data as", name_of_file)
+    if os.path.isfile(name_of_file)==True:
+            print("File exists already. It will be overwritten.")
     with open(name_of_file, "wb") as dump_file:
         pickle.dump(hist_data, dump_file)
         

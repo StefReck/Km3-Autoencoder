@@ -40,15 +40,16 @@ if not os.path.isfile(name_of_logfile):
 else:
     new_logfile=False
     
-    
+print("Logfile:", name_of_logfile)
 while True:
     print("\nWorking on epoch", epoch)
     
+    #Get the three model+dataset combos for the current epoch in a list
     modelidents, dataset_array = [],[]
     for modelbase, dataset in procedure:
         model_file = modelbase + "epoch"+str(epoch)+".h5"
         if not os.path.isfile(model_file):
-            print("Did not find the file", model_file, ", exiting...")
+            print("Did not find the model", model_file, ", exiting...")
             break 
         modelidents.append(model_file)
         dataset_array.append(dataset)
