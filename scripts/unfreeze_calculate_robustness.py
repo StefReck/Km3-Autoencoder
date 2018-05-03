@@ -8,10 +8,13 @@ For the robustness, the performance of the model has to be evaluated 3 times:
     Broken model  auf Broken    (what you see when developing the model, acc_sim)
     Broken model  auf real      (the actual performance on proper data, acc_meas)
     Real model    auf real      (the best-case scenario of what the network can get, acc_ulim)
+The above acc values are on a dataset basis (average over all events in that set)
 
-Robustness indicators (calculated binwise per energy bin):
+Robustness indicators:
     (acc_sim -acc_meas)/acc_meas    : How much worse is the model on actual data
     (acc_ulim-acc_meas)/acc_meas    : How much worse is it then the best case
+For these, the performance is binned energywise before calculating, so this is more 
+of a per model basis (low energy events not more important then others).
 """
 
 from evaluation_dataset import print_statistics_in_numbers
