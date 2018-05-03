@@ -124,7 +124,7 @@ def make_loss_array_energy_correct(model, f, n_bins, class_type, batchsize, xs_m
     return arr_energy_correct
 
 
-def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None, apply_precuts=False):
+def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_channels, dataset_info_dict, samples=None):
     """
     Use a model to predict the energy reco on a dataset.
     :param ks.model.Model/Sequential model: Fully trained Keras model of a neural network.
@@ -686,8 +686,9 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
         xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=n_gpu[0])
     else:
         xs_mean = None
-        
-    arr_energy_correct = make_performance_array_energy_energy(model, test_file, 
+    
+    #performance list contains [total_abs_mean,total_relative_median,total_relative_variance]
+    arr_energy_correct, performance_list = make_performance_array_energy_energy(model, test_file, 
                         class_type=[1,"energy"], xs_mean=xs_mean, swap_4d_channels=None, 
                         dataset_info_dict=dataset_info_dict, samples=samples, apply_precuts=apply_precuts)
     return arr_energy_correct
