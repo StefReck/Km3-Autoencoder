@@ -109,7 +109,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     else:
         print("No saved correct array for this model found. New one will be generated.\nGenerating energy array...")
         dataset_info_dict = get_dataset_info(dataset_tag)
-        arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples, apply_precuts)
+        arr_energy_correct = setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples)
         print("Saving as", name_of_arr)
         np.save(name_of_arr, arr_energy_correct)
         

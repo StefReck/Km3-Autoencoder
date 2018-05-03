@@ -661,7 +661,7 @@ def make_and_save_hist_data(dataset, modelident, class_type, name_of_file, bins,
 
 # ------------- Functions used for energy-energy evaluation -------------#
 
-def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None, apply_precuts=False ):   
+def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero_center, samples=None ):   
     """
     Comfort function to setup everything that is needed for generating the arr_energy_correct 
     for energy evaluation, and then generates it.
@@ -690,7 +690,7 @@ def setup_and_make_energy_arr_energy_correct(model_path, dataset_info_dict, zero
     #performance list contains [total_abs_mean,total_relative_median,total_relative_variance]
     arr_energy_correct, performance_list = make_performance_array_energy_energy(model, test_file, 
                         class_type=[1,"energy"], xs_mean=xs_mean, swap_4d_channels=None, 
-                        dataset_info_dict=dataset_info_dict, samples=samples, apply_precuts=apply_precuts)
+                        dataset_info_dict=dataset_info_dict, samples=samples)
     return arr_energy_correct
     
 
