@@ -84,6 +84,7 @@ while True:
     with open(name_of_logfile, "a") as logfile:
         if new_logfile:
             logfile.write(logheader)
+            new_logfile=False
         logfile.write(logline)
         print("Wrote into logfile")
         

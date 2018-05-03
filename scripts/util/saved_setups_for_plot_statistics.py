@@ -259,7 +259,7 @@ def get_props_for_plot_parser(tag):
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
     
-    if tag=="pic_ihlr_enc_test":
+    elif tag=="pic_ihlr_enc_test":
         #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
         title = "Variation of unfrozen encoder layers"
         test_files=[home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt",
@@ -267,6 +267,12 @@ def get_props_for_plot_parser(tag):
                     home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt" ,
                     home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
         labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
+        
+    elif tag=="unfreeze":
+        title = "Variation of unfrozen encoder layers"
+        test_files=[home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_test.txt" ,
+                    home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_broken4_test.txt",]
+        labels_override = ["Normal dataset", "Manipulated dataset",]
         
     else:
         raise NameError("Tag "+tag+" unknown.")
