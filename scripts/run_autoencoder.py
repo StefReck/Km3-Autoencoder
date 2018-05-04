@@ -113,6 +113,21 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
             lr=0.01
         else:
             lr=0.1
+    
+    elif lr_schedule_number=="200_dense":
+        #was used for training 200 dense new
+        if before_epoch<=20:
+            lr=0.001
+        elif before_epoch<=53:
+            lr=0.01
+            
+        elif before_epoch<=62:
+            lr=0.01*1.05**(before_epoch-53)
+        elif before_epoch<=98:
+            lr=0.01*1.05**(62-53) * 1.14907**(before_epoch-62)
+            
+        else:
+            lr=0.2
             
     elif lr_schedule_number=="steps15":
         # multiply user lr by 10 every 15 epochs

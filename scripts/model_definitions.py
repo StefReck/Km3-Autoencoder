@@ -234,7 +234,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_morefilter", autoencoder_stage=0, modelpath_and_name=None, 
+    model=setup_model(model_tag="vgg_5_200_dense", autoencoder_stage=0, modelpath_and_name=None, 
                       additional_options="")
     model.summary()
     
