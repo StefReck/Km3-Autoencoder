@@ -645,7 +645,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         if unfreeze_layer_training==True:
             #Unfreeze C layers of the model according to schedule
             #An additional C block is set trainable before these epochs
-            unfreeze_a_c_block_at = np.array([5,10,15,20,25,30,35,40,45])
+            unfreeze_a_c_block_at = np.array([5,10,15,20,25,30,35,40,])
             
             how_many = np.where(unfreeze_a_c_block_at==current_epoch)[0]
             if len(how_many)>0:
