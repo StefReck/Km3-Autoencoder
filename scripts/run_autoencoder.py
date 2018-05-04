@@ -105,7 +105,15 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
             lr=0.01
         else:
             lr=0.1
-        
+    elif lr_schedule_number=="3steps":
+        #for autoencoder training
+        if before_epoch<=20:
+            lr=0.001
+        elif before_epoch<=40:
+            lr=0.01
+        else:
+            lr=0.1
+            
     elif lr_schedule_number=="steps15":
         # multiply user lr by 10 every 15 epochs
         start_lr       = learning_rate

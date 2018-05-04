@@ -234,8 +234,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_64", autoencoder_stage=2, modelpath_and_name=None, 
-                      additional_options="dense_setup=small")
+    model=setup_model(model_tag="vgg_5_morefilter", autoencoder_stage=0, modelpath_and_name=None, 
+                      additional_options="")
     model.summary()
     
     conv_layer_indices = []

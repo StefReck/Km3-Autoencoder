@@ -318,12 +318,12 @@ def setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name=N
     train=False if autoencoder_stage == 1 else True #Freeze Encoder layers in encoder+ stage
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     
-    filter_base=[28,29,40,75]
+    filter_base=[28,29,38,75]
     
     inputs = Input(shape=(11,18,50,1))
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
-    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
+    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #13x20x48
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
     
@@ -416,11 +416,11 @@ def setup_vgg_5_200(autoencoder_stage, options_dict, modelpath_and_name=None):
         input_shape=(11,18,50,31)
         output_filters=31
         
-    inputs = Input(shape=input_shape)
+    inputs = Input(shape=input_shape) #11x18x50
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
-    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
-    x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
+    #x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #13x20x48
+    #x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
     
     x=conv_block(x,      filters=filter_base[1], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x23
@@ -503,8 +503,8 @@ def setup_vgg_5_200_deep(autoencoder_stage, options_dict, modelpath_and_name=Non
     inputs = Input(shape=(11,18,50,1))
     x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x50
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x48
-    x = ZeroPadding3D(((1,1),(1,1),(0,0)))(inputs) #13x20x48
-    x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
+    #x = ZeroPadding3D(((1,1),(1,1),(0,0)))(x) #13x20x48
+    #x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="valid",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder) #11x18x46
     x=conv_block(x,      filters=filter_base[0], kernel_size=(3,3,3), padding="same",  trainable=train, channel_axis=channel_axis, BNunlock=unlock_BN_in_encoder)
     x = AveragePooling3D((1, 1, 2), padding='valid')(x) #11x18x23
     
