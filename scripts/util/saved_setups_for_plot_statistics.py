@@ -248,7 +248,7 @@ def get_how_many_epochs_each_to_train(epoch_schedule):
 
 def get_props_for_plot_parser(tag):
     #For the script plots_statistics_parser
-    home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
+    home = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     legend_locations=(1, "upper left")
     #save it to this folder in the results/plots/ folder
     save_to_name = "statistics/statistics_parser_"+tag+".pdf"
@@ -259,25 +259,25 @@ def get_props_for_plot_parser(tag):
 
     if tag=="channel-encs":
         title = "Encoder performance of channel autoencoder networks"
-        test_files=[home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
-                    home+"models/channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_epoch17_supervised_up_down_stateful_convdrop_test.txt",
-                    home+"models/channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_epoch23_supervised_up_down_stateful_convdrop_test.txt"]
+        test_files=["channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
+                    "channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_epoch17_supervised_up_down_stateful_convdrop_test.txt",
+                    "channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_epoch23_supervised_up_down_stateful_convdrop_test.txt"]
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
     
     elif tag=="pic_ihlr_enc_test":
         #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
         title = "Variation of unfrozen encoder layers"
-        test_files=[home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt",
-                    home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt",
-                    home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt" ,
-                    home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
+        test_files=["vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt",
+                    "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt",
+                    "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt" ,
+                    "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
         labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
         
     elif tag=="unfreeze":
         title = "Successive unfreezing of encoder layers"
-        test_files=[home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_test.txt" ,
-                    home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_broken4_test.txt",]
+        test_files=["vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_test.txt" ,
+                    "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_broken4_test.txt",]
         labels_override = ["Normal dataset", "Manipulated dataset",]
         save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
         colors = ["navy", "orange"]
@@ -381,8 +381,10 @@ def get_props_for_plot_parser(tag):
         
     print("Loaded the following files:")
     for file in test_files:
-        print(file.split(home)[1]) 
+        print(file) 
         
+    test_files=[home+file for file in test_files]
+    
     save_as=home+"results/plots/"+save_to_name
     return test_files, title, labels_override, save_as, legend_locations, colors, xticks
 
