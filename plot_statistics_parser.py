@@ -49,7 +49,7 @@ dump_to_file=None
 save_as=None
 if test_files[0]=="saved":
     #overwrite some of the above options from a saved setup
-    test_files, title, labels_override, save_as, legend_locations, colors = get_props_for_plot_parser(test_files[1])
+    test_files, title, labels_override, save_as, legend_locations, colors, xticks = get_props_for_plot_parser(test_files[1])
 
 
 

@@ -254,6 +254,9 @@ def get_props_for_plot_parser(tag):
     save_to_name = "statistics/statistics_parser_"+tag+".pdf"
     #Colors to use. [] for auto selection
     colors=[]
+    #Override xtick locations; None for automatic
+    xticks=None
+
     if tag=="channel-encs":
         title = "Encoder performance of channel autoencoder networks"
         test_files=[home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
@@ -279,6 +282,100 @@ def get_props_for_plot_parser(tag):
         save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
         colors = ["navy", "orange"]
         
+        
+        
+    #------------------------- Old setups, from plot_statistics_better -------------------------    
+    
+    elif tag=="vgg_3_comp":
+        title="Progress of autoencoders with different optimization strategies"
+        test_files = ["vgg_3/trained_vgg_3_autoencoder_test.txt",
+              #"vgg_3_reg-e9/trained_vgg_3_reg-e9_autoencoder_test.txt",
+              #"vgg_3-eps4/trained_vgg_3-eps4_autoencoder_test.txt",
+              #"vgg_3_dropout/trained_vgg_3_dropout_autoencoder_test.txt",
+              #"vgg_3_max/trained_vgg_3_max_autoencoder_test.txt",
+              #"vgg_3_stride/trained_vgg_3_stride_autoencoder_test.txt",
+              #"vgg_3_stride_noRelu/trained_vgg_3_stride_noRelu_autoencoder_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",]
+              #"vgg_3_small/trained_vgg_3_small_autoencoder_test.txt",
+              #"vgg_3_verysmall/trained_vgg_3_verysmall_autoencoder_test.txt",]
+        labels_override = [r"Adam with $\epsilon=10^{-1}$", "SGD", r"Adam with $\epsilon=10^{-8}$"]
+    
+    elif tag=="vgg4_autoencoders_var_depth":
+        test_files = [#"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+                  "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+                  "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+                  "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+                  "vgg_4_15c/trained_vgg_4_15c_autoencoder_test.txt",
+                  "vgg_4_30c/trained_vgg_4_30c_autoencoder_test.txt",]
+    
+        title="Loss of autoencoders with a varying number of convolutional layers"
+        xticks=[0,5,10,15,20,25,30]
+        labels_override=["12 layers","14 layers", "16 layers", "20 layers", "30 layers", "60 layers"]
+        
+    
+    elif tag=="vgg4_autoencoders_10c":
+        test_files = [#"vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+                  #"vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
+                  #"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+                  #"vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+                  #"vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+                  "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+                  "vgg_4_10c_smallkernel/trained_vgg_4_10c_smallkernel_autoencoder_test.txt",
+                  "vgg_4_10c_triple/trained_vgg_4_10c_triple_autoencoder_test.txt",
+                  "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",]
+                  #"vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
+        title="Loss of autoencoders with 20 convolutional layers"
+        labels_override=["Standard", "Small kernel", "Triple structure", "Triple structure variation"]
+        
+    
+        """
+    #range not adjustable currently, should be 0:50
+    elif tag=="vgg_3_parallel_jumps":
+        test_files=["models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt",]
+        labels_override = [r"Adam with $\epsilon=10^{-1}$",]
+        title="Accuracy during parallel supervised training" 
+    """
+    
+    elif tag=="Unfrozen":
+        test_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
+                  "vgg_3_dropout/trained_vgg_3_dropout_supervised_up_down_test.txt",
+                  "vgg_3_max/trained_vgg_3_max_supervised_up_down_test.txt",
+                  "vgg_3_stride/trained_vgg_3_stride_supervised_up_down_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_supervised_up_down_test.txt",]
+    
+    elif tag=="Encoders_Epoch_10":
+        test_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.txt",
+                  "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_epoch10_supervised_up_down_test.txt",
+                  "vgg_3_max/trained_vgg_3_max_autoencoder_epoch10_supervised_up_down_test.txt",
+                  "vgg_3_stride/trained_vgg_3_stride_autoencoder_epoch10_supervised_up_down_test.txt", ]
+    
+    elif tag=="sgdlr01_encoders":
+        test_files = ["vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch2_supervised_up_down_test.txt",
+                  "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch5_supervised_up_down_test.txt",
+                  "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10_supervised_up_down_test.txt",]
+    
+    elif tag=="Encoders_vgg_3_eps_AE_E10":
+        test_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_triplebatchnorm_e1_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_unfbatchnorm_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch80_supervised_up_down_unfbatchnorm_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_unfbatchnorm_no_addBN_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_batchnorm_e1_test.txt",
+                  "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch11_supervised_up_down_test.txt",]
+    
+    elif tag=="vgg3eps": # AE E10 Encoders: finaler test von vgg_3
+        test_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_and_norm_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_BN_noBN_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_norm_noBN_noDrop_BN_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_downNorm_BN_noDrop_BN_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_BN_BN_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_noBN_BN_test.txt",
+                   "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
+    
+
+        
     else:
         raise NameError("Tag "+tag+" unknown.")
         
@@ -287,4 +384,96 @@ def get_props_for_plot_parser(tag):
         print(file.split(home)[1]) 
         
     save_as=home+"results/plots/"+save_to_name
-    return test_files, title, labels_override, save_as, legend_locations, colors
+    return test_files, title, labels_override, save_as, legend_locations, colors, xticks
+
+
+
+"""
+From the old plot_statistics_better script:
+    
+test_files = ["vgg_3/trained_vgg_3_autoencoder_test.txt",
+              #"vgg_3_reg-e9/trained_vgg_3_reg-e9_autoencoder_test.txt",
+              #"vgg_3-eps4/trained_vgg_3-eps4_autoencoder_test.txt",
+              #"vgg_3_dropout/trained_vgg_3_dropout_autoencoder_test.txt",
+              #"vgg_3_max/trained_vgg_3_max_autoencoder_test.txt",
+              #"vgg_3_stride/trained_vgg_3_stride_autoencoder_test.txt",
+              #"vgg_3_stride_noRelu/trained_vgg_3_stride_noRelu_autoencoder_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",]
+              #"vgg_3_small/trained_vgg_3_small_autoencoder_test.txt",
+              #"vgg_3_verysmall/trained_vgg_3_verysmall_autoencoder_test.txt",]
+
+#Unfrozen
+xtest_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",
+              "vgg_3_dropout/trained_vgg_3_dropout_supervised_up_down_test.txt",
+              "vgg_3_max/trained_vgg_3_max_supervised_up_down_test.txt",
+              "vgg_3_stride/trained_vgg_3_stride_supervised_up_down_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_supervised_up_down_test.txt",]
+
+#Encoders Epoch 10
+xtest_files = ["vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_dropout/trained_vgg_3_dropout_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_max/trained_vgg_3_max_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_stride/trained_vgg_3_stride_autoencoder_epoch10_supervised_up_down_test.txt", ]
+
+#sgdlr01 encoders
+xtest_files = ["vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch2_supervised_up_down_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch5_supervised_up_down_test.txt",
+              "vgg_3-sgdlr01/trained_vgg_3-sgdlr01_autoencoder_epoch10_supervised_up_down_test.txt",]
+
+#Enocders vgg_3_eps AE E10
+xtest_files = ["vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_triplebatchnorm_e1_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_unfbatchnorm_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch80_supervised_up_down_unfbatchnorm_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_unfbatchnorm_no_addBN_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_batchnorm_e1_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch11_supervised_up_down_test.txt",]
+
+#vgg3eps AE E10 Encoders: finaler test von vgg_3
+xtest_files = [ "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_and_norm_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_BN_noBN_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_norm_noBN_noDrop_BN_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_downNorm_BN_noDrop_BN_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_BN_BN_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_noNorm_noBN_BN_test.txt",
+               "vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch10_supervised_up_down_zero_center_test.txt",]
+
+#only
+xtest_files = ["vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_up_down_new_test.txt",]
+
+#vgg4 autoencoders variational depth
+xtest_files = [#"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+              "vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+              "vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+              "vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+              "vgg_4_15c/trained_vgg_4_15c_autoencoder_test.txt",
+              "vgg_4_30c/trained_vgg_4_30c_autoencoder_test.txt",]
+
+xtitle="Loss of autoencoders with a varying number of convolutional layers"
+xticks=[0,5,10,15,20,25,30]
+xlabels_override=["12 layers","14 layers", "16 layers", "20 layers", "30 layers", "60 layers"]
+
+
+#vgg4 autoencoders 10c tests
+test_files = [#"vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
+              #"vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
+              #"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
+              #"vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
+              #"vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
+              "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
+              "vgg_4_10c_smallkernel/trained_vgg_4_10c_smallkernel_autoencoder_test.txt",
+              "vgg_4_10c_triple/trained_vgg_4_10c_triple_autoencoder_test.txt",
+              "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",]
+              #"vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
+title="Loss of autoencoders with 20 convolutional layers"
+labels_override=["Standard", "Small kernel", "Triple structure", "Triple structure variation"]
+
+#vgg_5 smaller bottleneck
+xtest_files = ["vgg_5_channel/trained_vgg_5_channel_autoencoder_test.txt",
+              "vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt",
+              "vgg_3/trained_vgg_3_autoencoder_test.txt",
+              "vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt",]
+"""
+

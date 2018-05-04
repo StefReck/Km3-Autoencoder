@@ -12,9 +12,9 @@ debug=True
 
 if debug:
     logfile_path="trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_broken4_log.txt"
-    save_as=None
+    save_as="../results/plots/unfreeze/broken4_vgg5_200_robustness.pdf"
 else:
-    home="home/woody/capn/mppi013h/Km3-Autoencoder/"
+    home="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     logfile_path=home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_broken4_log.txt"
     save_as=home+"results/plots/unfreeze/broken4_vgg5_200_robustness.pdf"
 
@@ -38,7 +38,7 @@ ax.set_xlim((0,46))
 ax.set_xticks(np.arange(0,50,5))
 
 ax.set_ylim(-10.5,10.5)
-ax2.set_ylim(-0.1,40.1)
+ax2.set_ylim(-1,41)
 
 ax3.set_xlim((0,46))
 ax3.set_xticks(np.arange(0,45,5)+1)
@@ -51,7 +51,7 @@ ax.set_ylabel("Absolute change to original accuracy (%)")
 ax2.set_ylabel("Relative decrease changing datasets (%)")
 
 ax.xaxis.grid()
-ax.axhline(0, c="lightgrey", zorder=-1000)
+ax.axhline(0, c="lightgrey", zorder=-1000, lw=0.5)
 
 for no,key in enumerate(keys_acc):
     ydata = [100*(float(point)-float(data[key][0])) for point in data[key]]
