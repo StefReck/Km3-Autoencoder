@@ -196,7 +196,6 @@ def test_model():
 
 
 
-
 model = test_model()
 model.compile(optimizer='adam', loss='mse')
 model.predict(np.ones((1,)))

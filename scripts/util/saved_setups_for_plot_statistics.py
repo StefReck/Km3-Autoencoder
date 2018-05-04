@@ -203,7 +203,7 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_64_energy" or tag==34:
+    elif tag=="vgg_5_64_energy_new" or tag==34:
         title = "Parallel training with model '64 new'"
         ae_model =  home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_supervised_parallel_energy_test.txt"
@@ -214,7 +214,7 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_32-eps01_energy" or tag==35:
+    elif tag=="vgg_5_32-eps01_energy_new" or tag==35:
         title = "Parallel training with model '32 new'"
         ae_model =  home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_supervised_parallel_energy_test.txt"
@@ -250,7 +250,10 @@ def get_props_for_plot_parser(tag):
     #For the script plots_statistics_parser
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
     legend_locations=(1, "upper left")
-    
+    #save it to this folder in the results/plots/ folder
+    save_to_name = "statistics/statistics_parser_"+tag+".pdf"
+    #Colors to use. [] for auto selection
+    colors=[]
     if tag=="channel-encs":
         title = "Encoder performance of channel autoencoder networks"
         test_files=[home+"models/channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
@@ -269,10 +272,12 @@ def get_props_for_plot_parser(tag):
         labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
         
     elif tag=="unfreeze":
-        title = "Variation of unfrozen encoder layers"
+        title = "Successive unfreezing of encoder layers"
         test_files=[home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_test.txt" ,
                     home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_broken4_test.txt",]
         labels_override = ["Normal dataset", "Manipulated dataset",]
+        save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
+        colors = ["navy", "orange"]
         
     else:
         raise NameError("Tag "+tag+" unknown.")
@@ -281,5 +286,5 @@ def get_props_for_plot_parser(tag):
     for file in test_files:
         print(file.split(home)[1]) 
         
-    save_as=home+"results/plots/statistics/statistics_parser_"+tag+".pdf"
-    return test_files, title, labels_override, save_as, legend_locations
+    save_as=home+"results/plots/"+save_to_name
+    return test_files, title, labels_override, save_as, legend_locations, colors
