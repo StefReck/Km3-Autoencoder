@@ -385,7 +385,7 @@ def get_props_for_plot_parser(tag):
         
     test_files=[home+file for file in test_files]
     
-    save_as=home+"results/plots/"+save_to_name
+    save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
     return test_files, title, labels_override, save_as, legend_locations, colors, xticks
 
 
