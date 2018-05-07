@@ -14,34 +14,49 @@ Can also plot it and save it to results/plots
 import matplotlib.pyplot as plt
 
 from util.evaluation_utilities import make_or_load_files, make_binned_data_plot
+from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 
 tag="dpg_plot"
 
 def get_saved_plots_info(tag):
+    class_type = (2, 'up_down')
+    #Type of plot which is generated for whole array (it should all be of the same type):
+    #loss, acc, None
+    plot_type = "acc"
+    bins=32
+    y_lims=(0.75,1) #for acc only
+    
+    full_path=False
     if tag=="dpg_plot":
         #Model info:
-        #list of modelidents to work on (has to be an array, so add , at the end if only one file)
-        modelidents = ("vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5",
-                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch23.h5",
-                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
-        
-        class_type = (2, 'up_down')
+        #list of modelidents to work on (has to be an array, so add , at the end
+        #if only one file)
+        modelidents = (get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_3", full_path),
+                       get_path_best_epoch("vgg_3_unf", full_path))
         
         #Dataset to evaluate on
         dataset_array = ["xzt",] * len(modelidents)
-        
-        
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Up-down Performance comparison'
         label_array=["Best from autoencoder 200", "Best from autoencoder 2000", "Best supervised"]
         plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" #in the results/plots folder
-        #Type of plot which is generated for whole array (it should all be of the same type):
-        #loss, acc, None
-        plot_type = "acc"
+    
+    elif tag=="compare_600":
+        #morefilter and picture (evtl channel)
+        modelidents = (get_path_best_epoch("vgg_5_600_picture", full_path),
+                       get_path_best_epoch("vgg_5_600_morefilter", full_path),)
         
-        bins=32
-        y_lims=(0.75,1) #for acc only
+        #Dataset to evaluate on
+        dataset_array = ["xzt",] * len(modelidents)
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Up-down Performance comparison'
+        label_array=["From autoencoder 'picture'", "From autoencoder 'morefilter'"]
+        plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" #in the results/plots folder
+     
+        
+       
 
     else: raise NameError
     

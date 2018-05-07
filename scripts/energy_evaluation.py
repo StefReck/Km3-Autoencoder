@@ -16,7 +16,7 @@ import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
-    parser.add_argument('model', type=str, help='Name of a model .h5 file, or a identifier for a saved setup.')
+    parser.add_argument('model', type=str, help='Name of a model .h5 file, or an identifier for a saved setup. (see this file for identifiers for sets and saved_setups for single epochs)')
 
     args = parser.parse_args()
     params = vars(args)
@@ -31,9 +31,7 @@ import os
 
 from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events, make_energy_evaluation_statistics
-
-#Which model to use (see below)
-#identifiers = ["2000_unf",]
+from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 #only go through parts of the file (for testing)
 samples=None
@@ -51,58 +49,9 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     is_a_set=False
     
-    #----------------Single unfrozen datafiles----------------
-    if identifier=="2000_unf":
-        model_path = "models/vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
-    elif identifier=="2000_unf_mse":
-        model_path = "models/vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
-    elif identifier=="200_linear":
-        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
     
-    
-    #--------------------------Single encoder datafiles---------------------------
-    #------------------------------Energy bottleneck------------------------------
-    elif identifier=="vgg_3_2000":
-        model_path="models/vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
-    
-    elif identifier=="vgg_5_600_picture":
-        model_path="models/vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
-    elif identifier=="vgg_5_600_morefilter":
-        model_path=""
-        raise
-        
-    elif identifier=="vgg_5_200":
-        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_epoch57.h5"
-    elif identifier=="vgg_5_200_dense":
-        model_path=""
-        raise
-    
-    elif identifier=="vgg_5_64":
-        model_path=""
-        raise
-        
-    elif identifier=="vgg_5_32":
-        model_path=""
-        raise
-        
-    #------------------------------200 size variation------------------------------
-    elif identifier=="vgg_5_200_shallow":
-        model_path=""
-        raise
-    elif identifier=="vgg_5_200_small":
-        model_path=""
-        raise
-    elif identifier=="vgg_5_200_large":
-        model_path=""
-        raise
-    elif identifier=="vgg_5_200_deep":
-        model_path=""
-        raise
-    
-        
     #----------------Sets for mae comparison----------------
-    # Will exit after completion
-    elif identifier == "2000":
+    if identifier == "2000":
         identifiers = ["2000_unf", "2000_unf_mse"]
         label_list  = ["With MAE", "With MSE"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
@@ -115,11 +64,15 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     #-------------------------------------------------------
         
     else:
-        print("Input is not a known identifier. Opening as model instead.")
-        model_path = identifier
-        save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
-        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
-    
+        try:
+            #Read in the saved name from saved_setups_for_plot_statistics
+            model_path = get_path_best_epoch(identifier, full_path=False)
+        except NameError:
+            print("Input is not a known identifier. Opening as model instead.")
+            model_path = identifier
+            save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+            return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
+        
 
     if is_a_set:
         return [identifiers, label_list], save_plot_as
@@ -130,7 +83,7 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         if apply_precuts:
             save_as_base+="precut_"
         
-        model_path=home_path+model_path
+        model_path=home_path+"models/"+model_path
         return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
 
 
