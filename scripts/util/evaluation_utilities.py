@@ -185,10 +185,10 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
 def make_energy_evaluation_statistics(arr_energy_correct):
     """
     Takes the energy correct array from make_performance_array_energy_energy, calculates
-    The mean absolute error,median relative error and variance, prints them
-    and returns them in a tuple.
+    The mean absolute error,median relative error and variance over the dataset, 
+    prints them and returns them in a tuple.
     """
-    print("\nStatistics of this reconstruction:")
+    print("\nStatistics of this reconstruction, averaged over all samples in the dataset:")
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     abs_err = np.abs(mc_energy - reco_energy)
@@ -559,7 +559,7 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_r
     Input:
         modelidents:    List of strs of the path to the models on which the evaluation is done on.
         dataset_array:  List of dataset tags on which the models will be evaluated on.
-        bins:           Number of bins the evaluation will be binned to.
+        bins:           Number of bins the evaluation will be binned to (often 32).
         class_type:     Class type of the prediction. None for autoencoders.
         also_return_stats: Whether or not to return stats acquired during 
                             calculation of the array energy correct. Will always calculate the

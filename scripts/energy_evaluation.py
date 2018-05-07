@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 """
+    Evalutaion for energy regression models
+    
 Take a model that predicts energy of events and do the evaluation for that, both
 in the form of a 2d histogramm (mc energy vs reco energy), 
 and as a 1d histogram (mc_energy vs mean absolute error).
 
-Looks for saved arr_energ_corrects to load.
-Will print statisitcs from that array like median, variance, ...
+Looks for saved arr_energ_corrects to load, or generate new one.
+Will print statistics from that array like median, variance, ...
 Generates the 2d and the 1d plots and saves them.
 
-Can also compare multiple 1d plots.
+Can also compare multiple 1d plots instead.
 """
 import argparse
 
@@ -25,7 +27,7 @@ identifier = params["model"]
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os, sys
+import os
 
 from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events, make_energy_evaluation_statistics
@@ -37,6 +39,7 @@ from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, 
 samples=None
 #Should precuts be applied to the data; if so, the plot will be saved 
 #with a "_precut" added to the file name
+#Currently defunct
 apply_precuts=False
 
 def get_saved_plots_info(identifier, apply_precuts=False):
@@ -46,6 +49,7 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     energy_bins_2d=np.arange(3,101,1)
     energy_bins_1d=np.linspace(3,100,32)
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
+    is_a_set=False
     
     #----------------Single unfrozen datafiles----------------
     if identifier=="2000_unf":
@@ -54,10 +58,47 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         model_path = "models/vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
     elif identifier=="200_linear":
         model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
-   
     
-    #----------------Single encoder datafiles----------------
+    
+    #--------------------------Single encoder datafiles---------------------------
+    #------------------------------Energy bottleneck------------------------------
+    elif identifier=="vgg_3_2000":
+        model_path="models/vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
+    
+    elif identifier=="vgg_5_600_picture":
+        model_path="models/vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
+    elif identifier=="vgg_5_600_morefilter":
+        model_path=""
+        raise
         
+    elif identifier=="vgg_5_200":
+        model_path="models/vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_epoch57.h5"
+    elif identifier=="vgg_5_200_dense":
+        model_path=""
+        raise
+    
+    elif identifier=="vgg_5_64":
+        model_path=""
+        raise
+        
+    elif identifier=="vgg_5_32":
+        model_path=""
+        raise
+        
+    #------------------------------200 size variation------------------------------
+    elif identifier=="vgg_5_200_shallow":
+        model_path=""
+        raise
+    elif identifier=="vgg_5_200_small":
+        model_path=""
+        raise
+    elif identifier=="vgg_5_200_large":
+        model_path=""
+        raise
+    elif identifier=="vgg_5_200_deep":
+        model_path=""
+        raise
+    
         
     #----------------Sets for mae comparison----------------
     # Will exit after completion
@@ -65,12 +106,12 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         identifiers = ["2000_unf", "2000_unf_mse"]
         label_list  = ["With MAE", "With MSE"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
-        compare_plots(identifiers, label_list, save_plot_as)
+        is_a_set=True
     elif identifier == "bottleneck":
         identifiers = ["2000_unf", "200_linear"]
         label_list  = ["Unfrozen 2000", "Encoder 200"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
-        compare_plots(identifiers, label_list, save_plot_as)
+        is_a_set=True
     #-------------------------------------------------------
         
     else:
@@ -78,16 +119,19 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         model_path = identifier
         save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
         return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
+    
+
+    if is_a_set:
+        return [identifiers, label_list], save_plot_as
+    else:
+        print("Working on model", model_path)
+        #Where to save the plots to
+        save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+        if apply_precuts:
+            save_as_base+="precut_"
         
-    print("Working on model", model_path)
-    
-    #Where to save the plots to
-    save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
-    if apply_precuts:
-        save_as_base+="precut_"
-    
-    model_path=home_path+model_path
-    return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
+        model_path=home_path+model_path
+        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
 
 
 def get_dump_name_arr(model_path, dataset_tag):
@@ -113,7 +157,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
         print("Loading existing file of correct array", name_of_arr)
         arr_energy_correct = np.load(name_of_arr)
         #Print infos about the evaluation performance like Median, Variance,...
-        make_energy_evaluation_statistics(arr_energy_correct)
+        __ = make_energy_evaluation_statistics(arr_energy_correct)
     else:
         print("No saved correct array for this model found. New one will be generated.\nGenerating energy array...")
         dataset_info_dict = get_dataset_info(dataset_tag)
@@ -139,35 +183,44 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
 def save_and_show_plots(identifier, apply_precuts=False):
     #Main function. Generate or load the data for the plots, and make them.
     input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier, apply_precuts)
-    #This function ill exit after completion if a set was chosen
     
-    save_as_2d = save_as_base+"_2dhist_plot.pdf"
-    save_as_1d = save_as_base+"_mae_plot.pdf"
+    #Can also compare multiple already generated mae plots
+    if len(input_for_make_hist_data)==2:
+        #Compare existing mae plots
+        save_plot_as = save_as_base
+        fig_compare = compare_plots(*input_for_make_hist_data)
+        if save_plot_as != None:
+            print("Saving plot as", save_plot_as)
+            fig_compare.savefig(save_plot_as)
+            print("Done")
+        plt.show(fig_compare)
         
-    
-    hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
-    
-    print("Generating hist2d plot...")
-    fig_hist2d = make_2d_hist_plot(hist_data_2d)
-    
-    plt.show(fig_hist2d)
-    if save_as_2d != None:
-        print("Saving plot as", save_as_2d)
-        fig_hist2d.savefig(save_as_2d)
-        print("Done.")
+    else:    
+        #Do the standard energy evaluation
+        save_as_2d = save_as_base+"_2dhist_plot.pdf"
+        save_as_1d = save_as_base+"_mae_plot.pdf"
+            
         
-    
-    print("Generating mae plot...")
-    fig_mae = make_energy_mae_plot([energy_mae_plot_data,])
-    
-    plt.show(fig_mae)
-    if save_as_1d != None:
-        print("Saving plot as", save_as_1d)
-        fig_mae.savefig(save_as_1d)
-        print("Done.")
+        hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
+        
+        print("Generating hist2d plot...")
+        fig_hist2d = make_2d_hist_plot(hist_data_2d)
+        plt.show(fig_hist2d)
+        if save_as_2d != None:
+            print("Saving plot as", save_as_2d)
+            fig_hist2d.savefig(save_as_2d)
+            print("Done.")
+            
+        print("Generating mae plot...")
+        fig_mae = make_energy_mae_plot([energy_mae_plot_data,])
+        plt.show(fig_mae)
+        if save_as_1d != None:
+            print("Saving plot as", save_as_1d)
+            fig_mae.savefig(save_as_1d)
+            print("Done.")
 
 
-def compare_plots(identifiers, label_list, save_plot_as, apply_precuts=False):
+def compare_plots(identifiers, label_list, apply_precuts=False):
     """
     Plot several saved mae data files and plot them in a single figure.
     """
@@ -180,10 +233,7 @@ def compare_plots(identifiers, label_list, save_plot_as, apply_precuts=False):
 
     print("Done. Generating plot...")
     fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_list)
-    print("Saving plot as", save_plot_as)
-    fig_mae.savefig(save_plot_as)
-    plt.show(fig_mae)
-    sys.exit()
+    return fig_mae
     
     
 save_and_show_plots(identifier, apply_precuts)
