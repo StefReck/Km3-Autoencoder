@@ -43,6 +43,14 @@ def get_dataset_info(dataset_tag):
         #zero_center_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5_zero_center_mean.npy"    
         n_bins = (11,18,50,1)
         
+    elif dataset_tag=="xzt_precut":
+        #with old spatial binning and very old time binning (relative)
+        #Precuts applied to the test dataset, train set is just xzt (for loading 0centering)
+        data_path = ""
+        train_data = home_path + "data/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+        test_data = home_path + "data/xzt_precut/test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+        n_bins = (11,18,50,1)
+        
     elif dataset_tag=="xztc":
         #with old spatial binning and very old time binning (relative)
         data_path = home_path+"data/xztc/"
