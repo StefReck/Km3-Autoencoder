@@ -11,6 +11,10 @@ def get_props_for_plot_parallel(tag):
     epoch_schedule="10-2-1"
     labels_override = ["Autoencoder", "Encoder"] 
     save_to_folder = ""
+    
+    try: tag=int(tag) 
+    except: ValueError
+    
     #-------------------vgg5 picture loss functions tests---------------------------
     if tag=="msep" or tag==0:
         title = "Parallel training with MSEp autoencoder loss"
@@ -147,7 +151,7 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt"
         save_to_folder = "instanthighlr/"
         
-    #-------------------vgg_5_200 Parameter Erhöhung---------------------------
+    #-------------------vgg_5_200 Parameter Erhöhung Up-down ---------------------------
     elif tag=="vgg_5_200_deep" or tag==21:
         title = "Parallel training with model '200 deep'"
         ae_model =  home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_test.txt"
@@ -169,7 +173,7 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "vgg_5_200_params/"
         
-    #-------------------Energy reconstructions---------------------------
+    #------------------- Bottleneck energy ---------------------------------------------
     elif tag=="vgg_3_energy" or tag==25:
         title = "Parallel training with model '2000'"
         ae_model =  home+"models/vgg_3/trained_vgg_3_autoencoder_test.txt" 
@@ -220,8 +224,32 @@ def get_props_for_plot_parallel(tag):
         prl_model = home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
         
+    #-------------------vgg_5_200 Parameter Erhöhung Energy ---------------------------
+    elif tag=="vgg_5_200_deep_energy" or tag==36:
+        title = "Parallel training with model '200 deep'"
+        ae_model =  home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "vgg_5_200_params_energy/"
+    elif tag=="vgg_5_200_large_energy" or tag==37:
+        title = "Parallel training with model '200 large'"
+        ae_model =  home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_large/trained_vgg_5_200_large_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "vgg_5_200_params_energy/"
+    elif tag=="vgg_5_200_shallow_energy" or tag==38:
+        title = "Parallel training with model '200 shallow'"
+        ae_model =  home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "vgg_5_200_params_energy/"
+    elif tag=="vgg_5_200_small_energy" or tag==39:
+        title = "Parallel training with model '200 small'"
+        ae_model =  home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "vgg_5_200_params_energy/"
+        
+        
+    #----------------------------------------------------------------------------------
     else:
-        raise NameError("Tag "+tag+" unknown.")
+        raise NameError("Tag "+str(tag)+" unknown.")
         
     test_files=[ae_model, prl_model]
     print("Loaded the following files:")
@@ -231,6 +259,14 @@ def get_props_for_plot_parallel(tag):
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
     return test_files, title, labels_override, save_as, epoch_schedule
 
+def get_highest_tagnumber():
+    tag_no=0
+    while True:
+        try:
+            get_props_for_plot_parallel(tag_no)
+            tag_no+=1
+        except NameError: break
+    print("\n"+str(tag_no-1)+" is the highest present index.")
 
 def get_how_many_epochs_each_to_train(epoch_schedule):
     #Which epochs from the parallel encoder history to take, depending on the 
@@ -388,6 +424,9 @@ def get_props_for_plot_parser(tag):
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
     return test_files, title, labels_override, save_as, legend_locations, colors, xticks
 
+
+if __name__=="__main__":
+    get_highest_tagnumber()
 
 
 """
