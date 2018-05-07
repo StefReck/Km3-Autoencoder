@@ -179,22 +179,31 @@ def make_performance_array_energy_energy(model, f, class_type, xs_mean, swap_4d_
             arr_energy_correct = np.zeros((int(steps) * batchsize, arr_energy_correct_temp.shape[1:2][0]), dtype=np.float32)
         arr_energy_correct[s*batchsize : (s+1) * batchsize] = arr_energy_correct_temp
 
+    performance_list = make_energy_evaluation_statistics(arr_energy_correct)
+    return arr_energy_correct, performance_list
+
+def make_energy_evaluation_statistics(arr_energy_correct):
+    """
+    Takes the energy correct array from make_performance_array_energy_energy, calculates
+    The mean absolute error,median relative error and variance, prints them
+    and returns them in a tuple.
+    """
     print("\nStatistics of this reconstruction:")
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     abs_err = np.abs(mc_energy - reco_energy)
+    
     total_abs_mean = abs_err.mean()
     total_relative_median = np.median(abs_err/mc_energy)
     total_relative_variance = np.var(abs_err/mc_energy)
+    
     print("Average mean absolute error over all energies:", total_abs_mean)
     print("Median relative error over all energies:",total_relative_median)
     print("Variance in relative error over all energies:", total_relative_variance)
     print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
-    performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
     
-    return arr_energy_correct, performance_list
-
-
+    performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
+    return performance_list
 
 def check_if_prediction_is_correct(y_pred, y_true):
     """

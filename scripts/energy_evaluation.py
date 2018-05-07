@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Take a model that predicts energy of events and do the evaluation for that, either
+Take a model that predicts energy of events and do the evaluation for that, both
 in the form of a 2d histogramm (mc energy vs reco energy), 
-or as a 1d histogram (mc_energy vs mean absolute error).
+and as a 1d histogram (mc_energy vs mean absolute error).
+
+Looks for saved arr_energ_corrects to load.
+Will print statisitcs from that array like median, variance, ...
+Generates the 2d and the 1d plots and saves them.
+
+Can also compare multiple 1d plots.
 """
 import argparse
 
@@ -22,7 +28,7 @@ import numpy as np
 import os, sys
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events, make_energy_evaluation_statistics
 
 #Which model to use (see below)
 #identifiers = ["2000_unf",]
@@ -84,8 +90,8 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
 
 
-def get_dump_name_arr(model_path, dataset_tag, apply_precuts=False):
-    #Returns the name of the energy correct array
+def get_dump_name_arr(model_path, dataset_tag):
+    #Returns the name and path of the energy correct array dump file
     modelname = model_path.split("trained_")[1][:-3]
     dump_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/data/"
     
@@ -106,6 +112,8 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     if os.path.isfile(name_of_arr)==True:
         print("Loading existing file of correct array", name_of_arr)
         arr_energy_correct = np.load(name_of_arr)
+        #Print infos about the evaluation performance like Median, Variance,...
+        make_energy_evaluation_statistics(arr_energy_correct)
     else:
         print("No saved correct array for this model found. New one will be generated.\nGenerating energy array...")
         dataset_info_dict = get_dataset_info(dataset_tag)
