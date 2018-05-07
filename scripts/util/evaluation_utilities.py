@@ -555,6 +555,8 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_r
     Takes a bunch of models and returns the hist data for plotting, either
     by loading if it exists already or by generating it from scratch.
     Can also evaluate the performance of an autoencoder.
+    
+    Not used by energy evaluation anymore!
         
     Input:
         modelidents:    List of strs of the path to the models on which the evaluation is done on.
