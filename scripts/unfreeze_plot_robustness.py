@@ -7,26 +7,22 @@ import numpy as np
 
 from plotting.plot_statistics import read_out_file
 
-which_file="laptop_200_broken4"
+which_file="200_broken4"
 show_plot=True
+laptop=True
 
-def get_filepath(which_file):
-    if which_file=="laptop_200_broken4":
-        logfile_path="trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_broken4_log.txt"
-        save_as="../results/plots/unfreeze/broken4_vgg5_200_robustness.pdf"
-        
-    elif which_file=="200_broken4":
+def get_filepath(which_file, laptop=True):
+    if laptop:
+        home="../"
+    else:
         home="/home/woody/capn/mppi013h/Km3-Autoencoder/"
-        logfile_path=home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_broken4_log.txt"
+        
+    if which_file=="200_broken4":
+        logfile_path=home+"results/unfreeze_plot_data/trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_broken4_log.txt"
         save_as=home+"results/plots/unfreeze/broken4_vgg5_200_robustness.pdf"
         
-    elif which_file=="laptop_200_contE20_broken4":
-        logfile_path="trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_contE20_broken4_log.txt"
-        save_as=home+"../results/plots/unfreeze/broken4_contE20_vgg5_200_robustness.pdf"
-        
     elif which_file=="200_contE20_broken4":
-        home="/home/woody/capn/mppi013h/Km3-Autoencoder/"
-        logfile_path=home+"models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_contE20_broken4_log.txt"
+        logfile_path=home+"results/unfreeze_plot_data/trained_vgg_5_200-unfreeze_autoencoder_epoch1_unfreeze_contE20_broken4_log.txt"
         save_as=home+"results/plots/unfreeze/broken4_contE20_vgg5_200_robustness.pdf"
         
     else: raise NameError
@@ -82,15 +78,15 @@ def make_plot(logfile_path):
     
     return fig
     
-def show_and_save_plot(which_file, show_plot=True):
-    logfile_path, save_as = get_filepath(which_file)
+def show_and_save_plot(which_file, show_plot=True, laptop=True):
+    logfile_path, save_as = get_filepath(which_file, laptop)
     fig = make_plot(logfile_path)
     if save_as is not None:
         print("Saving plot to", save_as)
         fig.savefig(save_as)
     if show_plot: plt.show(fig)
 
-show_and_save_plot(which_file, show_plot)
+show_and_save_plot(which_file, show_plot, laptop)
     
     
     

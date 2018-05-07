@@ -36,7 +36,7 @@ def make_setup(tag):
         #Class type
         class_type=(2,"up_down")
         #Name of the file the lines will be logged to, generated automatically
-        name_of_logfile = model_base_ae + "unfreeze_broken4_log.txt"
+        name_of_logfile = "results/unfreeze_plot_data/"+model_base_ae.split("/")[-1] + "unfreeze_broken4_log.txt"
         #Starting epoch
         epoch=1
         #bins for the histogramm of which the robutness is calculated
@@ -54,7 +54,7 @@ def make_setup(tag):
         #Class type
         class_type=(2,"up_down")
         #Name of the file the lines will be logged to, generated automatically
-        name_of_logfile = model_base_ae + "unfreeze_contE20_broken4_log.txt"
+        name_of_logfile = "results/unfreeze_plot_data/"+model_base_ae.split("/")[-1] + "unfreeze_contE20_broken4_log.txt"
         #Starting epoch
         epoch=1
         #bins for the histogramm of which the robutness is calculated
