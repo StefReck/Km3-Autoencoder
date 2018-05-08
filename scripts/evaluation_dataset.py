@@ -4,6 +4,13 @@
 Evaluate model performance after training. 
 This is for comparison of supervised accuracy on different datasets.
 Especially for the plots for the broken data comparison.
+
+The usual setup is that simulations are broken (so that the AE has not to be trained again)
+so 3 tests are necessary:
+    Trained on broken --> Test on broken (seeming performance)
+    Trained on broken --> Test on real   (actual perfromance)
+    Trained on real   --> Test on real   (best case)
+    
 """
 
 import argparse
@@ -41,7 +48,10 @@ y_lims_override = None
 make_difference_plot=False
 which_broken_study=4
 
-
+def get_procedure(broken_model, real_model, brokendata_tag, realdata_tag):
+    modelidents   = (broken_model,   broken_model, real_model)
+    dataset_array = (brokendata_tag, realdata_tag, realdata_tag)
+    return modelidents, dataset_array
 
 def get_info(which_one, extra_name="", y_lims_override=None):
     """
@@ -68,7 +78,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     #Add the number of bins to the name of the plot file (usually 32)
     extra_name="_"+ str(bins)+"_bins" + extra_name
-    
+
     
     try: which_one=int(which_one)
     except: ValueError
@@ -248,11 +258,12 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.5,1.0)
         
     elif which_one=="5_unf" or which_one==13:
-        modelidents = ("vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5",
-                       "vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5",
-                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
-        #Which dataset each to use
-        dataset_array = ("xzt_broken5", "xzt", "xzt")
+        broken_model = "vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5"
+        real_model   = "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5"
+        brokendata_tag = "xzt_broken5"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Unfrozen network performance with manipulated simulations'
         #in the results/plots folder:

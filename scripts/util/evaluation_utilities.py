@@ -44,7 +44,7 @@ def make_performance_array_energy_correct(model, f, n_bins, class_type, batchsiz
     # TODO only works for a single test_file till now
     generator = generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, zero_center_image=xs_mean, f_size=None , is_autoencoder=False, yield_mc_info=True, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict) # f_size=samples prob not necessary
     
-    if samples is None: samples = len(h5py.File(f, 'r')['y'])
+    if samples is None: samples = len(h5py.File(f, 'r')['x'])
     steps = samples/batchsize
 
     arr_energy_correct = None
