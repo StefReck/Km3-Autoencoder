@@ -86,7 +86,7 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         #Where to save the plots to
         save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
         if apply_precuts:
-            save_as_base+="precut_"
+            save_as_base+="_precut"
             dataset_tag="xzt_precut"
         
         model_path=home_path+"models/"+model_path

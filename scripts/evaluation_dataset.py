@@ -69,6 +69,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     #Add the number of bins to the name of the plot file (usually 32)
     extra_name="_"+ str(bins)+"_bins" + extra_name
     
+    
+    try: which_one=int(which_one)
+    except: ValueError
     if which_one=="1_unf" or which_one==0:
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -232,10 +235,31 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         
         
     elif which_one=="5_enc" or which_one==12:
-        raise NameError("Not there yet...")
+        modelidents = ("vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken5_epoch58.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_broken5_epoch58.h5",
+                       "vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch24.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken5", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Autoencoder-encoder network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken5_enc"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.5,1.0)
         
     elif which_one=="5_unf" or which_one==13:
-        raise NameError("Not there yet...")
+        modelidents = ("vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5",
+                       "vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5",
+                       "vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken5", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Unfrozen network performance with manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_3_broken5_unf"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.5,1.0)
+    
     
     elif which_one=="energy" or which_one==14:
         raise NameError("Not there yet...")
