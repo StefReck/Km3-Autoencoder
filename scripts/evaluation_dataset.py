@@ -255,7 +255,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken5_enc"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.5,1.0)
+        y_lims=(0.7,1.0)
+        legend_loc="lower right"
         
     elif which_one=="5_unf" or which_one==13:
         broken_model = "vgg_3-broken5/trained_vgg_3-broken5_supervised_up_down_epoch6.h5"
@@ -269,7 +270,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #in the results/plots folder:
         plot_file_name = "vgg_3_broken5_unf"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.5,1.0)
+        y_lims=(0.7,1.0)
+        legend_loc="lower right"
     
     
     elif which_one=="energy" or which_one==14:
@@ -355,7 +357,15 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
     """
     Prints the average overall loss of performance, 
     averaged over all bins (not all events).
+    For this, three hist_datas are necessary:
+    hist_data_array
+                [0]:  On simulations (broken on broken)
+                [1]:  On measured    (broken on real)
+                [2]:  Upper limit    (real on real)
     """
+    print("\n----------Statistics of this evaluation-----------------")
+    print("\tAveraged over energy bins, not events!")
+    
     if plot_type == "acc":
         #hist_data contains [energy, binned_acc] for every model
         on_simulations_data = hist_data_array[0][1]
@@ -365,10 +375,12 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         dropoff_sim_measured = ( (on_simulations_data - on_measured_data)/on_measured_data ).mean()
         dropoff_upper_limit_measured = ((upper_limit_data - on_measured_data)/on_measured_data ).mean()
         
-        print("Average relative %-acc reduction across all bins: 100 * (x - measured) / measured")
+        print("Acc on Sims:\tOn measured\tUpper lim")
+        print(np.mean(on_simulations_data), np.mean(on_measured_data), np.mean(upper_limit_data))
+        print("\nAverage relative %-acc reduction across all bins: 100 * (x - measured) / measured")
         print("From simulation to measured\tFrom upper lim to measured:")
         print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
-        
+        print("--------------------------------------------------------\n")
         header = ("(Sim-Meas)/Meas","(Upperlim-Meas)/Meas")
         line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
         
