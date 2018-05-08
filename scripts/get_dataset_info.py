@@ -36,9 +36,9 @@ def get_dataset_info(dataset_tag):
     #Dataset to use
     if dataset_tag=="xzt":
         #for xzt
+        #sizes: 1,640,321, 410,556
         data_path = home_path + "data/xzt/"
         train_data = "train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
-        #test data: 410556
         test_data = "test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
         n_bins = (11,18,50,1)
         
@@ -49,6 +49,15 @@ def get_dataset_info(dataset_tag):
         data_path = ""
         train_data = home_path + "data/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
         test_data = home_path + "data/xzt_precut/elec-CC_and_muon-CC_481_to_600.h5"
+        n_bins = (11,18,50,1)
+        
+    elif dataset_tag=="xzt_spat_tight":
+        #for xzt with new spatial binning and tight time binning
+        #was generated from xyzt data
+        #Sizes: 1,641,687, 411,487
+        data_path = home_path+"data/xzt_new_binning_spatial_tight_time/"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
         n_bins = (11,18,50,1)
         
     elif dataset_tag=="xztc":
@@ -62,15 +71,6 @@ def get_dataset_info(dataset_tag):
     elif dataset_tag=="xzt_new":
         #for xzt with new spatial and time binning
         data_path = home_path+"data/xzt_new_binning_spatial_time/"
-        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
-        #zero_center_data = "" # generated automatically
-        n_bins = (11,18,50,1)
-        
-    elif dataset_tag=="xzt_spat_tight":
-        #for xzt with new spatial binning and tight time binning
-        #was generated from xyzt data
-        data_path = home_path+"data/xzt_new_binning_spatial_tight_time/"
         train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
         test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
         #zero_center_data = "" # generated automatically

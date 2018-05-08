@@ -549,7 +549,6 @@ def get_name_of_dump_files_for_evaluation_dataset(modelname, dataset, bins, clas
 
 
 
-#TODO: not bugfixed
 def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_return_stats=False):
     """
     Takes a bunch of models and returns the hist data for plotting, either

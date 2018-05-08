@@ -10,14 +10,26 @@ This is then binned and automatically dumped. Instead of recalculating,
 it is loaded automatically.
 Can also plot it and save it to results/plots
 """
+import argparse
+
+def parse_input():
+    parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
+    parser.add_argument('tag', type=str, help='Name of an identifier for a saved setup. (see this file for identifiers)')
+
+    args = parser.parse_args()
+    params = vars(args)
+    return params
+
+params = parse_input()
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from util.evaluation_utilities import make_or_load_files, make_binned_data_plot
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 
-tag="dpg_plot"
+tag=params["tag"]
 
 def get_saved_plots_info(tag):
     class_type = (2, 'up_down')
@@ -63,7 +75,7 @@ def get_saved_plots_info(tag):
         
        
 
-    else: raise NameError
+    else: NameError("Tag "+tag+" unknown.")
     
     modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"
@@ -80,6 +92,12 @@ def make_evaluation(tag):
     
     #generate or load data automatically:
     hist_data_array = make_or_load_files(modelidents, dataset_array, bins, class_type)
+    
+    print("\n   STATS   ")
+    for i,hist_from_model in enumerate(hist_data_array):
+        print("Model:", label_array[i])
+        print("Mean over all bins:", np.mean(hist_from_model[1]))
+    print("\n")
     
     #make plot of multiple data:
     if plot_type == "acc":
