@@ -441,6 +441,9 @@ def get_path_best_epoch(modeltag, full_path=True):
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch23.h5"
     elif modeltag=="vgg_5_200":
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5"
+    elif modeltag=="vgg_5_600_picture" :
+        model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch88.h5"
+    
     
     
     
@@ -450,53 +453,53 @@ def get_path_best_epoch(modeltag, full_path=True):
     #------------------------- Energy Networks ------------------------- 
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     #---------------- Single unfrozen datafiles ----------------
-    if modeltag=="2000_unf":
+    elif modeltag=="2000_unf_E":
         model_path = "vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
-    elif modeltag=="2000_unf_mse":
+    elif modeltag=="2000_unf_mse_E":
         model_path = "vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
-    elif modeltag=="200_linear":
+    elif modeltag=="200_linear_E":
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
     
     
     #------------------------------Energy bottleneck------------------------------
-    elif modeltag=="vgg_3_2000":
+    elif modeltag=="vgg_3_2000_E":
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
     
-    elif modeltag=="vgg_5_600_picture":
+    elif modeltag=="vgg_5_600_picture_E":
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
-    elif modeltag=="vgg_5_600_morefilter":
+    elif modeltag=="vgg_5_600_morefilter_E":
         model_path=""
         raise
         
-    elif modeltag=="vgg_5_200":
+    elif modeltag=="vgg_5_200_E":
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_epoch57.h5"
-    elif modeltag=="vgg_5_200_dense":
+    elif modeltag=="vgg_5_200_dense_E":
         model_path=""
         raise
     
-    elif modeltag=="vgg_5_64":
+    elif modeltag=="vgg_5_64_E":
         model_path=""
         raise
         
-    elif modeltag=="vgg_5_32":
+    elif modeltag=="vgg_5_32_E":
         model_path=""
         raise
         
     #------------------------------200 size variation------------------------------
-    elif modeltag=="vgg_5_200_shallow":
+    elif modeltag=="vgg_5_200_shallow_E":
         model_path=""
         raise
-    elif modeltag=="vgg_5_200_small":
+    elif modeltag=="vgg_5_200_small_E":
         model_path=""
         raise
-    elif modeltag=="vgg_5_200_large":
+    elif modeltag=="vgg_5_200_large_E":
         model_path=""
         raise
-    elif modeltag=="vgg_5_200_deep":
+    elif modeltag=="vgg_5_200_deep_E":
         model_path=""
         raise
         
-    else: raise NameError
+    else: raise NameError("Tag '"+str(modeltag)+"' is not known!")
     
     if full_path:
         model_path=base_path+model_path
