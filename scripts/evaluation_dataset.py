@@ -376,7 +376,7 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         dropoff_upper_limit_measured = ((upper_limit_data - on_measured_data)/on_measured_data ).mean()
         
         print("Acc on Sims:\tOn measured\tUpper lim")
-        print(np.mean(on_simulations_data), np.mean(on_measured_data), np.mean(upper_limit_data))
+        print(np.mean(on_simulations_data),"\t", np.mean(on_measured_data),"\t", np.mean(upper_limit_data))
         print("\nAverage relative %-acc reduction across all bins: 100 * (x - measured) / measured")
         print("From simulation to measured\tFrom upper lim to measured:")
         print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)

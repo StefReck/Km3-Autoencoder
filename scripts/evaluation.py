@@ -35,25 +35,30 @@ def get_saved_plots_info(tag):
         modelidents = (get_path_best_epoch("vgg_5_200", full_path),
                        get_path_best_epoch("vgg_3", full_path),
                        get_path_best_epoch("vgg_3_unf", full_path))
-        
         #Dataset to evaluate on
         dataset_array = ["xzt",] * len(modelidents)
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Up-down Performance comparison'
         label_array=["Best from autoencoder 200", "Best from autoencoder 2000", "Best supervised"]
-        plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" #in the results/plots folder
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" 
     
     elif tag=="compare_600":
         #morefilter and picture (evtl channel)
         modelidents = (get_path_best_epoch("vgg_5_600_picture", full_path),
                        get_path_best_epoch("vgg_5_600_morefilter", full_path),)
         
-        #Dataset to evaluate on
+    elif tag=="compare_bottleneck":
+        #morefilter and picture (evtl channel)
+        modelidents = (get_path_best_epoch("vgg_3", full_path),
+                       get_path_best_epoch("vgg_5_600_picture", full_path),
+                       get_path_best_epoch("vgg_5_200", full_path),)
+                       #get_path_best_epoch("vgg_5_64", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        #Plot properties: All in the array are plotted in one figure, with own label each
-        title_of_plot='Up-down Performance comparison'
-        label_array=["From autoencoder 'picture'", "From autoencoder 'morefilter'"]
-        plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" #in the results/plots folder
+        title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
+        label_array=["2000", "600", "200", "64"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_bottleneck_compare.pdf"
      
         
        
@@ -61,7 +66,7 @@ def get_saved_plots_info(tag):
     else: raise NameError
     
     modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
+    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"
     
     modelidents=[modelpath+modelident for modelident in modelidents]
     save_plot_as = plot_path + plot_file_name
