@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
+        Evalutaion for up-down classification models
+        
 Evaluate model performance after training for up-down or AUtoencoder networks.
 Will save and display a binned histogram plot of acc or loss vs energy.
 
@@ -55,23 +57,59 @@ def get_saved_plots_info(tag):
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" 
     
+    #--------------------------------Bottleneck--------------------------------
     elif tag=="compare_600":
         #morefilter and picture (evtl channel)
         modelidents = (get_path_best_epoch("vgg_5_600_picture", full_path),
                        get_path_best_epoch("vgg_5_600_morefilter", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Accuracy of encoders with bottleneck 600'
+        label_array=["Picture", "More filter"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
+        
+    elif tag=="compare_200":
+        modelidents = (get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_200_dense", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Accuracy of encoders with bottleneck 200'
+        label_array=["Standard", "Dense"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
         
     elif tag=="compare_bottleneck":
-        #morefilter and picture (evtl channel)
         modelidents = (get_path_best_epoch("vgg_3", full_path),
                        get_path_best_epoch("vgg_5_600_picture", full_path),
-                       get_path_best_epoch("vgg_5_200", full_path),)
-                       #get_path_best_epoch("vgg_5_64", full_path),)
+                       get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_64-new", full_path),
+                       get_path_best_epoch("vgg_5_32-new", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
         title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
         label_array=["2000", "600", "200", "64"]
         #in the results/plots/updown_evalutaion/ folder
-        plot_file_name = "vgg_5_bottleneck_compare.pdf"
+        plot_file_name = "vgg_5_"+tag+".pdf"
      
+        
+    #--------------------------- 200 size variation ---------------------------
+    elif tag=="compare_200_smaller":
+        modelidents = (get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_200_small", full_path),
+                       get_path_best_epoch("vgg_5_200_shallow", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Accuracy of encoders with bottleneck 200'
+        label_array=["Standard", "Small", "Shallow"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
+        
+    elif tag=="compare_200_bigger":
+        modelidents = (get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_200_large", full_path),
+                       get_path_best_epoch("vgg_5_200_deep", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Accuracy of encoders with bottleneck 200'
+        label_array=["Standard", "Large", "Deep"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
         
        
 

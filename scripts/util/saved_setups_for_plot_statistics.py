@@ -439,15 +439,35 @@ def get_path_best_epoch(modeltag, full_path=True):
     #------------------------- Bottleneck ------------------------- 
     elif modeltag=="vgg_3":
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch23.h5"
-    elif modeltag=="vgg_5_200":
-        model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5"
+    
     elif modeltag=="vgg_5_600_picture" :
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch88.h5"
+    elif modeltag=="vgg_5_600_morefilter":
+        model_path=""
+        raise
     
+    elif modeltag=="vgg_5_200":
+        model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5"
+    elif modeltag=="vgg_5_200_dense":
+        model_path=""
+        raise
     
+    elif modeltag=="vgg_5_64":
+        model_path=""
+        raise
+    elif modeltag=="vgg_5_32":
+        model_path=""
+        raise
     
-    
-    
+    #------------------------------200 size variation------------------------------
+    elif modeltag=="vgg_5_200_shallow":
+        model_path="/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch19_supervised_up_down_epoch63.h5"
+    elif modeltag=="vgg_5_200_small":
+        model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch77_supervised_up_down_epoch87.h5"
+    elif modeltag=="vgg_5_200_large":
+        model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch39_supervised_up_down_epoch55.h5"
+    elif modeltag=="vgg_5_200_deep":
+        model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch48_supervised_up_down_epoch60.h5"
     
     
     #------------------------- Energy Networks ------------------------- 

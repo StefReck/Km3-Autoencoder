@@ -55,7 +55,9 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     is_a_set=False
     
     
-    #----------------Sets for mae comparison----------------
+    #------------------------------Sets for mae comparison---------------------
+    
+    
     if identifier == "2000":
         identifiers = ["2000_unf", "2000_unf_mse"]
         label_list  = ["With MAE", "With MSE"]
@@ -66,6 +68,17 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         label_list  = ["Unfrozen 2000", "Encoder 200"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
         is_a_set=True
+    
+    #-----------------------Bottleneck----------------------
+    elif identifier == "compare_600":
+        identifiers = ["vgg_5_600_picture", "vgg_5_600_morefilter"]
+        label_list  = ["Picture", "More filter"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+        is_a_set=True
+        #title_of_plot='Accuracy of encoders with bottleneck 600'
+        
+    #Der rest von evaluation.py sollte hier auch rein, z.B. 200, 64,...
+        
     #-------------------------------------------------------
         
     else:
