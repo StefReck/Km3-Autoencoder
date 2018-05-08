@@ -230,6 +230,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         #y limits of plot:
         y_lims=(0.75,1)
         
+        
     elif which_one=="5_enc" or which_one==12:
         raise NameError("Not there yet...")
         
@@ -240,6 +241,21 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         raise NameError("Not there yet...")
         folder_in_the_plots_path = "broken_study_energy/"
         plot_type = "mre"
+    
+    
+    elif which_one=="unfreeze_comp" or which_one==15:
+        modelidents = ("models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_test.txt",
+                       "models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_test.txt",
+                       "models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch11.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='Continuation of partially unfrozen network training'
+        #in the results/plots folder:
+        folder_in_the_plots_path="unfreeze/"
+        plot_file_name = "broken4_vgg5_200_contE20"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
     
     else:
         raise NameError(str(which_one) + " is not known!")

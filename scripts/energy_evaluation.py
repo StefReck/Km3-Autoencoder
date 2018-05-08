@@ -11,34 +11,39 @@ Will print statistics from that array like median, variance, ...
 Generates the 2d and the 1d plots and saves them.
 
 Can also compare multiple 1d plots instead.
+
+If apply precuts is selected, the dataset will be xzt_precuts instead of xzt, 
+and _precut will be added to the filename and the saved arr_energy_correct.
 """
 import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
     parser.add_argument('model', type=str, help='Name of a model .h5 file, or an identifier for a saved setup. (see this file for identifiers for sets and saved_setups for single epochs)')
+    parser.add_argument('-p','--apply_precuts', help="Change to dataset xzt_precut", action='store_true')
 
     args = parser.parse_args()
     params = vars(args)
     return params
 
 params = parse_input()
-identifier = params["model"]
 
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, arr_energy_correct_select_pheid_events, make_energy_evaluation_statistics
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
-#only go through parts of the file (for testing)
-samples=None
+
+identifier = params["model"]
 #Should precuts be applied to the data; if so, the plot will be saved 
 #with a "_precut" added to the file name
-#Currently defunct
-apply_precuts=False
+apply_precuts = params["apply_precuts"]
+#only go through parts of the file (for testing)
+samples=None
+
 
 def get_saved_plots_info(identifier, apply_precuts=False):
     #Info about plots that have been generated for the thesis are listed here.
@@ -82,9 +87,10 @@ def get_saved_plots_info(identifier, apply_precuts=False):
         save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
         if apply_precuts:
             save_as_base+="precut_"
+            dataset_tag="xzt_precut"
         
         model_path=home_path+"models/"+model_path
-        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts], save_as_base
+        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
 
 
 def get_dump_name_arr(model_path, dataset_tag):
@@ -97,7 +103,7 @@ def get_dump_name_arr(model_path, dataset_tag):
     return name_of_arr
 
 
-def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, apply_precuts=False, samples=None):
+def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
     #This function outputs a np array with the 2d hist data, 
     #either by loading a saved arr_energy_correct, or by generating a new one
@@ -118,10 +124,6 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
         print("Saving as", name_of_arr)
         np.save(name_of_arr, arr_energy_correct)
         
-    if apply_precuts:
-        print("Applying precuts to array...")
-        arr_energy_correct = arr_energy_correct_select_pheid_events(arr_energy_correct)
-
     print("Generating 2d histogram...")
     hist_data_2d = calculate_2d_hist_data(arr_energy_correct, energy_bins_2d)
     print("Done.")
