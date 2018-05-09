@@ -376,24 +376,23 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     
     #x range
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel_test] )
-    plt.xlim((0,max_epoch))
-    
+    ax.set_xlim((0,max_epoch))
     #y range
-    ax.set_ylim(get_proper_range(data_autoencoder[1]))
-    ax2.set_ylim(get_proper_range(np.concatenate((data_parallel_test[1],data_parallel_train[1]))))
+    ylims_AE = get_proper_range(data_autoencoder[1])
+    ylims_prl = get_proper_range(get_proper_range(np.concatenate((data_parallel_test[1],data_parallel_train[1]))))
+    ax.set_ylim(ylims_AE)
+    ax2.set_ylim(ylims_prl)
     
     if xticks is not None:
-        plt.xticks( xticks )
+        ax.set_xticks( xticks )
     else:
-        plt.xticks( np.arange(0, max_epoch+1,5) )
+        ax.set_xticks( np.arange(0, max_epoch+1,10) )
         
     ax.set_ylabel(ylabel_list[0])
     ax2.set_ylabel(ylabel_list[1])
     ax.set_xlabel(xlabel)
     plt.title(title)
     ax.grid(True)
+    plt.gcf().subplots_adjust(right=0.86)
     return(fig)
-    
-
-
 

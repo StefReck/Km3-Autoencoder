@@ -419,7 +419,11 @@ def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy
     Makes a plot based on multiple binned acc or loss data.
     Will plot for every hist data in the array: [1] over [0]
     """
-    fig, ax = plt.subplots()
+    #For putting 2 plots next to each other, this is alright and readable
+    figsize = [6.4,5.5] 
+    plt.rcParams.update({'font.size': 14})
+
+    fig, ax = plt.subplots(figsize=figsize)
     for i, hist in enumerate(hist_data_array):
         #Use user defined colors, if given in proper length; else default palette
         energy=hist_data_array[i][0]

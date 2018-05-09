@@ -294,6 +294,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "broken4_vgg5_200_contE20"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,1.0)
+        legend_loc="lower right"
     
     else:
         raise NameError(str(which_one) + " is not known!")

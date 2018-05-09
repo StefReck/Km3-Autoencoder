@@ -3,7 +3,7 @@
 Make a quick plot of the statistics of DOM hits for the channel ID AE.
 """
 import matplotlib
-matplotlib.rcParams.update({'font.size': 14})
+matplotlib.rcParams.update({'font.size': 16})
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -38,7 +38,7 @@ xticks = np.arange(0,max_hits+1)
 y_ticks = [0.1, 1, 10, 100]
 ytick_labels = y_ticks
 
-fig=plt.figure(figsize=(9,7))
+fig=plt.figure(figsize=(9,6))
 plt.grid(zorder=-10)
 
 #plt.plot(hits_array, for_plot, "o-")

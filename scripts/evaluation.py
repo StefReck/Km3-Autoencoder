@@ -114,7 +114,7 @@ def get_saved_plots_info(tag):
         label_array=["Standard", "Large", "Deep"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
-        
+        y_lims=(0.8,0.95)
       
         
     #--------------------------- unfreeze comparison ---------------------------

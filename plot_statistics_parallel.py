@@ -2,7 +2,6 @@
 """
 Plot autoencoder and supervised parallel performance in one plot.
 """
-
 import argparse
 import os
 
@@ -35,7 +34,11 @@ else:
 #Default Values for plotting:
 xlabel="Epoch"
 title="Parallel Training"
-figsize = (13,8)
+
+#For putting 2 plots next to each other, this is alright and readable
+figsize = [6.4,5.5] 
+plt.rcParams.update({'font.size': 14})
+
 #Override default labels (names of the models); must be one for every test file, otherwise default
 labels_override=[]
 #legend location for the labels and the test/train box
