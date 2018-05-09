@@ -11,6 +11,8 @@ def get_props_for_plot_parallel(tag):
     epoch_schedule="10-2-1"
     labels_override = ["Autoencoder", "Encoder"] 
     save_to_folder = ""
+    #plot and font sizes:
+    style="two_in_one_line"
     
     try: tag=int(tag) 
     except: ValueError
@@ -256,8 +258,10 @@ def get_props_for_plot_parallel(tag):
     for file in test_files:
         print(file.split(home)[1]) 
         
+    figsize, fontsize = get_plot_statistics_plot_size(style)
+        
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
-    return test_files, title, labels_override, save_as, epoch_schedule
+    return test_files, title, labels_override, save_as, epoch_schedule, figsize, fontsize
 
 def get_highest_tagnumber():
     tag_no=0
@@ -280,6 +284,18 @@ def get_how_many_epochs_each_to_train(epoch_schedule):
         how_many_epochs_each_to_train = np.array([10,]*5+[1,]*200)
     print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
     return how_many_epochs_each_to_train
+
+def get_plot_statistics_plot_size(style):
+    #Plot and font sizes for plot_statistics:
+    if style=="two_in_one_line":
+        #For putting 2 plots next to each other, this is alright and readable
+        figsize = [6.4,5.5] 
+        font_size=14
+    elif style=="extended":
+        #For a single plot in a line
+        figsize = [8,7] 
+        font_size=14
+    return figsize, font_size
 
 
 def get_props_for_plot_parser(tag):

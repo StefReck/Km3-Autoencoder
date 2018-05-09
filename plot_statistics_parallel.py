@@ -37,7 +37,7 @@ title="Parallel Training"
 
 #For putting 2 plots next to each other, this is alright and readable
 figsize = [6.4,5.5] 
-plt.rcParams.update({'font.size': 14})
+font_size=14
 
 #Override default labels (names of the models); must be one for every test file, otherwise default
 labels_override=[]
@@ -55,12 +55,12 @@ save_as=None
 
 
 
-def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=None):
+def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=None, font_size=14):
     #Save and return the plot
     #Input: Either infos about what to plot, or a tag to load it automatically
     
     if tag != None:
-        test_files, title, labels_override, save_as, epoch_schedule = get_props_for_plot_parallel(tag)
+        test_files, title, labels_override, save_as, epoch_schedule, figsize, font_size = get_props_for_plot_parallel(tag)
         
     #Which epochs from the parallel encoder history to take:
     how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
@@ -76,7 +76,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     
     
     fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                     title, legend_locations, labels_override, colors, xticks, figsize)
+                     title, legend_locations, labels_override, colors, xticks, figsize, font_size)
     
     if save_as != None:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)

@@ -292,7 +292,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     return(fig)
 
 
-def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2=None): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2=None, font_size=14): 
     """
     Makes a plot of autoencoder loss and supervised acc of parallel training.
     data autoencoder :
@@ -300,6 +300,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     and data_parallel_test/_train:
     [Epoch, ydata]
     """
+    plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     

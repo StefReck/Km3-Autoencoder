@@ -442,7 +442,7 @@ def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
     plt.ylim((y_lims[0], y_lims[1]))
-    plt.title(title)
+    plt.suptitle(title)
     plt.grid(True)
 
     return fig
