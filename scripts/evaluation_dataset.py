@@ -281,11 +281,12 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     
     elif which_one=="unfreeze_comp" or which_one==15:
-        modelidents = ("models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_test.txt",
-                       "models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_test.txt",
-                       "models/vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch11.h5")
-        #Which dataset each to use
-        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        broken_model = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_epoch30.h5"
+        real_model   = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch30.h5"
+        brokendata_tag = "xzt_broken4"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
         #Plot properties: All in the array are plotted in one figure, with own label each
         title_of_plot='Continuation of partially unfrozen network training'
         #in the results/plots folder:

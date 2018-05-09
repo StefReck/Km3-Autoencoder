@@ -32,36 +32,36 @@ def make_options_dict(additional_options):
             options_dict["unlock_BN_in_encoder"]=True
             print("Batchnorms will be unlocked")
             
-        if "dropout=" in additional_options:
+        elif "dropout=" in additional_options:
             #Change dropout of dense layers
             dropout_rate = float(additional_options.split("=")[1])
             options_dict["dropout_for_dense"]=dropout_rate
             print("Dropout rate for dense layers will be", dropout_rate)
         
-        if "dropout_conv=" in additional_options:
+        elif "dropout_conv=" in additional_options:
             #Change dropout of conv layers
             dropout_rate = float(additional_options.split("=")[1])
             options_dict["dropout_for_conv"]=dropout_rate
             print("Dropout rate for conv layers will be", dropout_rate)
             print("Warning: not supported for all models!")
         
-        if "l1reg=" in additional_options:
+        elif "l1reg=" in additional_options:
             #Apply l1 reguarizer to encoded layer
             penalty = float(additional_options.split("=")[1])
             options_dict["encoded_penalty"]=penalty
             print("L1 regularizer of encoded layer with factor", penalty)
         
-        if "add_conv_layer" in additional_options:
+        elif "add_conv_layer" in additional_options:
             #Add a trainable conv layer before the dense layers of the encoder
             options_dict["add_conv_layer"]=True
             print("Conv layer is being added to encoder")
             
-        if "encoder_only" in additional_options:
+        elif "encoder_only" in additional_options:
             #Change dropout of dense layers
             options_dict["encoder_only"]=True
             print("Encoder only mode enabled! Not compatible with all models (you might get an error)")
         
-        if "dense_setup=" in additional_options:
+        elif "dense_setup=" in additional_options:
             #change the encoder part, only supported for vgg5picture
             #possible setups: standard, deep, shallow
             dense_setup = additional_options.split("=")[1]
