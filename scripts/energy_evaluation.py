@@ -19,7 +19,7 @@ import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
-    parser.add_argument('model', type=str, help='Name of a model .h5 file, or an identifier for a saved setup. (see this file for identifiers for sets and saved_setups for single epochs)')
+    parser.add_argument('model', type=str, help='Name of a model .h5 file, or a tag for a saved setup. (see this file for tags for sets and saved_setups for single epochs)')
     parser.add_argument('-p','--apply_precuts', help="Change to dataset xzt_precut", action='store_true')
 
     args = parser.parse_args()
@@ -37,7 +37,7 @@ from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, 
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 
-identifier = params["model"]
+tag = params["model"]
 #Should precuts be applied to the data; if so, the plot will be saved 
 #with a "_precut" added to the file name
 apply_precuts = params["apply_precuts"]
@@ -45,7 +45,7 @@ apply_precuts = params["apply_precuts"]
 samples=None
 
 
-def get_saved_plots_info(identifier, apply_precuts=False):
+def get_saved_plots_info(tag, apply_precuts=False):
     #Info about plots that have been generated for the thesis are listed here.
     dataset_tag="xzt"
     zero_center=True
@@ -58,24 +58,32 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     #------------------------------Sets for mae comparison---------------------
     
     
-    if identifier == "2000":
-        identifiers = ["2000_unf", "2000_unf_mse"]
-        label_list  = ["With MAE", "With MSE"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+    if tag == "2000":
+        tags = ["2000_unf", "2000_unf_mse"]
+        label_array  = ["With MAE", "With MSE"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
-    elif identifier == "bottleneck":
-        identifiers = ["2000_unf", "200_linear"]
-        label_list  = ["Unfrozen 2000", "Encoder 200"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+    elif tag == "bottleneck":
+        tags = ["2000_unf", "200_linear"]
+        label_array  = ["Unfrozen 2000", "Encoder 200"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
     
     #-----------------------Bottleneck----------------------
-    elif identifier == "compare_600":
-        identifiers = ["vgg_5_600_picture", "vgg_5_600_morefilter"]
-        label_list  = ["Picture", "More filter"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+identifier+"_plot.pdf"
+    elif tag == "compare_600":
+        tags = ["vgg_5_600_picture", "vgg_5_600_morefilter"]
+        label_array  = ["Picture", "More filter"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
         #title_of_plot='Accuracy of encoders with bottleneck 600'
+        
+    elif tag=="compare_200":
+        tags = ["vgg_5_200", "vgg_5_200_dense"]
+        label_array=["Standard", "Dense"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
+        #title_of_plot='Accuracy of encoders with bottleneck 200'
+        is_a_set=True
+        
         
     #Der rest von evaluation.py sollte hier auch rein, z.B. 200, 64,...
         
@@ -84,16 +92,16 @@ def get_saved_plots_info(identifier, apply_precuts=False):
     else:
         try:
             #Read in the saved name from saved_setups_for_plot_statistics
-            model_path = get_path_best_epoch(identifier, full_path=False)
+            model_path = get_path_best_epoch(tag, full_path=False)
         except NameError:
-            print("Input is not a known identifier. Opening as model instead.")
-            model_path = identifier
+            print("Input is not a known tag. Opening as model instead.")
+            model_path = tag
             save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
             return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
         
 
     if is_a_set:
-        return [identifiers, label_list], save_plot_as
+        return [tags, label_array], save_plot_as
     else:
         print("Working on model", model_path)
         #Where to save the plots to
@@ -148,9 +156,9 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     return(hist_data_2d, energy_mae_plot_data)
 
 
-def save_and_show_plots(identifier, apply_precuts=False):
+def save_and_show_plots(tag, apply_precuts=False):
     #Main function. Generate or load the data for the plots, and make them.
-    input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier, apply_precuts)
+    input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
     
     #Can also compare multiple already generated mae plots
     if len(input_for_make_hist_data)==2:
@@ -188,23 +196,23 @@ def save_and_show_plots(identifier, apply_precuts=False):
             print("Done.")
 
 
-def compare_plots(identifiers, label_list, apply_precuts=False):
+def compare_plots(tags, label_array, apply_precuts=False):
     """
     Plot several saved mae data files and plot them in a single figure.
     """
     mae_plot_data_list = []
     print("Loading the saved files of the following models:")
-    for identifier in identifiers:
-        input_for_make_hist_data, save_as_base = get_saved_plots_info(identifier, apply_precuts)
+    for tag in tags:
+        input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
         hist_data_2d, mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data)
         mae_plot_data_list.append(mae_plot_data)
 
     print("Done. Generating plot...")
-    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_list)
+    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_array)
     return fig_mae
     
     
-save_and_show_plots(identifier, apply_precuts)
+save_and_show_plots(tag, apply_precuts)
 
    
 

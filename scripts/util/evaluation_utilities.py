@@ -188,7 +188,8 @@ def make_energy_evaluation_statistics(arr_energy_correct):
     The mean absolute error,median relative error and variance over the dataset, 
     prints them and returns them in a tuple.
     """
-    print("\nStatistics of this reconstruction, averaged over all samples in the dataset:")
+    print("\n------------------------------------------------------------------------")
+    print("Statistics of this reconstruction, averaged over all samples in the dataset:")
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     abs_err = np.abs(mc_energy - reco_energy)
@@ -200,8 +201,9 @@ def make_energy_evaluation_statistics(arr_energy_correct):
     print("Average mean absolute error over all energies:", total_abs_mean)
     print("Median relative error over all energies:",total_relative_median)
     print("Variance in relative error over all energies:", total_relative_variance)
-    print(total_abs_mean,total_relative_median,total_relative_variance, "\n")
-    
+    print(total_abs_mean,total_relative_median,total_relative_variance)
+    print("------------------------------------------------------------------------\n")
+
     performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
     return performance_list
 

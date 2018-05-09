@@ -470,6 +470,12 @@ def get_path_best_epoch(modeltag, full_path=True):
         model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch48_supervised_up_down_epoch60.h5"
     
     
+    #------------------------------Unfreeze Networks------------------------------
+    elif modeltag=="vgg_5_200-unfreeze_contE20":
+        model_path="vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch30.h5"
+    
+    
+    
     #------------------------- Energy Networks ------------------------- 
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     #---------------- Single unfrozen datafiles ----------------

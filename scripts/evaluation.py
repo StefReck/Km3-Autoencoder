@@ -41,6 +41,10 @@ def get_saved_plots_info(tag):
     bins=32
     y_lims=(0.75,1) #for acc only
     
+    modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"
+    
+    
     full_path=False
     if tag=="dpg_plot":
         #Model info:
@@ -111,13 +115,24 @@ def get_saved_plots_info(tag):
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
         
-       
+      
+        
+    #--------------------------- unfreeze comparison ---------------------------
+    elif tag=="compare_unfreeze":
+        modelidents = (get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_200-unfreeze_contE20", full_path), 
+                       get_path_best_epoch("vgg_3_unf", full_path))
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Comparison of partially unfrozen network performance'
+        label_array=["Frozen", "Three unfrozen layers", "Supervised network"]
+        plot_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/unfreeze/"
+        plot_file_name = "vgg_5_"+tag+".pdf"
+        
+    
 
     else: NameError("Tag "+tag+" unknown.")
     
-    modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
-    plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"
-    
+
     modelidents=[modelpath+modelident for modelident in modelidents]
     save_plot_as = plot_path + plot_file_name
 

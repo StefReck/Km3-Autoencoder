@@ -293,7 +293,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path="unfreeze/"
         plot_file_name = "broken4_vgg5_200_contE20"+extra_name+".pdf" 
         #y limits of plot:
-        y_lims=(0.7,0.95)
+        y_lims=(0.7,1.0)
     
     else:
         raise NameError(str(which_one) + " is not known!")
