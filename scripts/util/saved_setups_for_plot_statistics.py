@@ -85,6 +85,11 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
+    elif tag=="vgg_5_600_morefilter-new" or tag==40:
+        title = "Parallel training with model '600 morefilter new'"
+        ae_model =  home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "bottleneck/"
     elif tag=="vgg_5_600_channel" or tag==11:
         title = "Parallel training with model '600 channel'"
         ae_model =  home+"models/vgg_5_channel/trained_vgg_5_channel_autoencoder_test.txt" 
@@ -101,7 +106,12 @@ def get_props_for_plot_parallel(tag):
         title = "Parallel training with model '200 dense'"
         ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_up_down_test.txt"
-        save_to_folder = "bottleneck/"      
+        save_to_folder = "bottleneck/"  
+    elif tag=="vgg_5_200_dense-new" or tag==41:
+        title = "Parallel training with model '200 dense new'"
+        ae_model =  home+"models/vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "bottleneck/"  
         
     elif tag=="vgg_5_64" or tag==14:
         title = "Parallel training with model '64'"
