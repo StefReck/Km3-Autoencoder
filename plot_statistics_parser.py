@@ -50,6 +50,25 @@ figsize, font_size = get_plot_statistics_plot_size(style)
 save_as=None
 
 
+def make_parser_plot(test_files, title, labels_override, save_as, 
+                     legend_locations, colors, xticks, figsize, font_size,
+                     dump_to_file, xlabel, save_it, show_it):
+    #Read the data in
+    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
+                                                                            dump_to_file=dump_to_file)
+    #Create the plot
+    fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
+                    legend_locations, labels_override, colors, xticks, figsize=figsize, font_size=font_size)
+    #Save the plot
+    if save_as != None and save_it==True:
+        plt.savefig(save_as)
+        print("Saved plot as",save_as)
+    else:
+        print("Plot was not saved.")
+    
+    if show_it: plt.show(fig)
+
+
 if test_files[0]=="saved":
     #Load a saved setup, identified with a tag
     tag=test_files[1]
@@ -59,13 +78,9 @@ if test_files[0]=="saved":
         while True:
             try:
                 test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(tag)
-                data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
-                                                                            dump_to_file=dump_to_file)
-                fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
-                                legend_locations, labels_override, colors, xticks, figsize=figsize, font_size=font_size)
-                fig.savefig(save_as)
-                print("Saved plot as",save_as)
-                plt.close(fig)
+                make_parser_plot(test_files, title, labels_override, save_as, 
+                     legend_locations, colors, xticks, figsize, font_size,
+                     dump_to_file, xlabel, save_it, show_it=False)
                 current_tag_number+=1
             except NameError:
                 print("Done. Generated a total of",current_tag_number,"plots.")
@@ -74,35 +89,13 @@ if test_files[0]=="saved":
         #overwrite some of the above options from a specific saved setup
         test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(tag)
 
-    #Read the data in
-    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
-                                                                            dump_to_file=dump_to_file)
-    #Create the plot
-    fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
-                    legend_locations, labels_override, colors, xticks, figsize=figsize, font_size=font_size)
-    #Save the plot
-    if save_as != None and save_it==True:
-        plt.savefig(save_as)
-        print("Saved plot as",save_as)
-    else:
-        print("Plot was not saved.")
-    
-    plt.show(fig)
+        make_parser_plot(test_files, title, labels_override, save_as, 
+                     legend_locations, colors, xticks, figsize, font_size,
+                     dump_to_file, xlabel, save_it, show_it=True)
 
 else:
     #Load the models handed to the parser directly, without a tag
     
-    #Read the data in
-    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
-                                                                            dump_to_file=dump_to_file)
-    #Create the plot
-    fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
-                    legend_locations, labels_override, colors, xticks, figsize=figsize, font_size=font_size)
-    #Save the plot
-    if save_as != None and save_it==True:
-        plt.savefig(save_as)
-        print("Saved plot as",save_as)
-    else:
-        print("Plot was not saved.")
-    
-    plt.show(fig)
+    make_parser_plot(test_files, title, labels_override, save_as, 
+                     legend_locations, colors, xticks, figsize, font_size,
+                     dump_to_file, xlabel, save_it, show_it=True)
