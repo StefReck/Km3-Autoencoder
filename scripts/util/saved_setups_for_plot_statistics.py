@@ -379,7 +379,8 @@ def get_props_for_plot_parser(tag, printing=True):
         
     elif tag=="encoder_energy" or tag==3:
         title = "Different dropout rates for the encoder"
-        test_files=["vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
+        test_files=["vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop00_test.txt",
+                    "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop02_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
