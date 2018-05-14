@@ -4,7 +4,7 @@ Some saved setups for the plot ststistics scripts.
 """
 import numpy as np
 
-def get_props_for_plot_parallel(tag):
+def get_props_for_plot_parallel(tag, printing=True):
     #For the script plots_statistics_parallel, which takes exactly two models
     #as an input (AE and parallel encoder)
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
@@ -274,23 +274,37 @@ def get_props_for_plot_parallel(tag):
         raise NameError("Tag "+str(tag)+" unknown.")
         
     test_files=[ae_model, prl_model]
-    print("Loaded the following files:")
-    for file in test_files:
-        print(file.split(home)[1]) 
+    if printing==True: 
+        print("Loaded the following files:")
+        for file in test_files:
+            print(file.split(home)[1]) 
         
     figsize, fontsize = get_plot_statistics_plot_size(style)
         
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
     return test_files, title, labels_override, save_as, epoch_schedule, figsize, fontsize
 
-def get_highest_tagnumber():
+def get_highest_tagnumbers():
     tag_no=0
     while True:
         try:
-            get_props_for_plot_parallel(tag_no)
-            tag_no+=1
-        except NameError: break
-    print("\n"+str(tag_no-1)+" is the highest present index.")
+            get_props_for_plot_parallel(tag_no, printing=False)
+        except NameError: 
+            parallel_tag_no=tag_no
+            break
+        tag_no+=1
+    
+    tag_no=0
+    while True:
+        try:
+            get_props_for_plot_parser(tag_no, printing=False)
+        except NameError: 
+            parser_tag_no=tag_no
+            break
+        tag_no+=1
+    
+    print("\nHighest parallel tag no: "+str(parallel_tag_no-1))
+    print("Highest parser tag no: "+str(parser_tag_no-1))
 
 def get_how_many_epochs_each_to_train(epoch_schedule):
     #Which epochs from the parallel encoder history to take, depending on the 
@@ -318,12 +332,12 @@ def get_plot_statistics_plot_size(style):
     return figsize, font_size
 
 
-def get_props_for_plot_parser(tag):
+def get_props_for_plot_parser(tag, printing=True):
     #For the script plots_statistics_parser
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     legend_locations=(1, "upper left")
     #save it to this folder in the results/plots/ folder
-    save_to_name = "statistics/statistics_parser_"+tag+".pdf"
+    save_to_name = "statistics/statistics_parser_"+str(tag)+".pdf"
     #Colors to use. [] for auto selection
     colors=[]
     #Override xtick locations; None for automatic
@@ -331,7 +345,9 @@ def get_props_for_plot_parser(tag):
     #Default style:
     style="extended"
 
-    if tag=="channel-encs":
+    try: tag=int(tag) 
+    except: ValueError
+    if tag=="channel-encs" or tag==0:
         title = "Encoder performance of channel autoencoder networks"
         test_files=["channel_3n_m3-noZeroEvent/trained_channel_3n_m3-noZeroEvent_autoencoder_epoch35_supervised_up_down_stateful_convdrop_test.txt", 
                     "channel_5n_m3-noZeroEvent/trained_channel_5n_m3-noZeroEvent_autoencoder_epoch17_supervised_up_down_stateful_convdrop_test.txt",
@@ -339,7 +355,7 @@ def get_props_for_plot_parser(tag):
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
     
-    elif tag=="pic_ihlr_enc_test":
+    elif tag=="pic_ihlr_enc_test" or tag==1:
         #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
         title = "Variation of unfrozen encoder layers"
         test_files=["vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_new_test.txt",
@@ -348,7 +364,7 @@ def get_props_for_plot_parser(tag):
                     "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
         labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
         
-    elif tag=="unfreeze":
+    elif tag=="unfreeze" or tag==2:
         title = "Successive unfreezing of encoder layers"
         test_files=["vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_test.txt" ,
                     "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_broken4_test.txt",]
@@ -356,12 +372,12 @@ def get_props_for_plot_parser(tag):
         save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
         colors = ["navy", "orange"]
         
-    elif tag=="encoder_energy":
+    elif tag=="encoder_energy" or tag==3:
         title = "Different dropout rates for the encoder"
-        test_files=["models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
-                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop02_test.txt", 
-                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
-                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
+        test_files=["vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
+                    "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop02_test.txt", 
+                    "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
+                    "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
         labels_override = ["10 percent", "20 percent", "30 percent", "40 percent"]
         #colors = ["navy", "orange"]
         
@@ -460,11 +476,12 @@ def get_props_for_plot_parser(tag):
 
         
     else:
-        raise NameError("Tag "+tag+" unknown.")
+        raise NameError("Tag "+str(tag)+" unknown.")
         
-    print("Loaded the following files:")
-    for file in test_files:
-        print(file) 
+    if printing==True: 
+        print("Loaded the following files:")
+        for file in test_files:
+            print(file) 
         
     test_files=[home+file for file in test_files]
     figsize, font_size = get_plot_statistics_plot_size(style)
@@ -581,7 +598,7 @@ def get_path_best_epoch(modeltag, full_path=True):
 
 
 if __name__=="__main__":
-    get_highest_tagnumber()
+    get_highest_tagnumbers()
 
 
 """

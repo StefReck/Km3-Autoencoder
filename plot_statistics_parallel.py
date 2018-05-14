@@ -11,6 +11,7 @@ def parse_input():
     parser.add_argument('parallel_model', type=str, help='name of _test.txt files to plot. (or a tag)')
     
     parser.add_argument('-c', '--channel', action="store_true", help='Use the channel parallel schedule (1 enc epoch per AE epoch)')
+    parser.add_argument('-s', '--save', action="store_true", help='Save the plot to the path defined in the file.')
     args = parser.parse_args()
     params = vars(args)
     return params
@@ -22,6 +23,7 @@ from scripts.plotting.plot_statistics import make_data_from_files, make_plot_sam
 from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train
 
 test_files = [ params["autoencoder_model"], params["parallel_model"] ]
+save_it = params["save"]
 
 #Epoch schedule that was used during training as defined by the parser:
 if params["channel"]==True:
@@ -55,7 +57,7 @@ save_as=None
 
 
 
-def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=None, font_size=14, figsize=[6.4,5.5]):
+def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=None, font_size=14, figsize=[6.4,5.5]):
     #Save and return the plot
     #Input: Either infos about what to plot, or a tag to load it automatically
     
@@ -78,10 +80,12 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
                      title, legend_locations, labels_override, colors, xticks, figsize, font_size)
     
-    if save_as != None:
+    if save_as != None and save_it==True:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)
         plt.savefig(save_as)
         print("Saved plot as",save_as,"\n")
+    else:
+        print("Plot was not saved.")
     
     return fig
 
@@ -94,7 +98,7 @@ if test_files[0]=="saved":
         current_tag_number=0
         while True:
             try:
-                fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag=current_tag_number, figsize=figsize)
+                fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=current_tag_number, figsize=figsize)
                 plt.close(fig)
                 current_tag_number+=1
             except NameError:
@@ -102,11 +106,11 @@ if test_files[0]=="saved":
                 break
     else:
         #make, save and show a single plot whose setup is saved
-        fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag, figsize=figsize)
+        fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag, figsize=figsize)
         plt.show(fig)
 
 else:
     #Plot the files that were given to the parser directly
     tag = None
-    fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, tag, figsize=figsize)
+    fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag, figsize=figsize)
     plt.show(fig)
