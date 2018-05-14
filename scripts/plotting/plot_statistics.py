@@ -214,11 +214,11 @@ def print_extrema(epochs, ydata):
     print("Minimum:\t",epochs[minimum_epoch],"\t",ydata[minimum_epoch])
     return
 
-def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize): 
+def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size): 
     """
     Makes a plot of one or more graphs, each with the same y-axis (e.g. loss, acc)
     """
-    
+    plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     
     all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
@@ -292,7 +292,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     return(fig)
 
 
-def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, data_parallel_2=None, font_size=14): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size=14, data_parallel_2=None): 
     """
     Makes a plot of autoencoder loss and supervised acc of parallel training.
     data autoencoder :

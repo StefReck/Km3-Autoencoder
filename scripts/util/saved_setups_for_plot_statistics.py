@@ -202,7 +202,12 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-        
+    elif tag=="vgg_5_600_morefilter_energy" or tag==42:
+        title = "Parallel training with model '600 morefilter new'"
+        ae_model =  home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
+         
     elif tag=="vgg_5_200_energy" or tag==27:
         title = "Parallel training with model '200'"
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
@@ -213,7 +218,12 @@ def get_props_for_plot_parallel(tag):
         ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-        
+    elif tag=="vgg_5_200_dense_energy-new" or tag==43:
+        title = "Parallel training with model '200 dense new'"
+        ae_model =  home+"models/vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "bottleneck_energy/"
+     
     elif tag=="vgg_5_64_energy" or tag==28:
         title = "Parallel training with model '64'"
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
@@ -303,7 +313,7 @@ def get_plot_statistics_plot_size(style):
         font_size=14
     elif style=="extended":
         #For a single plot in a line
-        figsize = [8,7] 
+        figsize = [10, 5.5] 
         font_size=14
     return figsize, font_size
 
@@ -318,6 +328,8 @@ def get_props_for_plot_parser(tag):
     colors=[]
     #Override xtick locations; None for automatic
     xticks=None
+    #Default style:
+    style="extended"
 
     if tag=="channel-encs":
         title = "Encoder performance of channel autoencoder networks"
@@ -343,6 +355,15 @@ def get_props_for_plot_parser(tag):
         labels_override = ["Normal dataset", "Manipulated dataset",]
         save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
         colors = ["navy", "orange"]
+        
+    elif tag=="encoder_energy":
+        title = "Different dropout rates for the encoder"
+        test_files=["models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
+                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop02_test.txt", 
+                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
+                    "models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
+        labels_override = ["10 percent", "20 percent", "30 percent", "40 percent"]
+        #colors = ["navy", "orange"]
         
         
         
@@ -446,9 +467,9 @@ def get_props_for_plot_parser(tag):
         print(file) 
         
     test_files=[home+file for file in test_files]
-    
+    figsize, font_size = get_plot_statistics_plot_size(style)
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
-    return test_files, title, labels_override, save_as, legend_locations, colors, xticks
+    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size
 
 
 def get_path_best_epoch(modeltag, full_path=True):
