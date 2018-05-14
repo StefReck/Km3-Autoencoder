@@ -48,17 +48,20 @@ style="extended"
 figsize, font_size = get_plot_statistics_plot_size(style)
 #Save the plot, None to skip
 save_as=None
+#Ranges for the plot
+xrange="auto"
 
 
 def make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, figsize, font_size,
-                     dump_to_file, xlabel, save_it, show_it):
+                     dump_to_file, xlabel, save_it, show_it, xrange):
     #Read the data in
     data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
                                                                             dump_to_file=dump_to_file)
     #Create the plot
     fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
-                    legend_locations, labels_override, colors, xticks, figsize=figsize, font_size=font_size)
+                    legend_locations, labels_override, colors, xticks, figsize=figsize, 
+                    font_size=font_size, xrange=xrange)
     #Save the plot
     if save_as != None and save_it==True:
         plt.savefig(save_as)
@@ -77,25 +80,27 @@ if test_files[0]=="saved":
         current_tag_number=0
         while True:
             try:
-                test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(current_tag_number)
+                test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size, xrange = get_props_for_plot_parser(current_tag_number)
                 make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, figsize, font_size,
-                     dump_to_file, xlabel, save_it=True, show_it=False)
+                     dump_to_file, xlabel, save_it=True, show_it=False,
+                     xrange=xrange)
                 current_tag_number+=1
             except NameError:
                 print("Done. Generated a total of",current_tag_number,"plots.")
                 break
     else:
         #overwrite some of the above options from a specific saved setup
-        test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(tag)
+        test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size, xrange = get_props_for_plot_parser(tag)
 
         make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, figsize, font_size,
-                     dump_to_file, xlabel, save_it, show_it=True)
+                     dump_to_file, xlabel, save_it, show_it=True, 
+                     xrange=xrange)
 
 else:
     #Load the models handed to the parser directly, without a tag
     
     make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, figsize, font_size,
-                     dump_to_file, xlabel, save_it, show_it=True)
+                     dump_to_file, xlabel, save_it, show_it=True, xrange=xrange)

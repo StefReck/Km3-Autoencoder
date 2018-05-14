@@ -344,6 +344,8 @@ def get_props_for_plot_parser(tag, printing=True):
     xticks=None
     #Default style:
     style="extended"
+    #range for plot:
+    xrange="auto"
 
     try: tag=int(tag) 
     except: ValueError
@@ -355,6 +357,7 @@ def get_props_for_plot_parser(tag, printing=True):
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
         save_to_name = "statistics/statistics_parser_channel-encs.pdf"
+        xrange=[0,50]
     
     elif tag=="pic_ihlr_enc_test" or tag==1:
         #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
@@ -382,6 +385,7 @@ def get_props_for_plot_parser(tag, printing=True):
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
         labels_override = ["10 percent", "20 percent", "30 percent", "40 percent"]
         save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
+        xrange=[0,65]
         #colors = ["navy", "orange"]
         
         
@@ -490,7 +494,7 @@ def get_props_for_plot_parser(tag, printing=True):
     test_files=[home+file for file in test_files]
     figsize, font_size = get_plot_statistics_plot_size(style)
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
-    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size
+    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size, xrange
 
 
 

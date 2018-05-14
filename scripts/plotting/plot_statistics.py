@@ -214,7 +214,7 @@ def print_extrema(epochs, ydata):
     print("Minimum:\t",epochs[minimum_epoch],"\t",ydata[minimum_epoch])
     return
 
-def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size): 
+def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size, xrange="auto"): 
     """
     Makes a plot of one or more graphs, each with the same y-axis (e.g. loss, acc)
     """
@@ -275,8 +275,11 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     ax.add_artist(legend2)
     
     #xrange
-    max_epoch = get_max_epoch(data_for_plots)
-    plt.xlim((0,max_epoch))
+    if xrange=="auto":
+        max_epoch = get_max_epoch(data_for_plots)
+        ax.set_xlim((0,max_epoch))
+    else:
+        ax.set_xlim(xrange)
 
     if xticks is not None:
         plt.xticks( xticks )
