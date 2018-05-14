@@ -77,10 +77,10 @@ if test_files[0]=="saved":
         current_tag_number=0
         while True:
             try:
-                test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(tag)
+                test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size = get_props_for_plot_parser(current_tag_number)
                 make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, figsize, font_size,
-                     dump_to_file, xlabel, save_it, show_it=False)
+                     dump_to_file, xlabel, save_it=True, show_it=False)
                 current_tag_number+=1
             except NameError:
                 print("Done. Generated a total of",current_tag_number,"plots.")

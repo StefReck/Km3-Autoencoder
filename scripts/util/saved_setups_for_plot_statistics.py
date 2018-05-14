@@ -354,6 +354,7 @@ def get_props_for_plot_parser(tag, printing=True):
                     "channel_10n_m3-noZeroEvent/trained_channel_10n_m3-noZeroEvent_autoencoder_epoch23_supervised_up_down_stateful_convdrop_test.txt"]
         labels_override = ["3 neurons", "5 neurons", "10 neurons"]
         legend_locations=("lower right", "upper left")
+        save_to_name = "statistics/statistics_parser_channel-encs.pdf"
     
     elif tag=="pic_ihlr_enc_test" or tag==1:
         #vgg 5 picture ihlr: Parallel tests ob man den absturz der acc verhindern kann durch mehr dense layer (kann man nicht).
@@ -363,6 +364,7 @@ def get_props_for_plot_parser(tag, printing=True):
                     "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_deep_test.txt" ,
                     "vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_dense_shallow_test.txt",]
         labels_override = ["Two dense", "+Convolution", "Three dense", "One dense"]
+        save_to_name = "statistics/statistics_parser_pic_ihlr_enc_test.pdf"
         
     elif tag=="unfreeze" or tag==2:
         title = "Successive unfreezing of encoder layers"
@@ -379,6 +381,7 @@ def get_props_for_plot_parser(tag, printing=True):
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
         labels_override = ["10 percent", "20 percent", "30 percent", "40 percent"]
+        save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
         #colors = ["navy", "orange"]
         
         
@@ -399,6 +402,7 @@ def get_props_for_plot_parser(tag, printing=True):
               #"vgg_3_small/trained_vgg_3_small_autoencoder_test.txt",
               #"vgg_3_verysmall/trained_vgg_3_verysmall_autoencoder_test.txt",]
         labels_override = [r"Adam with $\epsilon=10^{-1}$", "SGD", r"Adam with $\epsilon=10^{-8}$"]
+        save_to_name = "statistics/statistics_parser_vgg_3_comp_test.pdf"
     
     elif tag=="vgg4_autoencoders_var_depth":
         test_files = [#"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
@@ -487,6 +491,12 @@ def get_props_for_plot_parser(tag, printing=True):
     figsize, font_size = get_plot_statistics_plot_size(style)
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
     return test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size
+
+
+
+
+
+
 
 
 def get_path_best_epoch(modeltag, full_path=True):
