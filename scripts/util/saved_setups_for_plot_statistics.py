@@ -278,11 +278,9 @@ def get_props_for_plot_parallel(tag, printing=True):
         print("Loaded the following files:")
         for file in test_files:
             print(file.split(home)[1]) 
-        
-    figsize, fontsize = get_plot_statistics_plot_size(style)
-        
+           
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
-    return test_files, title, labels_override, save_as, epoch_schedule, figsize, fontsize
+    return test_files, title, labels_override, save_as, epoch_schedule, style
 
 def get_highest_tagnumbers():
     tag_no=0
@@ -377,7 +375,7 @@ def get_props_for_plot_parser(tag, printing=True):
         save_to_name = "unfreeze/broken4_vgg5_200_comp.pdf"
         colors = ["navy", "orange"]
         
-    elif tag=="encoder_energy" or tag==3:
+    elif tag=="encoder_energy_new" or tag==3:
         title = "Different dropout rates for the encoder"
         test_files=["vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop00_test.txt",
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop01_test.txt",
@@ -385,10 +383,19 @@ def get_props_for_plot_parser(tag, printing=True):
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
         labels_override = ["0 %", "10 %", "20 %", "30 %", "40 %"]
-        save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
+        save_to_name = "statistics/statistics_parser_encoder_energy_new_test.pdf"
         xrange=[0,65]
         #colors = ["navy", "orange"]
-        
+    elif tag=="encoder_energy" or tag==4:
+        title = "Different dropout rates for the encoder"
+        test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop00_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop01_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop02_test.txt", 
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop03_test.txt",]
+        #"vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_test.txt"
+        labels_override = ["0 %", "10 %", "20 %", "30 %"]
+        save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
+        #xrange=[0,65]
         
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
@@ -493,9 +500,8 @@ def get_props_for_plot_parser(tag, printing=True):
             print(file) 
         
     test_files=[home+file for file in test_files]
-    figsize, font_size = get_plot_statistics_plot_size(style)
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
-    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, figsize, font_size, xrange
+    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange
 
 
 

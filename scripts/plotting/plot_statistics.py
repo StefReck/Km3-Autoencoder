@@ -5,6 +5,10 @@ import numpy as np
 import matplotlib.lines as mlines
 import csv
 
+import sys
+sys.path.append('../')
+from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
+
 """
 Contains all the utility to read in log files and plot them.
 """    
@@ -214,12 +218,14 @@ def print_extrema(epochs, ydata):
     print("Minimum:\t",epochs[minimum_epoch],"\t",ydata[minimum_epoch])
     return
 
-def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size, xrange="auto"): 
+def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, xrange="auto"): 
     """
     Makes a plot of one or more graphs, each with the same y-axis (e.g. loss, acc)
     """
+    figsize, font_size = get_plot_statistics_plot_size(style)
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
+    fig.subplots_adjust(left=0.1)
     
     all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
     if all_ylabels_equal == False:
@@ -295,7 +301,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     return(fig)
 
 
-def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, figsize, font_size=14, data_parallel_2=None): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, data_parallel_2=None): 
     """
     Makes a plot of autoencoder loss and supervised acc of parallel training.
     data autoencoder :
@@ -303,8 +309,10 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     and data_parallel_test/_train:
     [Epoch, ydata]
     """
+    figsize, font_size = get_plot_statistics_plot_size(style)
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
+    
     ax2 = ax.twinx()
     
     if len(labels_override) == len(default_label_array):
@@ -392,9 +400,10 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     else:
         ax.set_xticks( np.arange(0, max_epoch+1,10) )
         
-    ax.set_ylabel(ylabel_list[0])
-    ax2.set_ylabel(ylabel_list[1])
+    ax.set_ylabel(ylabel_list[0]+" (Autoencoder)")
+    ax2.set_ylabel(ylabel_list[1]+" (Encoder)")
     ax.set_xlabel(xlabel)
+    
     plt.title(title)
     ax.grid(True)
     plt.gcf().subplots_adjust(right=0.86)
