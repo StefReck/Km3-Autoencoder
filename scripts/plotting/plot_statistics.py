@@ -225,7 +225,6 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     figsize, font_size = get_plot_statistics_plot_size(style)
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
-    fig.subplots_adjust(left=0.1)
     
     all_ylabels_equal = all(x == ylabel_list[0] for x in ylabel_list)
     if all_ylabels_equal == False:
@@ -312,6 +311,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     figsize, font_size = get_plot_statistics_plot_size(style)
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
+    fig.subplots_adjust(left=0.15)
     
     ax2 = ax.twinx()
     

@@ -323,6 +323,7 @@ def get_plot_statistics_plot_size(style):
         #For putting 2 plots next to each other, this is alright and readable
         figsize = [6.4,5.5] 
         font_size=14
+        
     elif style=="extended":
         #For a single plot in a line
         figsize = [10, 5.5] 
