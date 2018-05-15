@@ -10,9 +10,14 @@ from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg
 from model_def.model_def_vgg_4 import *
 from model_def.model_def_vgg_5 import *
 from model_def.model_def_channel_1 import *
+import warnings
 
 def make_options_dict(additional_options):
-    #Additional options can alter things like dropout rate or BN unlock etc.
+    #Can alter things like dropout rate or BN unlock etc.
+    #additional_options is the string handed to the parser in run_autoencoder
+    #via options
+    
+    #Default entries:
     options_dict={}
     options_dict["dropout_for_dense"] = 0.2
     options_dict["batchnorm_before_dense"]=True
@@ -24,6 +29,7 @@ def make_options_dict(additional_options):
     options_dict["add_conv_layer"]=False
     options_dict["make_stateful"]=False
     options_dict["dense_setup"]="standard"
+    options_dict["layer_version"]="double"
         
     additional_options_list = additional_options.split("-")
     for additional_options in additional_options_list:
@@ -68,6 +74,16 @@ def make_options_dict(additional_options):
             options_dict["dense_setup"]=dense_setup
             print("Using dense setup:",dense_setup, "(only supported for vgg5picture, vgg5_32)")
         
+        elif "layer_version=" in additional_options:
+            #Defines if the new (double c layer before 1st pooling) or the old 
+            #version of the 64 and 32 networks should be used
+            #either single or double
+            layer_version = additional_options.split("=")[1]
+            options_dict["layer_version"]=layer_version
+        
+        else:
+           warnings.warn("Ignoring unrecognized string for options:"+additional_options)
+            
     return options_dict
 
 
@@ -236,8 +252,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     return model
 
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_200_dense", autoencoder_stage=0, modelpath_and_name=None, 
-                      additional_options="")
+    model=setup_model(model_tag="vgg_5_64", autoencoder_stage=0, modelpath_and_name=None, 
+                      additional_options="layer_version=single")
     model.summary()
     
     conv_layer_indices = []

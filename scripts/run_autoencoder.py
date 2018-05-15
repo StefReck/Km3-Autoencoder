@@ -527,7 +527,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
         
         if encoder_epoch == 0:
-            #Create a new encoder network:
+            #Create a new encoder network in stage 1:
             model = setup_model(model_tag=modeltag, autoencoder_stage=1, modelpath_and_name=autoencoder_model, additional_options=options, number_of_output_neurons=number_of_output_neurons )
             model.compile(loss=supervised_loss, optimizer=adam, metrics=supervised_metrics)
             
