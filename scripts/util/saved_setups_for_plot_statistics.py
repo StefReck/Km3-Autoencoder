@@ -539,11 +539,10 @@ def get_path_best_epoch(modeltag, full_path=True):
         raise
     
     elif modeltag=="vgg_5_64":
-        model_path=""
-        raise
-    elif modeltag=="vgg_5_32":
-        model_path=""
-        raise
+        model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5"
+        
+    elif modeltag=="vgg_5_32-eps01":
+        model_path="vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_epoch43.h5"
     
     #------------------------------200 size variation------------------------------
     elif modeltag=="vgg_5_200_shallow":

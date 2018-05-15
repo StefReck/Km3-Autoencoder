@@ -217,6 +217,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_32_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,0.95)
+        legend_loc="lower right"
     
     elif which_one=="4flip_unf" or which_one==10:
         modelidents = ("vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5",

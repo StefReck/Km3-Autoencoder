@@ -62,6 +62,18 @@ def get_saved_plots_info(tag):
         plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" 
     
     #--------------------------------Bottleneck--------------------------------
+    elif tag=="compare_bottleneck":
+        modelidents = (get_path_best_epoch("vgg_3", full_path),
+                       get_path_best_epoch("vgg_5_600_picture", full_path),
+                       get_path_best_epoch("vgg_5_200", full_path),
+                       get_path_best_epoch("vgg_5_64", full_path),
+                       get_path_best_epoch("vgg_5_32-eps01", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
+        label_array=["2000", "600", "200", "64", "32"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
+        
     elif tag=="compare_600":
         #morefilter and picture (evtl channel)
         modelidents = (get_path_best_epoch("vgg_5_600_picture", full_path),
@@ -81,19 +93,7 @@ def get_saved_plots_info(tag):
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
         
-    elif tag=="compare_bottleneck":
-        modelidents = (get_path_best_epoch("vgg_3", full_path),
-                       get_path_best_epoch("vgg_5_600_picture", full_path),
-                       get_path_best_epoch("vgg_5_200", full_path),
-                       get_path_best_epoch("vgg_5_64-new", full_path),
-                       get_path_best_epoch("vgg_5_32-new", full_path),)
-        dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
-        label_array=["2000", "600", "200", "64"]
-        #in the results/plots/updown_evalutaion/ folder
-        plot_file_name = "vgg_5_"+tag+".pdf"
-     
-        
+    
     #--------------------------- 200 size variation ---------------------------
     elif tag=="compare_200_smaller":
         modelidents = (get_path_best_epoch("vgg_5_200", full_path),
