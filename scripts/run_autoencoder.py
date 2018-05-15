@@ -123,8 +123,8 @@ def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
             
         elif before_epoch<=62:
             lr=0.01*1.05**(before_epoch-53)
-        elif before_epoch<=98:
-            lr=0.01*1.05**(62-53) * 1.14907**(before_epoch-62)
+        elif before_epoch<=97:
+            lr=0.01*1.05**(62-53) * 1.0846**(before_epoch-62)
             
         else:
             lr=0.2

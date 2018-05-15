@@ -202,7 +202,7 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
-    elif tag=="vgg_5_600_morefilter_energy" or tag==42:
+    elif tag=="vgg_5_600_morefilter_energy-new" or tag==42:
         title = "Parallel training with model '600 morefilter new'"
         ae_model =  home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_supervised_parallel_energy_test.txt"
@@ -384,7 +384,7 @@ def get_props_for_plot_parser(tag, printing=True):
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop02_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop03_test.txt", 
                     "vgg_5_32-new/trained_vgg_5_32-new_autoencoder_epoch2_supervised_energy_dense_small_drop04_test.txt"]
-        labels_override = ["10 percent", "20 percent", "30 percent", "40 percent"]
+        labels_override = ["0 %", "10 %", "20 %", "30 %", "40 %"]
         save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
         xrange=[0,65]
         #colors = ["navy", "orange"]
