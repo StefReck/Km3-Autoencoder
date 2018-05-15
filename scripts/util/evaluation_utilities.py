@@ -561,7 +561,7 @@ def make_or_load_files(modelidents, dataset_array, bins, class_type=None, also_r
     by loading if it exists already or by generating it from scratch.
     Can also evaluate the performance of an autoencoder.
     
-    Not used by energy evaluation anymore!
+    Not used by energy evaluation anymore (except for evaluation_dataset)
         
     Input:
         modelidents:    List of strs of the path to the models on which the evaluation is done on.

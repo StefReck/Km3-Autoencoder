@@ -339,6 +339,8 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     
     elif plot_type == "mre":
         #Median relative error
+        #hist_data_array is for every model the tuple:
+        #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         y_label_of_plot='Median fractional energy resolution'
         fig = make_energy_mae_plot(hist_data_array, label_list=label_array)
         
@@ -388,8 +390,30 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
         
     elif plot_type=="mre":
-        pass
+        #TODO Not tested
+        #hist_data_array is for every model the tuple:
+        #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
+        #each containing [energy, binned mre]
+        on_simulations_data = hist_data_array[0][:][1]
+        on_measured_data    = hist_data_array[1][:][1]
+        upper_limit_data    = hist_data_array[2][:][1]
     
+        on_simulations_data=(on_measured_data[0]+on_simulations_data[1])/2
+        on_measured_data=(on_measured_data[0]+on_measured_data[1])/2
+        upper_limit_data=(upper_limit_data[0]+upper_limit_data[1])/2
+        
+        dropoff_sim_measured = ( (on_simulations_data - on_measured_data)/on_measured_data ).mean()
+        dropoff_upper_limit_measured = ((upper_limit_data - on_measured_data)/on_measured_data ).mean()
+        
+        print("MRE on Sims:\tOn measured\tUpper lim")
+        print(np.mean(on_simulations_data),"\t", np.mean(on_measured_data),"\t", np.mean(upper_limit_data))
+        print("\nAverage relative % reduction across all bins: 100 * (x - measured) / measured")
+        print("From simulation to measured\tFrom upper lim to measured:")
+        print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
+        print("--------------------------------------------------------\n")
+        header = ("(Sim-Meas)/Meas","(Upperlim-Meas)/Meas")
+        line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
+        
     else:
         raise NameError("Unknown plottype"+plot_type)
     

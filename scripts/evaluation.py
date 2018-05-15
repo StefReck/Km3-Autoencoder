@@ -63,6 +63,7 @@ def get_saved_plots_info(tag):
     
     #--------------------------------Bottleneck--------------------------------
     elif tag=="compare_bottleneck":
+        #Nicht sonderlich toll der Plot, vllt. eher tabellarisch
         modelidents = (get_path_best_epoch("vgg_3", full_path),
                        get_path_best_epoch("vgg_5_600_picture", full_path),
                        get_path_best_epoch("vgg_5_200", full_path),
@@ -73,6 +74,7 @@ def get_saved_plots_info(tag):
         label_array=["2000", "600", "200", "64", "32"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
+        y_lims=(0.75,0.95)
         
     elif tag=="compare_600":
         #morefilter and picture (evtl channel)
