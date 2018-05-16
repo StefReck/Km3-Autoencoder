@@ -931,7 +931,63 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     legend2_handles = [track_line,shower_line,empty_line]
    
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend2_handles+legend_handles)
-    plt.subplots_adjust(top=0.85, left=0.06, right=0.85)
+    plt.subplots_adjust(top=0.85, left=0.065, right=0.85)
+    
+    return fig
+
+
+def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[]):
+    """
+    Plot the median relative error, one plot each for track and shower.
+    """
+    figsize, font_size = get_plot_statistics_plot_size("double")
+    plt.rcParams.update({'font.size': font_size})
+    
+    fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
+    legend_handles = []
+    for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
+        energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
+        bins = energy_mae_plot_data_track[0]
+        mean_track  = energy_mae_plot_data_track[1]
+        mean_shower = energy_mae_plot_data_shower[1]
+        
+        try:
+            label = label_list[i]
+        except IndexError:
+            label = "unknown"
+            
+        #Plot the track in left plot
+        shower = ax1.step(bins, mean_shower, linestyle="-", where='post')
+        color_of_this_model = shower[0].get_color()
+        
+        #Plot the mean in right plot
+        ax2.step(bins, mean_track, linestyle="-", where='post', color=color_of_this_model)
+        
+        #Get an entry for the legend
+        legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
+        legend_handles.append(legend_entry)
+        
+    x_ticks_major = np.arange(0, 101, 10)
+    ax1.set_xticks(x_ticks_major)
+    ax1.minorticks_on()
+    ax2.set_xticks(x_ticks_major)
+    ax2.minorticks_on()
+    
+    ax1.set_title("Track like")
+    ax1.set_xlabel('True energy (GeV)')
+    ax1.set_ylabel('Median relative error')
+    
+    ax2.set_title("Shower like")
+    ax2.set_xlabel('True energy (GeV)')
+    ax2.set_ylabel('Median relative error')
+    
+    #plt.ylim((0, 0.2))
+    #fig.suptitle("Energy reconstruction")
+    ax1.grid(True)
+    ax2.grid(True)
+    
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend_handles)
+    plt.subplots_adjust(top=0.85, left=0.065, right=0.85)
     
     return fig
 
@@ -940,6 +996,7 @@ def make_energy_mae_plot_errorbars(energy_mae_plot_data_list, label_list=[]):
     """
     Generate two plots, one for shower, one for track, in which the median 
     and the variance as errorbars is shown, for multiple plot_datas.
+    Turns out to log terrible, not being used.
     """
     figsize, font_size = get_plot_statistics_plot_size("double")
     fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)

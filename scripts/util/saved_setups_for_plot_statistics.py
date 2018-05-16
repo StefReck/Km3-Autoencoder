@@ -607,17 +607,13 @@ def get_path_best_epoch(modeltag, full_path=True):
         
     #------------------------------200 size variation------------------------------
     elif modeltag=="vgg_5_200_shallow_E":
-        model_path=""
-        raise
+        model_path="vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch5_supervised_energy_epoch40.h5"
     elif modeltag=="vgg_5_200_small_E":
-        model_path=""
-        raise
+        model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch58_supervised_energy_epoch18.h5"
     elif modeltag=="vgg_5_200_large_E":
-        model_path=""
-        raise
+        model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch45_supervised_energy_epoch35.h5"
     elif modeltag=="vgg_5_200_deep_E":
-        model_path=""
-        raise
+        model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch41_supervised_energy_epoch37.h5"
         
     else: raise NameError("Tag '"+str(modeltag)+"' is not known!")
     

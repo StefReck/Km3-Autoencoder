@@ -33,7 +33,7 @@ import numpy as np
 import os
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics, make_energy_mae_plot_errorbars
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics, make_energy_mae_plot_errorbars, make_energy_mae_plot_mean_only
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 
@@ -53,7 +53,8 @@ def get_saved_plots_info(tag, apply_precuts=False):
     energy_bins_1d=np.linspace(3,100,32)
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     is_a_set=False
-    
+    #For sets: Which type of plot to generate
+    which_plot="mean_variance"
     
     #------------------------------Sets for mae comparison---------------------
     
@@ -61,29 +62,46 @@ def get_saved_plots_info(tag, apply_precuts=False):
     if tag == "2000":
         tags = ["2000_unf_E", "2000_unf_mse_E"]
         label_array  = ["With MAE", "With MSE"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
     elif tag == "bottleneck":
         tags = ["2000_unf_E", "200_linear_E"]
         label_array  = ["Unfrozen 2000", "Encoder 200"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
+        which_plot="mean"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
     
     #-----------------------Bottleneck----------------------
     elif tag == "compare_600":
         tags = ["vgg_5_600_picture_E", "vgg_5_600_morefilter_E"]
         label_array  = ["Picture", "More filter"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
         #title_of_plot='Accuracy of encoders with bottleneck 600'
         
     elif tag=="compare_200":
         tags = ["vgg_5_200_E", "vgg_5_200_dense_E"]
         label_array=["Standard", "Dense"]
-        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         #title_of_plot='Accuracy of encoders with bottleneck 200'
         is_a_set=True
         
+    #--------------------- 200 size varaition --------------------
+    elif tag=="compare_200_bigger":
+        tags = ["vgg_5_200_E", "vgg_5_200_large_E", "vgg_5_200_deep_E"]
+        label_array=["Standard", "Wider", "Deeper"]
+        which_plot="mean"
+        is_a_set=True 
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
+        
+    elif tag=="compare_200_smaller":
+        tags = ["vgg_5_200_E", "vgg_5_200_small_E", "vgg_5_200_shallow_E"]
+        label_array=["Standard", "Smaller", "Shallower"]
+        which_plot="mean"
+        is_a_set=True 
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
+        
+    
         
     #Der rest von evaluation.py sollte hier auch rein, z.B. 200, 64,...
         
@@ -101,7 +119,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
         
 
     if is_a_set:
-        return [tags, label_array], save_plot_as
+        return [tags, label_array, which_plot], save_plot_as
     else:
         print("Working on model", model_path)
         #Where to save the plots to
@@ -172,11 +190,11 @@ def save_and_show_plots(tag, apply_precuts=False):
         plt.show(fig_compare)
         
     else:    
-        #Do the standard energy evaluation
+        #Do the standard energy evaluation, i.e. calculate the energy array,
+        #save it and make the plots
         save_as_2d = save_as_base+"_2dhist_plot.pdf"
         save_as_1d = save_as_base+"_mae_plot.pdf"
             
-        
         hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
         
         print("Generating hist2d plot...")
@@ -196,7 +214,7 @@ def save_and_show_plots(tag, apply_precuts=False):
             print("Done.")
 
 
-def compare_plots(tags, label_array, apply_precuts=False):
+def compare_plots(tags, label_array, which_plot, apply_precuts=False):
     """
     Plot several saved mae data files and plot them in a single figure.
     """
@@ -208,7 +226,11 @@ def compare_plots(tags, label_array, apply_precuts=False):
         mae_plot_data_list.append(mae_plot_data)
 
     print("Done. Generating plot...")
-    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_array)
+    if which_plot=="mean_variance":
+        fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_array)
+    elif which_plot=="mean":
+        fig_mae = make_energy_mae_plot_mean_only(mae_plot_data_list, label_list=label_array)
+    
     return fig_mae
     
     

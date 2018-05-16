@@ -103,7 +103,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_200_shallow", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
         title_of_plot='Accuracy of encoders with bottleneck 200'
-        label_array=["Standard", "Small", "Shallow"]
+        label_array=["Standard", "Smaller", "Shallower"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
         
@@ -113,7 +113,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_200_deep", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
         title_of_plot='Accuracy of encoders with bottleneck 200'
-        label_array=["Standard", "Large", "Deep"]
+        label_array=["Standard", "Wider", "Deeper"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
         y_lims=(0.8,0.95)
