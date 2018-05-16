@@ -64,6 +64,7 @@ lambda_comp=0
 optimizer="adam"
 # Additional options for the model, see model_definitions.py; "None" for no options
 # e.g. "dropout=0.3", "unlock_BN", ...
+# multiple options are seperated with -
 options="None"
 
 # allows to create multiple supervised trainings from the same AE model
