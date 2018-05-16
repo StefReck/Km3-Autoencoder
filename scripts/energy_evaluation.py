@@ -168,7 +168,8 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     print("Done.")
     
     print("Generating mae histogramm...")
-    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
+    bin_number=32
+    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d, energy_bins=np.linspace(3,100,bin_number))
     print("Done.")
     
     return(hist_data_2d, energy_mae_plot_data)
@@ -179,8 +180,8 @@ def save_and_show_plots(tag, apply_precuts=False):
     input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
     
     #Can also compare multiple already generated mae plots
-    if len(input_for_make_hist_data)==2:
-        #Compare existing mae plots
+    if len(input_for_make_hist_data)==3:
+        #Is a set: Compare existing mae plots
         save_plot_as = save_as_base
         fig_compare = compare_plots(*input_for_make_hist_data)
         if save_plot_as != None:
