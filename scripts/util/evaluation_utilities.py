@@ -874,15 +874,19 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     """
     Takes a list of mae_plot_data (e.g. for different models) and makes a single plot.
     """
-    fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
+    figsize, font_size = get_plot_statistics_plot_size("double")
+    fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
+    plt.rcParams.update({'font.size': font_size})
+    
+    fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
     legend_handles = []
     for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
         energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
         bins = energy_mae_plot_data_track[0]
         mean_track  = energy_mae_plot_data_track[1]
         mean_shower = energy_mae_plot_data_shower[1]
-        var_track  = energy_mae_plot_data_track[2]
-        var_shower = energy_mae_plot_data_shower[2]
+        var_track  = np.sqrt(energy_mae_plot_data_track[2])
+        var_shower = np.sqrt(energy_mae_plot_data_shower[2])
         
         try:
             label = label_list[i]
@@ -908,31 +912,26 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     ax2.set_xticks(x_ticks_major)
     ax2.minorticks_on()
     
+    ax1.set_title("Median")
     ax1.set_xlabel('True energy (GeV)')
-    ax1.set_ylabel('Median fractional energy resolution')
+    ax1.set_ylabel('Median relative error')
     
+    ax1.set_title("Standard deviation")
     ax2.set_xlabel('True energy (GeV)')
-    ax2.set_ylabel(r'Variance of relative Error (GeV$^2$)')
+    ax2.set_ylabel(r'Standard deviation of relative Error')
     
     #plt.ylim((0, 0.2))
     fig.suptitle("Energy reconstruction", fontsize=16)
     ax1.grid(True)
     ax2.grid(True)
     
-    #Get control over the legend entries
-    #legend1 = ax2.legend(handles=legend_handles, loc="upper right")
-    #ax2.add_artist(legend1)
-    
     #Make a second legend box
     track_line  = mlines.Line2D([], [], color='grey', linestyle="-",  label='Track')
     shower_line = mlines.Line2D([], [], color='grey', linestyle="--", label='Shower')
     empty_line = mlines.Line2D([], [], color='white', linestyle="", label='')
     legend2_handles = [track_line,shower_line,empty_line]
-    #legend2 = ax2.legend(handles=legend2_handles, loc="best")
-    #ax2.add_artist(legend2)
    
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend2_handles+legend_handles)
-    
     plt.subplots_adjust(top=0.85, left=0.06, right=0.85)
     
     return fig

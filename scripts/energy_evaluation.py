@@ -208,7 +208,7 @@ def compare_plots(tags, label_array, apply_precuts=False):
         mae_plot_data_list.append(mae_plot_data)
 
     print("Done. Generating plot...")
-    fig_mae = make_energy_mae_plot_errorbars(mae_plot_data_list, label_list=label_array)
+    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_array)
     return fig_mae
     
     
