@@ -387,17 +387,24 @@ def get_props_for_plot_parser(tag, printing=True):
         save_to_name = "statistics/statistics_parser_encoder_energy_new_test.pdf"
         xrange=[0,65]
         #colors = ["navy", "orange"]
-    elif tag=="encoder_energy" or tag==4:
+    elif tag=="encoder_energy_drop" or tag==4:
         title = "Different dropout rates for the encoder"
         test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop00_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop01_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop02_test.txt", 
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop03_test.txt",]
-        #"vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_test.txt"
         labels_override = ["0 %", "10 %", "20 %", "30 %"]
-        save_to_name = "statistics/statistics_parser_encoder_energy_test.pdf"
-        #xrange=[0,65]
-        
+        save_to_name = "statistics/statistics_parser_encoder_energy_drop_test.pdf"
+        xrange=[0,60]
+        style="two_in_one_line"
+    elif tag=="encoder_energy_size" or tag==5:
+        title = "Size of first dense layer"
+        test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop02_test.txt"]
+        labels_override = ["256","64"]
+        save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
+        xrange=[0,60]
+        style="two_in_one_line"
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
     
