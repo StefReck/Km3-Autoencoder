@@ -50,7 +50,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
     dataset_tag="xzt"
     zero_center=True
     energy_bins_2d=np.arange(3,101,1)
-    energy_bins_1d=np.linspace(3,100,32)
+    energy_bins_1d=32
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     is_a_set=False
     #For sets: Which type of plot to generate
@@ -168,8 +168,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     print("Done.")
     
     print("Generating mae histogramm...")
-    bin_number=32
-    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d, energy_bins=np.linspace(3,100,bin_number))
+    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
     print("Done.")
     
     return(hist_data_2d, energy_mae_plot_data)

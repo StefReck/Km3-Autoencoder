@@ -826,13 +826,14 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         
     return(fig)
 
-def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.linspace(3,100,32)):
+def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d):
     """
     Generate binned statistics for the energy mae, or the relative mae.
     seperate for track and shower events.
     """
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
+    energy_bins=np.linspace(3,100,energy_bins_1d)
     is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
     abs_err = np.abs(mc_energy - reco_energy)
