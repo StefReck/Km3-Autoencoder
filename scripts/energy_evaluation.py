@@ -59,26 +59,26 @@ def get_saved_plots_info(tag, apply_precuts=False):
     
     
     if tag == "2000":
-        tags = ["2000_unf", "2000_unf_mse"]
+        tags = ["2000_unf_E", "2000_unf_mse_E"]
         label_array  = ["With MAE", "With MSE"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
     elif tag == "bottleneck":
-        tags = ["2000_unf", "200_linear"]
+        tags = ["2000_unf_E", "200_linear_E"]
         label_array  = ["Unfrozen 2000", "Encoder 200"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
     
     #-----------------------Bottleneck----------------------
     elif tag == "compare_600":
-        tags = ["vgg_5_600_picture", "vgg_5_600_morefilter"]
+        tags = ["vgg_5_600_picture_E", "vgg_5_600_morefilter_E"]
         label_array  = ["Picture", "More filter"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         is_a_set=True
         #title_of_plot='Accuracy of encoders with bottleneck 600'
         
     elif tag=="compare_200":
-        tags = ["vgg_5_200", "vgg_5_200_dense"]
+        tags = ["vgg_5_200_E", "vgg_5_200_dense_E"]
         label_array=["Standard", "Dense"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_plot.pdf"
         #title_of_plot='Accuracy of encoders with bottleneck 200'
