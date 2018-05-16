@@ -399,9 +399,10 @@ def get_props_for_plot_parser(tag, printing=True):
         style="two_in_one_line"
     elif tag=="encoder_energy_size" or tag==5:
         title = "Size of first dense layer"
-        test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_test.txt",
-                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop02_test.txt"]
-        labels_override = ["256","64"]
+        test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_verysmall_drop00_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop00_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_drop00_test.txt"]
+        labels_override = ["32","64", "256"]
         save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
         xrange=[0,60]
         style="two_in_one_line"
@@ -520,8 +521,7 @@ def get_props_for_plot_parser(tag, printing=True):
 
 def get_path_best_epoch(modeltag, full_path=True):
     #Get the path to the h5 file that had the best performance of a model
-    #if full_path is false, will only give the path inside the models/ folder
-    
+    #if full_path==True, will also include the base_path:
     base_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     #------------------------- Up-Down Networks ------------------------- 
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

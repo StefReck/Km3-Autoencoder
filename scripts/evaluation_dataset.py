@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot
-
+from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Evaluate model performance after training. This is for comparison of supervised accuracy on different datasets. Especially for the plots for the broken data comparison.')
@@ -274,14 +274,36 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.7,1.0)
         legend_loc="lower right"
     
+    elif which_one=="4_200_large_enc" or which_one==14:
+        broken_model = "vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch39_supervised_up_down_broken4_epoch34.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_large", full_path=False)
+        brokendata_tag = "xzt_broken4"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        title_of_plot='Large 200 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_200_large_broken4_enc"+extra_name+".pdf" 
+        y_lims=(0.7,0.95)
+    elif which_one=="4_200_small_enc" or which_one==15:
+        broken_model = "vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch77_supervised_up_down_broken4_epoch57.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_small", full_path=False)
+        brokendata_tag = "xzt_broken4"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        title_of_plot='Small 200 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_200_small_broken4_enc"+extra_name+".pdf" 
+        y_lims=(0.7,0.95)
     
-    elif which_one=="energy" or which_one==14:
+    elif which_one=="energy" or which_one==16:
         raise NameError("Not there yet...")
         folder_in_the_plots_path = "broken_study_energy/"
         plot_type = "mre"
     
     
-    elif which_one=="unfreeze_comp" or which_one==15:
+    elif which_one=="unfreeze_comp" or which_one==17:
         broken_model = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_epoch30.h5"
         real_model   = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch30.h5"
         brokendata_tag = "xzt_broken4"
