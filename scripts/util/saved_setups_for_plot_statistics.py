@@ -319,15 +319,17 @@ def get_how_many_epochs_each_to_train(epoch_schedule):
 
 def get_plot_statistics_plot_size(style):
     #Plot and font sizes for plot_statistics:
+    font_size=14
     if style=="two_in_one_line":
         #For putting 2 plots next to each other, this is alright and readable
-        figsize = [6.4,5.5] 
-        font_size=14
-        
+        figsize = [6.4,5.5]   
     elif style=="extended":
         #For a single plot in a line
         figsize = [10, 5.5] 
-        font_size=14
+    elif style=="double":
+        #For two subplots horizontally next to each other
+        figsize = [12.8, 5.5] 
+
     return figsize, font_size
 
 

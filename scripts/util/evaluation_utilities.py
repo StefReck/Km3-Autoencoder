@@ -22,6 +22,7 @@ import sys
 sys.path.append('../')
 
 from util.run_cnn import generate_batches_from_hdf5_file, load_zero_center_data, h5_get_number_of_rows
+from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 from get_dataset_info import get_dataset_info
 
 
@@ -825,7 +826,7 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         
     return(fig)
 
-def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.arange(3,101,1)):
+def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins=np.linspace(3,100,32)):
     """
     Generate binned statistics for the energy mae, or the relative mae.
     seperate for track and shower events.
@@ -888,29 +889,18 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
         except IndexError:
             label = "unknown"
             
-        if seperate_track_shower == False:
-            summed_error=mean_track+mean_shower
-            summed_var = var_shower+var_track
-            plot1 = ax1.step(bins, summed_error, where='post')
-            color_of_this_model = plot1[0].get_color()
-            ax2.step(bins, summed_var, where='post', color=color_of_this_model)
-            
-            #Get an entry for the legend
-            legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
-            legend_handles.append(legend_entry)
-        else:
-            #Plot the mean in left plot
-            shower = ax1.step(bins, mean_shower, linestyle="--", where='post')
-            color_of_this_model = shower[0].get_color()
-            ax1.step(bins, mean_track, linestyle="-", where='post', color=color_of_this_model)
-            
-            #Plot the variance in right plot
-            ax2.step(bins, var_shower, linestyle="--", where='post', color=color_of_this_model)
-            ax2.step(bins, var_track, linestyle="-", where='post', color=color_of_this_model)
-            
-            #Get an entry for the legend
-            legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
-            legend_handles.append(legend_entry)
+        #Plot the mean in left plot
+        shower = ax1.step(bins, mean_shower, linestyle="--", where='post')
+        color_of_this_model = shower[0].get_color()
+        ax1.step(bins, mean_track, linestyle="-", where='post', color=color_of_this_model)
+        
+        #Plot the variance in right plot
+        ax2.step(bins, var_shower, linestyle="--", where='post', color=color_of_this_model)
+        ax2.step(bins, var_track, linestyle="-", where='post', color=color_of_this_model)
+        
+        #Get an entry for the legend
+        legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
+        legend_handles.append(legend_entry)
         
     x_ticks_major = np.arange(0, 101, 10)
     ax1.set_xticks(x_ticks_major)
@@ -947,6 +937,79 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     
     return fig
 
+
+def make_energy_mae_plot_errorbars(energy_mae_plot_data_list, label_list=[]):
+    """
+    Generate two plots, one for shower, one for track, in which the median 
+    and the variance as errorbars is shown, for multiple plot_datas.
+    """
+    figsize, font_size = get_plot_statistics_plot_size("double")
+    fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
+    plt.rcParams.update({'font.size': font_size})
+    legend_handles = []
+    for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
+        energy_mae_plot_data_track, energy_mae_plot_data_shower = energy_mae_plot_data
+        bins = energy_mae_plot_data_track[0]
+        error_bar_locs = bins[:-1]+(bins[1]-bins[0])/2
+        mean_track  = energy_mae_plot_data_track[1]
+        mean_shower = energy_mae_plot_data_shower[1]
+        std_track  = np.sqrt(energy_mae_plot_data_track[2])
+        std_shower = np.sqrt(energy_mae_plot_data_shower[2])
+        
+        try:
+            label = label_list[i]
+        except IndexError:
+            label = "unknown"
+            
+        #Plot the track in left plot
+        ax1.set_title("Track like")
+        shower = ax1.step(bins, mean_track, linestyle="-", where='post')
+        color_of_this_model = shower[0].get_color()
+        ax1.errorbar(error_bar_locs, mean_track[:-1], std_track[:-1], color=color_of_this_model, fmt="none")
+        
+        #Plot the shower in right plot
+        ax2.set_title("Shower like")
+        ax2.step(bins, mean_shower, linestyle="-", where='post', color=color_of_this_model)
+        ax2.errorbar(error_bar_locs, mean_shower[:-1], std_shower[:-1], color=color_of_this_model, fmt="none")
+        
+        #Get an entry for the legend
+        legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
+        legend_handles.append(legend_entry)
+        
+    x_ticks_major = np.arange(0, 101, 10)
+    ax1.set_xticks(x_ticks_major)
+    ax1.minorticks_on()
+    ax2.set_xticks(x_ticks_major)
+    ax2.minorticks_on()
+    
+    ax1.set_xlabel('True energy (GeV)')
+    ax1.set_ylabel('Median fractional energy resolution') #median relative error
+    
+    ax2.set_xlabel('True energy (GeV)')
+    ax2.set_ylabel(r'Median fractional energy resolution')
+    
+    #plt.ylim((0, 0.2))
+    fig.suptitle("Energy reconstruction", fontsize=16)
+    ax1.grid(True)
+    ax2.grid(True)
+    
+    #Make a second legend box
+    """
+    track_line  = mlines.Line2D([], [], color='grey', linestyle="-",  label='Track')
+    shower_line = mlines.Line2D([], [], color='grey', linestyle="--", label='Shower')
+    empty_line = mlines.Line2D([], [], color='white', linestyle="", label='')
+    legend2_handles = [track_line,shower_line,empty_line]
+    legend_handles = legend_handles + legend2_handles
+    """
+   
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend_handles)
+    
+    plt.subplots_adjust(top=0.85, left=0.07, right=0.85)
+    
+    return fig
+
+
+
 def test_energy_evaluation_functions(mode="real"):
     """
     Generate some random noise and plot it with the energy evaluation functions.
@@ -965,11 +1028,11 @@ def test_energy_evaluation_functions(mode="real"):
         dummy_input = np.concatenate([dummy_hits_1, dummy_hits_2, dummy_types, dummy_cc], axis=-1)
         
         #make_2d_hist_plot(calculate_2d_hist_data(dummy_input), seperate_track_shower=0, normalize_columns=0)
-        make_energy_mae_plot([calculate_energy_mae_plot_data(dummy_input),])
+        make_energy_mae_plot_errorbars([calculate_energy_mae_plot_data(dummy_input),])
     elif mode=="real":
         data2d = np.load("temp.npy")
         make_2d_hist_plot(data2d)
-        make_energy_mae_plot(data2d)
+        make_energy_mae_plot_errorbars(data2d)
 
 
 # ------------- Functions used in making Matplotlib plots -------------#

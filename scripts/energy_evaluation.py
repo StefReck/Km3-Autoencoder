@@ -33,7 +33,7 @@ import numpy as np
 import os
 
 from get_dataset_info import get_dataset_info
-from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics
+from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics, make_energy_mae_plot_errorbars
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
 
@@ -208,7 +208,7 @@ def compare_plots(tags, label_array, apply_precuts=False):
         mae_plot_data_list.append(mae_plot_data)
 
     print("Done. Generating plot...")
-    fig_mae = make_energy_mae_plot(mae_plot_data_list, label_list=label_array)
+    fig_mae = make_energy_mae_plot_errorbars(mae_plot_data_list, label_list=label_array)
     return fig_mae
     
     
