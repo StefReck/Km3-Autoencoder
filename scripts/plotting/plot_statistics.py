@@ -280,16 +280,21 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     ax.add_artist(legend2)
     
     #xrange
-    max_epoch = get_max_epoch(data_for_plots)
     if xrange=="auto":
+        max_epoch = get_max_epoch(data_for_plots)
         ax.set_xlim((0,max_epoch))
     else:
+        max_epoch = max(xrange)
         ax.set_xlim(xrange)
 
     if xticks is not None:
         plt.xticks( xticks )
     else:
-        plt.xticks( np.arange(0, max_epoch+1,5) )
+        if max_epoch>=100:
+            increment = 10
+        else:
+            increment = 5
+        plt.xticks( np.arange(0, max_epoch+1,increment) )
 
     #yrange
     plt.ylim(get_proper_range(y_value_extrema))
