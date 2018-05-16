@@ -875,7 +875,6 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     Takes a list of mae_plot_data (e.g. for different models) and makes a single plot.
     """
     figsize, font_size = get_plot_statistics_plot_size("double")
-    fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
     plt.rcParams.update({'font.size': font_size})
     
     fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
@@ -916,12 +915,12 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     ax1.set_xlabel('True energy (GeV)')
     ax1.set_ylabel('Median relative error')
     
-    ax1.set_title("Standard deviation")
+    ax2.set_title("Standard deviation")
     ax2.set_xlabel('True energy (GeV)')
     ax2.set_ylabel(r'Standard deviation of relative Error')
     
     #plt.ylim((0, 0.2))
-    fig.suptitle("Energy reconstruction", fontsize=16)
+    #fig.suptitle("Energy reconstruction")
     ax1.grid(True)
     ax2.grid(True)
     
