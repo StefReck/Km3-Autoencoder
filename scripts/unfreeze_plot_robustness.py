@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from plotting.plot_statistics import read_out_file
+from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 which_file="200_broken4"
 show_plot=True
@@ -40,7 +41,9 @@ def make_plot(logfile_path):
     labels_acc=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
     colors_acc=["orange", "blue", "navy"]
     
-    fig, ax = plt.subplots(figsize=(9,6))
+    figsize, fontsize = get_plot_statistics_plot_size("extended")
+    plt.rcParams.update({'font.size': fontsize})
+    fig, ax = plt.subplots(figsize=figsize)
     ax2 = ax.twinx()
     ax3=ax.twiny()
     

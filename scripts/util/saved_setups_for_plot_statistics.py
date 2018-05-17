@@ -321,11 +321,12 @@ def get_plot_statistics_plot_size(style):
     #Plot and font sizes for plot_statistics:
     font_size=14
     if style=="two_in_one_line":
-        #For putting 2 plots next to each other, this is alright and readable
+        #For putting 2 plots next to each other, 0.48\textwidth
         figsize = [6.4,5.5]   
     elif style=="extended":
-        #For a single plot in a line
+        #For a single plot in a line, 0.95\textwidth
         figsize = [10, 5.5] 
+        font_size=12
     elif style=="double":
         #For two subplots horizontally next to each other
         figsize = [12.8, 5.5] 
@@ -407,8 +408,8 @@ def get_props_for_plot_parser(tag, printing=True):
         test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_verysmall_drop00_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop00_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_drop00_test.txt",
-                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_1000_drop00_test.txt",
-                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_4000_drop00_test.txt"]
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_1000_drop00_test.txt",
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_4000_drop00_test.txt"]
         labels_override = ["32","64", "256", "1000", "4000"]
         save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
         xrange=[0,60]

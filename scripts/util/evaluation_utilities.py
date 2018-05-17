@@ -801,8 +801,10 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         if normalize_columns == True:
             z1=norm_columns_of_2d_hist_data(z1)
             z2=norm_columns_of_2d_hist_data(z2)
-
-        fig, [ax1, ax2] = plt.subplots(1,2, figsize=(12,4.8))
+        figsize, fontsize = get_plot_statistics_plot_size("double")
+        plt.rcParams.update({'font.size': fontsize})
+        fig, [ax1, ax2] = plt.subplots(1,2, figsize=figsize)
+        
         plot1 = ax1.pcolormesh(x,y,z1, norm=colors.LogNorm(vmin=1, vmax=z1.max()))
         ax1.set_title("Track like events")
         cbar1 = fig.colorbar(plot1, ax=ax1, )
