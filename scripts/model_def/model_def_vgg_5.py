@@ -969,7 +969,12 @@ def setup_vgg_5_32(autoencoder_stage, options_dict, modelpath_and_name=None):
             x = dense_block(x, units=32, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
             x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
         else:
-            raise NameError("Dense setup "+dense_setup+" is unknown!")
+            try:
+                dense_neurons=int(dense_setup)
+                x = dense_block(x, units=dense_neurons, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+                x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=batchnorm_for_dense, dropout=dropout_for_dense)
+            except ValueError:
+                raise NameError("Dense setup "+dense_setup+" is unknown!")
         
         outputs = Dense(number_of_output_neurons, activation=supervised_last_activation, kernel_initializer='he_normal')(x)
         

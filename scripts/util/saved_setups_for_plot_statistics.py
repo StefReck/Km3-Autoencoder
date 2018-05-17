@@ -400,6 +400,7 @@ def get_props_for_plot_parser(tag, printing=True):
         labels_override = ["0 %", "10 %", "20 %", "30 %"]
         save_to_name = "statistics/statistics_parser_encoder_energy_drop_test.pdf"
         xrange=[0,60]
+        average_train_data_bins=8
         style="two_in_one_line"
     elif tag=="encoder_energy_size" or tag==5:
         title = "Size of first dense layer"
@@ -410,7 +411,7 @@ def get_props_for_plot_parser(tag, printing=True):
         save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
         xrange=[0,60]
         style="two_in_one_line"
-        average_train_data_bins=4
+        average_train_data_bins=8
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
     
