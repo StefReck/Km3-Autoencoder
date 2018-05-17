@@ -171,7 +171,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
     print("Done.")
     
-    return(hist_data_2d, energy_mae_plot_data)
+    return (hist_data_2d, energy_mae_plot_data)
 
 
 def save_and_show_plots(tag, apply_precuts=False):
@@ -233,8 +233,8 @@ def compare_plots(tags, label_array, which_plot, apply_precuts=False):
     
     return fig_mae
     
-    
-save_and_show_plots(tag, apply_precuts)
+if __name__=="__main__":
+    save_and_show_plots(tag, apply_precuts)
 
    
 

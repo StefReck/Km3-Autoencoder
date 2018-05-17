@@ -17,8 +17,9 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot
+from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot_mean_only
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
+from energy_evaluation import make_or_load_hist_data
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Evaluate model performance after training. This is for comparison of supervised accuracy on different datasets. Especially for the plots for the broken data comparison.')
@@ -82,6 +83,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     try: which_one=int(which_one)
     except: ValueError
+    # ----------------------------- Up down -----------------------------
     if which_one=="1_unf" or which_one==0:
         #vgg_3_broken1_unf
         modelidents = ("vgg_3-broken1/trained_vgg_3-broken1_supervised_up_down_epoch6.h5",
@@ -297,11 +299,23 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_200_small_broken4_enc"+extra_name+".pdf" 
         y_lims=(0.7,0.95)
     
-    elif which_one=="energy" or which_one==16:
-        raise NameError("Not there yet...")
-        folder_in_the_plots_path = "broken_study_energy/"
-        plot_type = "mre"
+    # ----------------------------- Energy regression -----------------------------
     
+    elif which_one=="energy_12_enc" or which_one==16:
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_small_broken12_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        title_of_plot=''
+        #y_lims=(0.7,0.95)
+        
+        broken_model = ""
+        real_model   = get_path_best_epoch("", full_path=False)
+        brokendata_tag = "xzt_broken12"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+    
+    # ----------------------------- Unfreeze stuff -----------------------------
     
     elif which_one=="unfreeze_comp" or which_one==17:
         broken_model = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_epoch30.h5"
@@ -336,36 +350,51 @@ def get_info(which_one, extra_name="", y_lims_override=None):
 
 def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     """
+    Main function:
     Make an evaluation based on the info_tag (Generate+Save or load evaluation data, save plot).
     A plot that shows acc or loss over the mc energy in a histogram, evaluated on different 
     datasets.
     Often, there will be three models plotted: 
         0: On 'simulations'
         1: On 'measured' data
+        2: Upper lim
     """
-    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, label_array, color_array = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)                
-    
-    #generate or load data automatically:
-    #this will be a list of binned evaluations, one for every model
-    hist_data_array = make_or_load_files(modelidents, dataset_array, class_type=class_type, bins=bins)
-    print_statistics_in_numbers(hist_data_array, plot_type)
+    modelidents, dataset_array, title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, label_array, color_array = get_info(info_tag, extra_name=extra_name, y_lims_override=y_lims_override)
     
     #make plot of multiple data:
     if plot_type == "acc":
+        #For up-down networks:
+        #generate or load data automatically:
+        #this will be a list of binned evaluations, one for every model
+        hist_data_array = make_or_load_files(modelidents, dataset_array, class_type=class_type, bins=bins)
+        print_statistics_in_numbers(hist_data_array, plot_type)
+        
         y_label_of_plot="Accuracy"
         fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
     
+    elif plot_type == "mre":
+        #Median relative error for energy regression, seperated for track and shower
+        #Data is loaded by the energy evaluation function, which is not
+        #fully compatible with this one :-( so additional infos are copied from there
+        hist_data_array=[]
+        for model_no,model_path in enumerate(modelidents):
+            dataset_tag = dataset_array[model_no]
+            zero_center=True
+            energy_bins_2d=np.arange(3,101,1)
+            energy_bins_1d=20
+            hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(model_path, 
+                    dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None)
+            #only interested in the mae plot data
+            hist_data_array.append(energy_mae_plot_data)
+        print_statistics_in_numbers(hist_data_array, plot_type)
+        y_label_of_plot='Median fractional energy resolution'
+        fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array)
+        
+        
     elif plot_type == "mse":
+        #Intended for Autoencoders, not been used in a long time...
         y_label_of_plot="Loss"
         fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims, color_array=color_array, legend_loc=legend_loc) 
-    
-    elif plot_type == "mre":
-        #Median relative error
-        #hist_data_array is for every model the tuple:
-        #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
-        y_label_of_plot='Median fractional energy resolution'
-        fig = make_energy_mae_plot(hist_data_array, label_list=label_array)
-        
     else:
         print("Plot type", plot_type, "not supported. Not generating plots, but hist_data is still saved.")
     
@@ -416,25 +445,32 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         #hist_data_array is for every model the tuple:
         #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         #each containing [energy, binned mre]
-        on_simulations_data = hist_data_array[0][:][1]
-        on_measured_data    = hist_data_array[1][:][1]
-        upper_limit_data    = hist_data_array[2][:][1]
-    
-        on_simulations_data=(on_measured_data[0]+on_simulations_data[1])/2
-        on_measured_data=(on_measured_data[0]+on_measured_data[1])/2
-        upper_limit_data=(upper_limit_data[0]+upper_limit_data[1])/2
+        on_simulations_data_track = hist_data_array[0][0]
+        on_measured_data_track    = hist_data_array[1][0]
+        upper_limit_data_track    = hist_data_array[2][0]
+        on_simulations_data_shower = hist_data_array[0][1]
+        on_measured_data_shower    = hist_data_array[1][1]
+        upper_limit_data_shower    = hist_data_array[2][1]
         
-        dropoff_sim_measured = ( (on_simulations_data - on_measured_data)/on_measured_data ).mean()
-        dropoff_upper_limit_measured = ((upper_limit_data - on_measured_data)/on_measured_data ).mean()
+        dropoff_sim_measured_track =   ((on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
+        dropoff_upper_limit_track =    ((upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
+        dropoff_sim_measured_shower =  ((on_simulations_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
+        dropoff_upper_limit_shower =   ((upper_limit_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
         
-        print("MRE on Sims:\tOn measured\tUpper lim")
-        print(np.mean(on_simulations_data),"\t", np.mean(on_measured_data),"\t", np.mean(upper_limit_data))
+        print("Track like events: MRE on Sims:\tOn measured\tUpper lim")
+        print(np.mean(on_simulations_data_track),"\t", np.mean(on_measured_data_track),"\t", np.mean(upper_limit_data_track))
         print("\nAverage relative % reduction across all bins: 100 * (x - measured) / measured")
         print("From simulation to measured\tFrom upper lim to measured:")
-        print(dropoff_sim_measured*100,"\t",dropoff_upper_limit_measured*100)
+        print(dropoff_sim_measured_track*100,"\t",dropoff_upper_limit_track*100)
+        
+        print("\nShower like events: MRE on Sims:\tOn measured\tUpper lim")
+        print(np.mean(on_simulations_data_shower),"\t", np.mean(on_measured_data_shower),"\t", np.mean(upper_limit_data_shower))
+        print("\nAverage relative % reduction across all bins: 100 * (x - measured) / measured")
+        print("From simulation to measured\tFrom upper lim to measured:")
+        print(dropoff_sim_measured_shower*100,"\t",dropoff_upper_limit_shower*100)
         print("--------------------------------------------------------\n")
-        header = ("(Sim-Meas)/Meas","(Upperlim-Meas)/Meas")
-        line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
+        header = None
+        line=None
         
     else:
         raise NameError("Unknown plottype"+plot_type)
