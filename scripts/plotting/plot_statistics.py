@@ -218,9 +218,11 @@ def print_extrema(epochs, ydata):
     print("Minimum:\t",epochs[minimum_epoch],"\t",ydata[minimum_epoch])
     return
 
-def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, xrange="auto"): 
+def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, xrange="auto", average_train_data_bins=1): 
     """
     Makes a plot of one or more graphs, each with the same y-axis (e.g. loss, acc)
+    average_train_data_bins: take the average of every two entries in the
+                            train data (less jitter)
     """
     figsize, font_size = get_plot_statistics_plot_size(style)
     plt.rcParams.update({'font.size': font_size})
@@ -251,23 +253,34 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     #plot the data in one plot
     for i,data_of_model in enumerate(data_for_plots):
         # data_of_model: [Test_epoch, Test_ydata, Train_epoch, Train_ydata]
+        train_epoch = np.array(data_of_model[2]).astype(float)
+        train_ydata = np.array(data_of_model[3]).astype(float)
+        
         print(label_array[i])
         print_extrema(data_of_model[0],data_of_model[1])
+        
+        if average_train_data_bins != 1:
+            #assure len(train data) is devisable by average_train_bins
+            rest = len(train_ydata)%average_train_data_bins
+            train_ydata=train_ydata[:-rest]
+            train_epoch=train_epoch[:-rest]
+            #average over every average_train_bins bins
+            train_ydata = np.mean(train_ydata.reshape(-1, average_train_data_bins), axis=1)
+            train_epoch = np.mean(train_epoch.reshape(-1, average_train_data_bins), axis=1)
+        
         if color_override==True:
             test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o", color=colors[i])
         else:
             test_plot = ax.plot(data_of_model[0], data_of_model[1], marker="o")
         #the train plot
-        ax.plot(data_of_model[2], data_of_model[3], linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
+        ax.plot(train_epoch, train_ydata, linestyle="-", color=test_plot[0].get_color(), alpha=0.5, lw=0.6)
         handle_for_legend = mlines.Line2D([], [], color=test_plot[0].get_color(), lw=3, label=label_array[i])
         handles1.append(handle_for_legend)
         #for proper yrange, look for min/max of ydata, but not for the first epochs train,
         #since loss is often extreme here
-        train_epoch_select = np.array(data_of_model[2]).astype(float)
-        train_epoch = np.array(data_of_model[3]).astype(float)
-        train_epoch_select = train_epoch_select>=3
+        train_epoch_select = train_epoch>=3
         y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1]),
-                                 max(train_epoch[train_epoch_select]), min(train_epoch[train_epoch_select])] )
+                                 max(train_ydata[train_epoch_select]), min(train_ydata[train_epoch_select])] )
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])

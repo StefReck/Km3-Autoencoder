@@ -50,7 +50,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
     dataset_tag="xzt"
     zero_center=True
     energy_bins_2d=np.arange(3,101,1)
-    energy_bins_1d=32
+    energy_bins_1d=20
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     is_a_set=False
     #For sets: Which type of plot to generate

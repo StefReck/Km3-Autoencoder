@@ -47,17 +47,21 @@ style="extended"
 save_as=None
 #Ranges for the plot
 xrange="auto"
+#Average over this many bins in the train data (to reduce jitter)
+average_train_data_bins=1
 
 
 def make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, style,
-                     dump_to_file, xlabel, save_it, show_it, xrange):
+                     dump_to_file, xlabel, save_it, show_it, xrange, 
+                     average_train_data_bins=1):
     #Read the data in
     data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
                                                                             dump_to_file=dump_to_file)
     #Create the plot
     fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 
-                    legend_locations, labels_override, colors, xticks, style=style, xrange=xrange)
+                    legend_locations, labels_override, colors, xticks, style=style, 
+                    xrange=xrange, average_train_data_bins=average_train_data_bins)
     #Save the plot
     if save_as != None and save_it==True:
         plt.savefig(save_as)
@@ -76,27 +80,28 @@ if test_files[0]=="saved":
         current_tag_number=0
         while True:
             try:
-                test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange = get_props_for_plot_parser(current_tag_number)
+                test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange, average_train_data_bins = get_props_for_plot_parser(current_tag_number)
                 make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, style,
                      dump_to_file, xlabel, save_it=True, show_it=False,
-                     xrange=xrange)
+                     xrange=xrange, average_train_data_bins=average_train_data_bins)
                 current_tag_number+=1
             except NameError:
                 print("Done. Generated a total of",current_tag_number,"plots.")
                 break
     else:
         #overwrite some of the above options from a specific saved setup
-        test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange = get_props_for_plot_parser(tag)
+        test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange, average_train_data_bins = get_props_for_plot_parser(tag)
 
         make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, style,
                      dump_to_file, xlabel, save_it, show_it=True, 
-                     xrange=xrange)
+                     xrange=xrange, average_train_data_bins=average_train_data_bins)
 
 else:
     #Load the models handed to the parser directly, without a tag
     
     make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, style,
-                     dump_to_file, xlabel, save_it, show_it=True, xrange=xrange)
+                     dump_to_file, xlabel, save_it, show_it=True, xrange=xrange,
+                     average_train_data_bins=average_train_data_bins)

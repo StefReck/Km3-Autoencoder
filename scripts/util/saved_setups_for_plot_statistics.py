@@ -347,6 +347,8 @@ def get_props_for_plot_parser(tag, printing=True):
     style="extended"
     #range for plot:
     xrange="auto"
+    #Average over this many bins in the train data (to reduce jitter)
+    average_train_data_bins=1
 
     try: tag=int(tag) 
     except: ValueError
@@ -408,6 +410,7 @@ def get_props_for_plot_parser(tag, printing=True):
         save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
         xrange=[0,60]
         style="two_in_one_line"
+        average_train_data_bins=4
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
     
@@ -512,7 +515,7 @@ def get_props_for_plot_parser(tag, printing=True):
         
     test_files=[home+file for file in test_files]
     save_as="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"+save_to_name
-    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange
+    return test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange, average_train_data_bins
 
 
 
