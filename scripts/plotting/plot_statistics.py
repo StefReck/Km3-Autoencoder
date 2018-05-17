@@ -241,7 +241,6 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         label_array = default_label_array
         print("Custom label array does not have the proper length (",len(label_array),"). Using default labels...")
         
-    
     if len(colors) == len(label_array):
         color_override = True
     else:
@@ -262,8 +261,9 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         if average_train_data_bins != 1:
             #assure len(train data) is devisable by average_train_bins
             rest = len(train_ydata)%average_train_data_bins
-            train_ydata=train_ydata[:-rest]
-            train_epoch=train_epoch[:-rest]
+            if rest != 0:
+                train_ydata=train_ydata[:-rest]
+                train_epoch=train_epoch[:-rest]
             #average over every average_train_bins bins
             train_ydata = np.mean(train_ydata.reshape(-1, average_train_data_bins), axis=1)
             train_epoch = np.mean(train_epoch.reshape(-1, average_train_data_bins), axis=1)
@@ -278,9 +278,8 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         handles1.append(handle_for_legend)
         #for proper yrange, look for min/max of ydata, but not for the first epochs train,
         #since loss is often extreme here
-        train_epoch_select = train_epoch>=3
-        y_value_extrema.extend( [max(data_of_model[1]), min(data_of_model[1]),
-                                 max(train_ydata[train_epoch_select]), min(train_ydata[train_epoch_select])] )
+        y_value_extrema.extend([max(data_of_model[1]), min(data_of_model[1]),
+                                max(train_ydata[train_epoch>=3]), min(train_ydata[train_epoch>=3]) ])
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
