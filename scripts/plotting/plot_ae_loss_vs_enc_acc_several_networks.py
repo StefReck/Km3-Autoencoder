@@ -23,13 +23,13 @@ def which_plot(do_you_want):
         tags=["vgg_5_600_morefilter", "vgg_3",
                 "vgg_5_600_picture","vgg_5_200",
               "vgg_5_200_dense","vgg_5_64",
-              "vgg_5_32-eps01", "vgg_5_600-ihlr"]
+              "vgg_5_32-eps01",]# "vgg_5_600-ihlr"]
         
         #Stuff for the plot
         label_list = ["Autoencoder 600 (morefilter)", "Autoencoder 2000",
                 "Autoencoder 600 (picture)", "Autoencoder 200",
                                  "Autoencoder 200 (dense)", "Autoencoder 64",
-                                 r"Autoencoder 32 ($\epsilon = 10^{-1}$)", "Autoencoder 600 (picture) high lr"]
+                                 r"Autoencoder 32 ($\epsilon = 10^{-1}$)",]# "Autoencoder 600 (picture) high lr"]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy for different autoencoder models"
         save_as = "vgg_5_acc.pdf"
@@ -75,12 +75,12 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
 
 
 def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
-    figsize, font_size = get_plot_statistics_plot_size("extended")
+    figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     
     for i,model_loss_ydata in enumerate(loss_ydata_list):
-        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "-", ms=5, label=labels[i])
+        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=2, label=labels[i])
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
