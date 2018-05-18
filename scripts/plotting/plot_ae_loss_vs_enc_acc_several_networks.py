@@ -30,7 +30,6 @@ def which_plot(do_you_want):
               "vgg_5_64",
               "vgg_5_32-eps01",
               ]
-        
         #Stuff for the plot
         label_list = ["2000",
                       #"600 (morefilter)", 
@@ -46,10 +45,36 @@ def which_plot(do_you_want):
         title = "Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
         #x and y lims
-        limits=[[0.0645, 0.0725],[82,86]]
+        limits=[[0.0645, 0.0725],[0.778,0.858]]
         
     elif do_you_want=="loss":
         raise NameError("Nothing is here yet...")
+        tags=["vgg_3_E",
+              #"vgg_5_600_morefilter",
+              #"vgg_5_600_picture",
+              "vgg_5_600-ihlr_E",
+              "vgg_5_200_E",
+              "vgg_5_200_large_E",
+              #"vgg_5_200_dense",
+              "vgg_5_64_E",
+              "vgg_5_32-eps01_E",
+              ]
+        #Stuff for the plot
+        label_list = ["2000",
+                      #"600 (morefilter)", 
+                      #"600 (picture)", 
+                      "600 (picture) high lr",
+                      "200",
+                      "200 large",
+                      #"200 (dense)", 
+                      "64",
+                      r"32 ($\epsilon = 10^{-1}$)",
+                      ]
+        xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
+        title = "Autoencoder loss and encoder accuracy"
+        save_as = "vgg_5_acc.pdf"
+        #x and y lims
+        limits=[[0.0645, 0.0725], None]
         
     elif do_you_want=="test":
         tags=["vgg_5_600_picture",]
@@ -94,7 +119,7 @@ def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits):
     fig, ax=plt.subplots(figsize=figsize)
     
     for i,model_loss_ydata in enumerate(loss_ydata_list):
-        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=3, label=labels[i])
+        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o-", ms=3, label=labels[i])
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
