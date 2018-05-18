@@ -26,12 +26,12 @@ def which_plot(do_you_want):
               "vgg_5_32-eps01",]# "vgg_5_600-ihlr"]
         
         #Stuff for the plot
-        label_list = ["Autoencoder 600 (morefilter)", "Autoencoder 2000",
-                "Autoencoder 600 (picture)", "Autoencoder 200",
-                                 "Autoencoder 200 (dense)", "Autoencoder 64",
-                                 r"Autoencoder 32 ($\epsilon = 10^{-1}$)",]# "Autoencoder 600 (picture) high lr"]
+        label_list = ["600 (morefilter)", "2000",
+                "600 (picture)", "200",
+                                 "200 (dense)", "64",
+                                 r"32 ($\epsilon = 10^{-1}$)",]# "Autoencoder 600 (picture) high lr"]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
-        title = "Autoencoder loss and encoder accuracy for different autoencoder models"
+        title = "Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
         
     elif do_you_want=="loss":
