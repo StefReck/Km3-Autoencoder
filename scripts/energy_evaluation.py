@@ -56,10 +56,13 @@ def get_saved_plots_info(tag, apply_precuts=False):
     #For sets: Which type of plot to generate
     which_plot="mean"
     
+    #------------------------------Special single files---------------------
+    if tag == "energy_12_enc":
+        model_path = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken12_epoch48.h5"
+        dataset_tag="xzt_broken12"
+    
     #------------------------------Sets for mae comparison---------------------
-    
-    
-    if tag == "2000":
+    elif tag == "2000":
         tags = ["2000_unf_E", "2000_unf_mse_E"]
         label_array  = ["With MAE", "With MSE"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
