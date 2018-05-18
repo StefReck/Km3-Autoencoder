@@ -308,16 +308,31 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         title_of_plot=''
         #y_lims=(0.7,0.95)
         
-        broken_model = ""
-        real_model   = get_path_best_epoch("", full_path=False)
+        broken_model = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken12_epoch48.h5"
+        real_model   = get_path_best_epoch("vgg_3_2000_E", full_path=False)
+        brokendata_tag = "xzt_broken12"
+        realdata_tag   = "xzt"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        
+    elif which_one=="energy_12_unf" or which_one==17:
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_small_broken12_unf"+extra_name+".pdf" 
+        plot_type = "mre"
+        title_of_plot=''
+        #y_lims=(0.7,0.95)
+        
+        broken_model = "vgg_3-broken12/trained_vgg_3-broken12_supervised_energy_epoch11.h5"
+        real_model   = get_path_best_epoch("2000_unf_E", full_path=False)
         brokendata_tag = "xzt_broken12"
         realdata_tag   = "xzt"
         modelidents, dataset_array = get_procedure(broken_model, real_model, 
                                                    brokendata_tag, realdata_tag)
     
+    
     # ----------------------------- Unfreeze stuff -----------------------------
     
-    elif which_one=="unfreeze_comp" or which_one==17:
+    elif which_one=="unfreeze_comp" or which_one==18:
         broken_model = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_broken4_epoch30.h5"
         real_model   = "vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch30.h5"
         brokendata_tag = "xzt_broken4"

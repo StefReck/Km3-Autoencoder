@@ -427,6 +427,8 @@ def get_props_for_plot_parser(tag, printing=True):
         xrange=[0,60]
         style="two_in_one_line"
         average_train_data_bins=8
+    
+    
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
     
@@ -603,6 +605,8 @@ def get_path_best_epoch(modeltag, full_path=True):
     #------------------------------Energy bottleneck------------------------------
     elif modeltag=="vgg_3_2000_E":
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
+    elif modeltag=="vgg_3_2000_E_nodrop":
+        raise
     
     elif modeltag=="vgg_5_600_picture_E":
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
