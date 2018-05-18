@@ -25,7 +25,8 @@ def which_plot(do_you_want):
               #"vgg_5_600_picture",
               "vgg_5_600-ihlr",
               "vgg_5_200",
-              "vgg_5_200_dense",
+              "vgg_5_200_large",
+              #"vgg_5_200_dense",
               "vgg_5_64",
               "vgg_5_32-eps01",
               ]
@@ -36,14 +37,16 @@ def which_plot(do_you_want):
                       #"600 (picture)", 
                       "600 (picture) high lr",
                       "200",
-                      "200 (dense)", 
+                      "200 large",
+                      #"200 (dense)", 
                       "64",
                       r"32 ($\epsilon = 10^{-1}$)",
                       ]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
-        xrange=[0.0645, 0.0725]
+        #x and y lims
+        limits=[[0.0645, 0.0725],[82,86]]
         
     elif do_you_want=="loss":
         raise NameError("Nothing is here yet...")
@@ -56,7 +59,7 @@ def which_plot(do_you_want):
         save_as = None
     
     if save_as is not None: save_as=base_path+save_as 
-    return tags, label_list,xlabel,ylabel,title,save_as, xrange
+    return tags, label_list,xlabel,ylabel,title,save_as, limits
 
 
 
@@ -85,7 +88,7 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
     return loss_ydata
 
 
-def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, xrange):
+def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits):
     figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
@@ -97,12 +100,13 @@ def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, xrange):
     ax.grid()
     ax.legend(loc="lower left")
     fig.suptitle(title)
-    ax.set_xlim(xrange)
+    ax.set_xlim(limits[0])
+    ax.set_ylim(limits[1])
     #plt.gcf().subplots_adjust(left=0., right=1.05, bottom=0, top=1)
     return fig
 
 
-def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, xrange):
+def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, limits):
     """
     Main function. Returns the plot.
     """
@@ -146,7 +150,7 @@ def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, xrange):
     else:
         label_array = default_label_array_ae
     
-    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title, xrange)
+    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title, limits)
     
     if save_as is not None:
         fig.savefig(save_as)
