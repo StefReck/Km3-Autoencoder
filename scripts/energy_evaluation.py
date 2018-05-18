@@ -59,7 +59,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
     #------------------------------Special single files---------------------
     if tag == "energy_12_enc":
         model_path = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken12_epoch48.h5"
-        dataset_tag="xzt_broken12"
+        dataset_tag="xzt"
     
     #------------------------------Sets for mae comparison---------------------
     elif tag == "2000":
@@ -209,7 +209,7 @@ def save_and_show_plots(tag, apply_precuts=False):
             print("Done.")
             
         print("Generating mae plot...")
-        fig_mae = make_energy_mae_plot([energy_mae_plot_data,])
+        fig_mae = make_energy_mae_plot_mean_only([energy_mae_plot_data,])
         plt.show(fig_mae)
         if save_as_1d != None:
             print("Saving plot as", save_as_1d)

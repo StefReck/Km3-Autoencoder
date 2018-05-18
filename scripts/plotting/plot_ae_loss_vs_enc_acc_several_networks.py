@@ -10,6 +10,7 @@ sys.path.append('/home/woody/capn/mppi013h/Km3-Autoencoder/scripts/')
 
 from plot_statistics import make_data_from_files, get_last_prl_epochs
 from util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, get_how_many_epochs_each_to_train
+from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 #Which plot do
 i_want = "acc"
@@ -74,7 +75,10 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
 
 
 def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
-    fig, ax = plt.subplots(figsize=(9,7))
+    figsize, font_size = get_plot_statistics_plot_size("extended")
+    plt.rcParams.update({'font.size': font_size})
+    fig, ax=plt.subplots(figsize=figsize)
+    
     for i,model_loss_ydata in enumerate(loss_ydata_list):
         ax.plot(model_loss_ydata[0], model_loss_ydata[1], "-", ms=5, label=labels[i])
     ax.set_xlabel(xlabel)
