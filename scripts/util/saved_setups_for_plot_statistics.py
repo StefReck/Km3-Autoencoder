@@ -13,10 +13,11 @@ def get_props_for_plot_parallel(tag, printing=True):
     save_to_folder = ""
     #plot and font sizes:
     style="two_in_one_line"
+    #plot title
+    title=""
     
     try: tag=int(tag) 
     except: ValueError
-    
     #-------------------vgg5 picture loss functions tests---------------------------
     if tag=="msep" or tag==0:
         title = "Parallel training with MSEp autoencoder loss"
@@ -229,6 +230,11 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_64_energy_nodrop" or tag==45:
+        title = "Parallel training with model '64' no dropout"
+        ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_energy_drop00_test.txt"
+        save_to_folder = "bottleneck_energy/"
     elif tag=="vgg_5_64_energy-new" or tag==34:
         title = "Parallel training with model '64 new'"
         ae_model =  home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_test.txt"
@@ -240,6 +246,11 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_32-eps01_energy_nodrop" or tag==44:
+        title = "Parallel training with model '32' no dropout"
+        ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_energy_drop00_test.txt"
+        save_to_folder = "bottleneck_energy/" 
     elif tag=="vgg_5_32-eps01_energy-new" or tag==35:
         title = "Parallel training with model '32 new'"
         ae_model =  home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_test.txt"
@@ -319,17 +330,18 @@ def get_how_many_epochs_each_to_train(epoch_schedule):
 
 def get_plot_statistics_plot_size(style):
     #Plot and font sizes for plot_statistics:
-    font_size=14
     if style=="two_in_one_line":
         #For putting 2 plots next to each other, 0.48\textwidth
         figsize = [6.4,5.5]   
+        font_size=14
     elif style=="extended":
         #For a single plot in a line, 0.95\textwidth
         figsize = [10, 5.5] 
         font_size=12
     elif style=="double":
-        #For two subplots horizontally next to each other
+        #For two subplots horizontally next to each other, 0.95\textwidth
         figsize = [12.8, 5.5] 
+        font_size=14
 
     return figsize, font_size
 
@@ -408,9 +420,9 @@ def get_props_for_plot_parser(tag, printing=True):
         test_files=["vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_verysmall_drop00_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_small_drop00_test.txt",
                     "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_drop00_test.txt",
-                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_1000_drop00_test.txt",
-                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_4000_drop00_test.txt"]
-        labels_override = ["32","64", "256", "1000", "4000"]
+                    "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_1000_drop00_test.txt",]
+                    #"vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch18_supervised_energy_dense_4000_drop00_test.txt"]
+        labels_override = ["32","64", "256", "1000",] #"4000"]
         save_to_name = "statistics/statistics_parser_encoder_energy_size_test.pdf"
         xrange=[0,60]
         style="two_in_one_line"
