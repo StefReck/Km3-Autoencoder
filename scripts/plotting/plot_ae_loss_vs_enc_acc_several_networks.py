@@ -21,27 +21,29 @@ def which_plot(do_you_want):
     if do_you_want == "acc": 
         #tags of the models to plot, as defined in saved_setups_for_plots
         tags=["vgg_3",
-              "vgg_5_600_morefilter",
-              "vgg_5_600_picture",
+              #"vgg_5_600_morefilter",
+              #"vgg_5_600_picture",
+              "vgg_5_600-ihlr",
               "vgg_5_200",
               "vgg_5_200_dense",
               "vgg_5_64",
               "vgg_5_32-eps01",
-              #"vgg_5_600-ihlr",
               ]
         
         #Stuff for the plot
         label_list = ["2000",
-                      "600 (morefilter)", 
-                      "600 (picture)", 
+                      #"600 (morefilter)", 
+                      #"600 (picture)", 
+                      "600 (picture) high lr",
                       "200",
-                      "200 (dense)", "64",
+                      "200 (dense)", 
+                      "64",
                       r"32 ($\epsilon = 10^{-1}$)",
-                      #"Autoencoder 600 (picture) high lr",
                       ]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
+        xrange=[0.0645, 0.0725]
         
     elif do_you_want=="loss":
         raise NameError("Nothing is here yet...")
@@ -54,7 +56,7 @@ def which_plot(do_you_want):
         save_as = None
     
     if save_as is not None: save_as=base_path+save_as 
-    return tags, label_list,xlabel,ylabel,title,save_as
+    return tags, label_list,xlabel,ylabel,title,save_as, xrange
 
 
 
@@ -83,23 +85,24 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
     return loss_ydata
 
 
-def make_plot(loss_ydata_list, labels, xlabel, ylabel, title):
+def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, xrange):
     figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     
     for i,model_loss_ydata in enumerate(loss_ydata_list):
-        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=2, label=labels[i])
+        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o", ms=3, label=labels[i])
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
     ax.legend(loc="lower left")
     fig.suptitle(title)
+    ax.set_xlim(xrange)
     #plt.gcf().subplots_adjust(left=0., right=1.05, bottom=0, top=1)
     return fig
 
 
-def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as):
+def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, xrange):
     """
     Main function. Returns the plot.
     """
@@ -143,7 +146,7 @@ def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as):
     else:
         label_array = default_label_array_ae
     
-    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title)
+    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title, xrange)
     
     if save_as is not None:
         fig.savefig(save_as)
