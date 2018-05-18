@@ -396,7 +396,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
         hist_data_array=[]
         for model_no,model_path in enumerate(modelidents):
             dataset_tag = dataset_array[model_no]
-            print("Working on", modelpath.split("trained_")[1][:-3], "using dataset", dataset_tag)
+            print("Working on", model_path.split("trained_")[1][:-3], "using dataset", dataset_tag)
             zero_center=True
             energy_bins_2d=np.arange(3,101,1)
             energy_bins_1d=20

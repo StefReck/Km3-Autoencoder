@@ -54,7 +54,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     is_a_set=False
     #For sets: Which type of plot to generate
-    which_plot="mean_variance"
+    which_plot="mean"
     
     #------------------------------Sets for mae comparison---------------------
     
