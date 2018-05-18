@@ -68,6 +68,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     plot_type = "acc"
     #Default location of legend ("best")
     legend_loc="best"
+    #ylims of plot ( only for acc )
+    y_lims=(0.5,1.0)
     #Where to save the plots
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
     folder_in_the_plots_path = "broken_study/"
@@ -394,6 +396,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
         hist_data_array=[]
         for model_no,model_path in enumerate(modelidents):
             dataset_tag = dataset_array[model_no]
+            print("Working on", modelpath.split("trained_")[1][:-3], "using dataset", dataset_tag)
             zero_center=True
             energy_bins_2d=np.arange(3,101,1)
             energy_bins_1d=20
@@ -460,12 +463,12 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         #hist_data_array is for every model the tuple:
         #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         #each containing [energy, binned mre]
-        on_simulations_data_track = hist_data_array[0][0]
-        on_measured_data_track    = hist_data_array[1][0]
-        upper_limit_data_track    = hist_data_array[2][0]
-        on_simulations_data_shower = hist_data_array[0][1]
-        on_measured_data_shower    = hist_data_array[1][1]
-        upper_limit_data_shower    = hist_data_array[2][1]
+        on_simulations_data_track = np.array(hist_data_array[0][0])
+        on_measured_data_track    = np.array(hist_data_array[1][0])
+        upper_limit_data_track    = np.array(hist_data_array[2][0])
+        on_simulations_data_shower = np.array(hist_data_array[0][1])
+        on_measured_data_shower    = np.array(hist_data_array[1][1])
+        upper_limit_data_shower    = np.array(hist_data_array[2][1])
         
         dropoff_sim_measured_track =   ((on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
         dropoff_upper_limit_track =    ((upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
