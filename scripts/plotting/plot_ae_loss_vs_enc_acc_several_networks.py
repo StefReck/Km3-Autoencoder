@@ -20,16 +20,25 @@ def which_plot(do_you_want):
     base_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/loss_vs_ydata/"
     if do_you_want == "acc": 
         #tags of the models to plot, as defined in saved_setups_for_plots
-        tags=["vgg_5_600_morefilter", "vgg_3",
-                "vgg_5_600_picture","vgg_5_200",
-              "vgg_5_200_dense","vgg_5_64",
-              "vgg_5_32-eps01",]# "vgg_5_600-ihlr"]
+        tags=["vgg_3",
+              "vgg_5_600_morefilter",
+              "vgg_5_600_picture",
+              "vgg_5_200",
+              "vgg_5_200_dense",
+              "vgg_5_64",
+              "vgg_5_32-eps01",
+              #"vgg_5_600-ihlr",
+              ]
         
         #Stuff for the plot
-        label_list = ["600 (morefilter)", "2000",
-                "600 (picture)", "200",
-                                 "200 (dense)", "64",
-                                 r"32 ($\epsilon = 10^{-1}$)",]# "Autoencoder 600 (picture) high lr"]
+        label_list = ["2000",
+                      "600 (morefilter)", 
+                      "600 (picture)", 
+                      "200",
+                      "200 (dense)", "64",
+                      r"32 ($\epsilon = 10^{-1}$)",
+                      #"Autoencoder 600 (picture) high lr",
+                      ]
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
