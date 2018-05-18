@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib.lines as mlines
 import csv
 
-#import sys
-#sys.path.append('../')
-from scripts.util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
+import sys
+sys.path.append('/home/woody/capn/mppi013h/Km3-Autoencoder/scripts/')
+from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 """
 Contains all the utility to read in log files and plot them.
