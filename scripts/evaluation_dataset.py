@@ -461,7 +461,6 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         line=(dropoff_sim_measured*100, dropoff_upper_limit_measured*100)
         
     elif plot_type=="mre":
-        #TODO Not tested
         #hist_data_array is for every model the tuple:
         #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         #each containing [energy, binned mre]
@@ -477,17 +476,14 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         dropoff_sim_measured_shower =  ((on_simulations_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
         dropoff_upper_limit_shower =   ((upper_limit_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
         
-        print("Track like events: MRE on Sims:\tOn measured\tUpper lim")
-        print(np.mean(on_simulations_data_track),"\t", np.mean(on_measured_data_track),"\t", np.mean(upper_limit_data_track))
-        print("\nAverage relative % reduction across all bins: 100 * (x - measured) / measured")
-        print("From simulation to measured\tFrom upper lim to measured:")
-        print(dropoff_sim_measured_track*100,"\t",dropoff_upper_limit_track*100)
-        
-        print("\nShower like events: MRE on Sims:\tOn measured\tUpper lim")
-        print(np.mean(on_simulations_data_shower),"\t", np.mean(on_measured_data_shower),"\t", np.mean(upper_limit_data_shower))
-        print("\nAverage relative % reduction across all bins: 100 * (x - measured) / measured")
-        print("From simulation to measured\tFrom upper lim to measured:")
-        print(dropoff_sim_measured_shower*100,"\t",dropoff_upper_limit_shower*100)
+        print("Track like events:")
+        print("First three are MRE, last two are average relative % reduction across all bins: 100 * (x - measured) / measured")
+        print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
+        print(np.mean(on_simulations_data_track),"\t", np.mean(on_measured_data_track),"\t", np.mean(upper_limit_data_track),"\t", dropoff_sim_measured_track*100,"\t",dropoff_upper_limit_track*100) 
+
+        print("\nShower like events:")
+        print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
+        print(np.mean(on_simulations_data_shower),"\t", np.mean(on_measured_data_shower),"\t", np.mean(upper_limit_data_shower),"\t", dropoff_sim_measured_shower*100,"\t",dropoff_upper_limit_shower*100)
         print("--------------------------------------------------------\n")
         header = None
         line=None
