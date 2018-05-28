@@ -50,6 +50,7 @@ make_difference_plot=False
 which_broken_study=4
 
 def get_procedure(broken_model, real_model, brokendata_tag, realdata_tag):
+    #For when the "Simulation"-dataset is manipulated simulations:
     modelidents   = (broken_model,   broken_model, real_model)
     dataset_array = (brokendata_tag, realdata_tag, realdata_tag)
     return modelidents, dataset_array
@@ -76,6 +77,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     #Labels for the plot
     label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+    title_of_plot=""
     #Overwrite default color palette. Leave empty for auto
     color_array=["orange", "blue", "navy"]
     
@@ -307,7 +309,6 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_200_small_broken12_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        title_of_plot=''
         #y_lims=(0.7,0.95)
         
         broken_model = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken12_epoch48.h5"
@@ -318,18 +319,19 @@ def get_info(which_one, extra_name="", y_lims_override=None):
                                                    brokendata_tag, realdata_tag)
         
     elif which_one=="energy_12_unf" or which_one==17:
+        brokendata_tag = "xzt_broken12"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_3-broken12/trained_vgg_3-broken12_supervised_energy_epoch11.h5"
+        real_model   = get_path_best_epoch("2000_unf_E", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_200_small_broken12_unf"+extra_name+".pdf" 
         plot_type = "mre"
-        title_of_plot=''
         #y_lims=(0.7,0.95)
         
-        broken_model = "vgg_3-broken12/trained_vgg_3-broken12_supervised_energy_epoch11.h5"
-        real_model   = get_path_best_epoch("2000_unf_E", full_path=False)
-        brokendata_tag = "xzt_broken12"
-        realdata_tag   = "xzt"
-        modelidents, dataset_array = get_procedure(broken_model, real_model, 
-                                                   brokendata_tag, realdata_tag)
+        
     
     
     # ----------------------------- Unfreeze stuff -----------------------------
@@ -406,7 +408,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
             hist_data_array.append(energy_mae_plot_data)
         print_statistics_in_numbers(hist_data_array, plot_type)
         y_label_of_plot='Median fractional energy resolution'
-        fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array)
+        fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array, color_list=color_array)
         
         
     elif plot_type == "mse":

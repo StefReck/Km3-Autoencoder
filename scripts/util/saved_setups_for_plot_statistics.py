@@ -350,6 +350,7 @@ def get_props_for_plot_parser(tag, printing=True):
     #For the script plots_statistics_parser
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     legend_locations=(1, "upper left")
+    title=""
     #save it to this folder in the results/plots/ folder
     save_to_name = "statistics/statistics_parser_"+str(tag)+".pdf"
     #Colors to use. [] for auto selection

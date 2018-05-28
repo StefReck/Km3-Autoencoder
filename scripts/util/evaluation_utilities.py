@@ -939,7 +939,7 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     return fig
 
 
-def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[]):
+def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], color_list=[]):
     """
     Plot the median relative error, one plot each for track and shower.
     """
@@ -960,7 +960,10 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[]):
             label = "unknown"
             
         #Plot the track in left plot
-        shower = ax1.step(bins, mean_shower, linestyle="-", where='post')
+        if color_list==[]:
+            shower = ax1.step(bins, mean_shower, linestyle="-", where='post')
+        else:
+            shower = ax1.step(bins, mean_shower, linestyle="-", where='post', color=color_list[i])
         color_of_this_model = shower[0].get_color()
         
         #Plot the mean in right plot
