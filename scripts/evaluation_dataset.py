@@ -464,12 +464,13 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         #hist_data_array is for every model the tuple:
         #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         #each containing [energy, binned mre]
-        on_simulations_data_track = np.array(hist_data_array[0][0])
-        on_measured_data_track    = np.array(hist_data_array[1][0])
-        upper_limit_data_track    = np.array(hist_data_array[2][0])
-        on_simulations_data_shower = np.array(hist_data_array[0][1])
-        on_measured_data_shower    = np.array(hist_data_array[1][1])
-        upper_limit_data_shower    = np.array(hist_data_array[2][1])
+        on_simulations_data_track = np.array(hist_data_array[0][0][1])
+        on_measured_data_track    = np.array(hist_data_array[1][0][1])
+        upper_limit_data_track    = np.array(hist_data_array[2][0][1])
+        
+        on_simulations_data_shower = np.array(hist_data_array[0][1][1])
+        on_measured_data_shower    = np.array(hist_data_array[1][1][1])
+        upper_limit_data_shower    = np.array(hist_data_array[2][1][1])
         
         dropoff_sim_measured_track =   ((on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
         dropoff_upper_limit_track =    ((upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
