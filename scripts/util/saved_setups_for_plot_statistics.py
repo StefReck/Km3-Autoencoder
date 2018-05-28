@@ -428,6 +428,17 @@ def get_props_for_plot_parser(tag, printing=True):
         style="two_in_one_line"
         average_train_data_bins=8
     
+    elif tag=="vgg_3_encoder_drop" or tag==6:
+        #title = "Size of first dense layer"
+        test_files=["vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_nodrop_test.txt" ,
+                    "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_test.txt"]
+        labels_override = ["No dropout", "20% dropout"]
+        save_to_name = "statistics/statistics_parser_vgg_3_encoder_energy_drop_test.pdf"
+        xrange=[0,50]
+        style="two_in_one_line"
+    
+    
+    
     
         
     #------------------------- Old setups, from plot_statistics_better -------------------------    
