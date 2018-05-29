@@ -4,6 +4,23 @@ Some saved setups for the plot ststistics scripts.
 """
 import numpy as np
 
+def get_plot_statistics_plot_size(style):
+    #Plot and font sizes for plot_statistics:
+    if style=="two_in_one_line":
+        #For putting 2 plots next to each other, 0.48\textwidth
+        figsize = [6.4,5.5]   
+        font_size=14
+    elif style=="extended":
+        #For a single plot in a line, 0.95\textwidth
+        figsize = [10, 5.5] 
+        font_size=12
+    elif style=="double":
+        #For two subplots horizontally next to each other, 0.95\textwidth
+        figsize = [12.8, 5.5] 
+        font_size=14
+
+    return figsize, font_size
+
 def get_props_for_plot_parallel(tag, printing=True):
     #For the script plots_statistics_parallel, which takes exactly two models
     #as an input (AE and parallel encoder)
@@ -327,23 +344,6 @@ def get_how_many_epochs_each_to_train(epoch_schedule):
         how_many_epochs_each_to_train = np.array([10,]*5+[1,]*200)
     print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
     return how_many_epochs_each_to_train
-
-def get_plot_statistics_plot_size(style):
-    #Plot and font sizes for plot_statistics:
-    if style=="two_in_one_line":
-        #For putting 2 plots next to each other, 0.48\textwidth
-        figsize = [6.4,5.5]   
-        font_size=14
-    elif style=="extended":
-        #For a single plot in a line, 0.95\textwidth
-        figsize = [10, 5.5] 
-        font_size=12
-    elif style=="double":
-        #For two subplots horizontally next to each other, 0.95\textwidth
-        figsize = [12.8, 5.5] 
-        font_size=14
-
-    return figsize, font_size
 
 
 def get_props_for_plot_parser(tag, printing=True):

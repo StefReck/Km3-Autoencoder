@@ -29,7 +29,7 @@ def make_options_dict(additional_options):
     options_dict["add_conv_layer"]=False
     options_dict["make_stateful"]=False
     options_dict["dense_setup"]="standard"
-    options_dict["layer_version"]="double"
+    options_dict["layer_version"]="single"
         
     additional_options_list = additional_options.split("-")
     for additional_options in additional_options_list:
