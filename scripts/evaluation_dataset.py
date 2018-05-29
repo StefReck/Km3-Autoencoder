@@ -331,7 +331,28 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_type = "mre"
         #y_lims=(0.7,0.95)
         
+    elif which_one=="energy_4_2000_unf" or which_one==19:
+        brokendata_tag = "xzt_broken4"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_3-broken12/trained_vgg_3-broken4_supervised_energy_epoch10.h5"
+        real_model   = get_path_best_epoch("2000_unf_E", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
         
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken4_unf"+extra_name+".pdf" 
+        plot_type = "mre"
+    elif which_one=="energy_4_2000_enc" or which_one==20:
+        brokendata_tag = "xzt_broken4"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_3-broken12/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken4_nodrop_epoch5.h5"
+        real_model   = get_path_best_epoch("vgg_3_2000_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken4_enc"+extra_name+".pdf" 
+        plot_type = "mre"
     
     
     # ----------------------------- Unfreeze stuff -----------------------------

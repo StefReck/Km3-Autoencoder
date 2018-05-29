@@ -618,7 +618,7 @@ def get_path_best_epoch(modeltag, full_path=True):
     elif modeltag=="vgg_3_2000_E":
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
     elif modeltag=="vgg_3_2000_E_nodrop":
-        raise
+        model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_nodrop_epoch7.h5"
     
     elif modeltag=="vgg_5_600_picture_E":
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
