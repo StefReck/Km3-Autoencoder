@@ -128,10 +128,10 @@ def add_energy_correlated_noise(xs, y_values, broken_mode=12):
     is proportional to some function of energy"""
     expectation_value_10_kHz=0.08866 # for 10kHz noise
     true_energies = y_values[:,2]
-    if mode==12:
+    if broken_mode==12:
         #Expectation value linearly decreasing from 10 kHz at 3 GeV to 0 kHz at 100 GeV
         poisson_noise_expectation_value = expectation_value_10_kHz * (100-true_energies)/97
-    elif mode==13:
+    elif broken_mode==13:
         #Expectation value linearly increasing from 0 kHz at 3 GeV to 5 kHz at 100 GeV
         poisson_noise_expectation_value = 0.5 * expectation_value_10_kHz * (1-(100-true_energies)/97)
     #noise has the shape (dims, batchsize), while xs has the shape (batchsize, dims)

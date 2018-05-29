@@ -619,36 +619,33 @@ def get_path_best_epoch(modeltag, full_path=True):
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
     elif modeltag=="vgg_3_2000_E_nodrop":
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_nodrop_epoch7.h5"
+        
+    elif modeltag=="vgg_5_600_picture_E_nodrop":
+        model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_nodrop_epoch14.h5"
+    elif modeltag=="vgg_5_600_morefilter_E_nodrop":
+        model_path="vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_epoch43_supervised_energy_epoch8.h5"
+        
+    elif modeltag=="vgg_5_200_E_nodrop":
+        model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_nodrop_epoch52.h5"
+    elif modeltag=="vgg_5_200_dense_E_nodrop":
+        model_path=""
+        raise
     
-    elif modeltag=="vgg_5_600_picture_E":
-        model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_epoch60.h5"
-    elif modeltag=="vgg_5_600_morefilter_E":
-        model_path=""
-        raise
+    elif modeltag=="vgg_5_64_E_nodrop":
+        model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch78_supervised_energy_drop00_epoch46.h5"
         
-    elif modeltag=="vgg_5_200_E":
-        model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_epoch57.h5"
-    elif modeltag=="vgg_5_200_dense_E":
-        model_path=""
-        raise
-    
-    elif modeltag=="vgg_5_64_E":
-        model_path=""
-        raise
-        
-    elif modeltag=="vgg_5_32_E":
-        model_path=""
-        raise
-        
+    elif modeltag=="vgg_5_32_E_nodrop":
+        model_path="vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch44_supervised_energy_nodrop_epoch90.h5"
+
     #------------------------------200 size variation------------------------------
-    elif modeltag=="vgg_5_200_shallow_E":
-        model_path="vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch5_supervised_energy_epoch40.h5"
-    elif modeltag=="vgg_5_200_small_E":
-        model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch58_supervised_energy_epoch18.h5"
-    elif modeltag=="vgg_5_200_large_E":
-        model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch45_supervised_energy_epoch35.h5"
-    elif modeltag=="vgg_5_200_deep_E":
-        model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch41_supervised_energy_epoch37.h5"
+    elif modeltag=="vgg_5_200_shallow_E_nodrop":
+        model_path="vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch5_supervised_energy_nodrop_epoch24.h5"
+    elif modeltag=="vgg_5_200_small_E_nodrop":
+        model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch58_supervised_energy_nodrop_epoch49.h5"
+    elif modeltag=="vgg_5_200_large_E_nodrop":
+        model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch45_supervised_energy_nodrop_epoch5.h5"
+    elif modeltag=="vgg_5_200_deep_E_nodrop":
+        model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch41_supervised_energy_nodrop_epoch31.h5"
         
     else: raise NameError("Tag '"+str(modeltag)+"' is not known!")
     
