@@ -961,13 +961,13 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
             
         #Plot the track in left plot
         if color_list==[]:
-            shower = ax1.step(bins, mean_shower, linestyle="-", where='post')
+            track = ax1.step(bins, mean_track, linestyle="-", where='post')
         else:
-            shower = ax1.step(bins, mean_shower, linestyle="-", where='post', color=color_list[i])
-        color_of_this_model = shower[0].get_color()
+            track = ax1.step(bins, mean_track, linestyle="-", where='post', color=color_list[i])
+        color_of_this_model = track[0].get_color()
         
-        #Plot the mean in right plot
-        ax2.step(bins, mean_track, linestyle="-", where='post', color=color_of_this_model)
+        #Plot the shower in right plot
+        ax2.step(bins, mean_shower, linestyle="-", where='post', color=color_of_this_model)
         
         #Get an entry for the legend
         legend_entry = mpatches.Patch(color=color_of_this_model, label=label)
