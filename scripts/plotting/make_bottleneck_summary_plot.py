@@ -13,7 +13,7 @@ from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 save_plot_as="../../results/plots/statistics/bottleneck_summary_plot_updown_energy.pdf"
 #size of bottleneck, Accuracy, Robuts1, Robuts2, Loss of energy
 results = np.array([
-[2000,	 82.51, 10.37, 5.72,   6.339 ], #"basic",
+[1920,	 82.51, 10.37, 5.72,   6.339 ], #"basic",
 [600,    84.93, 9.26,	  5.09,   5.846 ],#"picture",
 [200,    84.98, 7.47,	  4.18,   5.820 ],#"200",
 [64,     83.79, 8.67,  6.59,   5.855  ],#"64"	,
