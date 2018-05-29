@@ -493,16 +493,16 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         on_measured_data_shower    = np.array(hist_data_array[1][1][1])
         upper_limit_data_shower    = np.array(hist_data_array[2][1][1])
         
-        dropoff_sim_measured_track =   ((on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
-        dropoff_upper_limit_track =    ((upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
-        dropoff_sim_measured_shower =  ((on_simulations_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
-        dropoff_upper_limit_shower =   ((upper_limit_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
+        dropoff_sim_measured_track =   (-1*(on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
+        dropoff_upper_limit_track =    (-1*(upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
+        dropoff_sim_measured_shower =  (-1*(on_simulations_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
+        dropoff_upper_limit_shower =   (-1*(upper_limit_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
         
         print("Track like events:")
-        print("First three are MRE, last two are average relative % reduction across all bins: 100 * (x - measured) / measured")
+        print("First three are MRE, last two are average relative % increase across all bins: -1 * 100 * (x - measured) / measured")
         print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
         print(np.mean(on_simulations_data_track),"\t", np.mean(on_measured_data_track),"\t", np.mean(upper_limit_data_track),"\t", dropoff_sim_measured_track*100,"\t",dropoff_upper_limit_track*100) 
-
+        
         print("\nShower like events:")
         print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
         print(np.mean(on_simulations_data_shower),"\t", np.mean(on_measured_data_shower),"\t", np.mean(upper_limit_data_shower),"\t", dropoff_sim_measured_shower*100,"\t",dropoff_upper_limit_shower*100)
