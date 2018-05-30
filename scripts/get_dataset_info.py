@@ -68,22 +68,7 @@ def get_dataset_info(dataset_tag):
         filesize_factor_test=0.5
         n_bins = (11,18,50,31)
         
-    elif dataset_tag=="xzt_new":
-        #for xzt with new spatial and time binning
-        data_path = home_path+"data/xzt_new_binning_spatial_time/"
-        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
-        #zero_center_data = "" # generated automatically
-        n_bins = (11,18,50,1)
-        
-    elif dataset_tag=="xzt_new_spatial_only":
-        #for xzt with new spatial and time binning
-        data_path = home_path+"data/xzt_new_binning_spatial/"
-        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_600_shuffled_0.h5"
-        #zero_center_data = "" # generated automatically
-        n_bins = (11,18,50,1)
-        
+    #Manipulated datasets
     elif dataset_tag=="xzt_broken":
         #for xzt
         #generates broken simulated data, very dangerous!
@@ -167,6 +152,24 @@ def get_dataset_info(dataset_tag):
         n_bins = (11,18,50,1)
         print("Warning: GENERATING BROKEN SIMULATED DATA")
     
+    #Outdated new binned versions
+    elif dataset_tag=="xzt_new":
+        #for xzt with new spatial and time binning
+        data_path = home_path+"data/xzt_new_binning_spatial_time/"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_240_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_540_shuffled_0.h5"
+        #zero_center_data = "" # generated automatically
+        n_bins = (11,18,50,1)
+        
+    elif dataset_tag=="xzt_new_spatial_only":
+        #for xzt with new spatial and time binning
+        data_path = home_path+"data/xzt_new_binning_spatial/"
+        train_data = "elec-CC_and_muon-CC_xzt_train_1_to_480_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xzt_test_481_to_600_shuffled_0.h5"
+        #zero_center_data = "" # generated automatically
+        n_bins = (11,18,50,1)
+    
+    #For the channel autoencoder study
     elif dataset_tag=="xyz":
         #xyz- generated from xyzc by summing over channel
         #11x13x18
@@ -216,7 +219,7 @@ def get_dataset_info(dataset_tag):
         filesize_factor_test=1
         generator_can_read_y_values=False
 
-        
+    #Other
     elif dataset_tag=="debug_xyz":
         #For debug testing on my laptop:
         home_path="../"
