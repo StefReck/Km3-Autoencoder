@@ -940,7 +940,7 @@ def make_energy_mae_plot(energy_mae_plot_data_list, seperate_track_shower=True, 
     return fig
 
 
-def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], color_list=[]):
+def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], color_list=[], y_lims=None):
     """
     Plot the median relative error, one plot each for track and shower.
     """
@@ -988,6 +988,10 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
     ax2.set_xlabel('True energy (GeV)')
     ax2.set_ylabel('Median relative error')
     
+    if y_lims != None:
+        ax1.set_ylim(y_lims)
+        ax2.set_ylim(y_lims)
+
     #plt.ylim((0, 0.2))
     #fig.suptitle("Energy reconstruction")
     ax1.grid(True)

@@ -452,7 +452,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
             hist_data_array.append(energy_mae_plot_data)
         print_statistics_in_numbers(hist_data_array, plot_type)
         y_label_of_plot='Median fractional energy resolution'
-        fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array, color_list=color_array)
+        fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array, color_list=color_array, y_lims=y_lims)
         
         
     elif plot_type == "mse":
