@@ -148,8 +148,8 @@ def add_energy_correlated_noise(xs, true_energies, broken_mode=12):
         #Expectation value linearly increasing from 0 kHz at 3 GeV to 5 kHz at 100 GeV
         poisson_noise_expectation_value = 0.5 * expectation_value_10_kHz * (1-(100-true_energies)/97)
     elif broken_mode==14:
-        #Same as 13, but maximum expectation value is 2.5 kHz
-        poisson_noise_expectation_value = 0.25 * expectation_value_10_kHz * (1-(100-true_energies)/97) 
+        #Same as 13, but maximum expectation value is 2 kHz
+        poisson_noise_expectation_value = 0.2 * expectation_value_10_kHz * (1-(100-true_energies)/97) 
         
     #noise has the shape (dims, batchsize), while xs has the shape (batchsize, dims)
     noise = np.random.poisson(poisson_noise_expectation_value, size=xs.shape[1:]+true_energies.shape)
