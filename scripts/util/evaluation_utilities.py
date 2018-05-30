@@ -845,22 +845,23 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d):
         hist_energy_losses=np.zeros((len(energy_bins)-1))
         hist_energy_variance=np.zeros((len(energy_bins)-1))
         #In which bin does each event belong, according to its mc energy:
+        #Indices start at 1, not at 0!
         bin_indices = np.digitize(mc_energy, bins=energy_bins)
         
         #For every mc energy bin, mean over the mae of all events that have a corresponding mc energy
-        for bin_no in range(min(bin_indices), max(bin_indices)+1):
-            current_abs_err = abs_err[bin_indices==bin_no]
-            current_mc_energy = mc_energy[bin_indices==bin_no]
+        for bin_no in range(len(energy_bins)-1):
+            current_abs_err = abs_err[bin_indices==bin_no+1]
+            current_mc_energy = mc_energy[bin_indices==bin_no+1]
             
             if operation=="mae":
                 #calculate mean absolute error (outdated)
-                hist_energy_losses[bin_no-1]   = np.mean(current_abs_err)
+                hist_energy_losses[bin_no]   = np.mean(current_abs_err)
             elif operation=="median_relative":
                 #calculate the median of the relative error: |E_true-E_reco|/E_true
                 #and also its variance
                 relative_error = current_abs_err/current_mc_energy
-                hist_energy_losses[bin_no-1]   = np.median(relative_error)
-                hist_energy_variance[bin_no-1] = np.var(relative_error)
+                hist_energy_losses[bin_no]   = np.median(relative_error)
+                hist_energy_variance[bin_no] = np.var(relative_error)
         #For proper plotting with plt.step where="post"
         hist_energy_losses=np.append(hist_energy_losses, hist_energy_losses[-1])
         hist_energy_variance=np.append(hist_energy_variance, hist_energy_variance[-1])
