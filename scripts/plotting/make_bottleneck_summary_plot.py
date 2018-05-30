@@ -28,8 +28,10 @@ plt.rcParams.update({'font.size': fontsize})
 fig, ax = plt.subplots(figsize=figsize)
 
 ax2 = ax.twinx()
-ax2.axhline(top_results[1],0,1, ls="--", c="orange")
-ax.axhline(top_results[0],0,1, ls="--", c="blue")
+#ax2.axhline(top_results[1],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
+#They are almost at the same heigth on different axis, hacky: plot them in one instead to line them up
+hline_acc = ax.axhline(top_results[0],0,1, ls="-", c="blue", lw=3)
+hline_loss = ax.axhline(top_results[0],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
 
 acc_line, = ax.semilogx(results[:,0], results[:,1], "o", c="blue", label="Accuracy Up-Down")
 loss_line, = ax2.semilogx(results[:,0], results[:,4], "o", c="orange", label="MAE Energy")
@@ -47,7 +49,12 @@ ax.set_xlim(28,2200)
 ax.set_ylim(80.2,88.5)
 ax2.set_ylim(6.39,5.27 )
 ax.yaxis.grid()
-ax2.legend(handles=[acc_line,loss_line], loc="upper right")
+
+
+
+plt.legend([(acc_line, loss_line)], ["Supervised"])
+
+ax2.legend(handles=[acc_line,loss_line,(hline_acc, hline_loss)],labels=["Accuracy Up-Down","MAE Energy","Supervised",], bbox_to_anchor=(1, 0.94), bbox_transform=ax.transAxes)
 plt.subplots_adjust(right=0.88)
 
 fig.savefig(save_plot_as)

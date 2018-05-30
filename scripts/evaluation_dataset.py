@@ -364,6 +364,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken13_unf"+extra_name+".pdf" 
         plot_type = "mre"
+        y_lims=(0.02,0.78)
+
     elif which_one=="energy_13_2000_enc" or which_one==22:
         brokendata_tag = "xzt_broken13"
         realdata_tag   = "xzt"
@@ -374,7 +376,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken13_enc"+extra_name+".pdf" 
         plot_type = "mre"
-    
+        y_lims=(0.02,0.78)
     
     # ----------------------------- Unfreeze stuff -----------------------------
     

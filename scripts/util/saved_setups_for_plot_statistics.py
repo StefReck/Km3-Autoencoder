@@ -21,6 +21,20 @@ def get_plot_statistics_plot_size(style):
 
     return figsize, font_size
 
+def get_how_many_epochs_each_to_train(epoch_schedule):
+    #Which epochs from the parallel encoder history to take, depending on the 
+    #string that get_props... returns
+    if epoch_schedule=="1-1-1":
+        how_many_epochs_each_to_train = np.ones(100).astype(int)
+    elif epoch_schedule=="10-2-1":
+        how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
+    elif epoch_schedule=="10-1-1":
+        #Was used once for vgg_3_parallel
+        how_many_epochs_each_to_train = np.array([10,]*5+[1,]*200)
+    print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
+    return how_many_epochs_each_to_train
+
+
 def get_props_for_plot_parallel(tag, printing=True):
     #For the script plots_statistics_parallel, which takes exactly two models
     #as an input (AE and parallel encoder)
@@ -310,40 +324,6 @@ def get_props_for_plot_parallel(tag, printing=True):
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
     return test_files, title, labels_override, save_as, epoch_schedule, style
 
-def get_highest_tagnumbers():
-    tag_no=0
-    while True:
-        try:
-            get_props_for_plot_parallel(tag_no, printing=False)
-        except NameError: 
-            parallel_tag_no=tag_no
-            break
-        tag_no+=1
-    
-    tag_no=0
-    while True:
-        try:
-            get_props_for_plot_parser(tag_no, printing=False)
-        except NameError: 
-            parser_tag_no=tag_no
-            break
-        tag_no+=1
-    
-    print("\nHighest parallel tag no: "+str(parallel_tag_no-1))
-    print("Highest parser tag no: "+str(parser_tag_no-1))
-
-def get_how_many_epochs_each_to_train(epoch_schedule):
-    #Which epochs from the parallel encoder history to take, depending on the 
-    #string that get_props... returns
-    if epoch_schedule=="1-1-1":
-        how_many_epochs_each_to_train = np.ones(100).astype(int)
-    elif epoch_schedule=="10-2-1":
-        how_many_epochs_each_to_train = np.array([10,]*1+[2,]*5+[1,]*200)
-    elif epoch_schedule=="10-1-1":
-        #Was used once for vgg_3_parallel
-        how_many_epochs_each_to_train = np.array([10,]*5+[1,]*200)
-    print("Using parallel schedule", how_many_epochs_each_to_train[:12,], "...")
-    return how_many_epochs_each_to_train
 
 
 def get_props_for_plot_parser(tag, printing=True):
@@ -653,6 +633,29 @@ def get_path_best_epoch(modeltag, full_path=True):
         model_path=base_path+model_path
     return model_path
 
+
+
+def get_highest_tagnumbers():
+    tag_no=0
+    while True:
+        try:
+            get_props_for_plot_parallel(tag_no, printing=False)
+        except NameError: 
+            parallel_tag_no=tag_no
+            break
+        tag_no+=1
+    
+    tag_no=0
+    while True:
+        try:
+            get_props_for_plot_parser(tag_no, printing=False)
+        except NameError: 
+            parser_tag_no=tag_no
+            break
+        tag_no+=1
+    
+    print("\nHighest parallel tag no: "+str(parallel_tag_no-1))
+    print("Highest parser tag no: "+str(parser_tag_no-1))
 
 
 if __name__=="__main__":
