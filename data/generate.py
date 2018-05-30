@@ -184,7 +184,7 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
         
             hists_temp=f["x"][part_of_datafile[0]:part_of_datafile[1]] #X,11,18,50,31
             hists[part_of_datafile[0]:part_of_datafile[1]]=make_broken5_manip(hists_temp)
-    elif broken_mode==12 or broken_mode==13:
+    elif broken_mode==12 or broken_mode==13 or broken_mode==14:
         hists=f["x"][:up_to_which]
         true_energies = f["y"][:up_to_which][:,2]
         hists = add_energy_correlated_noise(hists, true_energies, broken_mode)
