@@ -4,7 +4,7 @@ import numpy as np
 # x, y, z, t, c
 #11,13,18,50,31
 
-mode="broken12"
+mode="broken14"
 
 #original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
     
@@ -89,6 +89,20 @@ elif mode=="broken13":
     #percentage of events to keep
     fraction=1
     broken_mode=13
+    
+elif mode=="broken14":
+    #Add noise corr to Energy
+    #Input: xzt (11,18,50)
+    #Output: xzt (11,18,50)
+    original_train_file="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+    original_test_file ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt/test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+    
+    outfile_train="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken14/train_muon-CC_and_elec-CC_each_240_xzt_broken14_shuffled.h5"
+    outfile_test ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken14/test_muon-CC_and_elec-CC_each_60_xzt_broken_14_shuffled.h5"
+    
+    #percentage of events to keep
+    fraction=1
+    broken_mode=14
 
 #show how often certain total number of hits in a dom occur; No files will be generated
 make_statistics = False
@@ -123,17 +137,20 @@ def make_broken5_manip(hists_temp, sum_channel = True):
     
     return hists_temp
 
-def add_energy_correlated_noise(xs, y_values, broken_mode=12):
+def add_energy_correlated_noise(xs, true_energies, broken_mode=12):
     """Adds additional poisson noise whose expectation value
     is proportional to some function of energy"""
     expectation_value_10_kHz=0.08866 # for 10kHz noise
-    true_energies = y_values[:,2]
     if broken_mode==12:
         #Expectation value linearly decreasing from 10 kHz at 3 GeV to 0 kHz at 100 GeV
         poisson_noise_expectation_value = expectation_value_10_kHz * (100-true_energies)/97
     elif broken_mode==13:
         #Expectation value linearly increasing from 0 kHz at 3 GeV to 5 kHz at 100 GeV
         poisson_noise_expectation_value = 0.5 * expectation_value_10_kHz * (1-(100-true_energies)/97)
+    elif broken_mode==14:
+        #Same as 13, but maximum expectation value is 2.5 kHz
+        poisson_noise_expectation_value = 0.25 * expectation_value_10_kHz * (1-(100-true_energies)/97) 
+        
     #noise has the shape (dims, batchsize), while xs has the shape (batchsize, dims)
     noise = np.random.poisson(poisson_noise_expectation_value, size=xs.shape[1:]+true_energies.shape)
     #permute so that noise has shape (batchsize, dims), just as xs
@@ -169,8 +186,8 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
             hists[part_of_datafile[0]:part_of_datafile[1]]=make_broken5_manip(hists_temp)
     elif broken_mode==12 or broken_mode==13:
         hists=f["x"][:up_to_which]
-        mc_infos=f["y"][:up_to_which]
-        hists = add_energy_correlated_noise(hists, mc_infos, broken_mode)
+        true_energies = f["y"][:up_to_which][:,2]
+        hists = add_energy_correlated_noise(hists, true_energies, broken_mode)
             
     else:
         if sum_over_axis is not None:
