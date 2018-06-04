@@ -225,8 +225,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.7,0.95)
         legend_loc="lower right"
     elif which_one=="4_32_enc_nodrop" or which_one==23:
-        modelidents = ("vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch22_supervised_up_down_broken4_nodrop_epoch79.h5",
-                       "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch22_supervised_up_down_broken4_nodrop_epoch79.h5",
+        modelidents = ("vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch22_supervised_up_down_broken4_nodrop_epoch47.h5",
+                       "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch22_supervised_up_down_broken4_nodrop_epoch47.h5",
                        "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_nodrop_epoch79.h5")
         dataset_array = ("xzt_broken4", "xzt", "xzt")
         title_of_plot='32 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
