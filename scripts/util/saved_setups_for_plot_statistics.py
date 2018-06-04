@@ -603,12 +603,12 @@ def get_path_best_epoch(modeltag, full_path=True):
     elif modeltag=="vgg_5_600_picture_E_nodrop":
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_nodrop_epoch14.h5"
     elif modeltag=="vgg_5_600_morefilter_E_nodrop":
-        model_path="vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_epoch43_supervised_energy_epoch8.h5"
+        model_path="vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_epoch43_supervised_energy_nodrop_epoch8.h5"
         
     elif modeltag=="vgg_5_200_E_nodrop":
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_nodrop_epoch52.h5"
     elif modeltag=="vgg_5_200_dense_E_nodrop":
-        model_path=""
+        model_path="vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch101_supervised_energy_nodrop_epoch"
         raise
     
     elif modeltag=="vgg_5_64_E_nodrop":

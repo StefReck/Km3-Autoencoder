@@ -75,6 +75,13 @@ def get_saved_plots_info(tag, apply_precuts=False):
         is_a_set=True
     
     #-----------------------Bottleneck----------------------
+    elif tag == "compare_2000":
+        tags = ["2000_unf_E", "vgg_3_2000_E_nodrop"]
+        label_array  = ["Unfrozen", "Encoder"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
+        is_a_set=True
+        #title_of_plot='Accuracy of encoders with bottleneck 600'
+    
     elif tag == "compare_600":
         tags = ["vgg_5_600_picture_E", "vgg_5_600_morefilter_E"]
         label_array  = ["Picture", "More filter"]
