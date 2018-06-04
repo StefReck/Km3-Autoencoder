@@ -80,7 +80,7 @@ def make_options_dict(additional_options):
             #either single or double
             layer_version = additional_options.split("=")[1]
             options_dict["layer_version"]=layer_version
-        
+
         else:
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)
             
@@ -251,11 +251,72 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         raise Exception('Model tag not available: '+ model_tag)
     return model
 
-if __name__=="__main__":
-    model=setup_model(model_tag="vgg_5_morefilter", autoencoder_stage=0, modelpath_and_name=None, 
-                      additional_options="")
-    model.summary()
+
+def print_model_blockwise(model):
+    for layer in model.layers:
+        if isinstance(layer, Conv3D) or isinstance(layer, Conv3DTranspose) or isinstance(layer, AveragePooling3D) or isinstance(layer, UpSampling3D):
+            print(layer.name, "\t", layer.output_shape[1:])
+            
+            
+def print_model_blockwise_latex_ready(model):
+    print_these_layers = [Conv3D, Conv3DTranspose, 
+                          AveragePooling3D, UpSampling3D]
+    names_of_these_layers = ["Convolutional block", "Convolutional block",
+                             "Average Pooling", "Upsampling"] #+ "Input"
     
+    layers_list = []
+    for layer_no, layer in enumerate(model.layers):
+        for i, layer_type in enumerate(print_these_layers):
+            if layer_no==0 or isinstance(layer, layer_type):
+                if layer_no==0:
+                    name="Input"
+                else:
+                    name = names_of_these_layers[i]
+                out_size=layer.output_shape[1:]
+                layers_list.append([name,out_size])
+                break
+                
+    print("\n\n")
+    for layer_no,[name, out_size] in enumerate(layers_list):
+        dimensions = str(out_size[0])+"x"+str(out_size[1])+"x"+str(out_size[2])+"&x&"+str(out_size[3])
+        
+        prefix=""
+        if layer_no==0 or layer_no==len(layers_list)-1:
+            prefix="\\rowcolor{Gray} "
+        
+        if layer_no==len(layers_list)-1:
+            name+= " (linear)"
+        
+        appendix = ""
+        try:
+            if name=="Average Pooling" or name=="Input" or layers_list[layer_no+1][0]=="Upsampling":
+                appendix=" \\hline\n"
+        except IndexError:
+            pass
+        
+        if name=="Average Pooling":
+            out_size_previous=layers_list[layer_no-1][1]
+            factors=[]
+            for i in range(len(out_size)):
+                factors.append(str(int(round(out_size_previous[i]/out_size[i]))))
+            name+=" ("+factors[0]+","+factors[1]+","+factors[2]+")"
+            
+        if name=="Upsampling":
+            out_size_previous=layers_list[layer_no-1][1]
+            factors=[]
+            for i in range(len(out_size)):
+                factors.append(str(int(round(out_size[i]/out_size_previous[i]))))
+            name+=" ("+factors[0]+","+factors[1]+","+factors[2]+")"
+            
+        print(prefix+name+" & "+dimensions+" \\\\"+appendix)    
+                
+    
+            
+if __name__=="__main__":
+    model=setup_model(model_tag="vgg_5_200", autoencoder_stage=0, modelpath_and_name=None, 
+                      additional_options="")
+    #model.summary()
+    print_model_blockwise_latex_ready(model)
     conv_layer_indices = []
     for layer_index, layer in enumerate(model.layers):
         if isinstance(layer, Conv3D):

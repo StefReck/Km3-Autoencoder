@@ -76,21 +76,24 @@ def get_saved_plots_info(tag, apply_precuts=False):
     
     #-----------------------Bottleneck----------------------
     elif tag == "compare_2000":
-        tags = ["2000_unf_E", "vgg_3_2000_E_nodrop"]
+        tags = ["2000_unf_E", 
+                "vgg_3_2000_E_nodrop"]
         label_array  = ["Unfrozen", "Encoder"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
         #title_of_plot='Accuracy of encoders with bottleneck 600'
     
     elif tag == "compare_600":
-        tags = ["vgg_5_600_picture_E_nodrop", "vgg_5_600_morefilter_E_nodrop"]
+        tags = ["vgg_5_600_picture_E_nodrop", 
+                "vgg_5_600_morefilter_E_nodrop"]
         label_array  = ["Picture", "More filter"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
         #title_of_plot='Accuracy of encoders with bottleneck 600'
         
     elif tag=="compare_200":
-        tags = ["vgg_5_200_E_nodrop", "vgg_5_200_dense_E_nodrop"]
+        tags = ["vgg_5_200_E_nodrop", 
+                "vgg_5_200_dense_E_nodrop"]
         label_array=["Standard", "Dense"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         #title_of_plot='Accuracy of encoders with bottleneck 200'
@@ -98,14 +101,18 @@ def get_saved_plots_info(tag, apply_precuts=False):
         
     #--------------------- 200 size varaition --------------------
     elif tag=="compare_200_bigger":
-        tags = ["vgg_5_200_E_nodrop", "vgg_5_200_large_E_nodrop", "vgg_5_200_deep_E_nodrop"]
+        tags = ["vgg_5_200_E_nodrop", 
+                "vgg_5_200_large_E_nodrop", 
+                "vgg_5_200_deep_E_nodrop"]
         label_array=["Standard", "Wider", "Deeper"]
         which_plot="mean"
         is_a_set=True 
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         
     elif tag=="compare_200_smaller":
-        tags = ["vgg_5_200_E_nodrop", "vgg_5_200_small_E_nodrop", "vgg_5_200_shallow_E_nodrop"]
+        tags = ["vgg_5_200_E_nodrop", 
+                "vgg_5_200_small_E_nodrop", 
+                "vgg_5_200_shallow_E_nodrop"]
         label_array=["Standard", "Smaller", "Shallower"]
         which_plot="mean"
         is_a_set=True 
@@ -113,7 +120,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
         
     
         
-    #Der rest von evaluation.py sollte hier auch rein, z.B. 200, 64,...
+    #Der rest von evaluation.py sollte hier auch rein, z.B. 64,...
         
     #-------------------------------------------------------
         
