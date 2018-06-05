@@ -212,6 +212,19 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_64_broken4_enc"+extra_name+".pdf" 
         #y limits of plot:
         y_lims=(0.7,0.95)
+        
+    elif which_one=="4_64_enc_nodrop" or which_one==26:
+        modelidents = ("vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_nodrop_epoch72.h5",
+                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_nodrop_epoch72.h5",
+                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5")
+        #Which dataset each to use
+        dataset_array = ("xzt_broken4", "xzt", "xzt")
+        #Plot properties: All in the array are plotted in one figure, with own label each
+        title_of_plot='64 neuron Autoencoder-encoder network performance\nwith manipulated simulations'
+        #in the results/plots folder:
+        plot_file_name = "vgg_5_64_broken4_enc_nodrop"+extra_name+".pdf" 
+        #y limits of plot:
+        y_lims=(0.7,0.95)
     
     elif which_one=="4_32_enc" or which_one==9:
         modelidents = ("vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch31_supervised_up_down_broken4_epoch1.h5",
@@ -387,6 +400,30 @@ def get_info(which_one, extra_name="", y_lims_override=None):
                                                    brokendata_tag, realdata_tag)
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken13_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+        
+    elif which_one=="energy_14_2000_unf" or which_one==24:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_3-broken14/trained_vgg_3-broken14_supervised_energy_epoch15.h5"
+        real_model   = get_path_best_epoch("2000_unf_E", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken14_unf"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+
+    elif which_one=="energy_14_2000_enc" or which_one==25:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken14_nodrop_epoch7.h5"
+        real_model   = get_path_best_epoch("vgg_3_2000_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.02,0.78)
     
