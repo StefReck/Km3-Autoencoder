@@ -264,7 +264,7 @@ def setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name=None
  
     if autoencoder_stage == 0:  #The Decoder part:
         #2x3x5
-        x=convT_block(x, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
+        x=convT_block(encoded, filters=filter_base[3], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
         x=convT_block(x, filters=filter_base[2], kernel_size=(3,3,3), padding="same", channel_axis=channel_axis) #2x3x5
         
         x = UpSampling3D((2, 2, 2))(x) #4x6x10
