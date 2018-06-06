@@ -546,7 +546,6 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
         #Data is loaded by the energy evaluation function, which is not
         #fully compatible with this one :-( so additional infos copied from there manually
         hist_data_array=[]
-        hist_data_single=[]
         for model_no,model_path in enumerate(modelidents):
             dataset_tag = dataset_array[model_no]
             print("Working on", model_path.split("trained_")[1][:-3], "using dataset", dataset_tag)
@@ -558,9 +557,9 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
                     include_mae_single=True)
             #only interested in the mae plot data
             hist_data_array.append(energy_mae_plot_data[:2])
-            hist_data_single.append(energy_mae_plot_data[3])
+            hist_data_single.append(energy_mae_plot_data[2])
             
-        print_statistics_in_numbers(hist_data_array, plot_type)
+        print_statistics_in_numbers(hist_data_array, plot_type, hist_data_single=hist_data_single)
         
         y_label_of_plot='Median fractional energy resolution'
         
@@ -592,7 +591,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     
     return
 
-def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
+def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False, hist_data_single=None):
     """
     Prints the average overall loss of performance, 
     averaged over all bins (not all events).
@@ -627,6 +626,8 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         #hist_data_array is for every model the tuple:
         #[energy_mae_plot_data_track, energy_mae_plot_data_shower]
         #each containing [energy, binned mre]      
+        #hist_data_single contains for every model the unseperated data tuple: [energy, binned mre]     
+        
         on_simulations_data_track = np.array(hist_data_array[0][0][1])
         on_measured_data_track    = np.array(hist_data_array[1][0][1])
         upper_limit_data_track    = np.array(hist_data_array[2][0][1])
@@ -635,20 +636,24 @@ def print_statistics_in_numbers(hist_data_array, plot_type, return_line=False):
         on_measured_data_shower    = np.array(hist_data_array[1][1][1])
         upper_limit_data_shower    = np.array(hist_data_array[2][1][1])
         
-        dropoff_sim_measured_track =   (-1*(on_simulations_data_track - on_measured_data_track)/on_measured_data_track ).mean()
-        dropoff_upper_limit_track =    (-1*(upper_limit_data_track - on_measured_data_track)/on_measured_data_track ).mean()
-        dropoff_sim_measured_shower =  (-1*(on_simulations_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
-        dropoff_upper_limit_shower =   (-1*(upper_limit_data_shower - on_measured_data_shower)/on_measured_data_shower ).mean()
+        on_simulations_data_single = np.array(hist_data_single[0][1])
+        on_measured_data_single = np.array(hist_data_single[1][1])
+        upper_limit_data_single = np.array(hist_data_single[2][1])
         
-        print("Track like events:")
         print("First three are MRE, last two are average relative % increase across all bins: -1 * 100 * (x - measured) / measured")
-        print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
-        print(np.mean(on_simulations_data_track),"\t", np.mean(on_measured_data_track),"\t", np.mean(upper_limit_data_track),"\t", dropoff_sim_measured_track*100,"\t",dropoff_upper_limit_track*100) 
+            
+        def print_one_table (on_simulations_data, on_measured_data, upper_limit_data, printig_header="Track like events:"):
+            dropoff_sim_measured =   (-1*(on_simulations_data  - on_measured_data)/on_measured_data).mean()
+            dropoff_upper_limit =    (-1*(upper_limit_data  - on_measured_data )/on_measured_data  ).mean()
+            print(printig_header)
+            print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
+            print(np.mean(on_simulations_data),"\t", np.mean(on_measured_data),"\t", np.mean(upper_limit_data),"\t", dropoff_sim_measured*100,"\t",dropoff_upper_limit*100) 
+            print("--------------------------------------------------------\n")
+            
+        print_one_table(on_simulations_data_track, on_measured_data_track, upper_limit_data_track, "Track like events:")
+        print_one_table(on_simulations_data_shower, on_measured_data_shower, upper_limit_data_shower, "Shower like events:")
+        print_one_table(on_simulations_data_single, on_measured_data_single, upper_limit_data_single, "All events:")
         
-        print("\nShower like events:")
-        print("On Sims:\tOn measured\tUpper lim\tFrom simulation to measured\tFrom upper lim to measured:")
-        print(np.mean(on_simulations_data_shower),"\t", np.mean(on_measured_data_shower),"\t", np.mean(upper_limit_data_shower),"\t", dropoff_sim_measured_shower*100,"\t",dropoff_upper_limit_shower*100)
-        print("--------------------------------------------------------\n")
         header = None
         line=None
         
