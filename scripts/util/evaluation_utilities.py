@@ -1006,8 +1006,14 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
     #ax2.legend(loc="upper right", handles=legend_handles, fontsize=12)
     #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend_handles, fontsize=12)
     plt.subplots_adjust(top=0.95, left=0.065, right=0.96, bottom=0.2)
-    ax1.legend(bbox_to_anchor=(0.05, -0.25, 2.05, .102), loc=3,
-           ncol=3, mode="expand", borderaxespad=0., handles=legend_handles)
+    
+    if len(legend_handles)==3:
+        legend_boxpos=[0.05,2.05]
+    else:
+        legend_boxpos=[0.5, 1.5]
+    
+    ax1.legend(bbox_to_anchor=(legend_boxpos[0], -0.25, legend_boxpos[1], .102), loc=3,
+           ncol=len(legend_handles), mode="expand", borderaxespad=0., handles=legend_handles)
     
     return fig
 
