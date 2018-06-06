@@ -159,7 +159,7 @@ def get_dump_name_arr(model_path, dataset_tag):
     return name_of_arr
 
 
-def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None):
+def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None, include_mae_single=False):
     #Compares the predicted energy and the mc energy of many events in a 2d histogram
     #This function outputs a np array with the 2d hist data, 
     #either by loading a saved arr_energy_correct, or by generating a new one
@@ -185,7 +185,8 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     print("Done.")
     
     print("Generating mae histogramm...")
-    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d)
+    energy_mae_plot_data = calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d, 
+                                            include_single=include_mae_single)
     print("Done.")
     
     return (hist_data_2d, energy_mae_plot_data)

@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot_mean_only
+from util.evaluation_utilities import make_or_load_files, make_binned_data_plot, make_energy_mae_plot_mean_only, make_energy_mae_plot_mean_only_single
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 from energy_evaluation import make_or_load_hist_data
 
@@ -45,7 +45,7 @@ y_lims_override = None
 #which shows the difference #between "on simulations" and "on measured data"
 #then, the number of the broken mode has to be given
 #can be True, False or "both"
-#TODO Rework
+#TODO Rework, disfunctional
 make_difference_plot=False
 which_broken_study=4
 
@@ -81,9 +81,9 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     #Overwrite default color palette. Leave empty for auto
     color_array=["orange", "blue", "navy"]
     
+    
     #Add the number of bins to the name of the plot file (usually 32)
     extra_name="_"+ str(bins)+"_bins" + extra_name
-
     
     try: which_one=int(which_one)
     except: ValueError
@@ -510,6 +510,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     modelidents = [modelpath + modelident for modelident in modelidents]
     save_plot_as = plot_path + folder_in_the_plots_path + plot_file_name    
     
+    
     return modelidents, dataset_array ,title_of_plot, save_plot_as, y_lims, class_type, plot_type, legend_loc, label_array, color_array
 
 
@@ -543,8 +544,9 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
     elif plot_type == "mre":
         #Median relative error for energy regression, seperated for track and shower
         #Data is loaded by the energy evaluation function, which is not
-        #fully compatible with this one :-( so additional infos are copied from there
+        #fully compatible with this one :-( so additional infos copied from there manually
         hist_data_array=[]
+        hist_data_single=[]
         for model_no,model_path in enumerate(modelidents):
             dataset_tag = dataset_array[model_no]
             print("Working on", model_path.split("trained_")[1][:-3], "using dataset", dataset_tag)
@@ -552,11 +554,23 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
             energy_bins_2d=np.arange(3,101,1)
             energy_bins_1d=20
             hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(model_path, 
-                    dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None)
+                    dataset_tag, zero_center, energy_bins_2d, energy_bins_1d, samples=None, 
+                    include_mae_single=True)
             #only interested in the mae plot data
-            hist_data_array.append(energy_mae_plot_data)
+            hist_data_array.append(energy_mae_plot_data[:2])
+            hist_data_single.append(energy_mae_plot_data[3])
+            
         print_statistics_in_numbers(hist_data_array, plot_type)
+        
         y_label_of_plot='Median fractional energy resolution'
+        
+        #Make the single plot and save without displaying
+        fig_single = make_energy_mae_plot_mean_only_single(hist_data_single, label_list=label_array, color_list=color_array, y_lims=y_lims)
+        fig_single_save_as=save_plot_as[:-4]+"_single.pdf"
+        fig_single.savefig(fig_single_save_as)
+        print("Single plot saved to", fig_single_save_as)
+        plt.close(fig_single)
+        
         fig = make_energy_mae_plot_mean_only(hist_data_array, label_list=label_array, color_list=color_array, y_lims=y_lims)
         
         

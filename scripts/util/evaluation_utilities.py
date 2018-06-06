@@ -828,15 +828,14 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         
     return(fig)
 
-def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d):
+def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d, include_single=False):
     """
     Generate binned statistics for the energy mae, or the relative mae.
-    seperate for track and shower events.
+    seperate for track and shower events, if needed.
     """
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
     energy_bins=np.linspace(3,100,energy_bins_1d)
-    is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     
     abs_err = np.abs(mc_energy - reco_energy)
 
@@ -868,9 +867,14 @@ def calculate_energy_mae_plot_data(arr_energy_correct, energy_bins_1d):
         energy_mae_plot_data = [energy_bins, hist_energy_losses, hist_energy_variance]
         return energy_mae_plot_data
     
+    is_track, is_shower = track_shower_seperation(arr_energy_correct[:,2], arr_energy_correct[:,3])
     energy_mae_plot_data_track = bin_abs_error(energy_bins, mc_energy[is_track], abs_err[is_track])
     energy_mae_plot_data_shower = bin_abs_error(energy_bins, mc_energy[is_shower], abs_err[is_shower])
     energy_mae_plot_data = [energy_mae_plot_data_track, energy_mae_plot_data_shower]
+    if include_single==True:
+        energy_mae_plot_data_single = bin_abs_error(energy_bins, mc_energy, abs_err)
+        energy_mae_plot_data.append(energy_mae_plot_data_single)
+        
     return energy_mae_plot_data
 
 
@@ -1003,6 +1007,56 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
            ncol=3, mode="expand", borderaxespad=0., handles=legend_handles)
     
     return fig
+
+def make_energy_mae_plot_mean_only_single(energy_mae_plot_data_list, label_list=[], color_list=[], y_lims=None):
+    """
+    Plot the median relative error, one plot each for track and shower.
+    """
+    figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
+    plt.rcParams.update({'font.size': font_size})
+    
+    fig, ax1 = plt.subplots(1,1, figsize=figsize)
+    
+    for i,energy_mae_plot_data in enumerate(energy_mae_plot_data_list):
+        bins = energy_mae_plot_data[0]
+        mean_track  = energy_mae_plot_data[1]
+        
+        try:
+            label = label_list[i]
+        except IndexError:
+            label = "unknown"
+            
+        #Plot the track in left plot
+        if color_list==[]:
+            ax1.step(bins, mean_track, linestyle="-", where='post', label=label)
+        else:
+            ax1.step(bins, mean_track, linestyle="-", where='post', color=color_list[i], label=label)
+
+        
+    x_ticks_major = np.arange(0, 101, 10)
+    ax1.set_xticks(x_ticks_major)
+    ax1.minorticks_on()
+
+    
+    #ax1.set_title("Track like")
+    ax1.set_xlabel('True energy (GeV)')
+    ax1.set_ylabel('Median relative error')
+
+    if y_lims != None:
+        ax1.set_ylim(y_lims)
+
+    #plt.ylim((0, 0.2))
+    #fig.suptitle("Energy reconstruction")
+    ax1.grid(True)
+    plt.legend()
+    #ax2.legend(loc="upper right", handles=legend_handles, fontsize=12)
+    #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., handles=legend_handles, fontsize=12)
+    #plt.subplots_adjust(top=0.95, left=0.065, right=0.96, bottom=0.2)
+    #ax1.legend(bbox_to_anchor=(0.05, -0.25, 2.05, .102), loc=3,
+    #       ncol=3, mode="expand", borderaxespad=0., handles=legend_handles)
+    
+    return fig
+
 
 
 def make_energy_mae_plot_errorbars(energy_mae_plot_data_list, label_list=[]):
