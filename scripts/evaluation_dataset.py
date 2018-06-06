@@ -75,8 +75,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/"
     folder_in_the_plots_path = "broken_study/"
     
-    #Labels for the plot
-    label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
+    #Labels for the plot are defined below now!
+    #label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
     title_of_plot=""
     #Overwrite default color palette. Leave empty for auto
     color_array=["orange", "blue", "navy"]
@@ -415,7 +415,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken14_unf"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
 
     elif which_one=="energy_14_2000_enc" or which_one==25:
         brokendata_tag = "xzt_broken14"
@@ -427,7 +427,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
     
     elif which_one=="energy_14_600_pic_enc" or which_one==27:
         brokendata_tag = "xzt_broken14"
@@ -439,7 +439,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_picture_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
         
     elif which_one=="energy_14_200_dense_enc" or which_one==28:
         brokendata_tag = "xzt_broken14"
@@ -451,7 +451,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_200_dense_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
         
     elif which_one=="energy_14_64_enc" or which_one==29:
         brokendata_tag = "xzt_broken14"
@@ -463,7 +463,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_64_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
         
     elif which_one=="energy_14_32_enc" or which_one==30:
         brokendata_tag = "xzt_broken14"
@@ -475,7 +475,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_32_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.02,0.78)
+        y_lims=(0.08,0.68)
     
     # ----------------------------- Unfreeze stuff -----------------------------
     
@@ -497,6 +497,12 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     else:
         raise NameError(str(which_one) + " is not known!")
+    
+    if plot_type=="mre":
+        #energy plot
+        label_array=["On 'simulations'", "On 'measured' data", "Lower limit on 'measured' data"]
+    else:
+        label_array=["On 'simulations'", "On 'measured' data", "Upper limit on 'measured' data"]
         
     if y_lims_override != None:
         y_lims = y_lims_override
