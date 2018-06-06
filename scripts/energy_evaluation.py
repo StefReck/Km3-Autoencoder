@@ -66,12 +66,13 @@ def get_saved_plots_info(tag, apply_precuts=False):
     
     #-----------------------Bottleneck----------------------
     elif tag == "compare_2000":
+        #title_of_plot='Performance comparison of the 1920 encoder network and the supervised one'
         tags = ["2000_unf_E", 
                 "vgg_3_2000_E_nodrop"]
         label_array  = ["Unfrozen", "Encoder"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
-        #title_of_plot='Accuracy of encoders with bottleneck 600'
+        
     
     elif tag == "compare_600":
         tags = ["vgg_5_600_picture_E_nodrop", 
@@ -87,6 +88,14 @@ def get_saved_plots_info(tag, apply_precuts=False):
         label_array=["Standard", "Dense"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         #title_of_plot='Accuracy of encoders with bottleneck 200'
+        is_a_set=True
+        
+    elif tag == "compare_200_dense":
+        #title_of_plot='Performance comparison of the 200 dense encoder network and the supervised one'
+        tags = ["2000_unf_E", 
+                "vgg_5_200_dense_E_nodrop"]
+        label_array  = ["Unfrozen", "Encoder"]
+        save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
         
     #--------------------- 200 size varaition --------------------
