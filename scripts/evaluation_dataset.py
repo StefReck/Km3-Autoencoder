@@ -403,6 +403,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_type = "mre"
         y_lims=(0.02,0.78)
         
+    #Broken 14 (rauschen prop zu E, bis zu 2 kHz plus)
+    #Bottleneck scan
     elif which_one=="energy_14_2000_unf" or which_one==24:
         brokendata_tag = "xzt_broken14"
         realdata_tag   = "xzt"
@@ -424,6 +426,54 @@ def get_info(which_one, extra_name="", y_lims_override=None):
                                                    brokendata_tag, realdata_tag)
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+    
+    elif which_one=="energy_14_600_pic_enc" or which_one==27:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_broken14_nodrop_epoch12.h5"
+        real_model   = get_path_best_epoch("vgg_5_600_picture_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_picture_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+        
+    elif which_one=="energy_14_200_dense_enc" or which_one==28:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch101_supervised_energy_broken14_nodrop_epoch45.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_dense_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_dense_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+        
+    elif which_one=="energy_14_64_enc" or which_one==29:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_64/trained_vgg_5_64_autoencoder_epoch78_supervised_energy_broken14_nodrop_epoch49.h5"
+        real_model   = get_path_best_epoch("vgg_5_64_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_64_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+        
+    elif which_one=="energy_14_32_enc" or which_one==30:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch44_supervised_energy_broken14_nodrop_epoch59.h5"
+        real_model   = get_path_best_epoch("vgg_5_32_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_32_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.02,0.78)
     
