@@ -1010,7 +1010,7 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
     if len(legend_handles)==3:
         legend_boxpos=[0.05,2.05]
     else:
-        legend_boxpos=[0.5, 1.5]
+        legend_boxpos=[0.5, 1.]
     
     ax1.legend(bbox_to_anchor=(legend_boxpos[0], -0.25, legend_boxpos[1], .102), loc=3,
            ncol=len(legend_handles), mode="expand", borderaxespad=0., handles=legend_handles)
