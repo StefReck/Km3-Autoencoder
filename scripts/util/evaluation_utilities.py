@@ -992,9 +992,12 @@ def make_energy_mae_plot_mean_only(energy_mae_plot_data_list, label_list=[], col
     ax2.set_xlabel('True energy (GeV)')
     ax2.set_ylabel('Median relative error')
     
-    if y_lims != None:
-        ax1.set_ylim(y_lims)
-        ax2.set_ylim(y_lims)
+    if y_lims == None:
+        #auto range, consistent for both plots
+        y_lims=[min(ax1.get_ylim()[0], ax2.get_ylim()[0]), max(ax1.get_ylim()[1], ax2.get_ylim()[1])]
+ 
+    ax1.set_ylim(y_lims)
+    ax2.set_ylim(y_lims)
 
     #plt.ylim((0, 0.2))
     #fig.suptitle("Energy reconstruction")
