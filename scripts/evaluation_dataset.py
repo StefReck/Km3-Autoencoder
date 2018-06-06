@@ -546,6 +546,7 @@ def make_evaluation(info_tag, extra_name, y_lims_override, show_the_plot=True):
         #Data is loaded by the energy evaluation function, which is not
         #fully compatible with this one :-( so additional infos copied from there manually
         hist_data_array=[]
+        hist_data_single=[]
         for model_no,model_path in enumerate(modelidents):
             dataset_tag = dataset_array[model_no]
             print("Working on", model_path.split("trained_")[1][:-3], "using dataset", dataset_tag)

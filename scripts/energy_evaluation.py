@@ -17,17 +17,6 @@ and _precut will be added to the filename and the saved arr_energy_correct.
 """
 import argparse
 
-def parse_input():
-    parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
-    parser.add_argument('model', type=str, help='Name of a model .h5 file, or a tag for a saved setup. (see this file for tags for sets and saved_setups for single epochs)')
-    parser.add_argument('-p','--apply_precuts', help="Change to dataset xzt_precut", action='store_true')
-
-    args = parser.parse_args()
-    params = vars(args)
-    return params
-
-params = parse_input()
-
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -36,13 +25,14 @@ from get_dataset_info import get_dataset_info
 from util.evaluation_utilities import setup_and_make_energy_arr_energy_correct, calculate_2d_hist_data, make_2d_hist_plot, calculate_energy_mae_plot_data, make_energy_mae_plot, make_energy_evaluation_statistics, make_energy_mae_plot_errorbars, make_energy_mae_plot_mean_only
 from util.saved_setups_for_plot_statistics import get_path_best_epoch
 
+def parse_input():
+    parser = argparse.ArgumentParser(description='Take a model that predicts energy of events and do the evaluation for that, either in the form of a 2d histogramm (mc energy vs reco energy), or as a 1d histogram (mc_energy vs mean absolute error).')
+    parser.add_argument('model', type=str, help='Name of a model .h5 file, or a tag for a saved setup. (see this file for tags for sets and saved_setups for single epochs)')
+    parser.add_argument('-p','--apply_precuts', help="Change to dataset xzt_precut", action='store_true')
 
-tag = params["model"]
-#Should precuts be applied to the data; if so, the plot will be saved 
-#with a "_precut" added to the file name
-apply_precuts = params["apply_precuts"]
-#only go through parts of the file (for testing)
-samples=None
+    args = parser.parse_args()
+    params = vars(args)
+    return params
 
 
 def get_saved_plots_info(tag, apply_precuts=False):
@@ -252,6 +242,13 @@ def compare_plots(tags, label_array, which_plot, apply_precuts=False):
     return fig_mae
     
 if __name__=="__main__":
+    params = parse_input()
+    tag = params["model"]
+    #Should precuts be applied to the data; if so, the plot will be saved 
+    #with a "_precut" added to the file name
+    apply_precuts = params["apply_precuts"]
+    #only go through parts of the file (for testing)
+    samples=None
     save_and_show_plots(tag, apply_precuts)
 
    
