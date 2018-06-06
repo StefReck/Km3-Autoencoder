@@ -608,8 +608,7 @@ def get_path_best_epoch(modeltag, full_path=True):
     elif modeltag=="vgg_5_200_E_nodrop":
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_nodrop_epoch52.h5"
     elif modeltag=="vgg_5_200_dense_E_nodrop":
-        model_path="vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch101_supervised_energy_nodrop_epoch"
-        raise
+        model_path="vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch101_supervised_energy_nodrop_epoch29.h5"
     
     elif modeltag=="vgg_5_64_E_nodrop":
         model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch78_supervised_energy_drop00_epoch46.h5"
