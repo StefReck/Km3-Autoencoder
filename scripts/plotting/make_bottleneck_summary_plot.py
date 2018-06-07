@@ -11,20 +11,56 @@ sys.path.append('../util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 
-mode="perf"
+mode="all"
 
 save_perf_plot_as="../../results/plots/statistics/bottleneck_summary_plot_updown_energy.pdf"
-save_rob_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_robust.pdf"
-#size of bottleneck, Accuracy, Robuts1, Robuts2, Loss of energy
+save_rob_4_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_robust_broken4.pdf"
+save_rob_14_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_robust_broken14.pdf"
+save_names=[save_perf_plot_as, save_rob_4_plot_as, save_rob_14_plot_as]
+
+#size of bottleneck, 
+#       Accuracy, Robuts1, Robuts2, 
+#                           Loss of energy
+#                                   Broken14 robustness 1 and 2
 results = np.array([
-[1920,	 82.51, 10.37, 5.72,   6.339 ], #"basic",
-[600,    84.93, 9.26,	  5.09,   5.846 ],#"picture",
-[200,    84.98, 7.47,	  4.18,   5.820 ],#"200",
-[64,     84.71, 8.67,  6.59,   5.855  ],#"64 nodrop" für acc updown, aber rob up-down ist noch das alte	,
-[32,     82.67,  8.08	,  5.85,  6.145 ],#"32-eps01 nodrop",
+[1920,	 82.51, 10.37, 5.72,   6.339,    ], #"basic",
+[600,    84.93, 9.26,	  5.09,   5.846,   ],#"picture",
+[200,    84.98, 7.47,	  4.18,   5.820,   ],#"200",
+[64,     84.71, 8.67,  6.59,   5.855,    ],#"64 nodrop"
+[32,     82.67,  8.08	,  5.85,  6.145,   ],#"32-eps01 nodrop",
 ])
 
-def make_and_save_plot(results, mode, save_perf_plot_as, save_rob_plot_as):
+#Broken4 updown
+robust_4 = np.array([
+[1920,  44.28,	35.82],#basic unfrozen
+[1920,	 10.37, 5.72, ], #"basic",
+[600,    9.26,	  5.09,  ],#"picture",
+[200,    7.47,	  4.18, ],#"200",
+[64,     8.67,  6.59,   ],#"64 nodrop"
+[32,     8.08	,  5.85, ],#"32-eps01 nodrop",
+])
+
+#Broken 14 energy robustness 1 and 2
+robustness = np.array([
+[1920,  53.3354561,     28.70117248], #basic unfrozen
+[1920,  40.32351996	,    12.56009858],#basic enc
+[600,   37.91563508,    11.86464918],#600 picture enc
+#[200,   29.6020633,	     7.915001627],#200 enc
+[200,   25.41014215, 	  6.329089502],#200_dense
+[64,    7.259040325	,   -0.385445984],#64
+[32,    9.77844588, 	  1.001811581],#32
+])
+
+data=[results, robust_4, robustness]
+
+def make_and_save_plot(data, mode, save_names):
+    results = data[0]
+    robust_4 = data[1]
+    robustness = data[2] #energy broken14
+    
+    robust1_color="yellowgreen"
+    robust2_color="darkolivegreen"
+    
     figsize, fontsize = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': fontsize})
     
@@ -61,15 +97,21 @@ def make_and_save_plot(results, mode, save_perf_plot_as, save_rob_plot_as):
         ax2.legend(handles=[acc_line,loss_line,(hline_acc, hline_loss)],labels=["Accuracy Up-Down","MAE Energy","Supervised",], bbox_to_anchor=(1, 0.94), bbox_transform=ax.transAxes)
         plt.subplots_adjust(right=0.88)
         
-        fig.savefig(save_perf_plot_as)
-        print("Saved plot as", save_perf_plot_as)
+        fig.savefig(save_names[0])
+        print("Saved plot as", save_names[0])
         plt.show()
     
     elif mode=="rob":
-        robust1_line, = ax.semilogx(results[:,0], results[:,2], "o", c="yellowgreen", label="Robust 1 Up-Down")
-        robust2_line, = ax.semilogx(results[:,0], results[:,3], "o", c="darkolivegreen", label="Robust 2 Up-Down")
+        plot_data = robust_4
         
-        ax.set_ylabel("Robustness")
+        robust1_line, = ax.semilogx(plot_data[1:,0], plot_data[1:,1], "o--", c=robust1_color, label="Overestimation")
+        robust2_line, = ax.semilogx(plot_data[1:,0], plot_data[1:,2], "o--", c=robust2_color, label="Underperformance")
+        
+        #hline_acc = ax.axhline(plot_data[0][1],0,1, ls="-", c=robust1_color, )
+        #hline_loss = ax.axhline(plot_data[0][2],0,1, ls="-", c=robust2_color, )
+        #plt.plot([32,],[32,], color="grey", ls="-", label="Supervised")
+        
+        ax.set_ylabel("Percentage")
         
         #ax.set_ylim(80.2,88.5)
         #ax.yaxis.grid()
@@ -83,15 +125,45 @@ def make_and_save_plot(results, mode, save_perf_plot_as, save_rob_plot_as):
         ax.set_xlabel("Neurons in bottleneck")
         ax.set_xlim(28,2200)
         
-        fig.savefig(save_rob_plot_as)
-        print("Saved plot as", save_rob_plot_as)
+        fig.savefig(save_names[1])
+        print("Saved plot as", save_names[1])
         plt.show()
+    
+    elif mode=="rob2":
+        plot_data = robustness
+        
+        robust1_line, = ax.semilogx(plot_data[1:,0], plot_data[1:,1], "o--", c=robust1_color, label="Overestimation")
+        robust2_line, = ax.semilogx(plot_data[1:,0], plot_data[1:,2], "o--", c=robust2_color, label="Underperformance")
+        
+        hline_acc = ax.axhline(plot_data[0][1],0,1, ls="-", c=robust1_color, )
+        hline_loss = ax.axhline(plot_data[0][2],0,1, ls="-", c=robust2_color, )
+        plt.plot([32,],[32,], color="grey", ls="-", label="Supervised")
+        
+        ax.set_ylabel("Percentage")
+        
+        #ax.set_ylim(80.2,88.5)
+        #ax.yaxis.grid()
+        plt.subplots_adjust(right=0.88)
+        plt.legend()
+        plt.grid()
+        
+        tick_locs=np.array([30,100,1000, 2000])
+        ax.set_xticks(tick_locs.astype(int))
+        ax.set_xticklabels(tick_locs.astype(str))
+        ax.set_xlabel("Neurons in bottleneck")
+        ax.set_xlim(28,2200)
+        
+        fig.savefig(save_names[2])
+        print("Saved plot as", save_names[2])
+        plt.show()
+        
 
-if mode=="both":
-    make_and_save_plot(results, "perf", save_perf_plot_as, save_rob_plot_as)
-    make_and_save_plot(results, "rob", save_perf_plot_as, save_rob_plot_as)
+if mode=="all":
+    make_and_save_plot(data, "perf", save_names)
+    make_and_save_plot(data, "rob", save_names)
+    make_and_save_plot(data, "rob2", save_names)
 else:
-    make_and_save_plot(results, mode, save_perf_plot_as, save_rob_plot_as)
+    make_and_save_plot(data, mode, save_names)
 
 
 
