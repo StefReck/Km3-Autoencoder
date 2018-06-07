@@ -476,6 +476,19 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_32_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.08,0.68)
+        
+    elif which_one=="energy_14_200_enc" or which_one==31:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_broken14_nodrop_epoch11.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.08,0.68)
+        
     
     # ----------------------------- Unfreeze stuff -----------------------------
     
