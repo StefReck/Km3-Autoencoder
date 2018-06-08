@@ -11,7 +11,7 @@ sys.path.append('../util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 
-mode="all"
+mode="rob"
 
 save_perf_plot_as="../../results/plots/statistics/bottleneck_summary_plot_updown_energy.pdf"
 save_rob_4_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_robust_broken4.pdf"
@@ -19,15 +19,15 @@ save_rob_14_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_rob
 save_names=[save_perf_plot_as, save_rob_4_plot_as, save_rob_14_plot_as]
 
 #size of bottleneck, 
-#       Accuracy, Robuts1, Robuts2, 
-#                           Loss of energy
-#                                   Broken14 robustness 1 and 2
+#          acc
+#               Loss of energy
+
 results = np.array([
-[1920,	 82.51, 10.37, 5.72,   6.339,    ], #"basic",
-[600,    84.93, 9.26,	  5.09,   5.846,   ],#"picture",
-[200,    84.98, 7.47,	  4.18,   5.820,   ],#"200",
-[64,     84.71, 8.67,  6.59,   5.855,    ],#"64 nodrop"
-[32,     82.67,  8.08	,  5.85,  6.145,   ],#"32-eps01 nodrop",
+[1920,	 82.51, 6.339,    ], #"basic",
+[600,    84.93, 5.846,   ],#"picture",
+[200,    84.98, 5.820,   ],#"200",
+[64,     84.71, 5.855,    ],#"64 nodrop"
+[32,     82.67, 6.145,   ],#"32-eps01 nodrop",
 ])
 
 #Broken4 updown
@@ -36,7 +36,7 @@ robust_4 = np.array([
 [1920,	 10.37, 5.72, ], #"basic",
 [600,    9.26,	  5.09,  ],#"picture",
 [200,    7.47,	  4.18, ],#"200",
-[64,     8.67,  6.59,   ],#"64 nodrop"
+[64,     8.55,	5.04   ],#"64 nodrop"
 [32,     8.08	,  5.85, ],#"32-eps01 nodrop",
 ])
 
@@ -50,6 +50,8 @@ robustness = np.array([
 [64,    7.259040325	,   -0.385445984],#64
 [32,    9.77844588, 	  1.001811581],#32
 ])
+
+
 
 data=[results, robust_4, robustness]
 
@@ -77,7 +79,7 @@ def make_and_save_plot(data, mode, save_names):
         hline_loss = ax.axhline(top_results[0],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
         
         acc_line, = ax.semilogx(results[:,0], results[:,1], "o", c="blue", label="Accuracy Up-Down")
-        loss_line, = ax2.semilogx(results[:,0], results[:,4], "o", c="orange", label="MAE Energy")
+        loss_line, = ax2.semilogx(results[:,0], results[:,2], "o", c="orange", label="MAE Energy")
         
         ax.set_ylabel("Accuracy up-down (%)")
         ax2.set_ylabel("Mean absolute error energy (GeV)")

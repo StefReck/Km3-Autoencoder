@@ -310,7 +310,20 @@ def get_props_for_plot_parallel(tag, printing=True):
         prl_model = home+"models/vgg_5_200_small/trained_vgg_5_200_small_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "vgg_5_200_params_energy/"
         
+    #-------------------vgg_5_200 New Binning UpDown and Energy ---------------------------
+    elif tag=="vgg_5_200-newbin" or tag==46:
+        #title = "Parallel training with model '200 small'"
+        ae_model =  home+"models/vgg_5_200-newbin/trained_vgg_5_200-newbin_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200-newbin/trained_vgg_5_200-newbin_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "newbinning/"
         
+    elif tag=="vgg_5_200-newbin_energy" or tag==47:
+        #title = "Parallel training with model '200 small'"
+        ae_model =  home+"models/vgg_5_200-newbin/trained_vgg_5_200-newbin_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_200-newbin/trained_vgg_5_200-newbin_autoencoder_supervised_parallel_energy_test.txt"
+        save_to_folder = "newbinning/"
+    
+    
     #----------------------------------------------------------------------------------
     else:
         raise NameError("Tag "+str(tag)+" unknown.")
