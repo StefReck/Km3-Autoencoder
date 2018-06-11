@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import argparse
 
 import sys
-sys.path.append('../util/')
+sys.path.append('scripts/util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 def parse_input():
@@ -19,7 +19,7 @@ def parse_input():
     args = parser.parse_args()
     return  args.datafile
 
-debug=1
+debug=0
 
 if not debug:
     datafile=parse_input()
@@ -36,7 +36,7 @@ else:
     
 def make_plot(energies):
     ylog=True
-    xlog=True
+    xlog=0
     
     figsize, fontsize = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': fontsize})
