@@ -34,7 +34,7 @@ def make_plot(logfile_path):
     data = read_out_file(logfile_path)
     #This is present in the datafile, in addition to "epoch"
     keys_robust = ['(Sim-Meas)', '(Upperlim-']
-    labels_robust=["Change to 'measured' data", "Change to 'upper limit'"]
+    labels_robust=["Overestimation", "Underperformance"]
     colors_robust=["yellowgreen", "darkolivegreen"]
     
     keys_acc = ['acc_sim', 'acc_meas', 'acc_ulim' ]
