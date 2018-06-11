@@ -36,7 +36,7 @@ else:
     
 def make_plot(energies):
     ylog=True
-    xlog=0
+    xlog=1
     
     figsize, fontsize = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': fontsize})
@@ -53,6 +53,7 @@ def make_plot(energies):
     plt.grid()
     plt.xlabel("Energy (GeV)")
     plt.ylabel("Number of Events")
+    plt.subplots_adjust(left=0.2)
     return fig
 
 fig = make_plot(energies)
