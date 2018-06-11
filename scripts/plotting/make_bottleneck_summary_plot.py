@@ -5,7 +5,6 @@ of the bottleneck size for the best models of each size.
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
 
 import sys
 sys.path.append('../util/')

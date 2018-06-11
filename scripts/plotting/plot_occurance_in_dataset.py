@@ -6,6 +6,7 @@ Plot number of events vs Energy, binned.
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
+import argparse
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Plot number of events vs Energy, binned.')
