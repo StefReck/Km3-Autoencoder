@@ -402,7 +402,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_2000_broken13_enc"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.02,0.78)
-        
+   
     #Broken 14 (rauschen prop zu E, bis zu 2 kHz plus)
     #Bottleneck scan
     elif which_one=="energy_14_2000_unf" or which_one==24:
@@ -489,6 +489,31 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_type = "mre"
         y_lims=(0.08,0.68)
         
+    # ----------------------------- Other tests -----------------------------
+
+     elif which_one=="energy_2_2000_unf" or which_one==32:
+        brokendata_tag = "xzt"
+        realdata_tag   = "xzt_broken2"
+        broken_model = get_path_best_epoch("2000_unf_E", full_path=False)
+        real_model   = "vgg_3-noise10/trained_vgg_3-noise10_supervised_energy_broken2_epoch12.h5"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken2_unf"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
+        
+    elif which_one=="energy_2_2000_enc" or which_one==33:
+        brokendata_tag = "xzt"
+        realdata_tag   = "xzt_broken2"
+        broken_model = "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch5_supervised_energy_nodrop_epoch3.h5"
+        real_model   = "vgg_3-noise10/trained_vgg_3-noise10_autoencoder_epoch7_supervised_energy_nodrop_epoch5.h5" #_broken2
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken2_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.02,0.78)
     
     # ----------------------------- Unfreeze stuff -----------------------------
     
