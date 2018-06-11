@@ -6,23 +6,15 @@ Plot number of events vs Energy, binned.
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-import argparse
 
 import sys
 sys.path.append('scripts/util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
-def parse_input():
-    parser = argparse.ArgumentParser(description='Plot number of events vs Energy, binned.')
-    parser.add_argument('datafile', type=str, help='Datafile')
-
-    args = parser.parse_args()
-    return  args.datafile
+datafile="data/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+save_to="results/plots/stats_train_muon-CC_and_elec-CC_each_240_xzt_shuffled.pdf"
 
 debug=0
-
-if not debug:
-    datafile=parse_input()
 
 
 if debug:
@@ -59,5 +51,7 @@ def make_plot(energies):
 fig = make_plot(energies)
 plt.show(fig)
 
+plt.savefig(fig, save_to)
+print("Plot saved to", save_to)
 
 
