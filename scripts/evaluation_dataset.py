@@ -214,8 +214,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         y_lims=(0.7,0.95)
         
     elif which_one=="4_64_enc_nodrop" or which_one==26:
-        modelidents = ("vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_nodrop_epoch72.h5",
-                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_broken4_nodrop_epoch72.h5",
+        modelidents = ("vgg_5_64/trained_vgg_5_64_autoencoder_epoch82_supervised_up_down_broken4_nodrop_epoch52.h5",
+                       "vgg_5_64/trained_vgg_5_64_autoencoder_epoch82_supervised_up_down_broken4_nodrop_epoch52.h5",
                        "vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_nodrop_epoch69.h5")
         #Which dataset each to use
         dataset_array = ("xzt_broken4", "xzt", "xzt")
