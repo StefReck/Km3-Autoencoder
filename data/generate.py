@@ -174,10 +174,9 @@ def add_energy_correlated_noise(xs, true_energies, broken_mode=12):
     xs = xs + noise
     return xs
 
-def make_broken15_manip(xs, make_plot=False):
-    """ Reduce the Count number based on the x-Coordinate of the string.
-    xs.shape=(bs,11,18,50)"""
+def get_broken15_efficiency(make_plot=False):
     #expectation value of the quantum efficiency, 95% (or so) at x=0, 60% at x=11
+    #Will have shape 11,18,50
     quantum_efficiency = np.ones((11,18,50))
     for x_no in range(11):
         quantum_efficiency[x_no,:,:] *= (1 - (0.4 * (x_no+1)/11))
@@ -198,13 +197,19 @@ def make_broken15_manip(xs, make_plot=False):
         plt.xlabel("Efficiency")
         plt.ylabel("DOMs")
         plt.show()
+    return quantum_efficiency
+#xs_org = np.random.randint(0,10,(1,11,18,50)).astype(int)
+#xs=get_broken15_efficiency()
+#raise
+    
+def make_broken15_manip(xs, quantum_efficiency):
+    """ Reduce the Count number based on the x-Coordinate of the string.
+    xs.shape=(bs,11,18,50)"""
     #n counts get reduced by binomial distribution with n tries and p=1-quantum_efficiency
     xs=xs.astype(int)
     xs = xs - np.random.binomial(xs, 1-quantum_efficiency)
     return xs.astype(int)
-#xs_org = np.random.randint(0,10,(1,11,18,50)).astype(int)
-#xs=make_broken15_manip(xs_org)
-#raise
+
 
 def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then, broken_mode=None):     
     print("Generating file", save_to)
@@ -236,7 +241,9 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
             
     elif broken_mode==15:
         hists=f["x"][:up_to_which]
-        hists = make_broken15_manip(hists)
+        efficency = get_broken15_efficiency()
+        np.random.seed()
+        hists = make_broken15_manip(hists, efficency)
         
     else:
         if sum_over_axis is not None:
