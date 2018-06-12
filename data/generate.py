@@ -4,7 +4,7 @@ import numpy as np
 # x, y, z, t, c
 #11,13,18,50,31
 
-mode="broken14"
+mode="broken15"
 
 #original_train_file="/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
     
@@ -103,6 +103,21 @@ elif mode=="broken14":
     #percentage of events to keep
     fraction=1
     broken_mode=14
+    
+elif mode=="broken15":
+    #Reduce Quantum efficiency of doms according to x-Coordinate
+    #can be caused by lines having been in the water for different time spans
+    #Input: xzt (11,18,50)
+    #Output: xzt (11,18,50)
+    original_train_file="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt/train_muon-CC_and_elec-CC_each_240_xzt_shuffled.h5"
+    original_test_file ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt/test_muon-CC_and_elec-CC_each_60_xzt_shuffled.h5"
+    
+    outfile_train="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken15/train_muon-CC_and_elec-CC_each_240_xzt_broken15_shuffled.h5"
+    outfile_test ="/home/woody/capn/mppi013h/Km3-Autoencoder/data/xzt_broken15/test_muon-CC_and_elec-CC_each_60_xzt_broken_15_shuffled.h5"
+    
+    #percentage of events to keep
+    fraction=1
+    broken_mode=15
 
 #show how often certain total number of hits in a dom occur; No files will be generated
 make_statistics = False
@@ -159,7 +174,37 @@ def add_energy_correlated_noise(xs, true_energies, broken_mode=12):
     xs = xs + noise
     return xs
 
-
+def make_broken15_manip(xs, make_plot=False):
+    """ Reduce the Count number based on the x-Coordinate of the string.
+    xs.shape=(bs,11,18,50)"""
+    #expectation value of the quantum efficiency, 95% (or so) at x=0, 60% at x=11
+    quantum_efficiency = np.ones((11,18,50))
+    for x_no in range(11):
+        quantum_efficiency[x_no,:,:] *= (1 - (0.4 * (x_no+1)/11))
+    #now scale by some random value:
+    np.random.seed(64)
+    quantum_efficiency = np.clip(quantum_efficiency * np.random.normal(1,0.1,size=quantum_efficiency.shape), 
+                                 a_min=0, a_max=1)
+    #this quantum_efficiency array is the same for all data!
+    if make_plot:
+        import matplotlib.pyplot as plt
+        figsize = [6.4,5.5]   
+        font_size=14
+        fig, ax = plt.subplots(figsize=figsize)
+        plt.rcParams.update({'font.size': font_size})
+        plt.grid()
+        plt.hist(quantum_efficiency.reshape((quantum_efficiency.shape[0], quantum_efficiency.shape[1]*quantum_efficiency.shape[2])).T, 
+                            bins=50, histtype="barstacked")
+        plt.xlabel("Efficiency")
+        plt.ylabel("DOMs")
+        plt.show()
+    #n counts get reduced by binomial distribution with n tries and p=1-quantum_efficiency
+    xs=xs.astype(int)
+    xs = xs - np.random.binomial(xs, 1-quantum_efficiency)
+    return xs.astype(int)
+#xs_org = np.random.randint(0,10,(1,11,18,50)).astype(int)
+#xs=make_broken15_manip(xs_org)
+#raise
 
 def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and_shuffle, only_doms_with_more_then, broken_mode=None):     
     print("Generating file", save_to)
@@ -189,6 +234,10 @@ def generate_file(file, save_to, fraction, sum_over_axis, reshape_to_channel_and
         true_energies = f["y"][:up_to_which][:,2]
         hists = add_energy_correlated_noise(hists, true_energies, broken_mode)
             
+    elif broken_mode==15:
+        hists=f["x"][:up_to_which]
+        hists = make_broken15_manip(hists)
+        
     else:
         if sum_over_axis is not None:
             hists=np.sum(f["x"][:up_to_which], axis=sum_over_axis)
