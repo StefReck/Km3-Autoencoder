@@ -151,6 +151,15 @@ def get_dataset_info(dataset_tag):
         test_data = "test_muon-CC_and_elec-CC_each_60_xzt_broken_14_shuffled.h5"
         n_bins = (11,18,50,1)
         print("Warning: GENERATING BROKEN SIMULATED DATA")
+        
+    elif dataset_tag=="xzt_broken15":
+        #Reduce the q efficiency of doms by up to about 40%, with a gradient in
+        #x direction (x=0 less reduced then x=11)
+        data_path = home_path+"data/xzt_broken15/"
+        train_data = "train_muon-CC_and_elec-CC_each_240_xzt_broken15_shuffled.h5"
+        test_data = "test_muon-CC_and_elec-CC_each_60_xzt_broken_15_shuffled.h5"
+        n_bins = (11,18,50,1)
+        print("Warning: GENERATING BROKEN SIMULATED DATA")
     
     #Outdated new binned versions
     elif dataset_tag=="xzt_new":
