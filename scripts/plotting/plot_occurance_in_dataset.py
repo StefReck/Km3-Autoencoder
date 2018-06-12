@@ -51,7 +51,7 @@ def make_plot(energies):
 fig = make_plot(energies)
 plt.show(fig)
 
-plt.savefig(fig, save_to)
+fig.savefig(save_to)
 print("Plot saved to", save_to)
 
 
