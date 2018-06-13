@@ -180,27 +180,38 @@ def get_broken15_efficiency(make_plot=False):
     quantum_efficiency = np.ones((11,18,50))
     for x_no in range(11):
         quantum_efficiency[x_no,:,:] *= (1 - (0.4 * (x_no+1)/11))
-    #now scale by some random value:
+    #now scale by some random value, gaussian distr.
+    #this random value is the same for all time bins, aka fix in time for every DOM
     np.random.seed(64)
-    quantum_efficiency = np.clip(quantum_efficiency * np.random.normal(1,0.1,size=quantum_efficiency.shape), 
+    random_value = np.random.normal(1,0.1,size=(11,18,1))
+    random_value = np.repeat(random_value, 50, axis=-1)
+    quantum_efficiency = np.clip(quantum_efficiency * random_value, 
                                  a_min=0, a_max=1)
     #this quantum_efficiency array is the same for all data!
     if make_plot:
         import matplotlib.pyplot as plt
-        figsize = [6.4,5.5]   
+        figsize = [5,5.5]   
         font_size=14
         fig, ax = plt.subplots(figsize=figsize)
         plt.rcParams.update({'font.size': font_size})
-        plt.grid()
-        plt.hist(quantum_efficiency.reshape((quantum_efficiency.shape[0], quantum_efficiency.shape[1]*quantum_efficiency.shape[2])).T, 
-                            bins=50, histtype="barstacked")
-        plt.xlabel("Efficiency")
-        plt.ylabel("DOMs")
+        #plt.grid()
+        image = quantum_efficiency[:,:,0] #11,18
+        plt.imshow(image.T)
+        
+        #plt.hist(quantum_efficiency.reshape((quantum_efficiency.shape[0], quantum_efficiency.shape[1]*quantum_efficiency.shape[2])).T, 
+        #                    bins=15, histtype="barstacked")
+        plt.xlabel("x Bin no")
+        plt.xticks(np.arange(0,11,2), np.arange(1,12,2))
+        plt.ylabel("z Bin no")
+        plt.yticks((0,6,12,17), (1,7,13,18))
+        cbar = plt.colorbar()
+        cbar.set_label('Efficiency')
+        #usually saved as broken_energy/broken15_efficiency_plot.pdf
         plt.show()
     return quantum_efficiency
-#xs_org = np.random.randint(0,10,(1,11,18,50)).astype(int)
-#xs=get_broken15_efficiency()
+#xs=get_broken15_efficiency(True)
 #raise
+#xs_org = np.random.randint(0,10,(1,11,18,50)).astype(int)
     
 def make_broken15_manip(xs, quantum_efficiency):
     """ Reduce the Count number based on the x-Coordinate of the string.
