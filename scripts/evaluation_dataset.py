@@ -524,7 +524,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken15_unf"+extra_name+".pdf" 
         plot_type = "mre"
-        y_lims=(0.21,0.81)
+        y_lims=(0.18,0.55)
     # ----------------------------- Unfreeze stuff -----------------------------
     
     elif which_one=="unfreeze_comp" or which_one==18:
