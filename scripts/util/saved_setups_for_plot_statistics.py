@@ -323,6 +323,15 @@ def get_props_for_plot_parallel(tag, printing=True):
         prl_model = home+"models/vgg_5_200-newbin/trained_vgg_5_200-newbin_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "newbinning/"
     
+    #------------------- Broken Studies ---------------------------
+    elif tag=="vgg_5_64-broken15_energy" or tag==48:
+        ae_model =  home+"models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_supervised_parallel_energy_nodrop_broken15_test.txt"
+        save_to_folder = "bottleneck_energy/"
+    elif tag=="vgg_5_64-broken15_energy" or tag==49:
+        ae_model =  home+"models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_test.txt"
+        prl_model = home+"models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_supervised_parallel_energy_nodrop_test.txt"
+        save_to_folder = "bottleneck_energy/"
     
     #----------------------------------------------------------------------------------
     else:
