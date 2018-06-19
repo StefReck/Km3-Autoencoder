@@ -35,6 +35,16 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", broken_simulations_mode )
 
     start_time = datetime.now()
+    
+    if is_AE_adevers_training:
+        if epoch%2 == 0:
+            #even: train only generator:
+            model = freeze_adversarial_part(model, unfrozen_critic=False, unfrozen_generator=True)
+        else:
+            #uneven: train only critic on smaller filesize
+            model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
+            train_files[0][1]=int(train_files[0][1]/10)
+    
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
@@ -131,6 +141,28 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     print (return_message)
     return evaluation
 
+def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
+    #Go through the network and freeze/unfreeze layers according to vars
+    last_layer_of_AE_name = "AE_output_layer"
+    
+    ae_loss="categorical_crossentropy"
+    pre_optimizer = model.optimizer
+    
+    is_in_generator_part=True
+    for layer in model.layers:
+        if is_in_generator_part:
+            layer.trainable=unfrozen_generator
+        else:
+            layer.trainable=unfrozen_critic
+        
+        if layer.name == last_layer_of_AE_name:
+            is_in_generator_part=False
+            
+    model.compile(loss=ae_loss, optimizer=pre_optimizer)
+    
+    print("State of network: Generator unfrozen:", unfrozen_generator, "Critic unfrozen:", unfrozen_critic)
+    
+    return model
 
 def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values=None):
     """

@@ -149,7 +149,7 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
         x=Cropping3D(((1,1),(1,1),(0,0)))(x) #11x18x48
         x=convT_block(x, filters=filter_base[0], kernel_size=(3,3,3), padding="valid", channel_axis=channel_axis) #13x20x50
         x=Cropping3D(((1,1),(1,1),(0,0)))(x)#11x18x50
-        AE_out = Conv3D(filters=output_filters, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
+        AE_out = Conv3D(filters=output_filters, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal', name="AE_output_layer")(x)
         #Output 11x13x18 x 1
         
         if pretrained_autoencoder_path != None:
