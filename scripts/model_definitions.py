@@ -31,6 +31,7 @@ def make_options_dict(additional_options):
     options_dict["make_stateful"]=False
     options_dict["dense_setup"]="standard"
     options_dict["layer_version"]="single"
+    options_dict["pretrained_autoencoder_path"]=None
         
     additional_options_list = additional_options.split("-")
     for additional_options in additional_options_list:
@@ -81,6 +82,10 @@ def make_options_dict(additional_options):
             #either single or double
             layer_version = additional_options.split("=")[1]
             options_dict["layer_version"]=layer_version
+            
+        elif "pretrained_autoencoder_path" in additional_options:
+            pretrained_autoencoder_path = additional_options.split("=")[1]
+            options_dict["pretrained_autoencoder_path"]=pretrained_autoencoder_path
 
         else:
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)

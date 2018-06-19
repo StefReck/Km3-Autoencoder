@@ -85,6 +85,7 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    pretrained_autoencoder_path = options_dict["pretrained_autoencoder_path"]
     
     number_of_output_neurons=options_dict["number_of_output_neurons"]
     
@@ -150,6 +151,16 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
         x=Cropping3D(((1,1),(1,1),(0,0)))(x)#11x18x50
         AE_out = Conv3D(filters=output_filters, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
         #Output 11x13x18 x 1
+        
+        if pretrained_autoencoder_path != None:
+            generator_model = Model(inputs=inputs, outputs=encoded)
+            pretrained_autoencoder = load_model(pretrained_autoencoder_path, compile=False) #no need to compile the model as long as only weights are read out
+            print("Loading weights from model", pretrained_autoencoder_path)
+            weights_loaded=0
+            for i,layer in enumerate(generator_model.layers):
+                layer.set_weights(pretrained_autoencoder.layers[i].get_weights())
+                weights_loaded+=1
+            print("Weights of ",weights_loaded, "layers were loaded.")
         
         #The adversarial part:
         #Takes the reconstruction and the original, both 11x13x18x1,
