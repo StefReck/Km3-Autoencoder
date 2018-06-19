@@ -237,6 +237,15 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         print("Autoencoder stage 4: Unfreeze Training. Setting up network like in AE stage 1...")
     else:
         unfreeze_layer_training = False
+        
+    if autoencoder_stage==5:
+        #for adversarial AE training, setup like normal autoencoder
+        autoencoder_stage=0
+        ae_loss_name = "categorical_crossentropy"
+        is_AE_adevers_training=True
+        print("Starting AE training in adversarial setup (stage 5). Loss will be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
+    else:
+        is_AE_adevers_training=False
     
     custom_objects=None
     #define loss function to use for new AEs
@@ -245,6 +254,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         ae_loss="mse"
     elif ae_loss_name=="mae":
         ae_loss="mae"
+    elif ae_loss_name=="categorical_crossentropy":
+        ae_loss="categorical_crossentropy"
     else:
         #custom loss functions have to be handed to load_model or it wont work
         custom_objects=get_custom_objects()
@@ -656,7 +667,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         lr = train_and_test_model(model=model, modelname=modelname, train_files=train_tuple, test_files=test_tuple,
                              batchsize=batchsize, n_bins=n_bins, class_type=class_type, xs_mean=xs_mean, epoch=current_epoch,
                              shuffle=False, lr=lr, lr_decay=lr_decay, tb_logger=False, swap_4d_channels=None,
-                             save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)    
+                             save_path=model_folder, is_autoencoder=is_autoencoder, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)    
     
     
 if __name__ == "__main__":

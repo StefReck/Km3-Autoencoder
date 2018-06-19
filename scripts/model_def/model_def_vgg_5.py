@@ -5,7 +5,7 @@ Bottleneck study
 """
 
 from keras.models import Model, load_model
-from keras.layers import Activation, ActivityRegularization, Cropping3D, Reshape, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D
+from keras.layers import Activation, ActivityRegularization, Cropping3D, Reshape, Input, Dropout, Dense, Flatten, Conv3D, UpSampling3D, BatchNormalization, ZeroPadding3D, Conv3DTranspose, AveragePooling3D, concatenate
 from keras import backend as K
 
 #Standard Conv Blocks
@@ -1053,5 +1053,7 @@ def setup_vgg_5_xztc(autoencoder_stage, options_dict, modelpath_and_name=None):
         
         model = Model(inputs=inputs, outputs=outputs)
         return model
+
+
 
 

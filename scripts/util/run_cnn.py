@@ -20,7 +20,7 @@ train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_
 """
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict):
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict, is_AE_adevers_training=False):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
@@ -35,7 +35,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", broken_simulations_mode )
 
     start_time = datetime.now()
-    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)
+    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     end_time = datetime.now()
@@ -43,7 +43,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     #Elapsed time for one epoch HH::MM:SS
     elapsed_time=str(time_delta).split(".")[0]
     
-    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict)
+    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if "acc" in training_hist.history:
@@ -56,7 +56,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     return lr
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict, n_events=None, tb_logger=False,):
+              shuffle, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict, n_events=None, tb_logger=False,is_AE_adevers_training=False):
     """
     Trains a model based on the Keras fit_generator method.
     If a TensorBoard callback is wished, validation data has to be passed to the fit_generator method.
@@ -99,15 +99,15 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
                 BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
                 
             history = model.fit_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset_info_dict=dataset_info_dict),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training),
                 steps_per_epoch=int(f_size / batchsize), epochs=1, verbose=verbose, max_queue_size=10,
-                validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger])
+                validation_data=validation_data, validation_steps=validation_steps, callbacks=[BatchLogger],)
             model.save(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '.h5') #TODO
         
     return history
         
         
-def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, broken_simulations_mode, dataset_info_dict, n_events=None,):
+def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, is_autoencoder, broken_simulations_mode, dataset_info_dict, n_events=None,is_AE_adevers_training=False):
     """
     Evaluates a model with validation data based on the Keras evaluate_generator method.
     :param ks.model.Model/Sequential model: Keras model (trained) of a neural network.
@@ -125,7 +125,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         if n_events is not None: f_size = n_events  # for testing
 
         evaluation = model.evaluate_generator(
-            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True, dataset_info_dict=dataset_info_dict),
+            generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training),
             steps=int(f_size / batchsize), max_queue_size=10)
     return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
     print (return_message)
@@ -246,7 +246,7 @@ def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values
     return xs
 
 #Copied from cnn_utilities and modified:
-def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, dataset_info_dict, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False):
+def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_autoencoder, dataset_info_dict, broken_simulations_mode=0, f_size=None, zero_center_image=None, yield_mc_info=False, swap_col=None, is_in_test_mode = False, is_AE_adevers_training=False):
     """
     Generator that returns batches of images ('xs') and labels ('ys') from a h5 file.
     :param string filepath: Full filepath of the input h5 file, e.g. '/path/to/file/file.h5'.
@@ -310,7 +310,12 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             #Modified for autoencoder:
             if is_autoencoder == True:
-                output = (xs, xs) if yield_mc_info is False else (xs, xs) + (y_values,)
+                if is_AE_adevers_training:
+                    #1,0 means fake, 0,1 means real
+                    labels = np.repeat([[[1,0],[0,1]],],xs.shape[0],0)
+                else:
+                    labels = xs
+                output = (xs, labels) if yield_mc_info is False else (xs, labels) + (y_values,)
                 
             else:
                 ys = np.zeros((batchsize, class_type[0]), dtype=np.float32)

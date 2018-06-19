@@ -2,7 +2,7 @@
 
 from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Lambda, Dropout, UpSampling3D, Flatten, BatchNormalization, Activation, Conv3D, Reshape, Conv1D, MaxPooling3D, UpSampling3D, Conv2D, Conv2DTranspose, ZeroPadding3D, Cropping3D, Conv3DTranspose, AveragePooling3D
-from keras.layers import LeakyReLU
+from keras.layers import LeakyReLU, TimeDistributed, concatenate
 from keras.callbacks import Callback
 import numpy as np
 import matplotlib.pyplot as plt
@@ -167,39 +167,26 @@ with tf.Session() as sess:
 
 
 def test_model():
-    inputs = Input(shape=(1,))
-    x = Dense(1, activation="softmax")(inputs)
-    #12,14,18
-
-    #stride 1/valid             stride 1/same = 1pad --> 13,15,20
-    #11,13,18                   
-    #9,11,16                    11,13,18
-    #11,13,18
-    
-    #stride 2/valid
-    #11,13,18
-    #5,6,8
-    #11,13,17       !x2 + 1
-    
-    #stride 2/same = 1pad --> 13,15,20
-    #11,13,18
-    #6,7,9
-    #12,14,18       !x2
-    
-    #same,valid: 11,6,13
-    #same,same:  11,6,12
-    #same, 01valid: 11,6,7,15
-    #same, 01same: 11,6,7,14
+    inputs = Input(shape=(2,10,10,10,1))
+    x = TimeDistributed(Conv3D(filters=1, kernel_size=(3,3,3), padding='valid'))(inputs)
     
     autoencoder = Model(inputs, x)
     return autoencoder
 
+def test2():
+    inputs = Input(shape=(5,5,5,1))
+    x = Conv3D(filters=1, kernel_size=(3,3,3), padding="same")(inputs)
+    x = Reshape((1,5,5,5,1))(x)
+    
+    y = Reshape((1,5,5,5,1))(inputs)
+    
+    out = concatenate([y,x],axis=1)
+    
+    return Model(inputs,out)
 
-
-model = test_model()
-model.compile(optimizer='adam', loss='mse')
-model.predict(np.ones((1,)))
-
+model = test2()
+#model.compile(optimizer='adam', loss='mse')
+model.summary()
 """
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))
