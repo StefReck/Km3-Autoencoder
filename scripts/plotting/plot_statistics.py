@@ -278,8 +278,15 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         handles1.append(handle_for_legend)
         #for proper yrange, look for min/max of ydata, but not for the first epochs train,
         #since loss is often extreme here
-        y_value_extrema.extend([max(data_of_model[1]), min(data_of_model[1]),
-                                max(train_ydata[train_epoch>=3]), min(train_ydata[train_epoch>=3]) ])
+        take_range_after_epoch = 3
+        if len(train_ydata[train_epoch>=take_range_after_epoch])=0:
+            #epoch 3 doesnt exist
+            take_range_after_epoch=0
+            
+        y_value_extrema.extend([max(data_of_model[1]), 
+                                min(data_of_model[1]),
+                                max(train_ydata[train_epoch>=take_range_after_epoch]), 
+                                min(train_ydata[train_epoch>=take_range_after_epoch]) ])
     
     #lhandles, llabels = ax.get_legend_handles_labels()
     legend1 = plt.legend(handles=handles1, loc=legend_locations[0])
