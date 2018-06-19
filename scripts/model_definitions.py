@@ -248,7 +248,7 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         options_dict["neurons_in_bottleneck"]=5
         model = setup_channel_tiny(autoencoder_stage, options_dict, modelpath_and_name)
     
-    elif model_tag == "setup_vgg_6_200_advers":
+    elif model_tag == "vgg_6_200_advers":
         model = setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name)
     
     
@@ -266,7 +266,7 @@ def print_model_blockwise(model):
     
             
 if __name__=="__main__":
-    model=setup_model(model_tag="setup_vgg_6_200_advers", autoencoder_stage=0, modelpath_and_name=None, 
+    model=setup_model(model_tag="vgg_6_200_advers", autoencoder_stage=0, modelpath_and_name=None, 
                       additional_options="")
     #model.summary()
     conv_layer_indices = []
