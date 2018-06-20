@@ -12,7 +12,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 from keras import regularizers
 import tensorflow as tf
 from scipy.special import factorial
-from util.custom_loss_functions import cat_cross_multi
 
 #from compare_hists import *
 #from util.Loggers import *
@@ -26,7 +25,39 @@ def setup_simple_model():
     model.add(Lambda(ndconv, input_shape=(5,5,5,1)))
     return model
     
+def conv_block_wrap(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, use_batchnorm=True):
+    x = TimeDistributed(Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=(not use_batchnorm), trainable=trainable))(inp)
+    if use_batchnorm: x = TimeDistributed(BatchNormalization(axis=channel_axis))(x)
+    x = TimeDistributed(Activation('relu', trainable=trainable))(x)
+    if dropout > 0.0: x = TimeDistributed(Dropout(dropout))(x)
+    return x
 
+def convT_block(inp, filters, kernel_size, padding, channel_axis, strides=(1,1,1), dropout=0.0):
+    x = Conv3DTranspose(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False)(inp)
+    x = BatchNormalization(axis=channel_axis)(x)
+    x = Activation('relu')(x)
+    if dropout > 0.0: x = Dropout(dropout)(x)
+    return x
+
+def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True, name=None):
+    if dropout > 0.0: x = Dropout(dropout)(x)
+    x = Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable)(x)
+    if batchnorm==True: x = BatchNormalization(axis=channel_axis, trainable=trainable)(x)
+    
+    if name is not None:
+        x = Activation('relu', name=name)(x)
+    else:
+        x = Activation('relu')(x)
+        
+    return x
+
+def dense_block_wrap(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True):
+    if dropout > 0.0: x = TimeDistributed(Dropout(dropout))(x)
+    x = TimeDistributed(Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable))(x)
+    if batchnorm==True: x = TimeDistributed(BatchNormalization(axis=channel_axis, trainable=trainable))(x)
+    x = TimeDistributed(Activation('relu'))(x)
+        
+    return x
     
 def setup_conv_model():
     #Test autoencoder im sequential style
@@ -167,35 +198,35 @@ with tf.Session() as sess:
 
 
 
-def test_model():
-    inputs = Input(shape=(2,10,10,10,1))
-    x = TimeDistributed(Conv3D(filters=1, kernel_size=(3,3,3), padding='valid'))(inputs)
+def test():
+    inputs=Input((2,11,18,50,1))
+    channel_axis=-1
+    use_batchnorm_critic=True
+    x=conv_block_wrap(inputs,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+    x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #6x9x25
     
-    autoencoder = Model(inputs, x)
-    return autoencoder
-
-def test2():
-    inputs = Input(shape=(2,2))
-    x = Dense(2, activation="softmax")(inputs)
+    x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+    x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+    x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #3x5x13
     
-    return Model(inputs,x)
+    x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+    x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+    #2x 3x5x13 x64
+    x = TimeDistributed(Flatten())(x)
+    #2x 12480
+    x = dense_block_wrap(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
+    x = dense_block_wrap(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
+    classification = TimeDistributed(Dense(2, activation="softmax", kernel_initializer='he_normal'))(x)
+    #out: 2x 2
+    #Target output: [ [1,0], [0,1] ]
+    #                  fake,  real
+    adversary = Model(inputs, classification)
+    return adversary
 
-model = test2()
-model.compile(optimizer='sgd', loss='categorical_crossentropy')
+model=test()
+inp = np.repeat(np.random.randint(0,5,(4,1,11,18,50,1)),2,axis=1)
+print(model.predict(inp))
 
-model2 = test2()
-model2.layers[1].set_weights(model.layers[1].get_weights())
-model2.compile(optimizer='sgd', loss=cat_cross_multi)
-
-inp = np.random.rand(100,2,2)
-target = np.repeat([[[1,0],[0,1]],], 100, axis=0)
-
-pred = model.predict_on_batch(inp)
-pred2 = model2.predict_on_batch(inp)
-
-m_loss = model.evaluate(inp, target)
-m2_loss = model2.evaluate(inp, target)
-print(m_loss, m2_loss)
 """
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))

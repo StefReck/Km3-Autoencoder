@@ -54,9 +54,9 @@ def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, stri
     if dropout > 0.0: x = Dropout(dropout)(x)
     return x
 
-def conv_block_wrap(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0):
-    x = TimeDistributed(Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=False, trainable=trainable))(inp)
-    x = TimeDistributed(BatchNormalization(axis=channel_axis))(x)
+def conv_block_wrap(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, use_batchnorm=True):
+    x = TimeDistributed(Conv3D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, kernel_initializer='he_normal', use_bias=(not use_batchnorm), trainable=trainable))(inp)
+    if use_batchnorm: x = TimeDistributed(BatchNormalization(axis=channel_axis))(x)
     x = TimeDistributed(Activation('relu', trainable=trainable))(x)
     if dropout > 0.0: x = TimeDistributed(Dropout(dropout))(x)
     return x
@@ -80,6 +80,14 @@ def dense_block(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=
         
     return x
 
+def dense_block_wrap(x, units, channel_axis, batchnorm=False, dropout=0.0, trainable=True):
+    if dropout > 0.0: x = TimeDistributed(Dropout(dropout))(x)
+    x = TimeDistributed(Dense(units=units, use_bias=1-batchnorm, kernel_initializer='he_normal', activation=None, trainable=trainable))(x)
+    if batchnorm==True: x = TimeDistributed(BatchNormalization(axis=channel_axis, trainable=trainable))(x)
+    x = TimeDistributed(Activation('relu'))(x)
+        
+    return x
+
 def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=None):
     batchnorm_before_dense = options_dict["batchnorm_before_dense"]
     dropout_for_dense      = options_dict["dropout_for_dense"]
@@ -88,6 +96,7 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
     pretrained_autoencoder_path = options_dict["pretrained_autoencoder_path"]
     
     number_of_output_neurons=options_dict["number_of_output_neurons"]
+
     
     if number_of_output_neurons > 1:
         supervised_last_activation='softmax'
@@ -166,26 +175,27 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
         #Takes the reconstruction and the original, both 11x13x18x1,
         #and concatenates them to 2x11x13x18x1, then applies Conv3D to both
         #simultaneosly
+        use_batchnorm_critic=True
         #advers_in = ReversedGradient()(AE_out)
         advers_added_dim = Reshape((1,11,18,50,1))(AE_out)
         input_added_dim = Reshape((1,11,18,50,1))(inputs)
         
         x = concatenate(inputs=[advers_added_dim, input_added_dim], axis=1)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
         x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #6x9x25
         
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
         x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #3x5x13
         
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
         #2x 3x5x13 x64
         x = TimeDistributed(Flatten())(x)
         #2x 12480
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
-        classification = Dense(2, activation="softmax", kernel_initializer='he_normal')(x)
+        x = dense_block_wrap(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
+        x = dense_block_wrap(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
+        classification = TimeDistributed(Dense(2, activation="softmax", kernel_initializer='he_normal'))(x)
         #out: 2x 2
         #Target output: [ [1,0], [0,1] ]
         #                  fake,  real

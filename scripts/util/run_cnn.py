@@ -46,12 +46,12 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         else:
             #uneven: train only critic on smaller filesize
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
-            n_events = int(train_files[0][1]/10)
+            n_events = int(train_files[0][1]/30)
             is_AE_adevers_training = 1 #critic
     else:
         n_events = None
     
-    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
+    training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=n_events, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
     #evaluate model evaluated und printet es in der konsole und in file
     end_time = datetime.now()
