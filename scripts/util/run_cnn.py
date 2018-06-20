@@ -36,14 +36,20 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
 
     start_time = datetime.now()
     
-    if is_AE_adevers_training:
+    if is_AE_adevers_training>0:
         if epoch%2 == 0:
             #even: train only generator:
             model = freeze_adversarial_part(model, unfrozen_critic=False, unfrozen_generator=True)
+            n_events = None
+            is_AE_adevers_training = 2 #generator
+            
         else:
             #uneven: train only critic on smaller filesize
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
-            train_files[0][1]=int(train_files[0][1]/10)
+            n_events = int(train_files[0][1]/10)
+            is_AE_adevers_training = 1 #critic
+    else:
+        n_events = None
     
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=None, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
@@ -53,7 +59,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     #Elapsed time for one epoch HH::MM:SS
     elapsed_time=str(time_delta).split(".")[0]
     
-    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=None, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
+    evaluation = evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, swap_4d_channels, n_events=n_events, is_autoencoder=is_autoencoder, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
 
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if "acc" in training_hist.history:
@@ -342,9 +348,15 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             #Modified for autoencoder:
             if is_autoencoder == True:
-                if is_AE_adevers_training:
+                if is_AE_adevers_training == 1:
+                    #For critic training
                     #1,0 means fake, 0,1 means real
                     labels = np.repeat([[[1,0],[0,1]],],xs.shape[0],0)
+                elif is_AE_adevers_training == 2:
+                    #for generator training
+                    #flip the labels, so that the generator learns to maximize the loss!
+                    #1,0 means fake, 0,1 means real
+                    labels = np.repeat([[[0,1],[1,0]],],xs.shape[0],0)
                 else:
                     labels = xs
                 output = (xs, labels) if yield_mc_info is False else (xs, labels) + (y_values,)

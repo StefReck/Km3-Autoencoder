@@ -166,25 +166,25 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
         #Takes the reconstruction and the original, both 11x13x18x1,
         #and concatenates them to 2x11x13x18x1, then applies Conv3D to both
         #simultaneosly
-        advers_in = ReversedGradient()(AE_out)
-        advers_added_dim = Reshape((1,11,18,50,1))(advers_in)
+        #advers_in = ReversedGradient()(AE_out)
+        advers_added_dim = Reshape((1,11,18,50,1))(AE_out)
         input_added_dim = Reshape((1,11,18,50,1))(inputs)
         
         x = concatenate(inputs=[advers_added_dim, input_added_dim], axis=1)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
         x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #6x9x25
         
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
         x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #3x5x13
         
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis)
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis)
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1)
         #2x 3x5x13 x64
         x = TimeDistributed(Flatten())(x)
         #2x 12480
-        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=True, dropout=0)
-        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=True, dropout=0)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
         classification = Dense(2, activation="softmax", kernel_initializer='he_normal')(x)
         #out: 2x 2
         #Target output: [ [1,0], [0,1] ]

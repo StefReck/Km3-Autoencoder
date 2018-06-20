@@ -12,6 +12,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from keras import regularizers
 import tensorflow as tf
 from scipy.special import factorial
+from util.custom_loss_functions import cat_cross_multi
 
 #from compare_hists import *
 #from util.Loggers import *
@@ -174,19 +175,27 @@ def test_model():
     return autoencoder
 
 def test2():
-    inputs = Input(shape=(5,5,5,1))
-    x = Conv3D(filters=1, kernel_size=(3,3,3), padding="same")(inputs)
-    x = Reshape((1,5,5,5,1))(x)
+    inputs = Input(shape=(2,2))
+    x = Dense(2, activation="softmax")(inputs)
     
-    y = Reshape((1,5,5,5,1))(inputs)
-    
-    out = concatenate([y,x],axis=1)
-    
-    return Model(inputs,out)
+    return Model(inputs,x)
 
 model = test2()
-#model.compile(optimizer='adam', loss='mse')
-model.summary()
+model.compile(optimizer='sgd', loss='categorical_crossentropy')
+
+model2 = test2()
+model2.layers[1].set_weights(model.layers[1].get_weights())
+model2.compile(optimizer='sgd', loss=cat_cross_multi)
+
+inp = np.random.rand(100,2,2)
+target = np.repeat([[[1,0],[0,1]],], 100, axis=0)
+
+pred = model.predict_on_batch(inp)
+pred2 = model2.predict_on_batch(inp)
+
+m_loss = model.evaluate(inp, target)
+m2_loss = model2.evaluate(inp, target)
+print(m_loss, m2_loss)
 """
 inputs1=np.zeros((500,10))
 inputs2=np.ones((500,10))

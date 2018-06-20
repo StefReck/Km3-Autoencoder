@@ -3,6 +3,8 @@
 Custom loss functions for the autoencoder on the tensorflow backend.
 """
 import tensorflow as tf
+from keras.backend.common import epsilon
+from keras.backend.tensorflow_backend import _to_tensor
  
 #return a dict of the custom loss functions to pass to load_model
 def get_custom_objects():
@@ -55,8 +57,8 @@ if __name__=="__main__":
     with tf.Session() as sess:
         sess.run(init)
         #a=np.random.randint(0,4,10)
-        a=np.array([0,0,0,11]+[0,]*50)
-        b=np.array([1,1,0,0]+[0,]*50)
+        a=np.random.rand(3,2,2)
+        b=np.random.rand(3,2,2)
         x = tf.constant(a, shape=a.shape, dtype="float32")
         y = tf.constant(b, shape=b.shape, dtype="float32")
         print(sess.run(msep_log(x,y)))

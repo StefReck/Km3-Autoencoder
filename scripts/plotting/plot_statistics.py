@@ -279,7 +279,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
         #for proper yrange, look for min/max of ydata, but not for the first epochs train,
         #since loss is often extreme here
         take_range_after_epoch = 3
-        if len(train_ydata[train_epoch>=take_range_after_epoch])=0:
+        if len(train_ydata[train_epoch>=take_range_after_epoch])==0:
             #epoch 3 doesnt exist
             take_range_after_epoch=0
             
