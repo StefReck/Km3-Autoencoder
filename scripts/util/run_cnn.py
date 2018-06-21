@@ -150,8 +150,7 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
         evaluation = model.evaluate_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, swap_col=swap_4d_channels, f_size=f_size, zero_center_image=xs_mean, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=True, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training),
             steps=int(f_size / batchsize), max_queue_size=10)
-    return_message = 'Test sample results: ' + str(evaluation) + ' (' + str(model.metrics_names) + ')'
-    print (return_message)
+    print('Test sample results: ', str(evaluation), ' (', str(model.metrics_names), ')')
     return evaluation
 
 def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
@@ -160,6 +159,7 @@ def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
     
     ae_loss="categorical_crossentropy"
     pre_optimizer = model.optimizer
+    pre_metrics= model.metrics
     
     is_in_generator_part=True
     for layer in model.layers:
@@ -171,7 +171,7 @@ def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
         if layer.name == last_layer_of_AE_name:
             is_in_generator_part=False
             
-    model.compile(loss=ae_loss, optimizer=pre_optimizer)
+    model.compile(loss=ae_loss, optimizer=pre_optimizer, metrics=pre_metrics)
     
     print("State of network: Generator unfrozen:", unfrozen_generator, "Critic unfrozen:", unfrozen_critic)
     

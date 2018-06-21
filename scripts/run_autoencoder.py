@@ -648,6 +648,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     filesize_hint_test="Filesize factor test="+str(filesize_factor_test) if filesize_factor_test!=1 else ""
     print("Train files:", train_tuple, filesize_hint)
     print("Test files:", test_tuple, filesize_hint_test)
+    print("Using metrics:", model.metrics_names)
     if autoencoder_model is not None: print("Using autoencoder model:", autoencoder_model)
     
     #Execute Training:
