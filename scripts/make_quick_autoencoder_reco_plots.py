@@ -43,8 +43,10 @@ if "vgg_6_200_advers" in model_file:
     only_autoencoder = setup_model("vgg_5_200",0)
     for i,layer in enumerate(only_autoencoder.layers):
         layer.set_weights(autoencoder.layers[i].get_weights())
+    gan_model = autoencoder
     autoencoder = only_autoencoder
-
+else:
+    gan_model = None
 
 dataset_info_dict = get_dataset_info(dataset_tag)
 train_file = dataset_info_dict["train_file"]
@@ -64,12 +66,18 @@ if no_zero_center==False:
     train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
     xs_mean = load_zero_center_data(train_files=train_tuple, batchsize=batchsize, n_bins=n_bins, n_gpu=1)
     hists_centered = np.subtract(hists_org.reshape((hists_org.shape+(1,))).astype(np.float32), xs_mean)
+    
     hists_pred = np.add(autoencoder.predict_on_batch(hists_centered), xs_mean)
+    print(gan_model.predict_on_batch(hists_centered))
+    
     hists_pred=hists_pred.reshape((hists_pred.shape[:-1]))
 elif no_zero_center==True:
     print("No zero centering")
     hists_centered = hists_org.reshape((hists_org.shape+(1,))).astype(np.float32)
+    
     hists_pred = autoencoder.predict_on_batch(hists_centered)
+    print(gan_model.predict_on_batch(hists_centered))
+    
     hists_pred=hists_pred.reshape((hists_pred.shape[:-1]))
 
 
