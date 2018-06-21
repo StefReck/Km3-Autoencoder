@@ -13,6 +13,7 @@ def get_custom_objects():
     custom_objects['mean_squared_error_poisson'] = mean_squared_error_poisson
     custom_objects['msep_squared'] = msep_squared
     custom_objects['msep_log'] = msep_log
+    custom_objects["cat_cross_inv"]=cat_cross_inv
     
     return custom_objects
 
@@ -51,6 +52,18 @@ def msep_log(y_true, y_pred):
     return tf.clip_by_value(tf.reduce_mean(tf.squared_difference(y_true, y_pred) *(-1/100)*tf.log(poisson_factor)),0,100)
 
 
+def cat_cross_inv(y_true, y_pred):
+    #like the normal categorical crossentropy, but labels are reversed!
+    #So this is how wrong the network was
+    y_true=1-y_true
+    axis=-1
+    y_pred /= tf.reduce_sum(y_pred, axis, True)
+    # manual computation of crossentropy
+    _epsilon = _to_tensor(epsilon(), y_pred.dtype.base_dtype)
+    y_pred = tf.clip_by_value(y_pred, _epsilon, 1. - _epsilon)
+    return - tf.reduce_sum(y_true * tf.log(y_pred), axis)
+
+
 if __name__=="__main__":
     import numpy as np
     init = tf.global_variables_initializer()
@@ -61,5 +74,5 @@ if __name__=="__main__":
         b=np.random.rand(3,2,2)
         x = tf.constant(a, shape=a.shape, dtype="float32")
         y = tf.constant(b, shape=b.shape, dtype="float32")
-        print(sess.run(msep_log(x,y)))
+        print(sess.run(cat_cross_inv(x,y)))
 

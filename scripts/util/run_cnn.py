@@ -8,7 +8,7 @@ import re
 import os
 from functools import reduce
 
-from util.Loggers import NBatchLogger_Recent, NBatchLogger_Recent_Acc
+from util.Loggers import NBatchLogger_Recent, NBatchLogger_Recent_Acc, NBatchLogger_Recent_CCI
 
 #import sys
 #sys.path.append('../')
@@ -64,11 +64,16 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     with open(save_path+"trained_" + modelname + '_test.txt', 'a') as test_file:
         if "acc" in training_hist.history:
             #loss and accuracy
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6:.4g}'.format(epoch , str(evaluation[0])[:10], str(training_hist.history["loss"][0])[:10], str(evaluation[1])[:10], str(training_hist.history["acc"][0])[:10], elapsed_time, K.get_value(model.optimizer.lr) ))
+            test_file.write('\n{0}\t{1:.9g}\t{2:.9g}\t{3:.9g}\t{4:.9g}\t{5}\t{6:.4g}'.format(epoch , evaluation[0], training_hist.history["loss"][0], evaluation[1], training_hist.history["acc"][0], elapsed_time, K.get_value(model.optimizer.lr) ))
+        
+        elif "cat_cross_inv" in training_hist.history:
+            #For the Advers AE
+            test_file.write('\n{0}\t{1:.9g}\t{2:.9g}\t{3:.9g}\t{4:.9g}\t{5}\t{6:.4g}'.format(epoch , evaluation[0], training_hist.history["loss"][0], evaluation[1], training_hist.history["cat_cross_inv"][0], elapsed_time, K.get_value(model.optimizer.lr) ))
+        
         else:
             #For autoencoders: only loss
             #history object looks like this: training_hist.history = {'loss': [0.9533379077911377, 0.9494166374206543]} for 2 epochs, this trains only one
-            test_file.write('\n{0}\t{1}\t{2}\t{3}\t{4:.4g}'.format(epoch, str(evaluation)[:10], str(training_hist.history["loss"][0])[:10], elapsed_time, K.get_value(model.optimizer.lr) ))
+            test_file.write('\n{0}\t{1:.9g}\t{2:.9g}\t{3}\t{4:.4g}'.format(epoch, evaluation, training_hist.history["loss"][0], elapsed_time, K.get_value(model.optimizer.lr) ))
     return lr
 
 def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
@@ -111,6 +116,8 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
             
             if "acc" in metrics:
                 BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
+            elif "cat_cross_inv" in metrics:
+                BatchLogger = NBatchLogger_Recent_CCI(display=500, logfile=log_file)
             else:
                 BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
                 

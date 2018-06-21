@@ -114,3 +114,27 @@ class NBatchLogger_Recent_Acc(Callback):
             fsync(self.logfile.fileno())
             self.averageLoss = 0
             self.averageAcc = 0
+            
+#Low effort (for cat_cross_inv)
+class NBatchLogger_Recent_CCI(Callback):
+    #Gibt lOSS aus über alle :display batches, gemittelt über die letzten :display batches
+    def __init__(self, display, logfile):
+        self.seen = 0
+        self.display = display
+        self.averageLoss = 0
+        self.averageAcc = 0
+        self.logfile = logfile
+        self.logfile.write("#Recent Logger\n#Batch\tLoss\tcat_cross_inv")
+                           
+    def on_batch_end(self, batch, logs={}):
+        self.seen += 1
+        self.averageLoss += logs.get('loss')
+        self.averageAcc += logs.get("cat_cross_inv")
+        if self.seen % (self.display) == 0:
+            averaged_loss = self.averageLoss / (self.display)
+            averaged_acc = self.averageAcc / (self.display)
+            self.logfile.write('\n{0}\t{1}\t{2}'.format(self.seen, averaged_loss, averaged_acc))
+            self.logfile.flush()
+            fsync(self.logfile.fileno())
+            self.averageLoss = 0
+            self.averageAcc = 0

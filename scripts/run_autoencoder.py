@@ -242,6 +242,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #for adversarial AE training, setup like normal autoencoder
         autoencoder_stage=0
         ae_loss_name = "categorical_crossentropy"
+        supervised_loss = "cat_cross_inv"
         is_AE_adevers_training=True
         print("Starting AE training in adversarial setup (stage 5). Loss will be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
     else:
@@ -261,7 +262,8 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         custom_objects=get_custom_objects()
         ae_loss=custom_objects[ae_loss_name]
     
-    #define loss function and metrics to use for new supervised networks
+    
+    #define loss function and metrics to use for new networks
     if supervised_loss == "auto":
         #automatically choose the supervised loss based on the number of output neurons;
         #otherwise use the user defined one (mse or mae)
@@ -281,7 +283,9 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         elif supervised_loss=='mse':
             supervised_metrics=None
         else:
-            raise NameError("supervised_loss: "+supervised_loss+" unknown.")
+            custom_objects=get_custom_objects()
+            supervised_metrics=[custom_objects[supervised_loss]]
+            
     print("Using supervised loss:", supervised_loss)
     
     if not os.path.exists(model_folder):
@@ -388,11 +392,15 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
             #Create a new autoencoder network
             print("Creating new autoencoder network:", modeltag)
             model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
-            model.compile(optimizer=adam, loss=ae_loss)
+            model.compile(optimizer=adam, loss=ae_loss, metrics=supervised_metrics)
             #Create header for new test log file
             with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
                 metrics = model.metrics_names #["loss"]
-                test_log_file.write('{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0]))
+                if len(metrics)==2:
+                    line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1])
+                elif len(metrics)==1:
+                    line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0])
+                test_log_file.write(line)
             
         else:
             #Load an existing trained autoencoder network and train that
@@ -405,7 +413,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
                 print("Lambda mode enabled")
                 model=setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
                 model.load_weights(autoencoder_model_to_load)
-                model.compile(optimizer=adam, loss=ae_loss)
+                model.compile(optimizer=adam, loss=ae_loss, metrics=supervised_metrics)
                 
                 opti_weights=load_model(autoencoder_model_to_load, custom_objects=custom_objects).optimizer.get_weights()
                 model.optimizer.set_weights(opti_weights)
