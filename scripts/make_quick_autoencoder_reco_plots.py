@@ -25,7 +25,7 @@ from plotting.histogramm_3d_utils import make_plots_from_array, get_some_hists_f
 from get_dataset_info import get_dataset_info
 from util.run_cnn import load_zero_center_data, h5_get_number_of_rows
 from util.custom_loss_functions import get_custom_objects
-
+from model_definitions import setup_model
 
 
 
@@ -36,6 +36,15 @@ how_many = params["how_many"]
 no_zero_center = params["no_zero_center"]
 
 autoencoder = load_model(model_file, custom_objects=get_custom_objects())
+
+if "vgg_6_200_advers" in model_file:
+    #This is an adversary network
+    #Only leave the autoencoder part over
+    only_autoencoder = setup_model("vgg_5_200",0)
+    for i,layer in enumerate(only_autoencoder.layers):
+        layer.set_weights(autoencoder.layers[i].get_weights())
+    autoencoder = only_autoencoder
+
 
 dataset_info_dict = get_dataset_info(dataset_tag)
 train_file = dataset_info_dict["train_file"]
