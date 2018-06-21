@@ -255,7 +255,8 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
     
     elif model_tag == "vgg_6_200_advers":
         model = setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name)
-    
+    elif model_tag == "vgg_6_2000_advers":
+        model = setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name)
     
     
     else:
