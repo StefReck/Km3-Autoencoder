@@ -162,7 +162,7 @@ def setup_vgg_6_200_advers(autoencoder_stage, options_dict, modelpath_and_name=N
         #Output 11x13x18 x 1
         
         if pretrained_autoencoder_path != None:
-            generator_model = Model(inputs=inputs, outputs=encoded)
+            generator_model = Model(inputs=inputs, outputs=AE_out)
             pretrained_autoencoder = load_model(pretrained_autoencoder_path, compile=False) #no need to compile the model as long as only weights are read out
             print("Loading weights from model", pretrained_autoencoder_path)
             weights_loaded=0
