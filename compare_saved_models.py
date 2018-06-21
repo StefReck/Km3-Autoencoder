@@ -7,6 +7,8 @@ from keras.models import load_model
 import numpy as np
 import argparse
 
+from scripts.util.custom_loss_functions import get_custom_objects
+
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Compare weights of two models layer wise.')
@@ -26,8 +28,9 @@ model_path_2 = params["model_path_2"]
 
 
 def do_model_check(model_path_1, model_path_2):
-    model_1 = load_model(model_path_1)
-    model_2 = load_model(model_path_2)
+    custom_objects=get_custom_objects()
+    model_1 = load_model(model_path_1, custom_objects=custom_objects)
+    model_2 = load_model(model_path_2, custom_objects=custom_objects)
     
     for layer_no,layer_1 in enumerate(model_1.layers):
         layer_2 = model_2.layers[layer_no]
