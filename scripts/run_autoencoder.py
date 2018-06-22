@@ -249,7 +249,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         supervised_loss = "cat_cross_inv"
         is_AE_adevers_training=1
         print("Starting AE training in adversarial setup (stage 5). Loss will be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
-    elif autoencoder_stage=6:
+    elif autoencoder_stage==6:
         #preperation for AAE training: train only the critic
         autoencoder_stage=0
         ae_loss_name = "categorical_crossentropy"

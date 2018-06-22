@@ -56,6 +56,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         if epoch==1:
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
         is_AE_adevers_training = 3 #critic
+        n_events = None
     else:
         n_events = None
     

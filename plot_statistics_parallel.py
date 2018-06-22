@@ -67,7 +67,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     
     #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list, default_label_array) 
     #for every test file
-    data_from_files, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file)
+    data_from_files, ylabel_list, default_label_array = make_data_from_files(test_files, dump_to_file=dump_to_file)
     
     data_autoencoder = data_from_files[0]
     data_parallel = data_from_files[1]
