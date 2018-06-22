@@ -30,9 +30,9 @@ from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_par
 
 #Default Values:
 xlabel="Epoch"
-title="Loss of autoencoders with a varying number of convolutional layers"
+title=""
 #Override default labels (names of the models); must be one for every test file, otherwise default
-labels_override=["12 layers CW", "12 layers","14 layers", "16 layers", "20 layers"]
+labels_override=["model",]
 #legend location for the labels and the test/train box
 legend_locations=(1, "upper left")
 #Override xtick locations; None for automatic
@@ -55,8 +55,8 @@ def make_parser_plot(test_files, title, labels_override, save_as,
                      legend_locations, colors, xticks, style,
                      dump_to_file, xlabel, save_it, show_it, xrange, 
                      average_train_data_bins=1):
-    #Read the data in
-    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, 
+    #Read the data in, auto means take acc when available, otherwise loss
+    data_for_plots, ylabel_list, default_label_array = make_data_from_files(test_files, which_ydata="auto",
                                                                             dump_to_file=dump_to_file)
     #Create the plot
     fig = make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, title, 

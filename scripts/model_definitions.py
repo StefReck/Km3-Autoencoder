@@ -9,7 +9,7 @@ Functions that return models are defined in this file
 from model_def.model_def_vgg_3 import setup_vgg_3,setup_vgg_3_dropout, setup_vgg_3_max, setup_vgg_3_stride, setup_vgg_3_stride_noRelu, setup_vgg_3_small, setup_vgg_3_verysmall, setup_vgg_3_reg
 from model_def.model_def_vgg_4 import *
 from model_def.model_def_vgg_5 import *
-from model_def.model_def_vgg_6 import setup_vgg_6_200_advers
+from model_def.model_def_vgg_6 import *
 from model_def.model_def_channel_1 import *
 import warnings
 
@@ -272,7 +272,7 @@ def print_model_blockwise(model):
     
             
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_6_200_advers", autoencoder_stage=0, modelpath_and_name=None, 
+    model=setup_model(model_tag="vgg_6_2000_advers", autoencoder_stage=0, modelpath_and_name=None, 
                       additional_options="")
     #model.summary()
     conv_layer_indices = []

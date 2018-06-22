@@ -40,31 +40,22 @@ def make_dicts_from_files(test_files):
         dict_array.append(data)
     return dict_array
 
-def make_loss_epoch(test_file, epoch): #"vgg_3/trained_vgg_3_autoencoder_test.txt"
+def make_loss_epoch(test_file, epoch, which_ydata): #"vgg_3/trained_vgg_3_autoencoder_test.txt"
     #Get losses or accuracy from logfile for one epoch, based on the name of the testfile
+    #which_ydata is is the label of the column that gets returned
+    #usually Accuracy or Loss
     #lin-spaced epoch data is added (slightly off)
     loss_epoch_file=test_file[:-8]+"epoch"+str(epoch)+"_log.txt"
 
     data = read_out_file(loss_epoch_file)
     #should have: Batch, Loss (,Accuracy)
+    losses = data[which_ydata]
+    """
     if "Accuracy" in data:
         losses = data["Accuracy"]
     else:
         losses = data["Loss"]
-    
-    #old version
     """
-    with open(loss_epoch_file, "r") as f:
-        losses=[]
-        use_column = 1 #0 is samples, 1 is loss, 2 is accuracy if supervised model
-        for line in f:
-            if "#" in line:
-                if "Accuracy" in line:
-                    use_column=2
-                continue
-            losses.append( float(line.strip().split('\t')[use_column]) )
-    """
-    
     epoch_points = np.linspace(epoch-1,epoch,len(losses), endpoint=False)
     return [epoch_points, losses]
 
@@ -77,36 +68,53 @@ def make_test_train_plot(epochs, test, train, label, epochs_train, ylabel):
     return test_plot
 
 
-def make_data_for_plot(dict_array, test_files):
+def make_data_for_plot(dict_array, test_files, which_ydata):
     #Returns ( [[Test_epoch, Test_ydata, Train_epoch, Train_ydata], ...], ylabel_list) for every test file
     return_list_array=[]
     ylabel_list=[]
     for i,data_dict in enumerate(dict_array): 
-        #Gather training loss from the _log.txt files for every epoch in the test file:
-        train_epoch_data=[]
-        train_y_data=[]
-        for epoch in data_dict["Epoch"]:
-            e,l = make_loss_epoch(test_files[i], int(epoch)) #automatically takes acc if available
+        number_of_test_epochs = len(data_dict["Epoch"])
+        
+        # "which_ydata" is the column label in the train files
+        #default: same ydata for all epochs is taken
+        which_ydatas = [which_ydata,]*number_of_test_epochs
+        if which_ydata=="Accuracy":
+            test_file_column_labels = ["Test acc",]*number_of_test_epochs
+            ylabel = "Accuracy"
+            
+        elif which_ydata=="cat_cross_inv":
+            #For adversarial AE, critic and generator training is alternated evey epoch,
+            #so a different label has to be taken every 2nd epoch
+            test_file_column_labels = ["Test cat_cross_inv",]*number_of_test_epochs
+            for i in range(1,len(number_of_test_epochs),2):
+                which_ydata[i]="Loss"
+                test_file_column_labels[i]="Test loss"
+            ylabel = "loss inv"
+            
+        else:
+            #just take the loss instead
+            test_file_column_labels = ["Test loss",]*number_of_test_epochs
+            ylabel = "Loss"
+            
+        test_epochs, test_ydata = [], []
+        train_epoch_data, train_y_data = [], []
+        
+        for test_file_line, test_file_epoch in enumerate(data_dict["Epoch"]):
+            which_ydata = which_ydatas[test_file_line]
+            test_file_column_label = test_file_column_labels[test_file_line]
+            
+            test_epochs.append(int(test_file_epoch))
+            test_ydata.append(float(data_dict[test_file_column_label][test_file_line]))
+            
+            e,l = make_loss_epoch(test_files[i], int(test_file_epoch), which_ydata)
             train_epoch_data.extend(e)
             train_y_data.extend(l)
-                
-        test_epochs =      list(map(int,     data_dict["Epoch"])) 
-        #train_epoch_data = list(map(float,   train_epoch_data ))
-        #train_y_data =     list(map(float,   train_y_data))
         
-        if "Test acc" in data_dict:
-            #This is an encoder network with categorical output
-            ylabel = "Accuracy"
-            test_acc    = list(map(float, data_dict["Test acc"])) 
-            return_list = [test_epochs, test_acc, train_epoch_data, train_y_data]   
-        else:
-            #This is an autoencoder network (or an encoder network doing regression)
-            ylabel = "Loss"
-            test_loss    = list(map(float, data_dict["Test loss"])) 
-            return_list = [test_epochs, test_loss, train_epoch_data, train_y_data]
-            
+        #Append to list for every test file given
+        return_list = [test_epochs, test_ydata, train_epoch_data, train_y_data]
         return_list_array.append(return_list)
         ylabel_list.append(ylabel)
+        
     return return_list_array, ylabel_list
 
 def get_max_epoch(data_from_files):
@@ -130,16 +138,32 @@ def get_default_labels(test_files):
     return modelnames
     
 
-def make_data_from_files(test_files, dump_to_file=None):
+def make_data_from_files(test_files, which_ydata="auto", dump_to_file=None):
     #Input: list of strings, each the path to a model in the models folder
     
     # Takes a list of names of test files, and returns:
     # ( [Test_epoch, Test_ydata, Train_epoch, Train_ydata], [...], ... ] , [ylabel1, ylabel2, ...], [default labels] )
     #                 For test file 1,                      File 2 ...   ,   File1 ,  File2,  ...
-    #ydata is loss, or instead acc if that is to be found in the log files
+    #which ydata is returned is defined by the name of which_ydata, the name of the loss
+    #which is also the top line of the train log files, e.g. Accuracy, Loss, cat_cross_inv
     #default labels are the labels for the legend
-    dict_array = make_dicts_from_files(test_files) #a list of dicts, one for every test file
-    data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files)
+    
+    #a list of dicts, one for every test file, conatining all columns of the testfile
+    dict_array = make_dicts_from_files(test_files) 
+    
+    if which_ydata=="auto":
+        #take acc if available, loss otherwise
+        #only the first dict is checked, others should be the same
+        if "Test acc" in dict_array[0]:
+            which_ydata = "Accuracy"
+        elif "Test cat_cross_inv" in dict_array[0]:
+            which_ydata = "cat_cross_inv"
+        else:
+            which_ydata = "Loss"
+    
+    #data from the single epoch train files, together with the test file data
+    data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files, which_ydata)
+    #labels for plot
     default_label_array = get_default_labels(test_files)
     
     if dump_to_file is not None:
