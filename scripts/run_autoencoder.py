@@ -238,13 +238,23 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
     else:
         unfreeze_layer_training = False
         
+    #AAE training: similar to stage 0, but with other loss and training setup
+    #is_AE_adevers_training=0 no AAE training
+    #1 or 2: train critic and generator alternating
+    #3: Train only critic
     if autoencoder_stage==5:
         #for adversarial AE training, setup like normal autoencoder
         autoencoder_stage=0
         ae_loss_name = "categorical_crossentropy"
         supervised_loss = "cat_cross_inv"
-        is_AE_adevers_training=True
+        is_AE_adevers_training=1
         print("Starting AE training in adversarial setup (stage 5). Loss will be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
+    elif autoencoder_stage=6:
+        #preperation for AAE training: train only the critic
+        autoencoder_stage=0
+        ae_loss_name = "categorical_crossentropy"
+        supervised_loss = "cat_cross_inv"
+        is_AE_adevers_training=3
     else:
         is_AE_adevers_training=False
     

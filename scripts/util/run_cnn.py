@@ -36,7 +36,9 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
 
     start_time = datetime.now()
     
-    if is_AE_adevers_training>0:
+    #For AAE gan training:
+    if is_AE_adevers_training==1 or is_AE_adevers_training==2:
+        #Train critic and generator alternating
         if epoch%2 == 0:
             #even: train only generator:
             model = freeze_adversarial_part(model, unfrozen_critic=False, unfrozen_generator=True)
@@ -48,8 +50,15 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
             n_events = int(train_files[0][1]/30)
             is_AE_adevers_training = 1 #critic
+            
+    elif is_AE_adevers_training==3:
+        #train only critic. Generator needs to be frozen only once
+        if epoch==1:
+            model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
+        is_AE_adevers_training = 3 #critic
     else:
         n_events = None
+    
     
     training_hist = fit_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch, shuffle, swap_4d_channels, is_autoencoder=is_autoencoder, n_events=n_events, tb_logger=tb_logger, save_path=save_path, verbose=verbose, broken_simulations_mode=broken_simulations_mode, dataset_info_dict=dataset_info_dict, is_AE_adevers_training=is_AE_adevers_training)
     #fit_model speichert model ab unter ("models/tag/trained_" + modelname + '_epoch' + str(epoch) + '.h5')
@@ -355,7 +364,7 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
             
             #Modified for autoencoder:
             if is_autoencoder == True:
-                if is_AE_adevers_training == 1:
+                if is_AE_adevers_training == 1 or is_AE_adevers_training==3:
                     #For critic training
                     #1,0 means fake, 0,1 means real
                     labels = np.repeat([[[1,0],[0,1]],],xs.shape[0],0)
