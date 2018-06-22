@@ -86,9 +86,9 @@ def make_data_for_plot(dict_array, test_files, which_ydata):
             #For adversarial AE, critic and generator training is alternated evey epoch,
             #so a different label has to be taken every 2nd epoch
             test_file_column_labels = ["Test cat_cross_inv",]*number_of_test_epochs
-            for i in range(1,len(number_of_test_epochs),2):
-                which_ydata[i]="Loss"
-                test_file_column_labels[i]="Test loss"
+            for j in range(1,number_of_test_epochs,2):
+                which_ydatas[j]="Loss"
+                test_file_column_labels[j]="Test loss"
             ylabel = "loss inv"
             
         else:

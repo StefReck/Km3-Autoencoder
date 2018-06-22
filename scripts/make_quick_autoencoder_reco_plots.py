@@ -45,6 +45,14 @@ if "vgg_6_200_advers" in model_file:
         layer.set_weights(autoencoder.layers[i].get_weights())
     gan_model = autoencoder
     autoencoder = only_autoencoder
+elif "vgg_6_2000_advers" in model_file:
+    #This is an adversary network
+    #Only leave the autoencoder part over
+    only_autoencoder = setup_model("vgg_5_2000",0)
+    for i,layer in enumerate(only_autoencoder.layers):
+        layer.set_weights(autoencoder.layers[i].get_weights())
+    gan_model = autoencoder
+    autoencoder = only_autoencoder
 else:
     gan_model = None
 
