@@ -383,12 +383,12 @@ def generate_batches_from_hdf5_file(filepath, batchsize, n_bins, class_type, is_
                 elif AE_y_labels == "wasserstein":
                     #For critic training
                     #-1 means fake, 1 means real
-                    labels = np.repeat([[-1,1],],xs.shape[0],0)
+                    labels = np.repeat([[[-1],[1]],],xs.shape[0],0)
                 elif AE_y_labels == "wasserstein_flip":
                     #for generator training
                     #flip the labels, so that the generator learns to maximize the loss!
                     #1,0 means fake, 0,1 means real
-                    labels = np.repeat([[1,-1],],xs.shape[0],0)
+                    labels = np.repeat([[[1],[-1]],],xs.shape[0],0)
                     
                 else:
                     #MSE Autoencoder
