@@ -525,6 +525,19 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_2000_broken15_unf"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.18,0.55)
+        
+    elif which_one=="energy_15_2000_enc" or which_one==35:
+        brokendata_tag = "xzt"
+        realdata_tag   = "xzt_broken15"
+        broken_model = "vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
+        real_model   = "vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energy_nodrop_broken15_epoch22.h5"
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_2000_broken15_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.18,0.55)
+        
     # ----------------------------- Unfreeze stuff -----------------------------
     
     elif which_one=="unfreeze_comp" or which_one==18:
