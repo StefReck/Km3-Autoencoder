@@ -5,6 +5,7 @@ Custom loss functions for the autoencoder on the tensorflow backend.
 import tensorflow as tf
 from keras.backend.common import epsilon
 from keras.backend.tensorflow_backend import _to_tensor
+from keras import backend as K
  
 #return a dict of the custom loss functions to pass to load_model
 def get_custom_objects():
@@ -14,6 +15,7 @@ def get_custom_objects():
     custom_objects['msep_squared'] = msep_squared
     custom_objects['msep_log'] = msep_log
     custom_objects["cat_cross_inv"]=cat_cross_inv
+    custom_objects["wasserstein_loss"]=wasserstein_loss
     
     return custom_objects
 
@@ -64,15 +66,27 @@ def cat_cross_inv(y_true, y_pred):
     return - tf.reduce_sum(y_true * tf.log(y_pred), axis)
 
 
+def wasserstein_loss(y_true, y_pred):
+    """Calculates the Wasserstein loss for a sample batch.
+    The Wasserstein loss function is very simple to calculate. In a standard GAN, the discriminator
+    has a sigmoid output, representing the probability that samples are real or generated. In Wasserstein
+    GANs, however, the output is linear with no activation function! Instead of being constrained to [0, 1],
+    the discriminator wants to make the distance between its output for real and generated samples as large as possible.
+    The most natural way to achieve this is to label generated samples -1 and real samples 1, instead of the
+    0 and 1 used in normal GANs, so that multiplying the outputs by the labels will give you the loss immediately.
+    Note that the nature of this loss means that it can be (and frequently will be) less than 0."""
+    return K.mean(y_true * y_pred, axis=(1,2))
+
+
 if __name__=="__main__":
     import numpy as np
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init)
         #a=np.random.randint(0,4,10)
-        a=np.random.rand(3,2,2)
-        b=np.random.rand(3,2,2)
+        a=np.random.rand(5,2,1)
+        b=np.random.rand(5,2,1)
         x = tf.constant(a, shape=a.shape, dtype="float32")
         y = tf.constant(b, shape=b.shape, dtype="float32")
-        print(sess.run(cat_cross_inv(x,y)))
+        print(sess.run(wasserstein_loss(x,y)))
 

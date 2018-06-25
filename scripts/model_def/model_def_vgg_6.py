@@ -312,10 +312,20 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         #2x 12480
         x = dense_block_wrap(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
         x = dense_block_wrap(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
+        
+        """
+        #Softmax  Categorical output
         classification = TimeDistributed(Dense(2, activation="softmax", kernel_initializer='he_normal'))(x)
         #out: 2x 2
         #Target output: [ [1,0], [0,1] ]
         #                  fake,  real
+        """
+        #For wasserstein distance: 
+        classification = TimeDistributed(Dense(1, activation="linear", kernel_initializer='he_normal'))(x)
+        #out: 2x 2
+        #Target output: [ -1, 1 ]
+        #                  fake,  real
+        
         adversary = Model(inputs, classification)
         return adversary
     
