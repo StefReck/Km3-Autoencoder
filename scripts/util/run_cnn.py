@@ -172,7 +172,7 @@ def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
     #Go through the network and freeze/unfreeze layers according to vars
     last_layer_of_AE_name = "AE_output_layer"
     
-    ae_loss="categorical_crossentropy"
+    ae_loss=model.loss
     pre_optimizer = model.optimizer
     pre_metrics= model.metrics
     
