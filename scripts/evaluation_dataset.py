@@ -530,7 +530,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         brokendata_tag = "xzt"
         realdata_tag   = "xzt_broken15"
         broken_model = "vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
-        real_model   = "vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energy_nodrop_broken15_epoch22.h5"
+        real_model   = "vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energy_broken15_nodrop_epoch22.h5"
         modelidents, dataset_array = get_procedure(broken_model, real_model, 
                                                    brokendata_tag, realdata_tag)
         folder_in_the_plots_path = "broken_study_energy/"

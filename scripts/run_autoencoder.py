@@ -253,7 +253,7 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         #preperation for AAE training: train only the critic
         autoencoder_stage=0
         ae_loss_name = "categorical_crossentropy"
-        supervised_loss = "cat_cross_inv"
+        #supervised_loss = "cat_cross_inv"
         is_AE_adevers_training=3
     else:
         is_AE_adevers_training=False
