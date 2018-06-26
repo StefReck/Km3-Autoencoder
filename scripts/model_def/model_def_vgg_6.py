@@ -293,24 +293,29 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         #and concatenates them to 2x11x13x18x1, then applies Conv3D to both
         #simultaneosly
         use_batchnorm_critic=True
+        dropout_for_critic = 0.0
+        
         #advers_in = ReversedGradient()(AE_out)
         advers_added_dim = Reshape((1,11,18,50,1))(AE_out)
         input_added_dim = Reshape((1,11,18,50,1))(inputs)
         
         x = concatenate(inputs=[advers_added_dim, input_added_dim], axis=1)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
-        x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #6x9x25
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x = TimeDistributed(AveragePooling3D((1, 1, 2), padding='same'))(x) #11x18x25
         
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
-        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
-        x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #3x5x13
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x=conv_block_wrap(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #6x9x13
         
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
-        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=0.1, use_batchnorm=use_batchnorm_critic)
-        #2x 3x5x13 x64
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x=conv_block_wrap(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, use_batchnorm=use_batchnorm_critic)
+        x = TimeDistributed(AveragePooling3D((2, 2, 2), padding='same'))(x) #3x5x7
+        
+        #2x 3x5x7 x64
         x = TimeDistributed(Flatten())(x)
         #2x 12480
-        x = dense_block_wrap(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0.1)
+        x = dense_block_wrap(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0)
         x = dense_block_wrap(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
         
         
