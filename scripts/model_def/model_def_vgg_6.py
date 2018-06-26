@@ -8,33 +8,6 @@ from keras.layers import Activation, ActivityRegularization, Cropping3D, Reshape
 from keras import backend as K
 from keras.engine.topology import Layer
 
-class ReversedGradient(Layer):
-    """Layer that reverses the gradients of all variables before this layer
-+    while keeping the gradients of all variables after this layer.
-+
-+    # Arguments
-+        l: hyper-parameter lambda to control the gradient.
-+
-+    # Input shape
-+        Arbitrary. Use the keyword argument `input_shape`
-+        (tuple of integers, does not include the samples axis)
-+        when using this layer as the first layer in a model.
-+
-+    # Output shape
-        Same shape as input.
-    """
-
-    def __init__(self, l=1., **kwargs):
-        super(ReversedGradient, self).__init__(**kwargs)
-        self.supports_masking = True
-
-    def call(self, inputs):
-        if isinstance(inputs, list):
-            output = [-inp + K.stop_gradient(2. * inp) for inp in inputs]
-        else:
-            output = -inputs + K.stop_gradient(2. * inputs)
-        return output
-
 
 #Standard Conv Blocks
 def conv_block(inp, filters, kernel_size, padding, trainable, channel_axis, strides=(1,1,1), dropout=0.0, BNunlock=False, name_of_first_layer = None):
@@ -277,6 +250,8 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         AE_out = Conv3D(filters=1, kernel_size=(1,1,1), padding='same', activation='linear', kernel_initializer='he_normal')(x)
         #Output 11x13x18 x 1
         
+        autoencoder_model = Model(inputs, AE_out, "autoencoder") 
+        
         if pretrained_autoencoder_path != None:
             generator_model = Model(inputs=inputs, outputs=AE_out)
             #models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch119.h5
@@ -295,6 +270,37 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         use_batchnorm_critic=True
         dropout_for_critic = 0.0
         
+        inputs_critic = Input(shape=(11,18,50,1))
+        x = conv_block(inputs_critic,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        x = conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        x = AveragePooling3D((1, 1, 2), padding='same')(x) #11x18x25
+        
+        x=conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic,)
+        x=conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #6x9x13
+        
+        x=conv_block(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        x=conv_block(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        x = AveragePooling3D((2, 2, 2), padding='same')(x) #3x5x7
+        #3x5x7 x64
+        x = Flatten()(x)
+        x = dense_block(x, units=256, channel_axis=channel_axis, batchnorm=False, dropout=0)
+        x = dense_block(x, units=16, channel_axis=channel_axis, batchnorm=False, dropout=0)
+        #Softmax  Categorical output
+        x = Dense(2, activation="softmax", kernel_initializer='he_normal')(x)
+        output_critic = Reshape((1,2))(x)
+        
+        critic = Model(inputs_critic, output_critic, "critic")
+        
+        critic_orig = critic(inputs)
+        critic_fake = critic(autoencoder_model(inputs))
+        
+        concatenated = concatenate([critic_orig, critic_fake], axis=1)
+        
+        adversary = Model(inputs, concatenated)
+        
+        
+        """
         #advers_in = ReversedGradient()(AE_out)
         advers_added_dim = Reshape((1,11,18,50,1))(AE_out)
         input_added_dim = Reshape((1,11,18,50,1))(inputs)
@@ -324,7 +330,7 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         #out: 2x 2
         #Target output: [ [1,0], [0,1] ]
         #                  fake,  real
-        
+        """
         """
         #For wasserstein distance: 
         classification = TimeDistributed(Dense(1, activation="linear", kernel_initializer='he_normal'))(x)
@@ -332,7 +338,7 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         #Target output: [ -1, 1 ]
         #                  fake,  real
         """
-        adversary = Model(inputs, classification)
+        #adversary = Model(inputs, classification)
         return adversary
     
     else: #Replacement for the decoder part for supervised training:

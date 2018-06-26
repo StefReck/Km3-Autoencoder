@@ -170,21 +170,23 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
 
 def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
     #Go through the network and freeze/unfreeze layers according to vars
-    last_layer_of_AE_name = "AE_output_layer"
+    #AAE model will now consist of 4 layers: input, AE, critic, concatenate
+    
+    AE_model_name = "autoencoder"
+    critic_model_name = "critic"
     
     ae_loss=model.loss
     pre_optimizer = model.optimizer
     pre_metrics= model.metrics
     
-    is_in_generator_part=True
     for layer in model.layers:
-        if is_in_generator_part:
-            layer.trainable=unfrozen_generator
-        else:
-            layer.trainable=unfrozen_critic
-        
-        if layer.name == last_layer_of_AE_name:
-            is_in_generator_part=False
+        if layer.name==AE_model_name:
+            for sub_layer in layer.layers:
+                sub_layer.trainable=unfrozen_generator
+            
+        elif layer.name==critic_model_name:
+            for sub_layer in layer.layers:
+                sub_layer.trainable=unfrozen_critic
             
     model.compile(loss=ae_loss, optimizer=pre_optimizer, metrics=pre_metrics)
     
