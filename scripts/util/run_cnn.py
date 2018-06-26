@@ -59,7 +59,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
         is_AE_adevers_training = 3 #critic
         n_events = None
-        AE_y_labels="wasserstein"
+        AE_y_labels="cat_cross"
         
     else:
         AE_y_labels="xs"
