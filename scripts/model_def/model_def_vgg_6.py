@@ -253,12 +253,11 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         autoencoder_model = Model(inputs, AE_out, "autoencoder") 
         
         if pretrained_autoencoder_path != None:
-            generator_model = Model(inputs=inputs, outputs=AE_out)
             #models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch119.h5
             pretrained_autoencoder = load_model(pretrained_autoencoder_path, compile=False) #no need to compile the model as long as only weights are read out
             print("Loading weights from model", pretrained_autoencoder_path)
             weights_loaded=0
-            for i,layer in enumerate(generator_model.layers):
+            for i,layer in enumerate(autoencoder_model.layers):
                 layer.set_weights(pretrained_autoencoder.layers[i].get_weights())
                 weights_loaded+=1
             print("Weights of ",weights_loaded, "layers were loaded.")
