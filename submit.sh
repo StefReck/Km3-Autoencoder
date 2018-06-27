@@ -20,6 +20,8 @@ runs=100
 # 2: encoder+dense from scratch, completely unfrozen
 # 3: Parallel supervised training (load in new frozen encoder epoch according to schedule)
 # 4: Unfreeze training: Like stage 1, but conv blocks are unfrozen every few epochs.
+# 5: Adversarial Autoencoder stage: like stage 0, but with critic network and alternating which part of the GAN is trained
+# 6: Adversarial Autoencoder: train only the critic network (for pretraining)
 autoencoder_stage=1
 #Define starting epoch of autoencoder model 
 #(stage 1: the frozen encoder part of which autoencoder epoch to use)
@@ -65,6 +67,7 @@ optimizer="adam"
 # Additional options for the model, see model_definitions.py; "None" for no options
 # e.g. "dropout=0.3", "unlock_BN", ...
 # multiple options are seperated with -
+# if the option argument contains -, use quotation marks like: load_model="...-..."
 options="None"
 
 # allows to create multiple supervised trainings from the same AE model
