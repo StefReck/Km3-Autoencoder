@@ -345,7 +345,8 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
     else: #Replacement for the decoder part for supervised training:
         if autoencoder_stage == 1: #Load weights of encoder part from existing autoencoder
             encoder = Model(inputs=inputs, outputs=encoded)
-            autoencoder = load_model(modelpath_and_name, compile=False) #no need to compile the model as long as only weights are read out
+            adv_autoencoder = load_model(modelpath_and_name, compile=False) #no need to compile the model as long as only weights are read out
+            autoencoder=adv_autoencoder.layers[1]
             for i,layer in enumerate(encoder.layers):
                 layer.set_weights(autoencoder.layers[i].get_weights())
             

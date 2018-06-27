@@ -34,7 +34,30 @@ def make_options_dict(additional_options):
     options_dict["pretrained_autoencoder_path"]=None
         
     additional_options_list = additional_options.split("-")
-    for additional_options in additional_options_list:
+    joined_list = []
+    skip_next_entry=False
+    for i in range(len(additional_options_list)):
+        additional_options = additional_options_list[i]
+        #could also be sth like unlock_BN=true-load_model="asd-md.h5"-bla=bla
+        #would get split to :
+        #   unlock_BN=true
+        #   load_model="asd
+        #   md.h5"
+        #   bla=bla
+        #--> merge 2nd and third from the above!
+        if skip_next_entry:
+            skip_next_entry=False
+            continue
+        
+        if '"' in additional_options[:-1]:
+            additional_options = additional_options + "-" + additional_options_list[i+1]
+            additional_options = additional_options.replace('"', '')
+            skip_next_entry=True
+            
+        joined_list.append(additional_options)
+        
+        
+    for additional_options in joined_list:
         if additional_options == "unlock_BN":
             #Always unlock the BN layers in the encoder part.
             options_dict["unlock_BN_in_encoder"]=True
@@ -91,7 +114,8 @@ def make_options_dict(additional_options):
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)
             
     return options_dict
-
+print(make_options_dict('layer_version=single-pretrained_autoencoder_path="asd-gdg.h5"-dense_setup=small'))
+raise
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options="", number_of_output_neurons=2):
     #model tags can have version numbers, e.g. vgg_1-different_lr
