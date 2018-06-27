@@ -292,12 +292,13 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         
         critic = Model(inputs_critic, output_critic, "critic")
         
-        critic_orig = critic(inputs)
-        critic_fake = critic(autoencoder_model(inputs))
+        input_to_AAE = Input(shape=(11,18,50,1))
         
+        critic_orig = critic(input_to_AAE)
+        critic_fake = critic(autoencoder_model(input_to_AAE))
         concatenated = concatenate([critic_orig, critic_fake], axis=1)
         
-        adversary = Model(inputs, concatenated)
+        adversary = Model(input_to_AAE, concatenated)
         
         
         """
