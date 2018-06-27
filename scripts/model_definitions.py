@@ -114,8 +114,6 @@ def make_options_dict(additional_options):
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)
             
     return options_dict
-print(make_options_dict('layer_version=single-pretrained_autoencoder_path="asd-gdg.h5"-dense_setup=small'))
-raise
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options="", number_of_output_neurons=2):
     #model tags can have version numbers, e.g. vgg_1-different_lr
