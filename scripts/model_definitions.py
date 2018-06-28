@@ -58,6 +58,7 @@ def make_options_dict(additional_options):
                 floating_option = floating_option + additional_options
                 quotation_started=False
                 joined_list.append(floating_option)
+            continue
             
         if quotation_started:
             floating_option = floating_option + additional_options + "-"
@@ -65,9 +66,7 @@ def make_options_dict(additional_options):
             joined_list.append(additional_options)
             
     if quotation_started:
-        print("Additional options contained only one", join_sign,"but an even number is required!")
-            
-        
+        warnings.warn("Additional options contained only one", join_sign,"but an even number is required!")
         
         
     for additional_options in joined_list:
@@ -131,6 +130,7 @@ def make_options_dict(additional_options):
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)
             
     return options_dict
+
 
 def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additional_options="", number_of_output_neurons=2):
     #model tags can have version numbers, e.g. vgg_1-different_lr
