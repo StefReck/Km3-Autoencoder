@@ -36,26 +36,36 @@ def make_options_dict(additional_options):
         
     additional_options_list = additional_options.split("-")
     joined_list = []
-    skip_next_entry=False
+    quotation_started=False
+    join_sign="'"
     for i in range(len(additional_options_list)):
         additional_options = additional_options_list[i]
-        #could also be sth like unlock_BN=true-load_model="asd-md.h5"-bla=bla
+        #could also be sth like unlock_BN=true-load_model="asd-mas-d.h5"-bla=bla
         #would get split to :
         #   unlock_BN=true
         #   load_model="asd
+        #   mas
         #   md.h5"
         #   bla=bla
-        #--> merge 2nd and third from the above!
-        if skip_next_entry:
-            skip_next_entry=False
-            continue
-        
-        if '"' in additional_options[:-1]:
-            additional_options = additional_options + "-" + additional_options_list[i+1]
-            additional_options = additional_options.replace('"', '')
-            skip_next_entry=True
+        #--> merge entry 2-4 from the above!
+        if join_sign in additional_options:
+            additional_options = additional_options.replace(join_sign, '')
+            if not quotation_started:
+                quotation_started=True
+                joined_list.append(additional_options)
+            else:
+                joined_list[-1] = joined_list[-1] + additional_options
+                quotation_started=False
             
-        joined_list.append(additional_options)
+        if quotation_started:
+            joined_list[-1] = joined_list[-1] + additional_options
+        else:
+            joined_list.append(additional_options)
+            
+    if quotation_started:
+        print("Additional options contained only one", join_sign,"but an even number is required!")
+            
+        
         
         
     for additional_options in joined_list:
