@@ -263,7 +263,8 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
             for i,layer in enumerate(autoencoder_model.layers):
                 layer.set_weights(pretrained_autoencoder.layers[i].get_weights())
                 weights_loaded+=1
-            print("Weights of ",weights_loaded, "layers were loaded (from", autoencoder_model.layers[0], "to", autoencoder_model.layers[-1], ")")
+            print("Weights of ",weights_loaded, "layers were loaded (from", autoencoder_model.layers[0].name, "to", autoencoder_model.layers[-1].name, ")")
+        
         
         #The adversarial part:
         #Takes the reconstruction and the original, both 11x13x18x1,
@@ -302,10 +303,11 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
             for i,layer in enumerate(critic.layers):
                 layer.set_weights(pretrained_critic.layers[i].get_weights())
                 weights_loaded+=1
-            print("Weights of ",weights_loaded, "layers were loaded (from", critic.layers[0], "to", critic.layers[-1], ")")
+            print("Weights of ",weights_loaded, "layers were loaded (from", critic.layers[0].name, "to", critic.layers[-1].name, ")")
         
         
         
+        #The total GAN:
         input_to_AAE = Input(shape=(11,18,50,1))
         
         critic_orig = critic(input_to_AAE)

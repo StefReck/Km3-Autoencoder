@@ -52,13 +52,13 @@ def make_options_dict(additional_options):
             additional_options = additional_options.replace(join_sign, '')
             if not quotation_started:
                 quotation_started=True
-                joined_list.append(additional_options)
+                joined_list.append(additional_options+"-")
             else:
                 joined_list[-1] = joined_list[-1] + additional_options
                 quotation_started=False
             
         if quotation_started:
-            joined_list[-1] = joined_list[-1] + additional_options
+            joined_list[-1] = joined_list[-1] + "-" + additional_options
         else:
             joined_list.append(additional_options)
             
