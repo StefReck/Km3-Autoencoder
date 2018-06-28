@@ -297,7 +297,7 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         
         if pretrained_critic_path != None:
             print("Loading weights for critic part...")
-            pretrained_critic = load_model(pretrained_critic_path, compile=False) #no need to compile the model as long as only weights are read out
+            pretrained_critic = load_model(pretrained_critic_path, compile=False).layers[2] #no need to compile the model as long as only weights are read out
             print("Loading weights from model", pretrained_critic_path)
             weights_loaded=0
             for i,layer in enumerate(critic.layers):
