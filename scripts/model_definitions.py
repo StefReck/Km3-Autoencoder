@@ -38,6 +38,7 @@ def make_options_dict(additional_options):
     joined_list = []
     quotation_started=False
     join_sign="'"
+    floating_option=""
     for i in range(len(additional_options_list)):
         additional_options = additional_options_list[i]
         #could also be sth like unlock_BN=true-load_model="asd-mas-d.h5"-bla=bla
@@ -52,13 +53,14 @@ def make_options_dict(additional_options):
             additional_options = additional_options.replace(join_sign, '')
             if not quotation_started:
                 quotation_started=True
-                joined_list.append(additional_options+"-")
+                floating_option = additional_options + "-"
             else:
-                joined_list[-1] = joined_list[-1] + additional_options
+                floating_option = floating_option + additional_options
                 quotation_started=False
+                joined_list.append(floating_option)
             
         if quotation_started:
-            joined_list[-1] = joined_list[-1] + "-" + additional_options
+            floating_option = floating_option + additional_options + "-"
         else:
             joined_list.append(additional_options)
             
