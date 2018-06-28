@@ -39,6 +39,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     #For AAE gan training:
     if is_AE_adevers_training==1 or is_AE_adevers_training==2:
         #Train critic and generator alternating
+        #accessed by AE stage 5
         if epoch%2 == 0:
             #even: train only generator:
             model = freeze_adversarial_part(model, unfrozen_critic=False, unfrozen_generator=True)
@@ -59,6 +60,15 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
         if epoch==1:
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
         is_AE_adevers_training = 3 #critic
+        n_events = 10000
+        AE_y_labels="cat_cross"
+        
+    elif is_AE_adevers_training==4:
+        #train only generator. critic needs to be frozen only once
+        #accessed by AE stage 7
+        if epoch==1:
+            model = freeze_adversarial_part(model, unfrozen_critic=False, unfrozen_generator=True)
+        is_AE_adevers_training = 2 #generator
         n_events = None
         AE_y_labels="cat_cross"
         

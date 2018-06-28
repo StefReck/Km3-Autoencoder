@@ -255,6 +255,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, cl
         ae_loss_name = "categorical_crossentropy"
         supervised_loss = None
         is_AE_adevers_training=3
+    elif autoencoder_stage==7:
+        #preperation for AAE training: train only the critic
+        autoencoder_stage=0
+        ae_loss_name = "categorical_crossentropy"
+        supervised_loss = None
+        is_AE_adevers_training=4
+        
     else:
         is_AE_adevers_training=False
     
