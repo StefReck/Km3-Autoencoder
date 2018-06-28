@@ -32,6 +32,7 @@ def make_options_dict(additional_options):
     options_dict["dense_setup"]="standard"
     options_dict["layer_version"]="single"
     options_dict["pretrained_autoencoder_path"]=None
+    options_dict["pretrained_critic_path"]=None
         
     additional_options_list = additional_options.split("-")
     joined_list = []
@@ -106,9 +107,13 @@ def make_options_dict(additional_options):
             layer_version = additional_options.split("=")[1]
             options_dict["layer_version"]=layer_version
             
+        #For GAN AEs:
         elif "pretrained_autoencoder_path" in additional_options:
             pretrained_autoencoder_path = additional_options.split("=")[1]
             options_dict["pretrained_autoencoder_path"]=pretrained_autoencoder_path
+        elif "pretrained_critic_path" in additional_options:
+            pretrained_critic_path = additional_options.split("=")[1]
+            options_dict["pretrained_critic_path"]=pretrained_critic_path
 
         else:
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)

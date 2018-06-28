@@ -55,6 +55,7 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
             
     elif is_AE_adevers_training==3:
         #train only critic. Generator needs to be frozen only once
+        #accessed by AE stage 6
         if epoch==1:
             model = freeze_adversarial_part(model, unfrozen_critic=True, unfrozen_generator=False)
         is_AE_adevers_training = 3 #critic
@@ -125,16 +126,15 @@ def fit_model(model, modelname, train_files, test_files, batchsize, n_bins, clas
         print ('Training in epoch', epoch, 'on train file ', i, "at", datetime.now().strftime('%H:%M:%S'))
 
         if n_events is not None: f_size = n_events  # for testing
-        
+        log_after_this_many_batches = 500
         
         with open(save_path+"trained_" + modelname + '_epoch' + str(epoch) + '_log.txt', 'w') as log_file:
-            
             if "acc" in metrics:
-                BatchLogger = NBatchLogger_Recent_Acc(display=500, logfile=log_file)
+                BatchLogger = NBatchLogger_Recent_Acc(display=log_after_this_many_batches, logfile=log_file)
             elif "cat_cross_inv" in metrics:
-                BatchLogger = NBatchLogger_Recent_CCI(display=500, logfile=log_file)
+                BatchLogger = NBatchLogger_Recent_CCI(display=log_after_this_many_batches, logfile=log_file)
             else:
-                BatchLogger = NBatchLogger_Recent(display=500, logfile=log_file)
+                BatchLogger = NBatchLogger_Recent(display=log_after_this_many_batches, logfile=log_file)
                 
             history = model.fit_generator(
             generate_batches_from_hdf5_file(f, batchsize, n_bins, class_type, is_autoencoder=is_autoencoder, f_size=f_size, zero_center_image=xs_mean, swap_col=swap_4d_channels, broken_simulations_mode=broken_simulations_mode, is_in_test_mode=False, dataset_info_dict=dataset_info_dict, AE_y_labels=AE_y_labels),

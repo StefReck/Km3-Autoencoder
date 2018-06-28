@@ -198,7 +198,9 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
     dropout_for_dense      = options_dict["dropout_for_dense"]
     unlock_BN_in_encoder   = options_dict["unlock_BN_in_encoder"]
     batchnorm_for_dense    = options_dict["batchnorm_for_dense"]
+    
     pretrained_autoencoder_path = options_dict["pretrained_autoencoder_path"]
+    pretrained_critic_path = options_dict["pretrained_critic_path"]
     
     number_of_output_neurons=options_dict["number_of_output_neurons"]
 
@@ -253,6 +255,7 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         autoencoder_model = Model(inputs, AE_out, "autoencoder") 
         
         if pretrained_autoencoder_path != None:
+            print("Loading weights for autoencoder part...")
             #models/vgg_3_eps/trained_vgg_3_eps_autoencoder_epoch119.h5
             pretrained_autoencoder = load_model(pretrained_autoencoder_path, compile=False) #no need to compile the model as long as only weights are read out
             print("Loading weights from model", pretrained_autoencoder_path)
@@ -260,7 +263,7 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
             for i,layer in enumerate(autoencoder_model.layers):
                 layer.set_weights(pretrained_autoencoder.layers[i].get_weights())
                 weights_loaded+=1
-            print("Weights of ",weights_loaded, "layers were loaded.")
+            print("Weights of ",weights_loaded, "layers were loaded (from", autoencoder_model.layers[0], "to", autoencoder_model.layers[-1], ")")
         
         #The adversarial part:
         #Takes the reconstruction and the original, both 11x13x18x1,
@@ -290,6 +293,18 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         output_critic = Reshape((1,2))(x)
         
         critic = Model(inputs_critic, output_critic, "critic")
+        
+        if pretrained_critic_path != None:
+            print("Loading weights for critic part...")
+            pretrained_critic = load_model(pretrained_critic_path, compile=False) #no need to compile the model as long as only weights are read out
+            print("Loading weights from model", pretrained_critic_path)
+            weights_loaded=0
+            for i,layer in enumerate(critic.layers):
+                layer.set_weights(pretrained_critic.layers[i].get_weights())
+                weights_loaded+=1
+            print("Weights of ",weights_loaded, "layers were loaded (from", critic.layers[0], "to", critic.layers[-1], ")")
+        
+        
         
         input_to_AAE = Input(shape=(11,18,50,1))
         

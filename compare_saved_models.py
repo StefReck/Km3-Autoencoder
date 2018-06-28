@@ -55,7 +55,7 @@ def do_model_check(model_path_1, model_path_2):
             
         else:
             #layer 1 is a model
-            for sub_num, layer in enumerate(layer_1):
+            for sub_num, layer in enumerate(layer_1.layers):
                 layer_2_sub = model_2.layers[sub_num]
                 print_layer_stats(layer, layer_2_sub)
             break
