@@ -158,7 +158,7 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     #max_doms_inside=hist_xy.max() #2
     #min_doms_inside=hist_xy.min() #0
     
-    fig = plt.figure(figsize=(8,13))
+    fig = plt.figure(figsize=(10,11))
     ax = fig.add_subplot(111)
     
     for x_bin_edge in x_bin_edges:
@@ -200,7 +200,7 @@ def plot_2d(x_bin_edges, y_bin_edges, x_one_layer, y_one_layer):
     
     legend = ax.legend(loc="lower right")
     legend.get_frame().set_alpha(1)
-    fig.suptitle("Binning and DOM locations")
+    #fig.suptitle("Binning and DOM locations")
     plt.gcf().subplots_adjust(left=0.17, right=0.86, bottom=0.13, top=0.83)
     plt.show()
     
@@ -303,7 +303,7 @@ offset_array=[[0,0,1], [6.45,-4.25,1], [6.19, 0.064, 1.0128], [-2.2,-0.1,1] ]
 #show_distance_of_bins(x_red, y_red, x_bin_edges, y_bin_edges, offset_array )
 
 #Altes binning: 0, neues binning: 2
-plot_offset=offset_array[2]
+plot_offset=offset_array[0]
 #plot_offset=[best_x, best_y, best_factor]
 plot_2d(plot_offset[2]*(x_bin_edges+plot_offset[0]), plot_offset[2]*(y_bin_edges+plot_offset[1]), x_red, y_red)
 

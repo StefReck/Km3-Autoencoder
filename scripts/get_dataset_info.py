@@ -181,6 +181,7 @@ def get_dataset_info(dataset_tag):
     #For the channel autoencoder study
     elif dataset_tag=="xyz":
         #xyz- generated from xyzc by summing over channel
+        #with new geo binning
         #11x13x18
         data_path = home_path+"data/xyz/"
         train_data = "elec-CC_and_muon-CC_xyz_train_1_to_240_shuffled_0.h5"
@@ -190,6 +191,7 @@ def get_dataset_info(dataset_tag):
         filesize_factor_test=1
     elif dataset_tag=="xyzc":
         #xyz-channel id as filter
+        #with new geo binning
         #11x13x18x31
         data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
         train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
