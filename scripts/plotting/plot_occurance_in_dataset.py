@@ -63,7 +63,7 @@ def make_plot_down(downgoing, energy):
     
     hist_1d_energy = np.histogram(energy, bins=98, range=(3,100)) #häufigkeit von energien
     hist_1d_energy_correct = np.histogram(energy[downgoing.astype(bool)], bins=98, range=(3,100)) #häufigkeit von richtigen energien
-    hist_1d_energy_accuracy_bins = np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
+    hist_1d_energy_accuracy_bins = 100*np.divide(hist_1d_energy_correct[0], hist_1d_energy[0], dtype=np.float32) #rel häufigkeit von richtigen energien
     
     print("Total fraction of down going events:", np.mean(downgoing))
     ax.step(energy_bins, hist_1d_energy_accuracy_bins, lw=2, )
@@ -81,7 +81,7 @@ plt.show(fig_down)
 
 fig.savefig(save_to)
 print("Plot saved to", save_to)
-fig_down.save_fig(save_to_down)
+fig_down.savefig(save_to_down)
 print("Plot saved to", save_to_down)
 
 

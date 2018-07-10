@@ -18,6 +18,7 @@ models_to_print=["vgg_3",
                  "vgg_5_200_large","vgg_5_200_deep",
                  "vgg_5_200_small", "vgg_5_200_shallow",
                  "channel_5n", "channel_3n_m3",]
+
 #Placeholder captions:
 captions = ["Network structure of the "+modeltag.replace("_"," ")+" model." for modeltag in models_to_print]
 
@@ -26,12 +27,13 @@ captions = ["Network structure of the "+modeltag.replace("_"," ")+" model." for 
 
 def print_model_blockwise_latex_ready(model, texfile):
     #The content of each tabel
-    print_these_layers = [Conv3D, Conv3DTranspose, 
+    print_these_layers = [Conv3DTranspose, Conv3D, 
                           AveragePooling3D, UpSampling3D,
                           Dense, Flatten, Reshape]
-    names_of_these_layers = ["Convolutional block", "Convolutional block (T)",
+    names_of_these_layers = ["Convolutional block (T)", "Convolutional block",
                              "Average Pooling", "Upsampling",
-                             "Dense Block", "Flatten", "Reshape"] #+ "Input"
+                             "Dense Block", "Flatten", "Reshape"]
+    #Input layer is treated seperatly!
     
     #Generate a list of the above layers, together with their output dimension
     layers_list = []
@@ -54,7 +56,7 @@ def print_model_blockwise_latex_ready(model, texfile):
             
     print("    Bottleneck:", bottleneck_neurons, "neurons")
     #Print a line in the table for each of the above layers
-    for layer_no,[name, out_size] in enumerate(layers_list):
+    for layer_no, [name,out_size] in enumerate(layers_list):
         is_at_bottleneck = (layer_no==bottleneck_is_at_layer)
         is_last_layer = (layer_no==len(layers_list)-1)
         make_appendix=True
