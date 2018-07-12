@@ -106,11 +106,14 @@ predicted_image_batch=np.array(predicted_image_batch)
 
 #plot them all in a pdf
 # for every event: first the original image, then the predictions from the AEs
+print("Event info:\n [event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, dir_x/y/z -> 5/6/7, time -> 8]")
 figures = []
 for original_image_no,original_image in enumerate(original_image_batch):
     #First the original image
     print("Plotting event no", original_image_no+1)
     event_id = info[original_image_no,0].astype(int)
+    print("Event info:", info[original_image_no])
+    #[event_id -> 0, particle_type -> 1, energy -> 2, isCC -> 3, bjorkeny -> 4, dir_x/y/z -> 5/6/7, time -> 8]
     org_fig = make_plots_from_array(original_image, suptitle="Original image  Event ID: "+str(event_id))
     figures.append(org_fig)
     plt.close(org_fig)
