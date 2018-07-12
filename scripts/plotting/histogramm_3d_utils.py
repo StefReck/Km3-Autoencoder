@@ -85,7 +85,12 @@ def make_3d_plots(hist_org, n_bins, suptitle, figsize, titles=["Original", "Pred
     ax1 = fig.add_subplot(plot_arrangement, projection='3d')
     plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=size_of_circles(hist_org), rasterized=True)
       
-    cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1, ticks=np.arange(int(hist_org[3].min()),hist_org[3].max()+1,1))
+    cbar_ticks_org = np.arange(int(hist_org[3].min()),hist_org[3].max()+1,1)
+    #if min max = e.g. 0.3 1.3 the above will produce only one number (1)
+    if len(cbar_ticks_org)<2:
+        cbar_ticks=[hist_org[3].min(), hist_org[3].max()]
+        
+    cbar1=fig.colorbar(plot1,fraction=0.046, pad=0.1, ticks=cbar_ticks_org)
     cbar1.ax.set_title('Hits')
     ax1.set_xlabel(binsize_to_name_dict[n_bins[0]])
     ax1.set_xlim([0,n_bins[0]])
