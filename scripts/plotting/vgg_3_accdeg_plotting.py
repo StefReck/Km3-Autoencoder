@@ -4,13 +4,16 @@ import matplotlib.patches as mpatches
 
 import matplotlib.text as mpl_text
 import matplotlib
-matplotlib.rcParams.update({'font.size': 12})
 import numpy as np
 
 """
 Plot the loss of the vgg_3 autoencoders at certain epochs vs the accuracy of the frozen encoder
 that was trained on that AE model at that epoch. The epoch of the E is annotated.
 """
+
+save_as=["../../results/plots/vgg_3_ae_loss_enc_acc_new.pdf",
+        "../../results/plots/vgg_3_basic_parallel_loss_acc.pdf",
+        "../../results/plots/vgg_3_eps_parallel_loss_acc.pdf"]
 
 #Up Down Classification
 labels=[r'Autoencoder $\epsilon = 10^{-1}$', r'Autoencoder SGD', r'Autoencoder $\epsilon = 10^{-8}$',]
@@ -64,7 +67,11 @@ CCaccuracies=[[59.9,	56.5],
 
 
 def make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies):
-    fig, ax = plt.subplots(figsize=(10,6))
+    figsize = [10, 6] 
+    font_size=12
+    fig, ax = plt.subplots(figsize=figsize)
+    matplotlib.rcParams.update({'font.size': font_size})
+    
     ax.plot([],[],marker="", ls="", label="Up-down classification")
     
     for i,autoencoder_model_loss in enumerate(losses):
@@ -114,7 +121,7 @@ def make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoe
      
      
         
-    plt.title("Quality of autoencoders and encoders")
+    #plt.title("Quality of autoencoders and encoders")
     plt.xlabel("Loss of autoencoder")
     ax.set_ylabel("Accuracy up-down (%)")
     
@@ -150,6 +157,7 @@ def make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoe
     
     
     plt.show()
+    return fig
     
     
 def make_dict_from_file(test_file):
@@ -161,7 +169,8 @@ def make_dict_from_file(test_file):
     return data
 
 def transform_epoch(data,how_many_epochs_each_to_train):
-    #returns the supervised epoch and best test acc of that AE model together with the corresponding autoencoder epoch
+    #returns the supervised epoch and best test acc of that AE model together
+    #with the corresponding autoencoder epoch
     epoch=np.array(data["Epoch"]).astype(int)
     acc=np.array(data["Test acc"]).astype(float)
     trainacc=np.array(data["Train acc"]).astype(float)
@@ -191,17 +200,21 @@ def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, l
     ae_loss_array=get_ae_loss_array("../Daten/trained_vgg_3_autoencoder_test.txt")
     ae_loss_data = ae_loss_array[trans_data[2]-1]
     
-    fig, ax = plt.subplots(figsize=(10,7))
+    figsize = [6.4,5.5]   
+    font_size=14
+    fig, ax = plt.subplots(figsize=figsize)
+    matplotlib.rcParams.update({'font.size': font_size})
+    #fig, ax = plt.subplots(figsize=(10,7))
     
     #plt.plot(data["Epoch"],data["Test acc"])
     test_plot=ax.plot(ae_loss_data, trans_data[1]*100, "o-", ms=4, color="orange", label="Test")
-    ax.plot(ae_loss_data, trans_data[3]*100, "o--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
+    ax.plot(ae_loss_data, trans_data[3]*100, "x--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
     ax.plot(loss, accuracy, "o", color=color, label=label)
     ax.grid()
     ax.legend()
     ax.set_xlabel("Loss of autoencoder")
     ax.set_ylabel("Accuracy up-down(%)")
-    fig.suptitle("Parallel training of autoencoder and supervised network")
+    #fig.suptitle("Parallel training of autoencoder and supervised network")
     xlims=[0.048,0.076]
     ax.set_xlim(xlims)
     ax.set_ylim([77,83])
@@ -212,7 +225,7 @@ def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, l
     ticklabels=[]
     for i in range(len(new_tick_locations_x)):
         i+=2
-        if i in [2,5,10,20,40,50,60,70,80,85,90]:
+        if i in [2,5,10,40,50,60,80,85,90]:
             ticklabels.append(i)
         else:
             ticklabels.append("")
@@ -227,6 +240,7 @@ def make_accdeg_parallel_basic(parallel_logfile,how_many_epochs_each_to_train, l
     #ax2.set_aspect("equal")
     
     plt.show()
+    return fig
     
 
 def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, loss, accuracy, epochs, label, color):
@@ -235,17 +249,30 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
     ae_loss_array=get_ae_loss_array("../Daten/trained_vgg_3_eps_autoencoder_test.txt")
     ae_loss_data = ae_loss_array[trans_data[2]-1]
     
-    fig, ax = plt.subplots(figsize=(10,7))
+    test_accs = trans_data[1]
+    train_accs = trans_data[3]
+    
+    #AE loss, test/train of converged E1 encoder (40 epochs):
+    epoch1_data=[loss[0], 0.78191743, 0.78241989]
+    ae_loss_data = np.insert(ae_loss_data, 0, epoch1_data[0])
+    test_accs = np.insert(test_accs, 0, epoch1_data[1]) 
+    train_accs = np.insert(train_accs, 0, epoch1_data[2]) 
+    
+    figsize = [6.4,5.5]   
+    font_size=14
+    fig, ax = plt.subplots(figsize=figsize)
+    matplotlib.rcParams.update({'font.size': font_size})
+    #fig, ax = plt.subplots(figsize=(10,7))
     
     #plt.plot(data["Epoch"],data["Test acc"])
-    test_plot=ax.plot(ae_loss_data, trans_data[1]*100, "o-", ms=4, color="orange", label="Test")
-    ax.plot(ae_loss_data, trans_data[3]*100, "--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
+    test_plot=ax.plot(ae_loss_data, test_accs*100, "o-", ms=4, color="orange", label="Test")
+    ax.plot(ae_loss_data, train_accs*100, "x--",alpha=0.5, lw=1, ms=4, label="Train",color=test_plot[0].get_color())
     ax.plot(loss, accuracy, "o", color=color, label=label)
     ax.grid()
-    ax.legend()
+    ax.legend(loc="lower right")
     ax.set_xlabel("Loss of autoencoder")
     ax.set_ylabel("Accuracy up-down(%)")
-    fig.suptitle("Parallel training of autoencoder and supervised network")
+    #fig.suptitle("Parallel training of autoencoder and supervised network")
     xlims=[0.015,0.045]
     ax.set_xlim(xlims)
     new_tick_locations_x = ae_loss_array[np.logical_and( ae_loss_array>=xlims[0], ae_loss_array<=xlims[1])]
@@ -255,7 +282,7 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
     ticklabels=[]
     for i in range(len(new_tick_locations_x)):
         i+=1
-        if i in [1,2,5,10,20,30,112]:
+        if i in [1,2,5,10,25,112]:
             ticklabels.append(i)
         else:
             ticklabels.append("")
@@ -265,7 +292,7 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
     
     for j in range(len(loss)):
         if j==5:
-            shiftx=-0.0015
+            shiftx=-0.002
             shifty=0
         else:
             shiftx=0.0003
@@ -273,11 +300,17 @@ def make_accdeg_parallel_eps(parallel_logfile,how_many_epochs_each_to_train, los
         ax.annotate(epochs[j], xy=(loss[j]+shiftx,accuracy[j]+shifty))
         
     plt.show()
+    return fig
+  
     
-make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
 
-make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
+#fig = make_accdeg_plot(labels,colors, autoencoder_epochs,losses,accuracies,CCautoencoder_epochs,CClosses,CCaccuracies)
+#fig.savefig(save_as[0])
 
-#make_accdeg_parallel_eps(eps_parallel_logfile,eps_how_many_epochs_each_to_train, losses[2], accuracies[2],autoencoder_epochs[2], labels[2], colors[2])
-make_accdeg_parallel_eps(eps_parallel_logfile_v3,eps_how_many_epochs_each_to_train_v3, losses[2], accuracies[2], autoencoder_epochs[2], labels[2], colors[2])
-   
+fig = make_accdeg_parallel_basic(basic_parallel_logfile,how_many_epochs_each_to_train, losses[0], accuracies[0],autoencoder_epochs[0], labels[0], colors[0])
+fig.savefig(save_as[1])
+
+fig = make_accdeg_parallel_eps(eps_parallel_logfile_v3,eps_how_many_epochs_each_to_train_v3, losses[2], accuracies[2], autoencoder_epochs[2], labels[2], colors[2])
+fig.savefig(save_as[2])
+
+print("Plots saved as:", save_as)

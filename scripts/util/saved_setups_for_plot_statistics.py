@@ -491,13 +491,15 @@ def get_props_for_plot_parser(tag, printing=True):
         labels_override=["Standard", "Small kernel", "Triple structure", "Triple structure variation"]
         
     
-        """
+        
     #range not adjustable currently, should be 0:50
     elif tag=="vgg_3_parallel_jumps":
-        test_files=["models/vgg_3/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt",]
+        test_files=["vgg_3/trained_vgg_3_autoencoder_supervised_parallel_up_down_test.txt",]
         labels_override = [r"Adam with $\epsilon=10^{-1}$",]
-        title="Accuracy during parallel supervised training" 
-    """
+        #title="Accuracy during parallel supervised training" 
+        #xrange=[0,50]
+        style="extended"#"two_in_one_line"
+        colors=["yellow",]
     
     elif tag=="Unfrozen":
         test_files = ["vgg_3/trained_vgg_3_supervised_up_down_test.txt",

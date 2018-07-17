@@ -189,16 +189,18 @@ def get_dataset_info(dataset_tag):
         n_bins = (11,13,18,1)
         filesize_factor=1
         filesize_factor_test=1
-    elif dataset_tag=="xyzc":
-        #xyz-channel id as filter
-        #with new geo binning
-        #11x13x18x31
-        data_path = "/home/woody/capn/mppi033h/Data/ORCA_JTE_NEMOWATER/h5_input_projections_3-100GeV/4dTo4d/xyz_channel_-350+850/concatenated/"
-        train_data = "elec-CC_and_muon-CC_xyzc_train_1_to_480_shuffled_0.h5"
-        test_data = "elec-CC_and_muon-CC_xyzc_test_481_to_600_shuffled_0.h5"
+    elif dataset_tag in ["xyzc", "xyzc_3", "xyzc_5", "xyzc_10"]:
+        #xyz-channel id as filter; channels might be summed down to dimension 3/5/10 on the fly
+        #350+850_tight-all_w-geo-fix
+        # 11x13x18x31
+        #train: 1,541,368
+        #test: 1,027,716
+        data_path = home_path + "xyzc/"
+        train_data = "elec-CC_and_muon-CC_xyzc_train_file_0_shuffled_0.h5"
+        test_data = "elec-CC_and_muon-CC_xyzc_test_file_0_shuffled_0.h5"
         n_bins = (11,13,18,31)
-        filesize_factor=0.5
-        filesize_factor_test=0.5
+        filesize_factor=1
+        filesize_factor_test=0.38 #--> 390,000
     elif dataset_tag=="xyzc_flat":
         #original data: xyz-channel id as filter
         #11x13x18x31

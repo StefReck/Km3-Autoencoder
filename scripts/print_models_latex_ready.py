@@ -30,7 +30,7 @@ def print_model_blockwise_latex_ready(model, texfile):
     print_these_layers = [Conv3DTranspose, Conv3D, 
                           AveragePooling3D, UpSampling3D,
                           Dense, Flatten, Reshape]
-    names_of_these_layers = ["Convolutional block (T)", "Convolutional block",
+    names_of_these_layers = ["\\phantom{(T)} Convolutional block (T)", "Convolutional block",
                              "Average Pooling", "Upsampling",
                              "Dense Block", "Flatten", "Reshape"]
     #Input layer is treated seperatly!
@@ -75,8 +75,10 @@ def print_model_blockwise_latex_ready(model, texfile):
             prefix="\\rowcolor{Gray} "
             
         if is_last_layer:
-            name+= " (linear)"
-        
+            if name=="Convolutional block":
+                name = "Convolution (kernel size 1, linear)"
+            elif name=="Dense Block":
+                name = "Dense (linear)"
         
         if make_appendix:
             if is_at_bottleneck:
@@ -140,9 +142,12 @@ def make_tex_file(tex_file_path, models_to_print, captions):
         texfile.write("\\input{header.tex}"+"\n")
         texfile.write("\\usepackage[utf8]{inputenc}"+"\n")
         texfile.write("\\usepackage{color, colortbl}"+"\n")
+        texfile.write("\\usepackage{xspace}"+"\n")
         texfile.write("\\definecolor{Gray}{gray}{0.9}"+"\n")
         texfile.write("\\definecolor{LightRed}{rgb}{1, 0.92, 0.92}"+"\n")
+        texfile.write("\\newcommand{\\model}[1]{\\textsc{#1}\\xspace}"+"\n")
         texfile.write("\\begin{document}"+"\n")
+        
         
         for modelno, modeltag in enumerate(models_to_print):
             print_table_of_model(modeltag, texfile, captions[modelno])
