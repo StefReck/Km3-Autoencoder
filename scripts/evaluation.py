@@ -61,6 +61,16 @@ def get_saved_plots_info(tag):
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "dpg_vgg3_vgg5_200_spvsd_comp.pdf" 
     
+    elif tag=="compare_2000_sup":
+        #morefilter and picture (evtl channel)
+        modelidents = (get_path_best_epoch("vgg_3_unf", full_path),
+                       get_path_best_epoch("vgg_3", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        #title_of_plot='Accuracy of encoders with bottleneck 600'
+        label_array=["Supervised approach", "From autoencoder $\epsilon=10^{-1}$ epoch 10"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_3_AE_E10_supervised_compare.pdf"
+    
     #--------------------------------Bottleneck--------------------------------
     elif tag=="compare_bottleneck":
         #Nicht sonderlich toll der Plot, vllt. eher tabellarisch
