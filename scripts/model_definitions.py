@@ -216,6 +216,9 @@ def setup_model(model_tag, autoencoder_stage, modelpath_and_name=None, additiona
         model = setup_vgg_5_channel(autoencoder_stage, options_dict, modelpath_and_name)
     elif model_tag == "vgg_5_morefilter":
         model = setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name)
+    elif model_tag == "vgg_5_morefilter_double":
+        options_dict["layer_version"]="double"
+        model = setup_vgg_5_morefilter(autoencoder_stage, options_dict, modelpath_and_name)
         
     elif model_tag == "vgg_5_200":
         options_dict["filter_base_version"]="standard"

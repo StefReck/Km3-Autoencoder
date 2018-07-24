@@ -21,9 +21,11 @@ models_to_print=[ #modeltag, display name
                  ["vgg_4_10c_triple_same_structure", "triple variation"],
                  
                  "\\clearpage \n \\newpage \n \\section{For chapter 5} ",
-                 ["vgg_5_picture", "model-600 picture"], 
-                 ["vgg_5_channel", "model-600 filter"], 
-                 ["vgg_5_morefilter", "model-600 more filter"],
+                 ["vgg_5_channel", "600-20 filters"], 
+                 ["vgg_5_picture", "600-50 filters"], 
+                 ["vgg_5_morefilter_double", "600-75 filters"],
+                 ["vgg_5_morefilter", "600-75 filters, 15 layers"],
+                 
                  ["vgg_5_200", "model-200"], 
                  ["vgg_5_200_dense", "model-200 dense"],
                  ["vgg_5_64", "model-64"], 
@@ -49,7 +51,7 @@ for models_to_print_line in models_to_print:
             caption += " The standard kernel size for convolutions and \
             transposed convolutions is $2\\times 2\\times 2$ for this model."
         
-        label = "app_"+display_name.replace(" ","_")
+        label = "app_"+modeltag.replace(" ","_")
     captions.append(caption)
     labels.append(label)
 
