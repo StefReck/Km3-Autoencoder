@@ -129,10 +129,12 @@ def get_saved_plots_info(tag, apply_precuts=False):
             model_path = get_path_best_epoch(tag, full_path=False)
         except NameError:
             print("Input is not a known tag. Opening as model instead.")
-            model_path = tag
-            save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
-            return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
-        
+            if type(tag) != int:
+                model_path = tag
+                save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+                return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
+            else:
+                raise ValueError
 
     if is_a_set:
         return [tags, label_array, which_plot], save_plot_as
