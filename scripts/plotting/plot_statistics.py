@@ -74,15 +74,16 @@ def make_data_for_plot(dict_array, test_files, which_ydata):
     ylabel_list=[]
     for i,data_dict in enumerate(dict_array): 
         number_of_test_epochs = len(data_dict["Epoch"])
+        which_y=which_ydata[i]
         
-        # "which_ydata" is the column label in the train files
+        # "which_y" is the column label in the train files
         #default: same ydata for all epochs is taken
-        which_ydatas = [which_ydata,]*number_of_test_epochs
-        if which_ydata=="Accuracy":
+        which_ydatas = [which_y,]*number_of_test_epochs
+        if which_y=="Accuracy":
             test_file_column_labels = ["Test acc",]*number_of_test_epochs
             ylabel = "Accuracy"
             
-        elif which_ydata=="cat_cross_inv":
+        elif which_y=="cat_cross_inv":
             #For adversarial AE, critic and generator training is alternated evey epoch,
             #so a different label has to be taken every 2nd epoch
             test_file_column_labels = ["Test cat_cross_inv",]*number_of_test_epochs
@@ -100,13 +101,13 @@ def make_data_for_plot(dict_array, test_files, which_ydata):
         train_epoch_data, train_y_data = [], []
         
         for test_file_line, test_file_epoch in enumerate(data_dict["Epoch"]):
-            which_ydata = which_ydatas[test_file_line]
+            which_y = which_ydatas[test_file_line]
             test_file_column_label = test_file_column_labels[test_file_line]
             
             test_epochs.append(int(test_file_epoch))
             test_ydata.append(float(data_dict[test_file_column_label][test_file_line]))
             
-            e,l = make_loss_epoch(test_files[i], int(test_file_epoch), which_ydata)
+            e,l = make_loss_epoch(test_files[i], int(test_file_epoch), which_y)
             train_epoch_data.extend(e)
             train_y_data.extend(l)
         
@@ -153,13 +154,14 @@ def make_data_from_files(test_files, which_ydata="auto", dump_to_file=None):
     
     if which_ydata=="auto":
         #take acc if available, loss otherwise
-        #only the first dict is checked, others should be the same
-        if "Test acc" in dict_array[0]:
-            which_ydata = "Accuracy"
-        elif "Test cat_cross_inv" in dict_array[0]:
-            which_ydata = "cat_cross_inv"
-        else:
-            which_ydata = "Loss"
+        which_ydata=[]
+        for dictx in dict_array:
+            if "Test acc" in dictx:
+                which_ydata.append("Accuracy")
+            elif "Test cat_cross_inv" in dictx:
+                which_ydata.append("cat_cross_inv")
+            else:
+                which_ydata.append("Loss")
     
     #data from the single epoch train files, together with the test file data
     data_from_files, ylabel_list = make_data_for_plot(dict_array, test_files, which_ydata)

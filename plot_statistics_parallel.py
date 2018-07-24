@@ -94,6 +94,7 @@ if test_files[0]=="saved":
     if tag == "all":
         #make and save all the plots whose setup is saved, without displaying them.
         current_tag_number=0
+        save_it=True
         while True:
             try:
                 fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=current_tag_number, style=style)
