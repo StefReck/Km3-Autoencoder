@@ -415,7 +415,7 @@ def make_energy_to_accuracy_plot_comp(arr_energy_correct, arr_energy_correct2, t
     
     
     
-def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best"):
+def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy", y_lims=(0.5,1), color_array=[], legend_loc="best", ticks=None):
     """
     Makes a plot based on multiple binned acc or loss data.
     Will plot for every hist data in the array: [1] over [0]
@@ -439,10 +439,15 @@ def make_binned_data_plot(hist_data_array, label_array, title, y_label="Accuracy
     plt.xticks(x_ticks_major)
     plt.minorticks_on()
 
+
     plt.legend(loc=legend_loc)
     plt.xlabel('Energy [GeV]')
     plt.ylabel(y_label)
     plt.ylim((y_lims[0], y_lims[1]))
+    
+    if ticks != None:
+        plt.yticks(ticks)
+    
     plt.suptitle(title)
     plt.grid(True)
 

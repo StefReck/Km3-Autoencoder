@@ -39,9 +39,10 @@ def get_saved_plots_info(tag):
     #loss, acc, None
     plot_type = "acc"
     bins=32
-    y_lims=(0.75,1) #for acc only
+    y_lims=(0.75,0.95) #for acc only
     title_of_plot=""
     #default plot size: two in one line, see make_binned_data_plot
+    ticks=list(a/100 for a in range(75,100,5))
     
     modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"
@@ -97,6 +98,7 @@ def get_saved_plots_info(tag):
         label_array=["Picture", "More filter"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
+        y_lims=(0.75,0.95)
         
     elif tag=="compare_200":
         modelidents = (get_path_best_epoch("vgg_5_200", full_path),
@@ -128,7 +130,7 @@ def get_saved_plots_info(tag):
         label_array=["Standard", "Wider", "Deeper"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
-        y_lims=(0.8,0.95)
+        y_lims=(0.75,0.95)
       
         
     #--------------------------- unfreeze comparison ---------------------------
@@ -150,12 +152,12 @@ def get_saved_plots_info(tag):
     modelidents=[modelpath+modelident for modelident in modelidents]
     save_plot_as = plot_path + plot_file_name
 
-    return modelidents, class_type, dataset_array, title_of_plot, label_array, save_plot_as, plot_type, bins, y_lims
+    return modelidents, class_type, dataset_array, title_of_plot, label_array, save_plot_as, plot_type, bins, y_lims, ticks
 
 
 
 def make_evaluation(tag, show_plot=True):
-    modelidents, class_type, dataset_array, title_of_plot, label_array, save_plot_as, plot_type, bins, y_lims = get_saved_plots_info(tag)
+    modelidents, class_type, dataset_array, title_of_plot, label_array, save_plot_as, plot_type, bins, y_lims, ticks = get_saved_plots_info(tag)
     
     #generate or load data automatically:
     hist_data_array = make_or_load_files(modelidents, dataset_array, bins, class_type)
@@ -169,13 +171,13 @@ def make_evaluation(tag, show_plot=True):
     #make plot of multiple data:
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
-        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims, ticks=ticks) 
         if show_plot: plt.show(fig)
         fig.savefig(save_plot_as)
         
     elif plot_type == "loss":
         y_label_of_plot="Loss"
-        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot) 
+        fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, ticks=ticks) 
         if show_plot: plt.show(fig)
         fig.savefig(save_plot_as)
         
