@@ -451,8 +451,10 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     if xticks is not None:
         ax.set_xticks( xticks )
     else:
-        ax.set_xticks( np.arange(0, max_epoch+1,10) )
-        
+        if max_epoch<100:
+            ax.set_xticks( np.arange(0, max_epoch+1,10) )
+        else:
+            ax.set_xticks( np.arange(0, max_epoch+1,20) )
     if AE_yticks != None:
         ax.set_yticks(AE_yticks)
         
