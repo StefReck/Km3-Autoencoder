@@ -82,7 +82,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_64", full_path),
                        get_path_best_epoch("vgg_5_32-eps01", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
+        #title_of_plot='Accuracy of autoencoders with different bottleneck sizes'
         label_array=["2000", "600", "200", "64", "32"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -93,7 +93,7 @@ def get_saved_plots_info(tag):
         modelidents = (get_path_best_epoch("vgg_5_600_picture", full_path),
                        get_path_best_epoch("vgg_5_600_morefilter", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of encoders with bottleneck 600'
+        #title_of_plot='Accuracy of encoders with bottleneck 600'
         label_array=["Picture", "More filter"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -102,7 +102,7 @@ def get_saved_plots_info(tag):
         modelidents = (get_path_best_epoch("vgg_5_200", full_path),
                        get_path_best_epoch("vgg_5_200_dense", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of encoders with bottleneck 200'
+        #title_of_plot='Accuracy of encoders with bottleneck 200'
         label_array=["Standard", "Dense"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -114,7 +114,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_200_small", full_path),
                        get_path_best_epoch("vgg_5_200_shallow", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of encoders with bottleneck 200'
+        #title_of_plot='Accuracy of encoders with bottleneck 200'
         label_array=["Standard", "Smaller", "Shallower"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -124,7 +124,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_200_large", full_path),
                        get_path_best_epoch("vgg_5_200_deep", full_path),)
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Accuracy of encoders with bottleneck 200'
+        #title_of_plot='Accuracy of encoders with bottleneck 200'
         label_array=["Standard", "Wider", "Deeper"]
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -137,7 +137,7 @@ def get_saved_plots_info(tag):
                        get_path_best_epoch("vgg_5_200-unfreeze_contE20", full_path), 
                        get_path_best_epoch("vgg_3_unf", full_path))
         dataset_array = ["xzt",] * len(modelidents)
-        title_of_plot='Comparison of partially unfrozen network performance'
+        #title_of_plot='Comparison of partially unfrozen network performance'
         label_array=["Frozen", "Three unfrozen layers", "Supervised network"]
         plot_path="/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/unfreeze/"
         plot_file_name = "vgg_5_"+tag+".pdf"
@@ -154,7 +154,7 @@ def get_saved_plots_info(tag):
 
 
 
-def make_evaluation(tag):
+def make_evaluation(tag, show_plot=True):
     modelidents, class_type, dataset_array, title_of_plot, label_array, save_plot_as, plot_type, bins, y_lims = get_saved_plots_info(tag)
     
     #generate or load data automatically:
@@ -170,13 +170,13 @@ def make_evaluation(tag):
     if plot_type == "acc":
         y_label_of_plot="Accuracy"
         fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot, y_lims=y_lims) 
-        plt.show(fig)
+        if show_plot: plt.show(fig)
         fig.savefig(save_plot_as)
         
     elif plot_type == "loss":
         y_label_of_plot="Loss"
         fig = make_binned_data_plot(hist_data_array, label_array, title_of_plot, y_label=y_label_of_plot) 
-        plt.show(fig)
+        if show_plot: plt.show(fig)
         fig.savefig(save_plot_as)
         
     elif plot_type == None:
@@ -186,7 +186,13 @@ def make_evaluation(tag):
     
     print("Plot saved to", save_plot_as)
 
-make_evaluation(tag)
+if tag=="all_comps":
+    tags=["compare_2000_sup","compare_bottleneck","compare_600","compare_200",
+    "compare_200_smaller", "compare_200_bigger","compare_unfreeze"]
+    for tag in tags:
+        make_evaluation(tag, show_plot=False)
+else:
+    make_evaluation(tag)
 
 
 

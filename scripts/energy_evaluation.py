@@ -265,7 +265,7 @@ if __name__=="__main__":
         print("Making evaluation of all best models...")
         plot_tag=101
         while True:
-            save_and_show_plots(tag, apply_precuts)
+            save_and_show_plots(plot_tag, apply_precuts, show_plot=False)
             plot_tag+=1
             
     else:
