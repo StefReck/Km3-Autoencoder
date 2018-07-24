@@ -471,24 +471,20 @@ def get_props_for_plot_parser(tag, printing=True):
                   "vgg_4_15c/trained_vgg_4_15c_autoencoder_test.txt",
                   "vgg_4_30c/trained_vgg_4_30c_autoencoder_test.txt",]
     
-        title="Loss of autoencoders with a varying number of convolutional layers"
+        #title="Loss of autoencoders with a varying number of convolutional layers"
         xticks=[0,5,10,15,20,25,30]
         labels_override=["12 layers","14 layers", "16 layers", "20 layers", "30 layers", "60 layers"]
-        
+        xrange=[0,30]
     
     elif tag=="vgg4_autoencoders_10c":
-        test_files = [#"vgg_3_eps/trained_vgg_3_eps_autoencoder_test.txt",
-                  #"vgg_4_ConvAfterPool/trained_vgg_4_ConvAfterPool_autoencoder_test.txt",
-                  #"vgg_4_6c/trained_vgg_4_6c_autoencoder_test.txt",
-                  #"vgg_4_6c_scale/trained_vgg_4_6c_scale_autoencoder_test.txt",
-                  #"vgg_4_8c/trained_vgg_4_8c_autoencoder_test.txt",
-                  "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt",
-                  "vgg_4_10c_smallkernel/trained_vgg_4_10c_smallkernel_autoencoder_test.txt",
+        test_files = ["vgg_4_10c_smallkernel/trained_vgg_4_10c_smallkernel_autoencoder_test.txt",
+                  "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",
                   "vgg_4_10c_triple/trained_vgg_4_10c_triple_autoencoder_test.txt",
-                  "vgg_4_10c_triple_same_structure/trained_vgg_4_10c_triple_same_structure_autoencoder_test.txt",]
-                  #"vgg_4_7c_less_filters/trained_vgg_4_7c_less_filters_autoencoder_test.txt"]
-        title="Loss of autoencoders with 20 convolutional layers"
-        labels_override=["Standard", "Small kernel", "Triple structure", "Triple structure variation"]
+                  "vgg_4_10c/trained_vgg_4_10c_autoencoder_test.txt", ]
+        #title="Loss of autoencoders with 20 convolutional layers"
+        xrange=[0,30]
+        labels_override=["Small kernel", "Triple structure variation", "Triple structure", "Standard 20 layers",]
+        colors=["b", "orange", "g", "r"]
         
     
         
@@ -562,47 +558,51 @@ def get_path_best_epoch(modeltag, full_path=True):
     #Get the path to the h5 file that had the best performance of a model
     #if full_path==True, will also include the base_path:
     base_path="/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
+    try:
+        modeltag=int(modeltag)
+    except ValueError:
+        pass
     #------------------------- Up-Down Networks ------------------------- 
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     #------------------------- unfrozen networks ------------------------
-    if modeltag=="vgg_3_unf":
+    if modeltag=="vgg_3_unf" or modeltag==1:
         model_path="vgg_3/trained_vgg_3_supervised_up_down_new_epoch5.h5"
         
     #------------------------- Bottleneck ------------------------- 
-    elif modeltag=="vgg_3":
+    elif modeltag=="vgg_3" or modeltag==2:
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch10_supervised_up_down_accdeg_epoch23.h5"
     
-    elif modeltag=="vgg_5_600_picture" :
+    elif modeltag=="vgg_5_600_picture" or modeltag==3:
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch88.h5"
-    elif modeltag=="vgg_5_600_morefilter":
+    elif modeltag=="vgg_5_600_morefilter" or modeltag==4:
         model_path=""
         raise
     
-    elif modeltag=="vgg_5_200":
+    elif modeltag=="vgg_5_200" or modeltag==5:
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5"
-    elif modeltag=="vgg_5_200_dense":
+    elif modeltag=="vgg_5_200_dense" or modeltag==5:
         model_path=""
         raise
     
-    elif modeltag=="vgg_5_64":
+    elif modeltag=="vgg_5_64" or modeltag==6:
         model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5"
         
-    elif modeltag=="vgg_5_32-eps01":
+    elif modeltag=="vgg_5_32-eps01" or modeltag==7:
         model_path="vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_epoch43.h5"
     
     #------------------------------200 size variation------------------------------
-    elif modeltag=="vgg_5_200_shallow":
+    elif modeltag=="vgg_5_200_shallow" or modeltag==8:
         model_path="/vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch19_supervised_up_down_epoch63.h5"
-    elif modeltag=="vgg_5_200_small":
+    elif modeltag=="vgg_5_200_small" or modeltag==9:
         model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch77_supervised_up_down_epoch87.h5"
-    elif modeltag=="vgg_5_200_large":
+    elif modeltag=="vgg_5_200_large" or modeltag==10:
         model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch39_supervised_up_down_epoch55.h5"
-    elif modeltag=="vgg_5_200_deep":
+    elif modeltag=="vgg_5_200_deep" or modeltag==11:
         model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch48_supervised_up_down_epoch60.h5"
     
     
     #------------------------------Unfreeze Networks------------------------------
-    elif modeltag=="vgg_5_200-unfreeze_contE20":
+    elif modeltag=="vgg_5_200-unfreeze_contE20" or modeltag==12:
         model_path="vgg_5_200-unfreeze/trained_vgg_5_200-unfreeze_autoencoder_epoch1_supervised_up_down_contE20_epoch30.h5"
     
     
@@ -610,44 +610,44 @@ def get_path_best_epoch(modeltag, full_path=True):
     #------------------------- Energy Networks ------------------------- 
     #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     #---------------- Single unfrozen datafiles ----------------
-    elif modeltag=="2000_unf_E":
+    elif modeltag=="2000_unf_E" or modeltag==101:
         model_path = "vgg_5_2000/trained_vgg_5_2000_supervised_energy_epoch17.h5"
-    elif modeltag=="2000_unf_mse_E":
+    elif modeltag=="2000_unf_mse_E" or modeltag==102:
         model_path = "vgg_5_2000-mse/trained_vgg_5_2000-mse_supervised_energy_epoch10.h5"
-    elif modeltag=="200_linear_E":
+    elif modeltag=="200_linear_E" or modeltag==103:
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_epoch18.h5"
     
     
     #------------------------------Energy bottleneck------------------------------
-    elif modeltag=="vgg_3_2000_E":
+    elif modeltag=="vgg_3_2000_E" or modeltag==104:
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_init_epoch29.h5"
-    elif modeltag=="vgg_3_2000_E_nodrop":
+    elif modeltag=="vgg_3_2000_E_nodrop" or modeltag==105:
         model_path="vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_nodrop_epoch7.h5"
         
-    elif modeltag=="vgg_5_600_picture_E_nodrop":
+    elif modeltag=="vgg_5_600_picture_E_nodrop" or modeltag==106:
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch44_supervised_energy_nodrop_epoch14.h5"
-    elif modeltag=="vgg_5_600_morefilter_E_nodrop":
+    elif modeltag=="vgg_5_600_morefilter_E_nodrop" or modeltag==107:
         model_path="vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_epoch43_supervised_energy_nodrop_epoch8.h5"
         
-    elif modeltag=="vgg_5_200_E_nodrop":
+    elif modeltag=="vgg_5_200_E_nodrop" or modeltag==108:
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_energy_nodrop_epoch52.h5"
-    elif modeltag=="vgg_5_200_dense_E_nodrop":
+    elif modeltag=="vgg_5_200_dense_E_nodrop" or modeltag==109:
         model_path="vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch101_supervised_energy_nodrop_epoch29.h5"
     
-    elif modeltag=="vgg_5_64_E_nodrop":
+    elif modeltag=="vgg_5_64_E_nodrop" or modeltag==110:
         model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch78_supervised_energy_drop00_2_epoch55.h5"
         
-    elif modeltag=="vgg_5_32_E_nodrop":
+    elif modeltag=="vgg_5_32_E_nodrop" or modeltag==111:
         model_path="vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_epoch44_supervised_energy_nodrop_epoch90.h5"
 
     #------------------------------200 size variation------------------------------
-    elif modeltag=="vgg_5_200_shallow_E_nodrop":
+    elif modeltag=="vgg_5_200_shallow_E_nodrop" or modeltag==112:
         model_path="vgg_5_200_shallow/trained_vgg_5_200_shallow_autoencoder_epoch5_supervised_energy_nodrop_epoch24.h5"
-    elif modeltag=="vgg_5_200_small_E_nodrop":
+    elif modeltag=="vgg_5_200_small_E_nodrop" or modeltag==113:
         model_path="vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch58_supervised_energy_nodrop_epoch49.h5"
-    elif modeltag=="vgg_5_200_large_E_nodrop":
+    elif modeltag=="vgg_5_200_large_E_nodrop" or modeltag==114:
         model_path="vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch45_supervised_energy_nodrop_epoch5.h5"
-    elif modeltag=="vgg_5_200_deep_E_nodrop":
+    elif modeltag=="vgg_5_200_deep_E_nodrop" or modeltag==115:
         model_path="vgg_5_200_deep/trained_vgg_5_200_deep_autoencoder_epoch41_supervised_energy_nodrop_epoch31.h5"
         
     else: raise NameError("Tag '"+str(modeltag)+"' is not known!")

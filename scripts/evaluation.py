@@ -40,6 +40,8 @@ def get_saved_plots_info(tag):
     plot_type = "acc"
     bins=32
     y_lims=(0.75,1) #for acc only
+    title_of_plot=""
+    #default plot size: two in one line, see make_binned_data_plot
     
     modelpath = "/home/woody/capn/mppi013h/Km3-Autoencoder/models/"
     plot_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/updown_evaluation/"

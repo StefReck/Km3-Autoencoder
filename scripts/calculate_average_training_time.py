@@ -5,15 +5,16 @@ Calculate average training time.
 
 import argparse
 def parse_input():
-    parser = argparse.ArgumentParser(description='Calculate average training time.')
+    parser = argparse.ArgumentParser(description='Calculate average training time based on strings like 09:37:23_to_10:00:56')
     parser.add_argument('test_file', type=str, help='Test file of the training of a model.')
 
     return parser.parse_args()
+
 params = parse_input()
+test_file = params.test_file
 
 from plotting.plot_statistics import make_dicts_from_files
 
-test_file = params.test_file
 
 def convert_to_minutes(time_string):
     #input: e.g. 09:37:23_to_10:00:56
@@ -22,7 +23,7 @@ def convert_to_minutes(time_string):
     hours, minutes, secs = [int(e) for e in start_time.split(":")]
     ehours, eminutes, esecs = [int(e) for e in end_time.split(":")]
     
-    time_diff_minutes = (ehours - hours)*60 + (eminutes - minutes)%60 - (minutes>eminutes)*60
+    time_diff_minutes = ((ehours - hours)%24)*60 + (eminutes - minutes)%60 - (minutes>eminutes)*60
     
     return time_diff_minutes
     

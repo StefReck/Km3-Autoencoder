@@ -191,7 +191,7 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
     return (hist_data_2d, energy_mae_plot_data)
 
 
-def save_and_show_plots(tag, apply_precuts=False):
+def save_and_show_plots(tag, apply_precuts=False, show_plot=True):
     #Main function. Generate or load the data for the plots, and make them.
     input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
     
@@ -204,7 +204,8 @@ def save_and_show_plots(tag, apply_precuts=False):
             print("Saving plot as", save_plot_as)
             fig_compare.savefig(save_plot_as)
             print("Done")
-        plt.show(fig_compare)
+        if show_plot:
+            plt.show(fig_compare)
         
     else:    
         #Do the standard energy evaluation, i.e. calculate the energy array,
@@ -216,7 +217,8 @@ def save_and_show_plots(tag, apply_precuts=False):
         
         print("Generating hist2d plot...")
         fig_hist2d = make_2d_hist_plot(hist_data_2d)
-        plt.show(fig_hist2d)
+        if show_plot:
+            plt.show(fig_hist2d)
         if save_as_2d != None:
             print("Saving plot as", save_as_2d)
             fig_hist2d.savefig(save_as_2d)
@@ -224,7 +226,8 @@ def save_and_show_plots(tag, apply_precuts=False):
             
         print("Generating mae plot...")
         fig_mae = make_energy_mae_plot_mean_only([energy_mae_plot_data,])
-        plt.show(fig_mae)
+        if show_plot:
+            plt.show(fig_mae)
         if save_as_1d != None:
             print("Saving plot as", save_as_1d)
             fig_mae.savefig(save_as_1d)
@@ -258,7 +261,15 @@ if __name__=="__main__":
     apply_precuts = params["apply_precuts"]
     #only go through parts of the file (for testing)
     samples=None
-    save_and_show_plots(tag, apply_precuts)
+    if tag=="all_energy":
+        print("Making evaluation of all best models...")
+        plot_tag=101
+        while True:
+            save_and_show_plots(tag, apply_precuts)
+            plot_tag+=1
+            
+    else:
+        save_and_show_plots(tag, apply_precuts)
 
    
 

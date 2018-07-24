@@ -275,14 +275,14 @@ def setup_vgg_6_2000_advers(autoencoder_stage, options_dict, modelpath_and_name=
         
         inputs_critic = Input(shape=(11,18,50,1))
         x = conv_block(inputs_critic,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
-        x = conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        #x = conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
         x = AveragePooling3D((1, 1, 2), padding='same')(x) #11x18x25
         
-        x=conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic,)
+        #x=conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic,)
         x=conv_block(x,      filters=32, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
         x = AveragePooling3D((2, 2, 2), padding='same')(x) #6x9x13
         
-        x=conv_block(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
+        #x=conv_block(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
         x=conv_block(x,      filters=64, kernel_size=(3,3,3), padding="same",  trainable=True, channel_axis=channel_axis, dropout=dropout_for_critic, )
         x = AveragePooling3D((2, 2, 2), padding='same')(x) #3x5x7
         #3x5x7 x64

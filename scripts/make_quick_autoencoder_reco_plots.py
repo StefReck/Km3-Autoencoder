@@ -76,7 +76,7 @@ if no_zero_center==False:
     hists_centered = np.subtract(hists_org.reshape((hists_org.shape+(1,))).astype(np.float32), xs_mean)
     
     hists_pred = np.add(autoencoder.predict_on_batch(hists_centered), xs_mean)
-    print(gan_model.predict_on_batch(hists_centered))
+    #print(gan_model.predict_on_batch(hists_centered))
     
     hists_pred=hists_pred.reshape((hists_pred.shape[:-1]))
 elif no_zero_center==True:
