@@ -60,7 +60,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     #Input: Either infos about what to plot, or a tag to load it automatically
     
     if tag != None:
-        test_files, title, labels_override, save_as, epoch_schedule, style = get_props_for_plot_parallel(tag)
+        test_files, title, labels_override, save_as, epoch_schedule, style, ylims = get_props_for_plot_parallel(tag)
         
     #Which epochs from the parallel encoder history to take:
     how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
@@ -76,7 +76,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     
     
     fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                     title, legend_locations, labels_override, colors, xticks, style)
+                     title, legend_locations, labels_override, colors, xticks, style, ylims=ylims)
     
     if save_as != None and save_it==True:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)

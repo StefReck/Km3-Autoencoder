@@ -350,7 +350,7 @@ def make_plot_same_y(data_for_plots, default_label_array, xlabel, ylabel_list, t
     return(fig)
 
 
-def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, data_parallel_2=None): 
+def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, title, legend_locations, labels_override, colors, xticks, style, data_parallel_2=None, ylims=None): 
     """
     Makes a plot of autoencoder loss and supervised acc of parallel training.
     data autoencoder :
@@ -440,8 +440,11 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     max_epoch = get_max_epoch( [data_autoencoder, data_parallel_test] )
     ax.set_xlim((0,max_epoch))
     #y range
-    ylims_AE = get_proper_range(data_autoencoder[1])
-    ylims_prl = get_proper_range(get_proper_range(np.concatenate((data_parallel_test[1],data_parallel_train[1]))))
+    if ylims==None:
+        ylims_AE = get_proper_range(data_autoencoder[1])
+        ylims_prl = get_proper_range(get_proper_range(np.concatenate((data_parallel_test[1],data_parallel_train[1]))))
+    else:
+        ylims_AE, ylims_prl = ylims
     ax.set_ylim(ylims_AE)
     ax2.set_ylim(ylims_prl)
     
@@ -453,6 +456,7 @@ def make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parall
     ax.set_ylabel(ylabel_list[0]+" (Autoencoder)")
     ax2.set_ylabel(ylabel_list[1]+" (Encoder)")
     ax.set_xlabel(xlabel)
+    
     
     plt.title(title)
     ax.grid(True)

@@ -46,6 +46,7 @@ def get_props_for_plot_parallel(tag, printing=True):
     style="two_in_one_line"
     #plot title
     title=""
+    ylims=None #[ylims_AE, y_lims_prl]
     
     try: tag=int(tag) 
     except: ValueError
@@ -112,11 +113,13 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_up_down_new_test.txt"
         save_to_folder = "bottleneck/"
+        ylims=[[0.055,0.085],[0.71,0.9]]
     elif tag=="vgg_5_600_morefilter" or tag==10:
         #title = "Parallel training with model '600 morefilter'"
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
+        ylims=[[0.055,0.085],[0.71,0.9]]
     elif tag=="vgg_5_600_morefilter-new" or tag==40:
         #title = "Parallel training with model '600 morefilter new'"
         ae_model =  home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_test.txt" 
@@ -344,7 +347,7 @@ def get_props_for_plot_parallel(tag, printing=True):
             print(file.split(home)[1]) 
            
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
-    return test_files, title, labels_override, save_as, epoch_schedule, style
+    return test_files, title, labels_override, save_as, epoch_schedule, style, ylims
 
 
 
