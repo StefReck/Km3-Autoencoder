@@ -11,7 +11,7 @@ sys.path.append('../util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 
-mode="rob"
+mode="perf"
 
 save_perf_plot_as="../../results/plots/statistics/bottleneck_summary_plot_updown_energy.pdf"
 save_rob_4_plot_as= "../../results/plots/statistics/bottleneck_summary_plot_robust_broken4.pdf"
@@ -21,13 +21,14 @@ save_names=[save_perf_plot_as, save_rob_4_plot_as, save_rob_14_plot_as]
 #size of bottleneck, 
 #          acc
 #               Loss of energy
+#                       MRE energy
 
 results = np.array([
-[1920,	 82.51, 6.339,    ], #"basic",
-[600,    84.93, 5.846,   ],#"picture",
-[200,    84.98, 5.820,   ],#"200",
-[64,     84.71, 5.855,    ],#"64 nodrop"
-[32,     82.67, 6.145,   ],#"32-eps01 nodrop",
+[1920,	 82.51, 6.339, 0.28014   ], #"basic",
+[600,    84.93, 5.846, 0.26500  ],#"picture",
+[200,    84.98, 5.774, 0.26084  ],#"200/200-dense",
+[64,     84.71, 5.838, 0.26244  ],#"64 nodrop"
+[32,     82.67, 6.145, 0.28251 ],#"32-eps01 nodrop",
 ])
 
 #Broken4 updown
@@ -70,19 +71,34 @@ def make_and_save_plot(data, mode, save_names):
     
     if mode=="perf":
         #best performing unfrozen up/down and energy
-        top_results=[88.16, 5.3185525]
+        top_results=[88.16, 5.3185525, 24.7034]
         ax2 = ax.twinx()
-       
+        make_MAE=False
+        acc_data=[results[:,0], results[:,1]]
+        if make_MAE:
+            ergy_data=[results[:,0], results[:,2]]
+            y_label="MAE Energy"
+            y_label_ax = "Mean absolute error energy (GeV)"
+            hline_loc=top_results[1]
+            ylims=[6.39,5.27]
+        else:
+            #make MRE instead
+            ergy_data=[results[:,0], 100*results[:,3]]
+            y_label="MRE Energy"
+            y_label_ax = "Mean relative error energy (%)"
+            hline_loc=top_results[2]
+            ylims=[28.5,24.56]
+        
         #ax2.axhline(top_results[1],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
         #They are almost at the same heigth on different axis, hacky: plot them in one instead to line them up
         hline_acc = ax.axhline(top_results[0],0,1, ls="-", c="blue", lw=3)
         hline_loss = ax.axhline(top_results[0],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
         
-        acc_line, = ax.semilogx(results[:,0], results[:,1], "o", c="blue", label="Accuracy Up-Down")
-        loss_line, = ax2.semilogx(results[:,0], results[:,2], "o", c="orange", label="MAE Energy")
+        acc_line, = ax.semilogx(acc_data[0], acc_data[1], "o", c="blue", label="Accuracy Up-Down")
+        loss_line, = ax2.semilogx(ergy_data[0], ergy_data[1], "o", c="orange", label=y_label)
         
         ax.set_ylabel("Accuracy up-down (%)")
-        ax2.set_ylabel("Mean absolute error energy (GeV)")
+        ax2.set_ylabel(y_label_ax)
         
         tick_locs=np.array([30,100,1000, 2000])
         ax.set_xticks(tick_locs.astype(int))
@@ -91,7 +107,7 @@ def make_and_save_plot(data, mode, save_names):
         ax.set_xlim(28,2200)
         
         ax.set_ylim(80.2,88.5)
-        ax2.set_ylim(6.39,5.27 )
+        ax2.set_ylim(ylims)
         ax.yaxis.grid()
         
         plt.legend([(acc_line, loss_line)], ["Supervised"])

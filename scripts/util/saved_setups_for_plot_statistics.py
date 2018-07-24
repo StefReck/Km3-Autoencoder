@@ -575,14 +575,12 @@ def get_path_best_epoch(modeltag, full_path=True):
     elif modeltag=="vgg_5_600_picture" or modeltag==3:
         model_path="vgg_5_picture/trained_vgg_5_picture_autoencoder_epoch48_supervised_up_down_epoch88.h5"
     elif modeltag=="vgg_5_600_morefilter" or modeltag==4:
-        model_path=""
-        raise
+        model_path="vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_epoch47_supervised_up_down_epoch95.h5"
     
     elif modeltag=="vgg_5_200" or modeltag==5:
         model_path="vgg_5_200/trained_vgg_5_200_autoencoder_epoch94_supervised_up_down_epoch45.h5"
     elif modeltag=="vgg_5_200_dense" or modeltag==5:
-        model_path=""
-        raise
+        model_path="vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_epoch120_supervised_up_down_epoch81.h5"
     
     elif modeltag=="vgg_5_64" or modeltag==6:
         model_path="vgg_5_64/trained_vgg_5_64_autoencoder_epoch64_supervised_up_down_epoch26.h5"
