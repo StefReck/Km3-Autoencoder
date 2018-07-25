@@ -27,8 +27,8 @@ results = np.array([
 [1920,	 82.51, 6.339, 0.28014   ], #"basic",
 [600,    84.93, 5.846, 0.26500  ],#"picture",
 [200,    84.98, 5.774, 0.26084  ],#"200/200-dense",
-[64,     84.71, 5.838, 0.26244  ],#"64 nodrop"
-[32,     82.67, 6.145, 0.28251 ],#"32-eps01 nodrop",
+[64,     83.79, 5.838, 0.26244  ],#"64 nodrop"
+[32,     80.63, 6.145, 0.28251 ],#"32-eps01 nodrop",
 ])
 
 #Broken4 updown
@@ -73,7 +73,7 @@ def make_and_save_plot(data, mode, save_names):
         #best performing unfrozen up/down and energy
         top_results=[88.16, 5.3185525, 24.7034]
         ax2 = ax.twinx()
-        make_MAE=False
+        make_MAE=0
         acc_data=[results[:,0], results[:,1]]
         if make_MAE:
             ergy_data=[results[:,0], results[:,2]]
@@ -81,6 +81,7 @@ def make_and_save_plot(data, mode, save_names):
             y_label_ax = "Mean absolute error energy (GeV)"
             hline_loc=top_results[1]
             ylims=[6.39,5.27]
+            legend_label="MAE Energy"
         else:
             #make MRE instead
             ergy_data=[results[:,0], 100*results[:,3]]
@@ -88,7 +89,7 @@ def make_and_save_plot(data, mode, save_names):
             y_label_ax = "Mean relative error energy (%)"
             hline_loc=top_results[2]
             ylims=[28.5,24.56]
-        
+            legend_label="MRE Energy"
         #ax2.axhline(top_results[1],0,1, ls="--", c="orange", lw=3, dashes=(3,3))
         #They are almost at the same heigth on different axis, hacky: plot them in one instead to line them up
         hline_acc = ax.axhline(top_results[0],0,1, ls="-", c="blue", lw=3)
@@ -112,7 +113,7 @@ def make_and_save_plot(data, mode, save_names):
         
         plt.legend([(acc_line, loss_line)], ["Supervised"])
         
-        ax2.legend(handles=[acc_line,loss_line,(hline_acc, hline_loss)],labels=["Accuracy Up-Down","MAE Energy","Supervised",], bbox_to_anchor=(1, 0.94), bbox_transform=ax.transAxes)
+        ax2.legend(handles=[acc_line,loss_line,(hline_acc, hline_loss)],labels=["Accuracy Up-Down",legend_label,"Supervised",], bbox_to_anchor=(1, 0.94), bbox_transform=ax.transAxes)
         plt.subplots_adjust(right=0.88)
         
         fig.savefig(save_names[0])

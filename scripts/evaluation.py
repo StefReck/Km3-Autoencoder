@@ -109,6 +109,14 @@ def get_saved_plots_info(tag):
         #in the results/plots/updown_evalutaion/ folder
         plot_file_name = "vgg_5_"+tag+".pdf"
         
+    elif tag=="compare_best":
+        modelidents = (get_path_best_epoch("vgg_3_unf", full_path),
+                       get_path_best_epoch("vgg_5_200", full_path),)
+        dataset_array = ["xzt",] * len(modelidents)
+        #title_of_plot='Accuracy of encoders with bottleneck 200'
+        label_array=["Supervised", "Model 200-pool"]
+        #in the results/plots/updown_evalutaion/ folder
+        plot_file_name = "vgg_5_"+tag+".pdf"
     
     #--------------------------- 200 size variation ---------------------------
     elif tag=="compare_200_smaller":

@@ -90,13 +90,14 @@ def get_saved_plots_info(tag, apply_precuts=False):
         #title_of_plot='Accuracy of encoders with bottleneck 200'
         is_a_set=True
         
-    elif tag == "compare_200_dense":
+    elif tag == "compare_best":
         #title_of_plot='Performance comparison of the 200 dense encoder network and the supervised one'
         tags = ["2000_unf_E", 
                 "vgg_5_200_dense_E_nodrop"]
         label_array  = ["Unfrozen", "Encoder"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
+        
         
     #--------------------- 200 size varaition --------------------
     elif tag=="compare_200_bigger":
