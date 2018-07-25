@@ -158,7 +158,7 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_64/trained_vgg_5_64_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
-        ylims=[[0.065,0.085],[0.575,0.925]]
+        ylims=[[0.067,0.083],[0.575,0.925]]
     elif tag=="vgg_5_64-new" or tag==32:
         #title = "Parallel training with model '64 new'"
         ae_model =  home+"models/vgg_5_64-new/trained_vgg_5_64-new_autoencoder_test.txt"
@@ -176,7 +176,7 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_32-eps01/trained_vgg_5_32-eps01_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "bottleneck/"
-        ylims=[[0.065,0.085],[0.575,0.925]]
+        ylims=[[0.067,0.083],[0.575,0.925]]
     elif tag=="vgg_5_32-new" or tag==33:
         #title = "Parallel training with model '32 new'"
         ae_model =  home+"models/vgg_5_32-new/trained_vgg_5_32-new_autoencoder_test.txt"
@@ -239,11 +239,17 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_picture/trained_vgg_5_picture_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+        ylims=[[0.055,0.085],[5.75,8]]
+        AE_yticks=list(i/1000 for i in range(55,90,5))
+        
     elif tag=="vgg_5_600_morefilter_energy" or tag==31:
         #title = "Parallel training with model '600 morefilter'"
         ae_model =  home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_morefilter/trained_vgg_5_morefilter_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+        ylims=[[0.055,0.085],[5.75,8]]
+        AE_yticks=list(i/1000 for i in range(55,90,5))
+        
     elif tag=="vgg_5_600_morefilter_energy-new" or tag==42:
         #title = "Parallel training with model '600 morefilter new'"
         ae_model =  home+"models/vgg_5_morefilter-new/trained_vgg_5_morefilter-new_autoencoder_test.txt"
@@ -255,11 +261,16 @@ def get_props_for_plot_parallel(tag, printing=True):
         ae_model =  home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_test.txt"
         prl_model = home+"models/vgg_5_200/trained_vgg_5_200_autoencoder_supervised_parallel_energy_linear_test.txt"
         save_to_folder = "bottleneck_energy/"
+        ylims=[[0.0625,0.084],[5.8,8.6]]
+        AE_yticks=list(i/1000 for i in range(65,85,5))
+        
     elif tag=="vgg_5_200_dense_energy" or tag==30:
         #title = "Parallel training with model '200 dense'"
         ae_model =  home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_200_dense/trained_vgg_5_200_dense_autoencoder_supervised_parallel_energy_test.txt"
         save_to_folder = "bottleneck_energy/"
+        ylims=[[0.0625,0.084],[5.8,8.6]]
+        AE_yticks=list(i/1000 for i in range(65,85,5))
     elif tag=="vgg_5_200_dense_energy-new" or tag==43:
         #title = "Parallel training with model '200 dense new'"
         ae_model =  home+"models/vgg_5_200_dense-new/trained_vgg_5_200_dense-new_autoencoder_test.txt"
