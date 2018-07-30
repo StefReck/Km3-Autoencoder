@@ -47,7 +47,8 @@ def which_plot(do_you_want):
         title = ""#"Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
         #x and y lims
-        limits=[[0.0645, 0.0725],[0.778,0.858]]
+        limits=[[0.064, 0.074],[0.778,0.858]]
+        smooth_values=1
         
     elif do_you_want=="loss":
         tags=["vgg_3_energy",
@@ -71,7 +72,8 @@ def which_plot(do_you_want):
         title = ""#"Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_ergy.pdf"
         #x and y lims
-        limits=[[0.061, 0.076], [7.2,5.8]]
+        limits=[[0.064, 0.074], [7.2,5.8]]
+        smooth_values=3
         
     elif do_you_want=="test":
         tags=["vgg_5_600_picture",]
@@ -79,9 +81,10 @@ def which_plot(do_you_want):
         xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
         title = "Autoencoder loss and encoder accuracy for different autoencoder models"
         save_as = None
+        smooth_values=0
     
     if save_as is not None: save_as=base_path+save_as 
-    return tags, label_list,xlabel,ylabel,title,save_as, limits
+    return tags, label_list,xlabel,ylabel,title,save_as, limits, smooth_values
 
 
 
@@ -116,23 +119,23 @@ def smooth(values, span=1):
         smoothed_values.append(np.mean(values[(value_index-span):(value_index+span+1)]))
     return np.array(smoothed_values)
 
-def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_values=True):
+def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_values=0):
     figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     
     for i,model_loss_ydata in enumerate(loss_ydata_list):
         ae_loss, enc_loss = model_loss_ydata[0], model_loss_ydata[1]
-        if smooth_values:
-            temp_plot = ax.plot(ae_loss, enc_loss, "o", ms=1,)
-            ax.plot(smooth(ae_loss,3) , smooth(enc_loss,3), "-", lw=2, color=temp_plot[0].get_color(), label=labels[i])
+        if smooth_values>0:
+            temp_plot = ax.plot(ae_loss, enc_loss, "o", ms=1.5,)
+            ax.plot(smooth(ae_loss,smooth_values) , smooth(enc_loss,smooth_values), "-", lw=2, color=temp_plot[0].get_color(), label=labels[i])
         else:
             ax.plot(ae_loss, enc_loss, "o-", ms=3, label=labels[i])
         
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    ax.legend(loc="lower left")
+    ax.legend(loc="lower left", fontsize = 10)
     fig.suptitle(title)
     ax.set_xlim(limits[0])
     ax.set_ylim(limits[1])
@@ -140,7 +143,7 @@ def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_val
     return fig
 
 
-def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, limits):
+def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, limits, smooth_values):
     """
     Main function. Returns the plot.
     """
@@ -184,7 +187,7 @@ def make_the_plot(tags, label_list, xlabel, ylabel, title, save_as, limits):
     else:
         label_array = default_label_array_ae
     
-    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title, limits)
+    fig = make_plot(loss_ydata_list, label_array ,xlabel, ylabel, title, limits, smooth_values=smooth_values)
     
     if save_as is not None:
         fig.savefig(save_as)
