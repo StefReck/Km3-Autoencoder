@@ -40,7 +40,7 @@ def get_props_for_plot_parallel(tag, printing=True):
     #as an input (AE and parallel encoder)
     home = "/home/woody/capn/mppi013h/Km3-Autoencoder/"
     epoch_schedule="10-2-1"
-    labels_override = ["Autoencoder", "Encoder"] 
+    labels_override = ["Autoencoder", "Encoder+Dense"] 
     save_to_folder = ""
     #plot and font sizes:
     style="two_in_one_line"

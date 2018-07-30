@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 from plotting.plot_statistics import read_out_file, get_proper_range
 
 
-def make_plot(data_dict, figsize=(9,7), title="Constituents of the test MSE"):
+def make_plot(data_dict, figsize=(6.4,5.5), title="Constituents of the test MSE"):
+    plt.rcParams.update({'font.size': 14})
     #whats_there = ("MSE above3","MSE below","MSE")
     labels = ("MSE of high count bins", "MSE of low count bins", "Total MSE")
     colors = ("green","orange","blue")
@@ -40,7 +41,7 @@ def make_plot(data_dict, figsize=(9,7), title="Constituents of the test MSE"):
     ax2.set_ylabel("Test MSE (high counts)")
     
     ax.set_ylim(get_proper_range( list(map(float, data_dict["MSE"]))))
-    ax2.set_ylim(get_proper_range( list(map(float,data_dict["MSE above3"]))))
+    ax2.set_ylim([0,11])
     
     plt.legend(loc="upper right")
     return fig

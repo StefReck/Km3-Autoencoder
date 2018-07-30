@@ -64,46 +64,46 @@ def plot_which_quadro(event_no, test_file):
     data = np.sum(test_file["x"][event_no], axis=0)
     info = test_file["y"][event_no: event_no+1]
     info_array = get_title_arrays(info)
+    print(info_array)
     #(['Up-going'], ['Anti-Elec-CC'], ['Energy: 43.7 GeV'])
     #event_track: [event_id, particle_type, energy, isCC, bjorkeny, dir_x/y/z, time]
     
-    
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, figsize=(7,11))
-    ax1.set_title("Original event:   " + info_array[0][0] + "   "+ info_array[1][0] +  "   "+info_array[2][0])
+    plt.rcParams.update({'font.size': 12})
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12,5))
+    ax1.set_title("Original event")
     ax1.set_ylabel("Z bin")
     ax1.set_xlabel("T bin")
     divide_by = np.max(data)
     org_plot = ax1.imshow(data/divide_by, )
-    cbar = plt.colorbar(org_plot, ax=ax1)
+    cbar = plt.colorbar(org_plot, ax=ax1, fraction=0.017)
     cbar.set_ticks(cbar.get_ticks())
     cbar.set_ticklabels(list(map(int,cbar.get_ticks()*divide_by)))
     cbar.ax.set_title('Hits')
     
     poisson = poisson_factor(data)
-    ax2.set_title("Poisson sensitivity")
+    ax2.set_title("Poisson sensitivity: "+r'$1 - P_{poisson}$')
     pois_plot = ax2.imshow(poisson)
     ax2.set_ylabel("Z bin")
     ax2.set_xlabel("T bin")
-    cbar_2=plt.colorbar(pois_plot, ax=ax2)
-    cbar_2.ax.set_title(r'$1 - P_{poisson}$')
+    cbar_2=plt.colorbar(pois_plot, ax=ax2, fraction=0.017)
     
     poisson_sq = poisson_square_factor(data)
-    ax3.set_title("Poisson squared sensitivity")
+    ax3.set_title("Poisson squared sensitivity: "+r'$(1 - P_{poisson})^{2}$')
     pois_plot_3 = ax3.imshow(poisson_sq)
     ax3.set_ylabel("Z bin")
     ax3.set_xlabel("T bin")
-    cbar_3=plt.colorbar(pois_plot_3, ax=ax3)
-    cbar_3.ax.set_title(r'$(1 - P_{poisson})^{2}$')
+    cbar_3=plt.colorbar(pois_plot_3, ax=ax3, fraction=0.017)
     
     poisson_log = poisson_log_factor(data)
-    ax4.set_title("Poisson log sensitivity")
+    ax4.set_title("Poisson log sensitivity: "+r'$-\log( P_{poisson}$)')
     pois_plot_4 = ax4.imshow(poisson_log)
     ax4.set_ylabel("Z bin")
     ax4.set_xlabel("T bin")
-    cbar_4=plt.colorbar(pois_plot_4, ax=ax4)
-    cbar_4.ax.set_title(r'$-\log( P_{poisson}$)')
+    cbar_4=plt.colorbar(pois_plot_4, ax=ax4, fraction=0.017)
     
-    fig.tight_layout()
+    plt.subplots_adjust(left=0.06, bottom=0.05, right=0.94, top=0.98,
+                wspace=0.2, hspace=0.2)
+    #fig.tight_layout()
     return fig
 
 
