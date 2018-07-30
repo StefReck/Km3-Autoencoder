@@ -774,7 +774,7 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
     x=hist_2d_data_track[1] #mc energy bin edges
     y=hist_2d_data_track[2] #reco energy bin edges
     
-    title="Energy reconstruction"
+    title=""#"Energy reconstruction"
     xlabel = "True energy (GeV)"
     ylabel = "Reconstructed energy (GeV)"
     

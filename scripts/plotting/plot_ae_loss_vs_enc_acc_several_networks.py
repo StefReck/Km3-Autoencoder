@@ -41,40 +41,39 @@ def which_plot(do_you_want):
                       "64",
                       r"32 ($\epsilon = 10^{-1}$)",
                       ]
-        xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
-        title = "Autoencoder loss and encoder accuracy"
+        xlabel, ylabel = "Autoencoder loss", "Encoder+dense accuracy"
+        title = ""#"Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_acc.pdf"
         #x and y lims
         limits=[[0.0645, 0.0725],[0.778,0.858]]
         
     elif do_you_want=="loss":
-        raise NameError("Nothing is here yet...")
         tags=["vgg_3_E",
-              #"vgg_5_600_morefilter",
-              #"vgg_5_600_picture",
+              "vgg_5_600_morefilter_E",
+              "vgg_5_600_picture_E",
               "vgg_5_600-ihlr_E",
               "vgg_5_200_E",
               "vgg_5_200_large_E",
-              #"vgg_5_200_dense",
+              "vgg_5_200_dense_E",
               "vgg_5_64_E",
               "vgg_5_32-eps01_E",
               ]
         #Stuff for the plot
         label_list = ["2000",
-                      #"600 (morefilter)", 
-                      #"600 (picture)", 
+                      "600 (morefilter)", 
+                      "600 (picture)", 
                       "600 (picture) high lr",
                       "200",
                       "200 large",
-                      #"200 (dense)", 
+                      "200 (dense)", 
                       "64",
                       r"32 ($\epsilon = 10^{-1}$)",
                       ]
-        xlabel, ylabel = "Autoencoder loss", "Encoder accuracy"
-        title = "Autoencoder loss and encoder accuracy"
-        save_as = "vgg_5_acc.pdf"
+        xlabel, ylabel = "Autoencoder loss", "Encoder+dense loss"
+        title = ""#"Autoencoder loss and encoder accuracy"
+        save_as = "vgg_5_ergy.pdf"
         #x and y lims
-        limits=[[0.0645, 0.0725], None]
+        limits=[None, None]
         
     elif do_you_want=="test":
         tags=["vgg_5_600_picture",]

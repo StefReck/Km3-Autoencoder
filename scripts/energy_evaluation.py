@@ -94,7 +94,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
         #title_of_plot='Performance comparison of the 200 dense encoder network and the supervised one'
         tags = ["2000_unf_E", 
                 "vgg_5_200_dense_E_nodrop"]
-        label_array  = ["Unfrozen", "Encoder"]
+        label_array  = ["Supervised", "Model 200-dense"]
         save_plot_as = home_path+"results/plots/energy_evaluation/mae_compare_set_"+tag+"_"+which_plot+".pdf"
         is_a_set=True
         
