@@ -116,7 +116,7 @@ def smooth(values, span=1):
         smoothed_values.append(np.mean(values[(value_index-span):(value_index+span+1)]))
     return np.array(smoothed_values)
 
-def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_values=False):
+def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_values=True):
     figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
@@ -124,8 +124,8 @@ def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_val
     for i,model_loss_ydata in enumerate(loss_ydata_list):
         ae_loss, enc_loss = model_loss_ydata[0], model_loss_ydata[1]
         if smooth_values:
-            ax.plot(ae_loss, enc_loss, "o", ms=3, label=labels[i])
-            ax.plot(smooth(ae_loss) , smooth(enc_loss), "-", ms=3)
+            temp_plot = ax.plot(ae_loss, enc_loss, "o", ms=1,)
+            ax.plot(smooth(ae_loss,3) , smooth(enc_loss,3), "-", lw=2, color=temp_plot[0].get_color(), label=labels[i])
         else:
             ax.plot(ae_loss, enc_loss, "o-", ms=3, label=labels[i])
         
