@@ -205,6 +205,11 @@ def get_props_for_plot_parallel(tag, printing=True):
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt"
         save_to_folder = "instanthighlr/"
         
+    elif tag=="vgg_5_600-ihlr_add_conv" or tag==50:
+        ae_model =  home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_test.txt" 
+        prl_model = home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_supervised_parallel_up_down_test.txt"
+        save_to_folder = "instanthighlr/"
+        
     #-------------------vgg_5_200 Parameter Erhöhung Up-down ---------------------------
     elif tag=="vgg_5_200_deep" or tag==21:
         #title = "Parallel training with model '200 deep'"

@@ -55,7 +55,7 @@ dump_to_file=None
 save_as=None
 
 
-def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=None, style="two_in_one_line"):
+def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=None, style="two_in_one_line", ylims=None, AE_yticks=None):
     #Save and return the plot
     #Input: Either infos about what to plot, or a tag to load it automatically
     
@@ -76,7 +76,7 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     
     
     fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                     title, legend_locations, labels_override, colors, xticks, style, ylims=ylims, AE_yticks=AE_yticks)
+                     title, legend_locations, labels_override, colors, xticks, style, ylims, AE_yticks)
     
     if save_as != None and save_it==True:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)
