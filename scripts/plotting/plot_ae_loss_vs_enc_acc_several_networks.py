@@ -13,13 +13,15 @@ from util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, g
 from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 #Which plot do
-i_want = "acc"
+i_want = "loss"
+#loss acc test
 
 def which_plot(do_you_want):
     #The folder the plots might be saved to
     base_path = "/home/woody/capn/mppi013h/Km3-Autoencoder/results/plots/loss_vs_ydata/"
     if do_you_want == "acc": 
-        #tags of the models to plot, as defined in saved_setups_for_plots
+        #tags of the models to plot, as defined in 
+        #saved_setups_for_plots: get_props_for_plots_parallel
         tags=["vgg_3",
               #"vgg_5_600_morefilter",
               #"vgg_5_600_picture",
@@ -48,23 +50,19 @@ def which_plot(do_you_want):
         limits=[[0.0645, 0.0725],[0.778,0.858]]
         
     elif do_you_want=="loss":
-        tags=["vgg_3_E",
-              "vgg_5_600_morefilter_E",
-              "vgg_5_600_picture_E",
-              "vgg_5_600-ihlr_E",
-              "vgg_5_200_E",
-              "vgg_5_200_large_E",
-              "vgg_5_200_dense_E",
-              "vgg_5_64_E",
-              "vgg_5_32-eps01_E",
+        tags=["vgg_3_energy",
+              "vgg_5_600_morefilter_energy",
+              "vgg_5_600_picture_energy",
+              "vgg_5_200_energy",
+              "vgg_5_200_dense_energy",
+              "vgg_5_64_energy_nodrop",
+              "vgg_5_32-eps01_energy_nodrop",
               ]
         #Stuff for the plot
         label_list = ["2000",
                       "600 (morefilter)", 
                       "600 (picture)", 
-                      "600 (picture) high lr",
                       "200",
-                      "200 large",
                       "200 (dense)", 
                       "64",
                       r"32 ($\epsilon = 10^{-1}$)",
