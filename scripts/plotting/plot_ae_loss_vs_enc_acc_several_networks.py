@@ -71,7 +71,7 @@ def which_plot(do_you_want):
         title = ""#"Autoencoder loss and encoder accuracy"
         save_as = "vgg_5_ergy.pdf"
         #x and y lims
-        limits=[None, None]
+        limits=[[0.061, 0.076], [7.2,5.8]]
         
     elif do_you_want=="test":
         tags=["vgg_5_600_picture",]
@@ -109,14 +109,26 @@ def combine_ae_and_parallel(data_ae, data_prl, epoch_schedule):
             loss_ydata[1].append(enc_ydata)
     return loss_ydata
 
+def smooth(values, span=1):
+    #average over span*2 + 1 values
+    smoothed_values=[]
+    for value_index in range( span, len(values)-span ):
+        smoothed_values.append(np.mean(values[(value_index-span):(value_index+span+1)]))
+    return np.array(smoothed_values)
 
-def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits):
+def make_plot(loss_ydata_list, labels, xlabel, ylabel, title, limits, smooth_values=False):
     figsize, font_size = get_plot_statistics_plot_size("two_in_one_line")
     plt.rcParams.update({'font.size': font_size})
     fig, ax=plt.subplots(figsize=figsize)
     
     for i,model_loss_ydata in enumerate(loss_ydata_list):
-        ax.plot(model_loss_ydata[0], model_loss_ydata[1], "o-", ms=3, label=labels[i])
+        ae_loss, enc_loss = model_loss_ydata[0], model_loss_ydata[1]
+        if smooth_values:
+            ax.plot(ae_loss, enc_loss, "o", ms=3, label=labels[i])
+            ax.plot(smooth(ae_loss) , smooth(enc_loss), "-", ms=3)
+        else:
+            ax.plot(ae_loss, enc_loss, "o-", ms=3, label=labels[i])
+        
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
