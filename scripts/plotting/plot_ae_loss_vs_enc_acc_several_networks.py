@@ -23,9 +23,9 @@ def which_plot(do_you_want):
         #tags of the models to plot, as defined in 
         #saved_setups_for_plots: get_props_for_plots_parallel
         tags=["vgg_3",
-              #"vgg_5_600_morefilter",
-              #"vgg_5_600_picture",
-              "vgg_5_600-ihlr",
+              "vgg_5_600_morefilter",
+              "vgg_5_600_picture",
+              #"vgg_5_600-ihlr",
               "vgg_5_200",
               "vgg_5_200_large",
               #"vgg_5_200_dense",
@@ -33,15 +33,15 @@ def which_plot(do_you_want):
               "vgg_5_32-eps01",
               ]
         #Stuff for the plot
-        label_list = ["2000",
-                      #"600 (morefilter)", 
-                      #"600 (picture)", 
-                      "600 (picture) high lr",
-                      "200",
-                      "200 large",
+        label_list = ["model-1920",
+                      "600-75 filters", 
+                      "600-50 filters", 
+                      #"600 (picture) high lr",
+                      "200-conv",
+                      "200-wide",
                       #"200 (dense)", 
                       "64",
-                      r"32 ($\epsilon = 10^{-1}$)",
+                      "32",
                       ]
         xlabel, ylabel = "Autoencoder loss", "Encoder+dense accuracy"
         title = ""#"Autoencoder loss and encoder accuracy"
@@ -60,13 +60,13 @@ def which_plot(do_you_want):
               "vgg_5_32-eps01_energy_nodrop",
               ]
         #Stuff for the plot
-        label_list = ["2000",
-                      "600 (morefilter)", 
-                      "600 (picture)", 
-                      "200",
-                      "200 (dense)", 
+        label_list = ["model-1920",
+                      "600-75 filters", 
+                      "600-50 filters", 
+                      "200-conv",
+                      "200-dense", 
                       "64",
-                      r"32 ($\epsilon = 10^{-1}$)",
+                      "32",
                       ]
         xlabel, ylabel = "Autoencoder loss", "Encoder+dense loss"
         title = ""#"Autoencoder loss and encoder accuracy"
