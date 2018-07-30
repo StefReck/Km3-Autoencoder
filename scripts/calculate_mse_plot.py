@@ -22,11 +22,11 @@ from plotting.plot_statistics import read_out_file, get_proper_range
 def make_plot(data_dict, figsize=(6.4,5.5), title="Constituents of the test MSE"):
     plt.rcParams.update({'font.size': 14})
     #whats_there = ("MSE above3","MSE below","MSE")
-    labels = ("MSE of high count bins", "MSE of low count bins", "Total MSE")
+    labels = ("High count", "Low count", "Total")
     colors = ("green","orange","blue")
     
     fig, ax = plt.subplots(figsize=figsize)
-    plt.title(title)
+    plt.title("")
     plt.grid()
     
     ax.plot(data_dict["Epoch"], data_dict["MSE below"], "o-", label=labels[1], c=colors[1])
@@ -44,6 +44,7 @@ def make_plot(data_dict, figsize=(6.4,5.5), title="Constituents of the test MSE"
     ax2.set_ylim([0,11])
     
     plt.legend(loc="upper right")
+    plt.subplots_adjust(left=0.15)
     return fig
 
 def get_data_infos():
