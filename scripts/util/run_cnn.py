@@ -2,6 +2,9 @@
 import h5py
 import numpy as np
 from keras import backend as K
+from keras import optimizers
+from keras.models import load_model
+from keras.layers import BatchNormalization, Conv3D
 import warnings
 from datetime import datetime
 import re
@@ -9,7 +12,8 @@ import os
 from functools import reduce
 
 from util.Loggers import NBatchLogger_Recent, NBatchLogger_Recent_Acc, NBatchLogger_Recent_CCI
-
+from util.custom_loss_functions import get_custom_objects
+from model_definitions import setup_model
 #import sys
 #sys.path.append('../')
 #from get_dataset_info import get_dataset_info
@@ -18,6 +22,9 @@ from util.Loggers import NBatchLogger_Recent, NBatchLogger_Recent_Acc, NBatchLog
 train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
                          shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None):
 """
+
+
+
 
 def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
                          shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict, is_AE_adevers_training=False):
@@ -178,6 +185,356 @@ def evaluate_model(model, test_files, batchsize, n_bins, class_type, xs_mean, sw
     print('Test sample results: ', str(evaluation), ' (', str(model.metrics_names), ')')
     return evaluation
 
+
+def look_up_latest_epoch(autoencoder_stage, epoch, encoder_epoch, model_folder, modeltag, class_type, encoder_version):
+    """Automatically look up the epoch of the most recent saved model"""
+    if autoencoder_stage==0 and epoch==-1:
+        epoch=0
+        while True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch+1) + '.h5')==True:
+                epoch+=1
+            else:
+                break
+    elif autoencoder_stage==1 and encoder_epoch == -1:
+        encoder_epoch=0
+        while True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                encoder_epoch+=1
+            else:
+                break
+    elif autoencoder_stage==2 and encoder_epoch == -1:
+        encoder_epoch=0
+        while True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_supervised_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                encoder_epoch+=1
+            else:
+                break
+    elif autoencoder_stage==3 and encoder_epoch == -1:
+        encoder_epoch=0
+        while True:
+            if os.path.isfile(model_folder + "trained_" + modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version + '_epoch' + str(encoder_epoch+1) + '.h5')==True:
+                encoder_epoch+=1
+            else:
+                break
+    return epoch, encoder_epoch
+
+def get_autoencoder_loss(ae_loss_name):
+    """
+    Define the loss function to use for a new AE
+    (saved autoencoders will continue to use their original one)
+    """
+    custom_objects=None
+    if ae_loss_name=="mse":
+        ae_loss="mse"
+    elif ae_loss_name=="mae":
+        ae_loss="mae"
+    elif ae_loss_name=="categorical_crossentropy":
+        ae_loss="categorical_crossentropy"
+    else:
+        #custom loss functions have to be handed to load_model or it wont work
+        custom_objects=get_custom_objects()
+        ae_loss=custom_objects[ae_loss_name]
+    return ae_loss, custom_objects
+
+
+def get_supervised_loss_and_metric(supervised_loss, number_of_output_neurons):
+    """ 
+    Define the loss function and additional metrics to use for a new 
+    Encoder+dense network (saved nets will continue to use their original one)
+    """
+    if supervised_loss == "auto":
+        #automatically choose the supervised loss based on the number of 
+        #output neurons (is always >=1)
+        #otherwise, use the user defined one (mse or mae)
+        if number_of_output_neurons>=2:
+            #e.g. up-down, PID, ...
+            supervised_loss = 'categorical_crossentropy'
+            supervised_metrics=['accuracy']
+        elif number_of_output_neurons==1:
+            #for energy regression
+            supervised_loss = 'mae'
+            supervised_metrics=None
+    else:
+        #manually choose supervised loss and metrics
+        if supervised_loss=='categorical_crossentropy':
+            supervised_metrics=['accuracy']
+        elif supervised_loss=='mae':
+            supervised_metrics=None
+        elif supervised_loss=='mse':
+            supervised_metrics=None
+        elif supervised_loss==None:
+            supervised_metrics=None
+        else:
+            raise NameError("Supervised loss "+supervised_loss+" is unknown!")
+            
+    return supervised_loss, supervised_metrics
+
+def setup_learning_rate(learning_rate, learning_rate_decay, autoencoder_stage, epoch, encoder_epoch):
+    """ Setup learning rate for the start of the training. """
+    #Initial learning rate:
+    lr = learning_rate 
+    #lr_decay can either be a float, e.g. 0.05 for 5% decay of lr per epoch,
+    #or it can be a string like "s1", meaning that the custom 
+    #lr schedule 1 should be used. In this case, the learning rate is looked
+    #up every epoch during the main loop below
+    try:
+        #lr_decay is not a string --> use no schedule
+        lr_schedule_number=None 
+        lr_decay=float(learning_rate_decay)
+    except ValueError:
+        #lr_decay is a string --> use schedule
+        lr_schedule_number=learning_rate_decay
+        lr_decay=0
+    #In the case of no schedule, if lr is a negative float, take its absolute   
+    #as the lr of epoch 1 and calculate the lr of the current epoch assuming  
+    #it was decayed every epoch; This is useful for resuming training. The lr 
+    #gets decayed once when train_and_test_model is called (so epoch-1 here)
+    if lr<0 and lr_schedule_number==None:
+        if autoencoder_stage==0 and epoch>0:
+            lr=abs( lr * (1-float(lr_decay))**(epoch-1) )
+        elif (autoencoder_stage==1 or autoencoder_stage==2 or autoencoder_stage==3) and encoder_epoch>0:
+            lr=abs( lr * (1-float(lr_decay))**(encoder_epoch-1) )
+        else:
+            lr=abs(lr)
+            
+    return lr, lr_decay, lr_schedule_number
+    
+
+def setup_autoencoder_model(modeltag, epoch, optimizer, ae_loss, options, custom_objects, model_folder, modelname):
+    """
+    Return the compiled model of an autoencoder.
+    
+    Loads the model architecture according to the modeltag. If the model is
+    newly created (epoch=0), it will get the optimizer and loss from
+    the arguments. Otherwise, it is just loaded.
+    
+    Options contains additional options for the setup_model function, e.g.
+    dropout, ...
+    """
+    if epoch == 0:
+        #Create a new autoencoder network
+        print("Creating new autoencoder network:", modeltag)
+        model = setup_model(model_tag=modeltag, autoencoder_stage=0, modelpath_and_name=None, additional_options=options)
+        model.compile(optimizer=optimizer, loss=ae_loss)
+        #Create header for new test log file
+        with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
+            metrics = model.metrics_names #["loss"]
+            if len(metrics)==2:
+                line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", metrics[0], metrics[0],metrics[1],metrics[1])
+            elif len(metrics)==1:
+                line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", metrics[0], metrics[0])
+            test_log_file.write(line)
+        
+    else:
+        #Load an existing trained autoencoder network and train that
+        autoencoder_model_to_load=model_folder + "trained_" + modelname + '_epoch' + str(epoch) + '.h5'
+        print("Loading existing autoencoder to continue training:", autoencoder_model_to_load)
+        model = load_model(autoencoder_model_to_load, custom_objects=custom_objects)
+    return model
+            
+
+def setup_encoder_dense_model(modeltag, encoder_epoch, modelname, autoencoder_stage,
+                              number_of_output_neurons, supervised_loss, supervised_metrics,
+                              optimizer, options, model_folder, custom_objects,
+                              autoencoder_model):
+    """
+    Return the compiled model of an encoder+dense network.
+    
+    This is used for both the encoder+dense network (autoencoder_stage=1),
+    as well as the unfrozen supervised one (autoencoder_stage=2), 
+    since they have the same architecture.
+    Loads the model architecture according to the modeltag. If the model is
+    newly created (epoch=0) and not unfrozen, it will load in the weights of an existing
+    autoencoder's encoder, then add dense layers.
+    
+    autoencoder_model is the path to the autoencoder from which the encoder will 
+                            be loaded if epoch=0. If None, nothing will be loaded.
+    """
+    if encoder_epoch == 0:
+        #Create a new encoder network:
+        print("Creating new network", modelname)
+        if autoencoder_model != None: 
+            print("Loading weights from autoencoder", autoencoder_model)
+        model = setup_model(model_tag=modeltag, autoencoder_stage=autoencoder_stage, 
+                            modelpath_and_name=autoencoder_model, additional_options=options, 
+                            number_of_output_neurons=number_of_output_neurons)
+        
+        
+        model.compile(loss=supervised_loss, optimizer=optimizer, metrics=supervised_metrics)
+        #Create header for new test log file
+        with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
+            metrics = model.metrics_names #['loss', 'acc']
+            if len(metrics)==2:
+                line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", 
+                        metrics[0], metrics[0],metrics[1],metrics[1])
+            elif len(metrics)==1:
+                line = '{0}\tTest {1}\tTrain {2}\tTime\tLR'.format("Epoch", 
+                        metrics[0], metrics[0])
+            else:
+                raise Exception("Warning: Only 1 or 2 metrics are supported for logfile headers. Given was "+str(metrics))
+            test_log_file.write(line)
+        
+    else:
+        #Load an existing trained encoder network and train that
+        network_to_load=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
+        print("Loading saved network", network_to_load)
+        model = load_model(network_to_load, custom_objects=custom_objects)
+    return model
+
+
+def setup_successive_training(modeltag, encoder_epoch, model_folder, class_type, 
+                              encoder_version, number_of_output_neurons, 
+                              supervised_loss, supervised_metrics, optimizer,
+                              options, custom_objects):
+    """
+    Return model and info for autoencoder stage 3: Successive training.
+    
+    This is the encoder+dense model, like in stage 1, but also returns some
+    info needed for the successive training, like at which supervised
+    epochs to switch weights.
+    """
+    #Hyperparameter how_many_epochs_each_to_train:
+    #how many epochs should be trained on each autoencoder epoch, starting from epoch 1
+    #The bottom entry is the default and worked will in most cases
+    if modeltag[:7] == "channel":
+        #channel id autoencoders need less epochs per AE epoch, their modeltag starts with channel
+        how_many_epochs_each_to_train =[1,]*100
+        #Dataset is switched when moving to encoder training, so stateful has to be active
+        make_stateful=True
+    else:
+        how_many_epochs_each_to_train =[10,]*1+[2,]*5+[1,]*194
+        make_stateful=False
+    print("Parallel training with epoch schedule:", how_many_epochs_each_to_train[:20], ",...")
+    
+    
+    #in case of the 200_dense model, manually set encoded layer (does not work otherwise...(it actually does...))
+    if modeltag=="vgg_5_200_dense":
+        last_encoder_layer_index_override=35
+        print("Last encoder layer set to 35")
+    else:
+        last_encoder_layer_index_override=None
+    
+    #Encoder epochs after which to switch the autoencoder model
+    switch_autoencoder_model=np.cumsum(how_many_epochs_each_to_train)
+    #calculate the current autoencoder epoch automatically based on the encoder epoch
+    #e.g. switch_at = [10,12,14], encoder_epoch = 11
+    #--> AE epoch=2
+    for ae_epoch,switch in enumerate(switch_autoencoder_model):
+        if encoder_epoch-switch <= 0:
+            autoencoder_epoch=ae_epoch+1
+            break
+    
+    #name of the autoencoder model file that the encoder part is taken from:
+    autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
+    #name of the supervised model:
+    modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
+    
+    #Setup encoder+dense and load encoder weights (like autoencoder_stage=1)
+    model = setup_encoder_dense_model(modeltag, encoder_epoch, modelname, 1,
+                          number_of_output_neurons, supervised_loss, supervised_metrics,
+                          optimizer, options, model_folder, custom_objects,
+                          autoencoder_model)
+    return model, switch_autoencoder_model, autoencoder_epoch, make_stateful, last_encoder_layer_index_override
+
+
+def setup_optimizer(use_opti, lr, epsilon):
+    """
+    Return an optimizer for training.
+    
+    If an epsilon is specified, adam is used with 
+    epsilon=10**(given epsilon).
+    only used when compiling model, so loaded models will retain their optimizer
+    """
+    if use_opti == "adam" or use_opti=="ADAM":
+        optimizer = optimizers.Adam(lr=lr,    beta_1=0.9, beta_2=0.999, epsilon=10**epsilon,   decay=0.0)
+    elif use_opti == "sgd" or use_opti=="SGD":
+        optimizer = optimizers.SGD(lr=lr, momentum=0.0, decay=0.0, nesterov=False)
+    else:
+        raise NameError("Optimizer "+str(use_opti)+" unknown!")
+    return optimizer
+
+
+def switch_encoder_weights(encoder_model, autoencoder_model, last_encoder_layer_index_override=None):
+    """
+    Change the weights of a frozen encoder to the ones from another autoencoder model.
+    """
+    #look for last encoder layer = last flatten layer in the network / layer with name encoded if present
+    if last_encoder_layer_index_override == None:
+        last_encoder_layer_index = get_index_of_bottleneck(encoder_model)
+    else:
+        last_encoder_layer_index = last_encoder_layer_index_override
+    
+    changed_layers=0
+    for i,layer in enumerate(encoder_model.layers):
+        if i <= last_encoder_layer_index:
+            layer.set_weights(autoencoder_model.layers[i].get_weights())
+            changed_layers+=1
+        else:
+            break
+    print("Weights of layers changed:", changed_layers, "(up to layer", encoder_model.layers[last_encoder_layer_index].name, ")")
+
+
+def get_index_of_bottleneck(model):
+    #smallest_layer_neurons = np.prod(model.layers[0].output_shape[1:])
+    for i,layer in enumerate(model.layers):
+        #Sometimes keywords tell where the botn is
+        if layer.name == "encoded":
+            last_encoder_layer_index = i
+            break
+        elif layer.name == "after_encoded":
+            last_encoder_layer_index = i-1
+            break
+        #otherwise take the flatten layer
+        elif "flatten" in layer.name:
+            last_encoder_layer_index = i
+            
+        """
+        #if not, take the last layer with the smallest number of output neurons as the bottleneck
+        #only works for AEs
+        layer_neurons = np.prod(model.layers[i].output_shape[1:])
+        if layer_neurons<=smallest_layer_neurons:
+            smallest_layer_neurons=layer_neurons
+            last_encoder_layer_index = i
+        """
+        
+    print("Bottleneck is", np.prod(model.layers[last_encoder_layer_index].output_shape[1:])," neurons at layer", model.layers[last_encoder_layer_index].name)
+    return last_encoder_layer_index
+
+def make_encoder_stateful(model):
+    #Set all batchnorm layers in the encoder part to be stateful
+    #this does not get saved with save_model, so it has to be done again whenever the model is loaded
+    last_encoder_layer = get_index_of_bottleneck(model)
+    for layer in model.layers[:last_encoder_layer+1]:
+        if isinstance(layer, BatchNormalization):
+            #make it so that the test mean and variance is recalculated
+            layer.stateful=True
+            print("Made layer", layer.name, "stateful.")
+    return model
+
+
+def unfreeze_conv_layers(model, how_many):
+    """
+    Make the last how_many conv blocks in the network trainable.
+    The network is recompiled in the process (otherwise trainable is not recognized)
+        how_many:   ...C layers should be unfrozen, counting from the end
+    """
+    if how_many==0:
+        print("Warning: unfreeze_conv_layers was executed with how_many=0. This has no effect!")
+    else:
+        conv_layer_indices = []
+        for layer_index, layer in enumerate(model.layers):
+            if isinstance(layer, Conv3D):
+                conv_layer_indices.append(layer_index)
+        layer_to_unfreeze_after = conv_layer_indices[-how_many]
+        modified_layers=0
+        for layer in model.layers[layer_to_unfreeze_after:]:
+            layer.trainable = True
+            modified_layers+=1
+        model.compile(loss=model.loss, optimizer=model.optimizer, metrics=model.metrics)
+        print("Unfroze the last", modified_layers, "layers.")
+    return model
+
+
 def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
     #Go through the network and freeze/unfreeze layers according to vars
     #AAE model will now consist of 4 layers: input, AE, critic, concatenate
@@ -203,6 +560,82 @@ def freeze_adversarial_part(model, unfrozen_generator, unfrozen_critic):
     print("State of network: Generator unfrozen:", unfrozen_generator, "Critic unfrozen:", unfrozen_critic)
     
     return model
+
+
+def lr_schedule(before_epoch, lr_schedule_number, learning_rate):
+    """
+    Return the desired lr of an epoch according to a lr schedule.
+    learning rate is the original lr input
+    In the test_log file, the epoch "before_epoch" will have this lr.
+    lr rate should be set to this before starting the next epoch.
+    """
+    if lr_schedule_number=="s1":
+        #decay lr by 5 percent/epoch for 13 epochs down to half, then constant
+        #for parallel training
+        if before_epoch<=14:
+            lr=0.001 * 0.95**(before_epoch-1)
+        else:
+            lr=0.0005
+    
+    elif lr_schedule_number=="s2":
+        #for autoencoder training
+        if before_epoch<=20:
+            lr=0.001
+        else:
+            lr=0.01
+        
+    elif lr_schedule_number=="s3":
+        #for autoencoder training
+        if before_epoch<=20:
+            lr=0.01
+        else:
+            lr=0.1
+    elif lr_schedule_number=="3steps":
+        #for autoencoder training
+        if before_epoch<=20:
+            lr=0.001
+        elif before_epoch<=40:
+            lr=0.01
+        else:
+            lr=0.1
+    
+    elif lr_schedule_number=="200_dense":
+        #was used for training 200 dense new
+        if before_epoch<=20:
+            lr=0.001
+        elif before_epoch<=53:
+            lr=0.01
+            
+        elif before_epoch<=62:
+            lr=0.01*1.05**(before_epoch-53)
+        elif before_epoch<=97:
+            lr=0.01*1.05**(62-53) * 1.0846**(before_epoch-62)
+            
+        else:
+            lr=0.2
+            
+    elif lr_schedule_number=="steps15":
+        # multiply user lr by 10 every 15 epochs
+        start_lr       = learning_rate
+        multiply_with  = 10
+        every_n_epochs = 15
+        lr = start_lr * multiply_with**np.floor((before_epoch-1)/every_n_epochs)
+        
+    elif lr_schedule_number=="c15red":
+        # used for e.g. vgg5 200 large and vgg5 200 deep
+        # constant 0.1, after epoch 15 increase by 10% per epoch for 5 epochs,
+        # then constant again
+        if before_epoch<=15:
+            lr = 0.1
+        elif before_epoch<=27:
+            lr = 0.1 * 1.1**(before_epoch-15)
+        else:
+            lr = 0.1 * 1.1**12
+            
+    print("LR-schedule",lr_schedule_number,"is at", lr, "before epoch", before_epoch)
+    return lr
+
+
 
 def modify_batches(xs, batchsize, dataset_info_dict, zero_center_image, y_values=None):
     """
