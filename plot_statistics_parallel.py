@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Plot autoencoder and supervised parallel performance in one plot.
+Plot the successive training history of a model.
+
+The progress of two models will be plotted: An autoencoder, and an encoder+dense
+network that was trained successively (stage 3). Test and train loss will be 
+plotted over the epoch for both.
 """
 import argparse
 import os
@@ -53,14 +57,18 @@ colors=["blue", "orange"] # = automatic
 dump_to_file=None
 #save plot as
 save_as=None
-
+#y limits of plot (none for auto)
+ylims=None #[ylims_AE, y_lims_prl]
+#ticks of the AE y axis (none for auto)
+AE_yticks=None
 
 def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=None, style="two_in_one_line", ylims=None, AE_yticks=None):
     #Save and return the plot
     #Input: Either infos about what to plot, or a tag to load it automatically
     
     if tag != None:
-        test_files, title, labels_override, save_as, epoch_schedule, style, ylims, AE_yticks = get_props_for_plot_parallel(tag)
+        (test_files, title, labels_override, save_as, epoch_schedule, 
+         style, ylims, AE_yticks) = get_props_for_plot_parallel(tag)
         
     #Which epochs from the parallel encoder history to take:
     how_many_epochs_each_to_train = get_how_many_epochs_each_to_train(epoch_schedule)
@@ -72,11 +80,16 @@ def make_parallel_statistics(test_files, title, labels_override, save_as, epoch_
     data_autoencoder = data_from_files[0]
     data_parallel = data_from_files[1]
     
-    data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, data_parallel, how_many_epochs_each_to_train)
+    data_parallel_test, data_parallel_train = get_last_prl_epochs(data_autoencoder, 
+                                                                  data_parallel, 
+                                                                  how_many_epochs_each_to_train)
     
     
-    fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, data_parallel_test, default_label_array, xlabel, ylabel_list, 
-                     title, legend_locations, labels_override, colors, xticks, style, ylims, AE_yticks)
+    fig = make_plot_same_y_parallel(data_autoencoder, data_parallel_train, 
+                    data_parallel_test, default_label_array, 
+                    xlabel, ylabel_list, 
+                    title, legend_locations, labels_override, 
+                    colors, xticks, style, ylims, AE_yticks)
     
     if save_as != None and save_it==True:
         os.makedirs(os.path.dirname(save_as), exist_ok=True)
@@ -97,7 +110,10 @@ if test_files[0]=="saved":
         save_it=True
         while True:
             try:
-                fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag=current_tag_number, style=style)
+                fig = make_parallel_statistics(test_files, title, 
+                                               labels_override, save_as, 
+                                               epoch_schedule, save_it, 
+                                               tag=current_tag_number, style=style)
                 plt.close(fig)
                 current_tag_number+=1
             except NameError:
@@ -105,11 +121,13 @@ if test_files[0]=="saved":
                 break
     else:
         #make, save and show a single plot whose setup is saved
-        fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag, style)
+        fig = make_parallel_statistics(test_files, title, labels_override, 
+                                       save_as, epoch_schedule, save_it, tag, style)
         plt.show(fig)
 
 else:
     #Plot the files that were given to the parser directly
     tag = None
-    fig = make_parallel_statistics(test_files, title, labels_override, save_as, epoch_schedule, save_it, tag, style)
+    fig = make_parallel_statistics(test_files, title, labels_override, 
+                                   save_as, epoch_schedule, save_it, tag, style)
     plt.show(fig)

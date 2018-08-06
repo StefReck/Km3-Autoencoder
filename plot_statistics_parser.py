@@ -4,9 +4,10 @@ import argparse
 
 
 """
-Make a plot of multiple models, each identified with its test log file, with
-lots of different options.
-This is intended for plotting models with the same y axis data (loss OR acc).
+Plot the training history of a model.
+
+This will look up the logfiles of the model, and plot train and test loss over
+the epoch.
 """
 
 def parse_input():
@@ -28,7 +29,8 @@ import matplotlib.pyplot as plt
 from scripts.plotting.plot_statistics import make_data_from_files, make_plot_same_y
 from scripts.util.saved_setups_for_plot_statistics import get_props_for_plot_parser
 
-#Default Values:
+#Properties of the plot
+#These will be overwritten if using a saved setup.
 xlabel="Epoch"
 title=""
 #Override default labels (names of the models); must be one for every test file, otherwise default
@@ -49,6 +51,8 @@ save_as=None
 xrange="auto"
 #Average over this many bins in the train data (to reduce jitter)
 average_train_data_bins=1
+
+
 
 
 def make_parser_plot(test_files, title, labels_override, save_as, 
@@ -91,7 +95,8 @@ if test_files[0]=="saved":
                 break
     else:
         #overwrite some of the above options from a specific saved setup
-        test_files, title, labels_override, save_as, legend_locations, colors, xticks, style, xrange, average_train_data_bins = get_props_for_plot_parser(tag)
+        (test_files, title, labels_override, save_as, legend_locations, 
+         colors, xticks, style, xrange, average_train_data_bins) = get_props_for_plot_parser(tag)
 
         make_parser_plot(test_files, title, labels_override, save_as, 
                      legend_locations, colors, xticks, style,

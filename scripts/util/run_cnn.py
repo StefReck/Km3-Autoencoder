@@ -350,9 +350,11 @@ def setup_encoder_dense_model(modeltag, encoder_epoch, modelname, autoencoder_st
     autoencoder_model is the path to the autoencoder from which the encoder will 
                             be loaded if epoch=0. If None, nothing will be loaded.
     """
+    test_log_file_name = model_folder + "trained_" + modelname + '_test.txt'
+
     if encoder_epoch == 0:
         #Create a new encoder network:
-        print("Creating new network", modelname)
+        print("Creating new network")
         if autoencoder_model != None: 
             print("Loading weights from autoencoder", autoencoder_model)
         model = setup_model(model_tag=modeltag, autoencoder_stage=autoencoder_stage, 
@@ -362,7 +364,7 @@ def setup_encoder_dense_model(modeltag, encoder_epoch, modelname, autoencoder_st
         
         model.compile(loss=supervised_loss, optimizer=optimizer, metrics=supervised_metrics)
         #Create header for new test log file
-        with open(model_folder + "trained_" + modelname + '_test.txt', 'w') as test_log_file:
+        with open(test_log_file_name, 'w') as test_log_file:
             metrics = model.metrics_names #['loss', 'acc']
             if len(metrics)==2:
                 line = '{0}\tTest {1}\tTrain {2}\tTest {3}\tTrain {4}\tTime\tLR'.format("Epoch", 
@@ -376,16 +378,13 @@ def setup_encoder_dense_model(modeltag, encoder_epoch, modelname, autoencoder_st
         
     else:
         #Load an existing trained encoder network and train that
-        network_to_load=model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
-        print("Loading saved network", network_to_load)
-        model = load_model(network_to_load, custom_objects=custom_objects)
+        existing_network_file = model_folder + "trained_" + modelname + '_epoch' + str(encoder_epoch) + '.h5'
+        print("Loading saved network", existing_network_file)
+        model = load_model(existing_network_file, custom_objects=custom_objects)
     return model
 
 
-def setup_successive_training(modeltag, encoder_epoch, model_folder, class_type, 
-                              encoder_version, number_of_output_neurons, 
-                              supervised_loss, supervised_metrics, optimizer,
-                              options, custom_objects):
+def setup_successive_training(modeltag, encoder_epoch):
     """
     Return model and info for autoencoder stage 3: Successive training.
     
@@ -421,20 +420,10 @@ def setup_successive_training(modeltag, encoder_epoch, model_folder, class_type,
     #--> AE epoch=2
     for ae_epoch,switch in enumerate(switch_autoencoder_model):
         if encoder_epoch-switch <= 0:
-            autoencoder_epoch=ae_epoch+1
+            succ_autoencoder_epoch=ae_epoch+1
             break
     
-    #name of the autoencoder model file that the encoder part is taken from:
-    autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(autoencoder_epoch) + '.h5'
-    #name of the supervised model:
-    modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
-    
-    #Setup encoder+dense and load encoder weights (like autoencoder_stage=1)
-    model = setup_encoder_dense_model(modeltag, encoder_epoch, modelname, 1,
-                          number_of_output_neurons, supervised_loss, supervised_metrics,
-                          optimizer, options, model_folder, custom_objects,
-                          autoencoder_model)
-    return model, switch_autoencoder_model, autoencoder_epoch, make_stateful, last_encoder_layer_index_override
+    return switch_autoencoder_model, succ_autoencoder_epoch, make_stateful, last_encoder_layer_index_override
 
 
 def setup_optimizer(use_opti, lr, epsilon):

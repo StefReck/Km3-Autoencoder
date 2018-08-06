@@ -4,6 +4,7 @@
 This script starts or resumes the training of an autoencoder or an encoder that is 
 defined in model_definitions. Due to the large amout of input arguments,
 this should be run from a shell script.
+A documentation for the possible inputs is given in submit.sh.
 """
 
 
@@ -24,14 +25,15 @@ from util.run_cnn import (
 from get_dataset_info import get_dataset_info
 
 
-# start.py "vgg_1_xzt" 1 0 0 0 2 "up_down" True 0 11 18 50 1 
-# read out input arguments and return them as a tuple for the training
 def unpack_parsed_args():
     """ 
-    Read out the arguments handed to the parser.
+    Read out input arguments and return them as a tuple for the training
     
-    They will be printed and returned as a list, so that they can be handed to
+    They will be printed and returned as a dict, so that they can be handed to
     execute_training.
+    
+    Returns:
+        params: Dict with all input parameters of the parser.
     """
     parser = argparse.ArgumentParser(description='The main function for training \
         autoencoder-based networks. See submit.sh for detailed explanations of all parameters.')
@@ -81,76 +83,29 @@ def unpack_parsed_args():
         print(keyword, ":\t", params[keyword])
     print("\n")
     
-    modeltag = params["modeltag"]
-    runs=params["runs"]
-    autoencoder_stage=params["autoencoder_stage"]
-    autoencoder_epoch=params["autoencoder_epoch"]
-    encoder_epoch=params["encoder_epoch"]
-    class_type = (params["class_type_bins"], params["class_type_name"])
-    zero_center = params["zero_center"]
-    verbose=params["verbose"]
-    dataset = params["dataset"]
-    learning_rate = params["learning_rate"]
-    learning_rate_decay = params["learning_rate_decay"]
-    epsilon = params["epsilon"]
-    lambda_comp = params["lambda_comp"]
-    use_opti = params["optimizer"]
-    options = params["options"]
-    encoder_version = params["encoder_version"]
-    ae_loss_name=params["ae_loss_name"]
-    supervised_loss=params["supervised_loss"]
-    init_model_path=params["init_model"]
-    
-    return (modeltag, runs, autoencoder_stage, autoencoder_epoch, encoder_epoch,
-            class_type, zero_center, verbose, dataset, learning_rate, 
-            learning_rate_decay, epsilon, lambda_comp, use_opti, 
-            encoder_version, options, ae_loss_name, supervised_loss, 
-            init_model_path)
+    return params
    
 
-def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch, 
-                     class_type, zero_center, verbose, dataset, learning_rate, 
-                     learning_rate_decay, epsilon, lambda_comp, use_opti, 
-                     encoder_version, options, ae_loss_name, supervised_loss, 
-                     init_model_path):
-    """ Main function for setting up and training networks. """
+
+def extra_autoencoder_stages_setup(autoencoder_stage):
+    """
+    Setup for special trainings that dont fit into regular categories.
     
-    #Every model architecture is identified by its modeltag
-    #Each will be given its own directory in the main_folder automatically
-    #e.g. if the modeltag is "vgg_3", all saved models will 
-    #be stored in: main_folder+"/vgg_3/"
-    main_folder = "/home/woody/capn/mppi013h/Km3-Autoencoder/models"
+    They still use the same network architectures as the standard categories,
+    but have some additional properties during training.
     
-    
-    #Get infos about the dataset
-    dataset_info_dict = get_dataset_info(dataset)
-    train_file=dataset_info_dict["train_file"]
-    test_file=dataset_info_dict["test_file"]
-    n_bins=dataset_info_dict["n_bins"]
-    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
-    filesize_factor=dataset_info_dict["filesize_factor"]
-    filesize_factor_test=dataset_info_dict["filesize_factor_test"]
-    batchsize=dataset_info_dict["batchsize"] #def 32
-    
-    #Create the folder for the model if it does not exist already
-    model_folder = main_folder + "/" + modeltag + "/"
-    if not os.path.exists(model_folder):
-        os.makedirs(model_folder)
-        print("Created model folder", model_folder)
-        
-    #Number of output neurons of the supervised networks
-    #(Autoencoders ignore this)
-    number_of_output_neurons = int(class_type[0])
-    if number_of_output_neurons<1:
-        raise ValueError("number_of_output_neurons have to be >= 1")
-    
-    
-    #If autoencoder stage 4 is selected (unfreeze C layers), 
-    #set up everything like AE stage 1, i.e. Encoder+dense network
+    Returns:
+        autoencoder_stage: Defines which architecture is loaded.
+        ae_loss_name: Loss of autoencoder training.
+        supervised_loss. Loss of supervised training.
+        unfreeze_layer_training: Bool: Parts of the network will be gradually unfrozen 
+            during training.
+        is_AE_adevers_training: int defining the stage of adversarial autoencoder training.
+    """
     if autoencoder_stage==4:
+        print("Autoencoder stage 4: Unfreeze Training. Setting up network like in AE stage 1...")
         autoencoder_stage=1
         unfreeze_layer_training = True
-        print("Autoencoder stage 4: Unfreeze Training. Setting up network like in AE stage 1...")
     else:
         unfreeze_layer_training = False
     #If autoencoder stage 5,6 or 7 is selected: Adversarial autoencoders
@@ -159,13 +114,13 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch,
     #1 or 2: train critic and generator alternating
     #3: Train only critic
     if autoencoder_stage==5:
+        print("Starting AE training in adversarial setup (stage 5). Loss will\
+              be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
         #for adversarial AE training, setup like normal autoencoder
         autoencoder_stage=0
         ae_loss_name = "categorical_crossentropy"
         supervised_loss = "cat_cross_inv"
         is_AE_adevers_training=1
-        print("Starting AE training in adversarial setup (stage 5). Loss will\
-              be cat cross entropy and labels will eb fixed! Otherwise like stage 0.")
     elif autoencoder_stage==6:
         #preperation for AAE training: train only the critic
         autoencoder_stage=0
@@ -180,7 +135,37 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch,
         is_AE_adevers_training=4
     else:
         is_AE_adevers_training=False
+        
+    return autoencoder_stage, ae_loss_name, supervised_loss, unfreeze_layer_training, is_AE_adevers_training
+
+
+
+
+
+def setup_model(modeltag, model_folder, autoencoder_stage, epoch, encoder_epoch, 
+                class_type, learning_rate, learning_rate_decay, epsilon, use_opti, 
+                encoder_version, ae_loss_name, supervised_loss,):
+    """ 
+    Define various properties that are needed for building and training the model.
     
+    Returns:
+        ae_loss : Loss function to be used for AE training. 
+        supervised_loss : Loss function to be used for supervised training.
+        supervised_metrics : Additional metrics to be used for supervised training.
+        custom_objects : Dict of custom learning rate functions (required for load_model)
+        lr : Initial learning rate.
+        lr_decay : Decay of lr per epoch, if no schedule is given.
+        lr_schedule_number : Schedule for lr decay. None if lr_decay is used.
+        epoch : Current autoencoder epoch.
+        encoder_epoch : Current encoder epoch.
+        optimizer : Optimizer that will be used in training.
+    """
+    
+    #Number of output neurons of the supervised networks
+    #(Autoencoders ignore this)
+    number_of_output_neurons = int(class_type[0])
+    if number_of_output_neurons<1:
+        raise ValueError("number_of_output_neurons have to be >= 1")
     
     #define the loss function to use for a new AE
     #(saved autoencoders will continue to use their original one)
@@ -208,25 +193,46 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch,
             
     #Optimizer to be used. Adam is used with epsilon=10**(given epsilon).
     optimizer = setup_optimizer(use_opti, lr, epsilon)
+
+    return (ae_loss, supervised_loss, supervised_metrics, custom_objects,
+            lr, lr_decay, lr_schedule_number,
+            epoch, encoder_epoch,
+            optimizer,)
     
-    #The files to train and test on, together with the nummber of events in them
-    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
-    test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
+
+
+
+def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss, 
+                options, custom_objects, model_folder, class_type,
+                encoder_version, encoder_epoch, supervised_loss,
+                supervised_metrics, init_model_path):
+    """
+    Construct and compile the model. Also returns info for successive training.    
     
-    #Zero-Center for the data. if zero center image does not exist, a new one
-    #is calculated and saved
-    if zero_center == True:
-        xs_mean = load_zero_center_data(train_files=train_tuple, 
-                                        batchsize=batchsize, n_bins=n_bins, n_gpu=1)
-        print("Using zero centering.")
-    else:
-        xs_mean = None
-        print("Not using zero centering.")
-    
-    
+    The basic architectures are:
+        Stage 0: Autoencoder
+        Stage 1: Encoder+dense w/ frozen encoder, initialized to give AE
+    Variants of the above are:
+        Stage 2: Encoder+dense completely unfrozen, random initialized.
+        Stage 3: Like stage 1, but trained successively.
+            
+    Returns:
+        model : The keras model to train.
+        modelname : Name of that model as a string.
+        autoencoder_model : For encoder+dense networks:
+            Path of the autoencoder model file that the encoder part is taken from.
+        is_autoencoder : Whether the model is an autoencoder or not.
+        last_encoder_layer_index_override : Manual definition of the layer 
+            that is the bottleneck.
+        switch_autoencoder_model : Successive training: When to switch the encoder weights.
+        succ_autoencoder_epoch : Successive training: The weights of which autoencoder 
+            are being used right now.
+    """
     #Setup network:
     #If epoch is 0, a new model is created. Otherwise, the 
     #existing model of the given epoch is loaded unchanged.
+    
+    number_of_output_neurons = int(class_type[0])
     
     #Autoencoder self-supervised training. Epoch is the autoencoder epoch, 
     #enc_epoch not relevant for this stage
@@ -270,23 +276,69 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch,
     elif autoencoder_stage==3:
         print("\n\nAutoencoder stage 3")
         is_autoencoder=False
-        (model, switch_autoencoder_model, succ_autoencoder_epoch, make_stateful, 
+        (switch_autoencoder_model, succ_autoencoder_epoch, make_stateful, 
          last_encoder_layer_index_override) = setup_successive_training(
-                              modeltag, encoder_epoch, model_folder, class_type, 
-                              encoder_version, number_of_output_neurons, 
-                              supervised_loss, supervised_metrics, optimizer,
-                              options, custom_objects)
+                              modeltag, encoder_epoch)
+        #name of the autoencoder model file that the encoder part is taken from:
+        autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(succ_autoencoder_epoch) + '.h5'
+        #name of the supervised model:
+        modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
+    
+        #Setup encoder+dense and load encoder weights (like autoencoder_stage=1)
+        model = setup_encoder_dense_model(modeltag, encoder_epoch, modelname, 1,
+                          number_of_output_neurons, supervised_loss, supervised_metrics,
+                          optimizer, options, model_folder, custom_objects,
+                          autoencoder_model)
+        
         if make_stateful==True:
             model = make_encoder_stateful(model)
-                
-            
+              
     #Initialize the model with the weights of a saved one
     if init_model_path is not None and init_model_path != "None":
         print("Initializing model weights to", init_model_path)
         init_model = load_model(init_model_path, custom_objects=custom_objects)
         for i,layer in enumerate(model.layers):
                 layer.set_weights(init_model.layers[i].get_weights())
+            
+    return (model, modelname, autoencoder_model, is_autoencoder,
+            last_encoder_layer_index_override, switch_autoencoder_model, 
+            succ_autoencoder_epoch, )
+
+
+
+
+def train_model(model, dataset, zero_center, modelname, autoencoder_model, 
+                lr_schedule_number, runs, learning_rate, model_folder, 
+                last_encoder_layer_index_override, switch_autoencoder_model,
+                autoencoder_stage, succ_autoencoder_epoch, modeltag,
+                unfreeze_layer_training, custom_objects, class_type, lr_decay, 
+                verbose, is_AE_adevers_training, is_autoencoder, epoch,
+                encoder_epoch):
+    """ Train, test and save the model and logfiles. """
+    #Get infos about the dataset
+    dataset_info_dict = get_dataset_info(dataset)
+    train_file=dataset_info_dict["train_file"]
+    test_file=dataset_info_dict["test_file"]
+    n_bins=dataset_info_dict["n_bins"]
+    broken_simulations_mode=dataset_info_dict["broken_simulations_mode"] #def 0
+    filesize_factor=dataset_info_dict["filesize_factor"]
+    filesize_factor_test=dataset_info_dict["filesize_factor_test"]
+    batchsize=dataset_info_dict["batchsize"] #def 32
     
+    #The files to train and test on, together with the nummber of events in them
+    train_tuple=[[train_file, int(h5_get_number_of_rows(train_file)*filesize_factor)]]
+    test_tuple=[[test_file, int(h5_get_number_of_rows(test_file)*filesize_factor_test)]]
+    
+    #Zero-Center for the data. if zero center image does not exist, a new one
+    #is calculated and saved
+    if zero_center == True:
+        xs_mean = load_zero_center_data(train_files=train_tuple, 
+                                        batchsize=batchsize, n_bins=n_bins, n_gpu=1)
+        print("Using zero centering.")
+    else:
+        xs_mean = None
+        print("Not using zero centering.")
+        
     #Which epochs are the ones relevant for current stage
     if is_autoencoder==True:
         running_epoch=epoch #Stage 0
@@ -372,4 +424,73 @@ def execute_training(modeltag, runs, autoencoder_stage, epoch, encoder_epoch,
 
     
 if __name__ == "__main__":
-    execute_training(*unpack_parsed_args())
+    
+    params = unpack_parsed_args()
+    modeltag = params["modeltag"]
+    runs=params["runs"]
+    autoencoder_stage=params["autoencoder_stage"]
+    epoch=params["autoencoder_epoch"]
+    encoder_epoch=params["encoder_epoch"]
+    class_type = (params["class_type_bins"], params["class_type_name"])
+    zero_center = params["zero_center"]
+    verbose=params["verbose"]
+    dataset = params["dataset"]
+    learning_rate = params["learning_rate"]
+    learning_rate_decay = params["learning_rate_decay"]
+    epsilon = params["epsilon"]
+    lambda_comp = params["lambda_comp"]
+    use_opti = params["optimizer"]
+    options = params["options"]
+    encoder_version = params["encoder_version"]
+    ae_loss_name=params["ae_loss_name"]
+    supervised_loss=params["supervised_loss"]
+    init_model_path=params["init_model"]
+    
+    
+    #Every model architecture is identified by its modeltag
+    #Each will be given its own directory in the main_folder automatically
+    #e.g. if the modeltag is "vgg_3", all saved models will 
+    #be stored in: main_folder+"/vgg_3/"
+    main_folder = "/home/woody/capn/mppi013h/Km3-Autoencoder/models"
+    
+    #Create the folder for the model if it does not exist already
+    model_folder = main_folder + "/" + modeltag + "/"
+    if not os.path.exists(model_folder):
+        os.makedirs(model_folder)
+        print("Created model folder", model_folder)
+    
+    
+    (
+     autoencoder_stage, ae_loss_name, supervised_loss, 
+     unfreeze_layer_training, is_AE_adevers_training
+     ) = extra_autoencoder_stages_setup(autoencoder_stage)
+
+    
+    (
+      ae_loss, supervised_loss, supervised_metrics, custom_objects,
+      lr, lr_decay, lr_schedule_number,
+      epoch, encoder_epoch,
+      optimizer,
+     ) = setup_model(
+             modeltag, model_folder, autoencoder_stage, epoch, encoder_epoch, 
+             class_type, learning_rate, learning_rate_decay, epsilon, use_opti, 
+             encoder_version, ae_loss_name, supervised_loss,)
+    
+    (
+     model, modelname, autoencoder_model, is_autoencoder,
+     last_encoder_layer_index_override, switch_autoencoder_model, 
+     succ_autoencoder_epoch, 
+     ) = build_model(
+             autoencoder_stage, modeltag, epoch, optimizer, ae_loss, 
+             options, custom_objects, model_folder, class_type,
+             encoder_version, encoder_epoch, supervised_loss,
+             supervised_metrics, init_model_path)
+    
+    
+    train_model(model, dataset, zero_center, modelname, autoencoder_model, 
+                lr_schedule_number, runs, learning_rate, model_folder, 
+                last_encoder_layer_index_override, switch_autoencoder_model,
+                autoencoder_stage, succ_autoencoder_epoch, modeltag,
+                unfreeze_layer_training, custom_objects, class_type, lr_decay, 
+                verbose, is_AE_adevers_training, is_autoencoder, epoch,
+                encoder_epoch)
