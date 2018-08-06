@@ -87,7 +87,7 @@ def unpack_parsed_args():
    
 
 
-def extra_autoencoder_stages_setup(autoencoder_stage):
+def extra_autoencoder_stages_setup(autoencoder_stage, ae_loss_name, supervised_loss):
     """
     Setup for special trainings that dont fit into regular categories.
     
@@ -102,6 +102,7 @@ def extra_autoencoder_stages_setup(autoencoder_stage):
             during training.
         is_AE_adevers_training: int defining the stage of adversarial autoencoder training.
     """
+    
     if autoencoder_stage==4:
         print("Autoencoder stage 4: Unfreeze Training. Setting up network like in AE stage 1...")
         autoencoder_stage=1
@@ -135,6 +136,7 @@ def extra_autoencoder_stages_setup(autoencoder_stage):
         is_AE_adevers_training=4
     else:
         is_AE_adevers_training=False
+        unfreeze_layer_training=False
         
     return autoencoder_stage, ae_loss_name, supervised_loss, unfreeze_layer_training, is_AE_adevers_training
 
@@ -172,12 +174,16 @@ def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss,
     #existing model of the given epoch is loaded unchanged.
     
     number_of_output_neurons = int(class_type[0])
-    
+    #Only relevant for stage 3: successive training:
+    (last_encoder_layer_index_override, switch_autoencoder_model, 
+     succ_autoencoder_epoch) = None, None, None
+     
     #Autoencoder self-supervised training. Epoch is the autoencoder epoch, 
     #enc_epoch not relevant for this stage
     if autoencoder_stage==0:
         is_autoencoder=True
         modelname = modeltag + "_autoencoder"
+        autoencoder_model = modelname
         print("\n\nAutoencoder stage 0")
         model = setup_autoencoder_model(modeltag, epoch, optimizer, ae_loss, 
                                         options, custom_objects, model_folder, modelname)
@@ -401,7 +407,8 @@ def execute_network_training():
     
     #For AE stages other than 0,1,2,3:
     (autoencoder_stage, ae_loss_name, supervised_loss, unfreeze_layer_training, 
-     is_AE_adevers_training) = extra_autoencoder_stages_setup(autoencoder_stage)
+     is_AE_adevers_training) = extra_autoencoder_stages_setup(autoencoder_stage, 
+                           ae_loss_name, supervised_loss)
     
     #Number of output neurons of the supervised networks (AE ignore this)
     number_of_output_neurons = int(class_type[0])
