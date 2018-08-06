@@ -256,7 +256,7 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
                 lr_schedule_number, runs, learning_rate, model_folder, 
                 last_encoder_layer_index_override, switch_autoencoder_model,
                 autoencoder_stage, succ_autoencoder_epoch, modeltag,
-                unfreeze_layer_training, custom_objects, class_type, lr_decay, 
+                unfreeze_layer_training, custom_objects, class_type, lr, lr_decay, 
                 verbose, is_AE_adevers_training, is_autoencoder, epoch,
                 encoder_epoch):
     """ Train, test and save the model and logfiles. """
@@ -457,7 +457,7 @@ def execute_network_training():
                 lr_schedule_number, runs, learning_rate, model_folder, 
                 last_encoder_layer_index_override, switch_autoencoder_model,
                 autoencoder_stage, succ_autoencoder_epoch, modeltag,
-                unfreeze_layer_training, custom_objects, class_type, lr_decay, 
+                unfreeze_layer_training, custom_objects, class_type, lr, lr_decay, 
                 verbose, is_AE_adevers_training, is_autoencoder, epoch,
                 encoder_epoch)
     

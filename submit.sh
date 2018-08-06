@@ -12,17 +12,20 @@
 # This also defines the name of the folder where everything is saved
 # can append '-XXX' for model version, which is saved in its own folder
 modeltag="vgg_3"
-#How many additinal epochs the network will be trained for by executing this script:
-runs=100
-#Type of training/network
+#Defines the type of training/network
+#Basic settings:
 # 0: autoencoder
 # 1: encoder+dense from autoencoder w/ frozen layers
 # 2: encoder+dense from scratch, completely unfrozen
 # 3: Parallel supervised training (load in new frozen encoder epoch according to schedule)
+#Advanced stages:
 # 4: Unfreeze training: Like stage 1, but conv blocks are unfrozen every few epochs.
 # 5: Adversarial Autoencoder stage: like stage 0, but with critic network and alternating which part of the GAN is trained
 # 6: Adversarial Autoencoder: train only the critic network (for pretraining)
 autoencoder_stage=1
+
+#How many additinal epochs the network will be trained for by executing this script:
+runs=100
 #Define starting epoch of autoencoder model 
 #(stage 1: the frozen encoder part of which autoencoder epoch to use)
 # if -1, the latest epoch is automatically looked for
@@ -61,6 +64,7 @@ learning_rate_decay=0.05
 epsilon=-8
 # lambda compatibility mode (0 or 1): Load the model manually from model definition,
 # and insert the weigths; can be used to overwrite parameters of the optimizer
+#This is not supported currently and should therefore be zero
 lambda_comp=0
 #optimizer to use, either "adam" or "sgd"
 optimizer="adam"
