@@ -82,6 +82,7 @@ def make_3d_plots(hist_org, n_bins, suptitle, figsize, titles=["Original", "Pred
     else:
         plot_arrangement = 111
     
+    
     ax1 = fig.add_subplot(plot_arrangement, projection='3d')
     plot1 = ax1.scatter(hist_org[0],hist_org[1],hist_org[2], c=hist_org[3], s=size_of_circles(hist_org), rasterized=True)
       
