@@ -141,67 +141,6 @@ def extra_autoencoder_stages_setup(autoencoder_stage):
 
 
 
-
-def setup_model(modeltag, model_folder, autoencoder_stage, epoch, encoder_epoch, 
-                class_type, learning_rate, learning_rate_decay, epsilon, use_opti, 
-                encoder_version, ae_loss_name, supervised_loss,):
-    """ 
-    Define various properties that are needed for building and training the model.
-    
-    Returns:
-        ae_loss : Loss function to be used for AE training. 
-        supervised_loss : Loss function to be used for supervised training.
-        supervised_metrics : Additional metrics to be used for supervised training.
-        custom_objects : Dict of custom learning rate functions (required for load_model)
-        lr : Initial learning rate.
-        lr_decay : Decay of lr per epoch, if no schedule is given.
-        lr_schedule_number : Schedule for lr decay. None if lr_decay is used.
-        epoch : Current autoencoder epoch.
-        encoder_epoch : Current encoder epoch.
-        optimizer : Optimizer that will be used in training.
-    """
-    
-    #Number of output neurons of the supervised networks
-    #(Autoencoders ignore this)
-    number_of_output_neurons = int(class_type[0])
-    if number_of_output_neurons<1:
-        raise ValueError("number_of_output_neurons have to be >= 1")
-    
-    #define the loss function to use for a new AE
-    #(saved autoencoders will continue to use their original one)
-    ae_loss, custom_objects = get_autoencoder_loss(ae_loss_name)
-    print("Using autoencoder loss:", ae_loss_name)
-    
-    #Define the loss function and additional metrics to use for a new 
-    #Encoder+dense network (saved nets will continue to use their original one)
-    supervised_loss, supervised_metrics = get_supervised_loss_and_metric(supervised_loss, 
-                                                                         number_of_output_neurons)
-    print("Using supervised loss:", supervised_loss)
-    
-    #Setup learning rate for the start of the training
-    lr, lr_decay, lr_schedule_number = setup_learning_rate(learning_rate, 
-                                        learning_rate_decay, autoencoder_stage, 
-                                        epoch, encoder_epoch)
-    if lr_schedule_number!= None:
-        print("Using learning rate schedule", lr_schedule_number)
-    
-    #automatically look for the epoch of the most recent saved model 
-    #of the current architecture if epoch=-1 was given:
-    epoch, encoder_epoch = look_up_latest_epoch(autoencoder_stage, epoch, 
-                                        encoder_epoch, model_folder, modeltag, 
-                                        class_type, encoder_version)
-            
-    #Optimizer to be used. Adam is used with epsilon=10**(given epsilon).
-    optimizer = setup_optimizer(use_opti, lr, epsilon)
-
-    return (ae_loss, supervised_loss, supervised_metrics, custom_objects,
-            lr, lr_decay, lr_schedule_number,
-            epoch, encoder_epoch,
-            optimizer,)
-    
-
-
-
 def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss, 
                 options, custom_objects, model_folder, class_type,
                 encoder_version, encoder_epoch, supervised_loss,
@@ -423,8 +362,9 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
                                   is_AE_adevers_training=is_AE_adevers_training)    
 
     
-if __name__ == "__main__":
-    
+
+def execute_network_training():
+    """ Main function for training autoencoder-based networks. """
     params = unpack_parsed_args()
     modeltag = params["modeltag"]
     runs=params["runs"]
@@ -438,7 +378,7 @@ if __name__ == "__main__":
     learning_rate = params["learning_rate"]
     learning_rate_decay = params["learning_rate_decay"]
     epsilon = params["epsilon"]
-    lambda_comp = params["lambda_comp"]
+    #lambda_comp = params["lambda_comp"] not supported anymore
     use_opti = params["optimizer"]
     options = params["options"]
     encoder_version = params["encoder_version"]
@@ -459,23 +399,42 @@ if __name__ == "__main__":
         os.makedirs(model_folder)
         print("Created model folder", model_folder)
     
+    #For AE stages other than 0,1,2,3:
+    (autoencoder_stage, ae_loss_name, supervised_loss, unfreeze_layer_training, 
+     is_AE_adevers_training) = extra_autoencoder_stages_setup(autoencoder_stage)
     
-    (
-     autoencoder_stage, ae_loss_name, supervised_loss, 
-     unfreeze_layer_training, is_AE_adevers_training
-     ) = extra_autoencoder_stages_setup(autoencoder_stage)
-
+    #Number of output neurons of the supervised networks (AE ignore this)
+    number_of_output_neurons = int(class_type[0])
+    if number_of_output_neurons<1:
+        raise ValueError("number_of_output_neurons have to be >= 1")
     
-    (
-      ae_loss, supervised_loss, supervised_metrics, custom_objects,
-      lr, lr_decay, lr_schedule_number,
-      epoch, encoder_epoch,
-      optimizer,
-     ) = setup_model(
-             modeltag, model_folder, autoencoder_stage, epoch, encoder_epoch, 
-             class_type, learning_rate, learning_rate_decay, epsilon, use_opti, 
-             encoder_version, ae_loss_name, supervised_loss,)
+    #define the loss function to use for a new AE
+    #(saved autoencoders will continue to use their original one)
+    ae_loss, custom_objects = get_autoencoder_loss(ae_loss_name)
+    print("Using autoencoder loss:", ae_loss_name)
     
+    #Define the loss function and additional metrics to use for a new 
+    #Encoder+dense network (saved nets will continue to use their original one)
+    supervised_loss, supervised_metrics = get_supervised_loss_and_metric(supervised_loss, 
+                                                        number_of_output_neurons)
+    print("Using supervised loss:", supervised_loss)
+    
+    #Setup learning rate for the start of the training
+    lr, lr_decay, lr_schedule_number = setup_learning_rate(learning_rate, 
+                                        learning_rate_decay, autoencoder_stage, 
+                                        epoch, encoder_epoch)
+    if lr_schedule_number!= None:
+        print("Using learning rate schedule", lr_schedule_number)
+    
+    #automatically look for the epoch of the most recent saved model 
+    #of the current architecture if epoch=-1 was given:
+    epoch, encoder_epoch = look_up_latest_epoch(autoencoder_stage, epoch, 
+                                        encoder_epoch, model_folder, modeltag, 
+                                        class_type, encoder_version)
+    #Optimizer for training:
+    optimizer = setup_optimizer(use_opti, lr, epsilon)
+    
+    #Construct, initialize and compile model:
     (
      model, modelname, autoencoder_model, is_autoencoder,
      last_encoder_layer_index_override, switch_autoencoder_model, 
@@ -486,7 +445,7 @@ if __name__ == "__main__":
              encoder_version, encoder_epoch, supervised_loss,
              supervised_metrics, init_model_path)
     
-    
+    #Train, test, save the model:
     train_model(model, dataset, zero_center, modelname, autoencoder_model, 
                 lr_schedule_number, runs, learning_rate, model_folder, 
                 last_encoder_layer_index_override, switch_autoencoder_model,
@@ -494,3 +453,9 @@ if __name__ == "__main__":
                 unfreeze_layer_training, custom_objects, class_type, lr_decay, 
                 verbose, is_AE_adevers_training, is_autoencoder, epoch,
                 encoder_epoch)
+    
+    
+if __name__ == "__main__":
+    execute_network_training()
+
+    
