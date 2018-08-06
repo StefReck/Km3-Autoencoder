@@ -1,5 +1,7 @@
 # Deep convolutional autoencoders for KM3NeT/ORCA
 This repository contains scripts for building, training and visualizing autoencoder-based networks. 
+They are used on simulated data of the KM3NeT/ORCA neutrino telescope.
+See also [OrcaNet](https://github.com/ViaFerrata/OrcaNet) for a project with supervised deep networks for ORCA.
 
 ## Training the network
 The main file for training and testing networks is **scripts/run_autoencoder.py**. 
@@ -17,12 +19,13 @@ Describes the type of network used for training. The basic stages are:
 - 1 = Encoder+dense: Take the encoder from an autoencoder, freeze it and add dense layers 
 - 2 = Supervised approach: Like the encoder+dense, but not frozen and randomly initialized. This is essentially a standard supervised network.
 - 3 = Successive training: Like stage 1, but switch out the weights of the encoder regularily. This way, one can scan which encoder is best for the supervised task.
+
 There are also some additional phases for advanced training (like GANs), but they are not documented well.
 
 ## Visualization
 These are scripts used for visualizing the progress of the training.
 
-- plot_statistics_parser: Plot the train and test loss of a model over the training epoch, based on test and train log files. Can also plot multiple models, given they have the same loss.
+- plot_statistics_parser: Plot the train and test loss of a model over the training epoch, based on test and train log files. Can also plot multiple models, given they have the same type of cost function.
 - plots_statistics_parallel: Plot the successive training of a model. This will show both the autoencoder as well as the encoder+dense (stage 3) train and test losses, both plotted over the autoencoder epoch. ![Shows the performance of an autoencoder and the corresponding encoder+dense network during training.](results/plots/readme_examples/statistics_parallel_trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.png?raw=true "Successive training history")
 - scripts/make_quick_autoencoder_reco_plots: Show the reconstruction of an autoencoder. This will plot an event and the output from a saved autoencoder which is used on this event side by side as a histogram. ![Autoencoder reconstruction at an early point during training.|50%](results/plots/readme_examples/AE_vgg_3_epoch_10_reko.png?raw=true "Reconstruction")
 
