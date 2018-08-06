@@ -265,8 +265,10 @@ def get_dataset_info(dataset_tag):
     #e.g. -filesize=0.3
         if "filesize=" in option:
             filesize_factor=float(option.split("=")[1])
-            print("Filesize set to", filesize_factor)
-
+            print("Train set filesize set to", filesize_factor)
+        elif "filesizetest=" in option:
+            filesize_factor_test=float(option.split("=")[1])
+            print("Test set filesize set to", filesize_factor_test)
         else:
             print("Ignoring unrecognized dataset_tag option", option)
     
