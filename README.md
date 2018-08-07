@@ -3,6 +3,13 @@ This repository contains scripts for building, training and visualizing autoenco
 They are used on simulated data of the KM3NeT/ORCA neutrino telescope.
 See also [OrcaNet](https://github.com/ViaFerrata/OrcaNet) for a project with supervised deep networks for ORCA.
 
+The basic idea is to train an autoencoder unsupervised first, which could in principle be done on measured data. 
+This way, one can circumvent possibly existing deviations between simulations and measured data.
+
+Then, the encoder part of the autoencoder is taken, its weights are frozen and dense layers are added. 
+This encoder+dense net is trained on simulations to predict the desired feature of the data.
+![Autoencoder training procedure](results/plots/readme_examples/autoencoder_principle.png?raw=true "Autoencoder training procedure")
+
 ## Training the network
 The main file for training and testing networks is **scripts/run_autoencoder.py**. 
 Models will be saved after every epoch, and log files will be created which show the history of training. 
