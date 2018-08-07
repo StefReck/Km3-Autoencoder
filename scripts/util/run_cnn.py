@@ -18,16 +18,13 @@ from model_definitions import setup_model
 #sys.path.append('../')
 #from get_dataset_info import get_dataset_info
 
-"""
-train_and_test_model(model, modelname, train_files, test_files, batchsize=32, n_bins=(11,13,18,1), class_type=None, xs_mean=None, epoch=0,
-                         shuffle=False, lr=None, lr_decay=None, tb_logger=False, swap_4d_channels=None):
-"""
 
-
-
-
-def train_and_test_model(model, modelname, train_files, test_files, batchsize, n_bins, class_type, xs_mean, epoch,
-                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, save_path, is_autoencoder, verbose, broken_simulations_mode, dataset_info_dict, is_AE_adevers_training=False):
+def train_and_test_model(model, modelname, train_files, test_files, batchsize, 
+                         n_bins, class_type, xs_mean, epoch,
+                         shuffle, lr, lr_decay, tb_logger, swap_4d_channels, 
+                         save_path, is_autoencoder, verbose, 
+                         broken_simulations_mode, dataset_info_dict, 
+                         is_AE_adevers_training=False):
     """
     Convenience function that trains (fit_generator) and tests (evaluate_generator) a Keras model.
     For documentation of the parameters, confer to the fit_model and evaluate_model functions.
@@ -36,10 +33,12 @@ def train_and_test_model(model, modelname, train_files, test_files, batchsize, n
     if epoch > 1 and lr_decay != 0:
         lr *= 1 - float(lr_decay)
         K.set_value(model.optimizer.lr, lr)
-        print ('Set LR to ' + str(K.get_value(model.optimizer.lr)) + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
+        print ('Set LR to ' + str(K.get_value(model.optimizer.lr)) \
+               + ' before epoch ' + str(epoch) + ' (decay: ' + str(lr_decay) + ')')
 
     if broken_simulations_mode != 0:
-        print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", broken_simulations_mode )
+        print("Warning: GENERATING BROKEN SIMULATED DATA\nBroken simulations mode", 
+              broken_simulations_mode )
 
     start_time = datetime.now()
     
@@ -269,7 +268,8 @@ def get_supervised_loss_and_metric(supervised_loss, number_of_output_neurons):
             
     return supervised_loss, supervised_metrics
 
-def setup_learning_rate(learning_rate, learning_rate_decay, autoencoder_stage, epoch, encoder_epoch):
+def setup_learning_rate(learning_rate, learning_rate_decay, autoencoder_stage, 
+                        epoch, encoder_epoch):
     """ Setup learning rate for the start of the training. """
     #Initial learning rate:
     lr = learning_rate 
@@ -279,8 +279,8 @@ def setup_learning_rate(learning_rate, learning_rate_decay, autoencoder_stage, e
     #up every epoch during the main loop below
     try:
         #lr_decay is not a string --> use no schedule
-        lr_schedule_number=None 
         lr_decay=float(learning_rate_decay)
+        lr_schedule_number=None 
     except ValueError:
         #lr_decay is a string --> use schedule
         lr_schedule_number=learning_rate_decay

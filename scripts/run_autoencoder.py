@@ -285,7 +285,7 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
         running_epoch=encoder_epoch #Stage 1,2,3
     #Set LR of loaded model to new lr
     if lr_schedule_number != None:
-            lr=lr_schedule(running_epoch+1, lr_schedule_number, learning_rate )
+            lr=lr_schedule(running_epoch+1, lr_schedule_number, learning_rate)
     K.set_value(model.optimizer.lr, lr)
     
     #Print info about the model and training
@@ -407,17 +407,17 @@ def execute_network_training():
     supervised_loss, supervised_metrics = get_supervised_loss_and_metric(supervised_loss, 
                                                         number_of_output_neurons)
     print("Using supervised loss:", supervised_loss)
+    #automatically look for the epoch of the most recent saved model 
+    #of the current architecture if epoch=-1 was given:
+    epoch, encoder_epoch = look_up_latest_epoch(autoencoder_stage, epoch, 
+                                        encoder_epoch, model_folder, modeltag, 
+                                        class_type, encoder_version)
     #Setup learning rate for the start of the training
     lr, lr_decay, lr_schedule_number = setup_learning_rate(learning_rate, 
                                         learning_rate_decay, autoencoder_stage, 
                                         epoch, encoder_epoch)
     if lr_schedule_number!= None:
         print("Using learning rate schedule", lr_schedule_number)
-    #automatically look for the epoch of the most recent saved model 
-    #of the current architecture if epoch=-1 was given:
-    epoch, encoder_epoch = look_up_latest_epoch(autoencoder_stage, epoch, 
-                                        encoder_epoch, model_folder, modeltag, 
-                                        class_type, encoder_version)
     #Optimizer for training:
     optimizer = setup_optimizer(use_opti, lr, epsilon)
     #Construct, initialize and compile model:
