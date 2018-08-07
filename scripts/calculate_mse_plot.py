@@ -28,16 +28,16 @@ def make_plot(data_dict, figsize=(6.4,5.5), title="Constituents of the test MSE"
     fig, ax = plt.subplots(figsize=figsize)
     plt.title("")
     plt.grid()
-    
-    ax.plot(data_dict["Epoch"], data_dict["MSE below"], "o-", label=labels[1], c=colors[1])
-    ax.plot(data_dict["Epoch"], data_dict["MSE"], "o-", label=labels[2], c=colors[2])
+    marksize=3
+    ax.plot(data_dict["Epoch"], data_dict["MSE below"], "o-", label=labels[1], c=colors[1], ms=marksize)
+    ax.plot(data_dict["Epoch"], data_dict["MSE"], "o-", label=labels[2], c=colors[2], ms=marksize)
     ax.set_xlabel("Autoencoder epoch")
     ax.set_ylabel("Test MSE (low counts and total)")
     plt.legend(loc="upper left")
     
     
     ax2 = ax.twinx()
-    ax2.plot(data_dict["Epoch"], data_dict["MSE above3"], "o-", label=labels[0], c=colors[0])
+    ax2.plot(data_dict["Epoch"], data_dict["MSE above3"], "o-", label=labels[0], c=colors[0], ms=marksize)
     ax2.set_ylabel("Test MSE (high counts)")
     
     ax.set_ylim(get_proper_range( list(map(float, data_dict["MSE"]))))

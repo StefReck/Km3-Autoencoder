@@ -13,7 +13,7 @@ from util.saved_setups_for_plot_statistics import get_props_for_plot_parallel, g
 from util.saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
 #Which plot do
-i_want = "loss"
+i_want = "acc"
 #loss acc test
 
 def which_plot(do_you_want):

@@ -18,10 +18,10 @@ from get_dataset_info import get_dataset_info
 from histogramm_3d_utils import make_plots_from_array
 
 
-save_name_of_pdf="vgg_5_picture-instanthighlr.pdf"
+save_name_of_pdf="vgg_3_AE_3d_hists.pdf"
 #name of the AE h5 files, up to the epoch number
-autoencoder_model_base = "../../models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_epoch"
-plot_which_epochs = [5,7,9,11,13]
+autoencoder_model_base = "../../models/vgg_3/trained_vgg_3_autoencoder_epoch"
+plot_which_epochs = [1,10,60,140,]
 number_of_events = 5
 #insted of plotting X events, can also explicitly look for a specific event id and plot only that
 # None if not
