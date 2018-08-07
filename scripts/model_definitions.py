@@ -79,7 +79,6 @@ def make_options_dict(additional_options):
             #Change dropout of dense layers
             dropout_rate = float(additional_options.split("=")[1])
             options_dict["dropout_for_dense"]=dropout_rate
-            print("Dropout rate for dense layers will be", dropout_rate)
         
         elif "dropout_conv=" in additional_options:
             #Change dropout of conv layers
@@ -125,10 +124,16 @@ def make_options_dict(additional_options):
         elif "pretrained_critic_path" in additional_options:
             pretrained_critic_path = additional_options.split("=")[1]
             options_dict["pretrained_critic_path"]=pretrained_critic_path
-
+        
+        elif "None" in additional_options or None in additional_options:
+            pass
+        
         else:
            warnings.warn("Ignoring unrecognized string for options:"+additional_options)
-            
+    
+    print("Dropout rate for dense layers in encoder+dense network of this " \
+          + "model will be", options_dict["dropout_for_dense"])
+    
     return options_dict
 
 
