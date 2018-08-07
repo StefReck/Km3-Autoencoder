@@ -193,18 +193,22 @@ def make_energy_evaluation_statistics(arr_energy_correct):
     print("Statistics of this reconstruction, averaged over all samples in the dataset:")
     mc_energy = arr_energy_correct[:,0]
     reco_energy = arr_energy_correct[:,1]
-    abs_err = np.abs(mc_energy - reco_energy)
+    lin_error = mc_energy - reco_energy
     
-    total_lin_error = np.median(mc_energy - reco_energy)
+    abs_err = np.abs(lin_error)
+    
     total_abs_mean = abs_err.mean()
     total_relative_median = np.median(abs_err/mc_energy)
     total_relative_variance = np.var(abs_err/mc_energy)
+    total_lin_error = np.median(lin_error)
+    total_lin_rel_error = np.median(lin_error/mc_energy)
     
     print("Average mean absolute error over all energies:", total_abs_mean)
     print("Median relative error over all energies:",total_relative_median)
     print("Variance in relative error over all energies:", total_relative_variance)
     print(total_abs_mean,total_relative_median,total_relative_variance)
     print("Median linear error: ", total_lin_error)
+    print("Median linear relative error: ", total_lin_rel_error)
     print("------------------------------------------------------------------------\n")
 
     performance_list = [total_abs_mean,total_relative_median,total_relative_variance]
