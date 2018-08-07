@@ -314,7 +314,7 @@ def print_model_blockwise(model):
     
             
 if __name__=="__main__":
-    model=setup_model(model_tag="vgg_6_2000_advers", autoencoder_stage=0, modelpath_and_name=None, 
+    model=setup_model(model_tag="vgg_5_200", autoencoder_stage=0, modelpath_and_name=None, 
                       additional_options="")
     #model.summary()
     conv_layer_indices = []

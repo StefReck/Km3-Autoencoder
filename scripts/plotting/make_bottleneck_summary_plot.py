@@ -10,7 +10,7 @@ import sys
 sys.path.append('../util/')
 from saved_setups_for_plot_statistics import get_plot_statistics_plot_size
 
-
+#perf, rob
 mode="perf"
 
 save_perf_plot_as="../../results/plots/statistics/bottleneck_summary_plot_updown_energy.pdf"
@@ -27,8 +27,8 @@ results = np.array([
 [1920,	 82.51, 6.339, 0.28014   ], #"basic",
 [600,    84.93, 5.846, 0.26500  ],#"picture",
 [200,    84.98, 5.774, 0.26084  ],#"200/200-dense",
-[64,     83.79, 5.838, 0.26244  ],#"64 nodrop"
-[32,     80.63, 6.145, 0.28251 ],#"32-eps01 nodrop",
+[64,     84.71, 5.838, 0.26244  ],#"64 nodrop"
+[32,     82.67, 6.145, 0.28251 ],#"32-eps01 nodrop",
 ])
 
 #Broken4 updown

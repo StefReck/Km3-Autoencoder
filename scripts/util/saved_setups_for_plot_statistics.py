@@ -205,15 +205,15 @@ def get_props_for_plot_parallel(tag, printing=True):
         prl_model = home+"models/vgg_5_picture-instanthighlr/trained_vgg_5_picture-instanthighlr_autoencoder_supervised_parallel_up_down_add_conv_test.txt"
         save_to_folder = "instanthighlr/"
         
-    elif tag=="vgg_5_600-ihlr_add_conv" or tag==50:
+    elif tag=="vgg_5_600-ihlr_msep" or tag==50:
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep/trained_vgg_5_picture-instanthighlr_msep_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "instanthighlr/"
-    elif tag=="vgg_5_600-ihlr_add_conv" or tag==51:
+    elif tag=="vgg_5_600-ihlr_msep2" or tag==51:
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr_msep2/trained_vgg_5_picture-instanthighlr_msep2_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "instanthighlr/"
-    elif tag=="vgg_5_600-ihlr_add_conv" or tag==52:
+    elif tag=="vgg_5_600-ihlr_msepsq" or tag==52:
         ae_model =  home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_test.txt" 
         prl_model = home+"models/vgg_5_picture-instanthighlr_msepsq/trained_vgg_5_picture-instanthighlr_msepsq_autoencoder_supervised_parallel_up_down_test.txt"
         save_to_folder = "instanthighlr/"

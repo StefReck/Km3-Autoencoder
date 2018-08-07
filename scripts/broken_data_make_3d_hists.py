@@ -12,15 +12,15 @@ from util.run_cnn import generate_batches_from_hdf5_file
 from get_dataset_info import get_dataset_info
 from plotting.histogramm_3d_utils import make_3d_plots, reshape_3d_to_3d, get_title_arrays
 
-which_broken_mode=12
+which_broken_mode=4
 #How many to display
 batchsize=3
 #save to data; None for dont save but just display
 save_to_pdf_name=None#"broken_2_3D_hist.pdf"
 #norm = normal first for plot, inv = broken first
-order="norm"
+order="inv"#"norm"
 #Redraw events from the file until at least one has an energy higher then this
-minimum_energy = 75
+minimum_energy = 0
 
 #Minimum counts for the plots
 min_counts=0.1
@@ -101,6 +101,8 @@ for i in range(len(data_normal)):
     plot_brok=reshape_3d_to_3d(data_broken[i], min_counts)
     plot_norm=reshape_3d_to_3d(data_normal[i], min_counts)
     suptitle = suptitle_base +"   ("+title_array[0][i]+", "+title_array[1][i]+", "+title_array[2][i]+")"
+    print(suptitle)
+    suptitle=""
     if order=="norm":
         fig = make_3d_plots(plot_norm, n_bins[:-1], hist_pred=plot_brok, suptitle=suptitle, figsize=(12,7), titles=titles)
     elif order=="inv":

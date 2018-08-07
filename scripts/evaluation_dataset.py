@@ -367,6 +367,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken4_unf"+extra_name+".pdf" 
         plot_type = "mre"
+        y_lims=(0.2,0.6)
+        
     elif which_one=="energy_4_2000_enc" or which_one==20:
         brokendata_tag = "xzt_broken4"
         realdata_tag   = "xzt"
@@ -377,7 +379,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         folder_in_the_plots_path = "broken_study_energy/"
         plot_file_name = "vgg_5_2000_broken4_enc"+extra_name+".pdf" 
         plot_type = "mre"
-        
+        y_lims=(0.2,0.6)
         
     elif which_one=="energy_13_2000_unf" or which_one==21:
         brokendata_tag = "xzt_broken13"
@@ -558,6 +560,8 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     
     else:
         raise NameError(str(which_one) + " is not known!")
+    
+    title_of_plot=""
     
     if plot_type=="mre":
         #energy plot

@@ -13,7 +13,7 @@ This encoder+dense net is trained on simulations to predict the desired feature 
 ## Training the network
 The main file for training and testing networks is **scripts/run_autoencoder.py**. 
 Models will be saved after every epoch, and log files will be created which show the history of training. 
-The test log file _test.txt contains the summarized statistics of every epoch, while the train log files _log.txt contain the batch-wise statistics of every single epoch.
+The test log file xxx_test.txt contains the summarized statistics of every epoch, while the train log files xxx_log.txt contain the batch-wise statistics of every single epoch.
 The script has plenty of input parameters, so the use of a shell script to run it is recommended.
 A detailed explanation of all the parameters is given in the example shell script **submit.sh**, but the most important ones are the following:
 
@@ -32,7 +32,7 @@ There are also some additional phases for advanced training (like GANs), but the
 ## Visualization
 These are scripts used for visualizing the progress of the training.
 
-- plot_statistics_parser: Plot the train and test loss of a model over the training epoch, based on test and train log files. Can also plot multiple models, given they have the same loss.
-- plots_statistics_parallel: Plot the successive training of a model. This will show both the autoencoder as well as the encoder+dense (stage 3) train and test losses, both plotted over the autoencoder epoch. ![Shows the performance of an autoencoder and the corresponding encoder+dense network during training.|50%](results/plots/readme_examples/statistics_parallel_trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.png?raw=true "Successive training history")
-- scripts/make_quick_autoencoder_reco_plots: Show the reconstruction of an autoencoder. This will plot an event and the output from a saved autoencoder which is used on this event side by side as a histogram. ![Autoencoder reconstruction at an early point during training.|50%](results/plots/readme_examples/AE_vgg_3_epoch_10_reko.png?raw=true "Reconstruction")
+- plot_statistics_parser.py: Plot the train and test loss of a model over the training epoch, based on test and train log files. Can also plot multiple models, given they have the same loss.
+- plots_statistics_parallel.py: Plot the successive training of a model. This will show both the autoencoder as well as the encoder+dense (stage 3) train and test losses, both plotted over the autoencoder epoch. ![Shows the performance of an autoencoder and the corresponding encoder+dense network during training.|50%](results/plots/readme_examples/statistics_parallel_trained_vgg_5_morefilter_autoencoder_supervised_parallel_up_down_test.png?raw=true "Successive training history")
+- scripts/make_quick_autoencoder_reco_plots.py: Show the reconstruction of an autoencoder. This will plot an event and the output from a saved autoencoder which is used on this event side by side as a histogram. ![Autoencoder reconstruction at an early point during training.|50%](results/plots/readme_examples/AE_vgg_3_epoch_10_reko.png?raw=true "Reconstruction")
 
