@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-Return a dict that contains info like path about the dataset that belongs
-to a certain dataset tag.
-"""
 
 def get_dataset_info(dataset_tag):
+    """
+    Return a dict that contains info like path about the dataset that belongs
+    to a certain dataset tag.
+    
+    Returns:
+        return_dict (dict): Info about dataset.
+    """
     #Path to my Km3_net-Autoencoder folder on HPC:
     home_path="/home/woody/capn/mppi013h/Km3-Autoencoder/"
     

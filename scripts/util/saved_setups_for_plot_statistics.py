@@ -48,6 +48,13 @@ def get_props_for_plot_parallel(tag, printing=True):
     title=""
     ylims=None #[ylims_AE, y_lims_prl]
     AE_yticks=None
+    xlabel="Epoch"
+    #legend location for the labels and the test/train box
+    legend_locations=(1, "upper left")
+    #Override xtick locations; None for automatic
+    xticks=None
+    # override line colors; must be one color for every test file, otherwise automatic
+    colors=["blue", "orange"] # = automatic
     
     try: tag=int(tag) 
     except: ValueError
@@ -378,7 +385,8 @@ def get_props_for_plot_parallel(tag, printing=True):
             print(file.split(home)[1]) 
            
     save_as=home+"results/plots/statistics/"+save_to_folder+"statistics_parallel_"+prl_model.split("/")[-1][:-4]+".pdf"
-    return test_files, title, labels_override, save_as, epoch_schedule, style, ylims, AE_yticks
+    return (test_files, title, labels_override, save_as, epoch_schedule, 
+            style, ylims, AE_yticks, xlabel, colors, legend_locations, xticks)
 
 
 

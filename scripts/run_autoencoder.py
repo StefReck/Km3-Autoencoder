@@ -29,11 +29,10 @@ def unpack_parsed_args():
     """ 
     Read out input arguments and return them as a tuple for the training
     
-    They will be printed and returned as a dict, so that they can be handed to
-    execute_training.
+    They will be printed and returned as a dict.
     
     Returns:
-        params: Dict with all input parameters of the parser.
+        params (dict): Dict with all input parameters of the parser.
     """
     parser = argparse.ArgumentParser(description='The main function for training \
         autoencoder-based networks. See submit.sh for detailed explanations of all parameters.')
@@ -94,12 +93,13 @@ def extra_autoencoder_stages_setup(autoencoder_stage, ae_loss_name,
     but have some additional properties during training.
     
     Returns:
-        autoencoder_stage: Defines which architecture is loaded.
-        ae_loss_name: Loss of autoencoder training.
-        supervised_loss. Loss of supervised training.
-        unfreeze_layer_training: Bool: Parts of the network will be gradually unfrozen 
-            during training.
-        is_AE_adevers_training: int defining the stage of adversarial autoencoder training.
+        autoencoder_stage (int): Defines which architecture is loaded.
+        ae_loss_name (str): Loss of autoencoder training.
+        supervised_loss(str or None). Loss of supervised training.
+        unfreeze_layer_training (bool): Parts of the network will be gradually 
+            unfrozen during training.
+        is_AE_adevers_training (int): Defines the stage of adversarial 
+            autoencoder training.
     """
     
     if autoencoder_stage==4:
@@ -157,15 +157,16 @@ def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss,
             
     Returns:
         model : The keras model to train.
-        modelname : Name of that model as a string.
-        autoencoder_model : For encoder+dense networks:
+        modelname (str) : Name of that model as a string.
+        autoencoder_model (str) : For encoder+dense networks:
             Path of the autoencoder model file that the encoder part is taken from.
-        is_autoencoder : Whether the model is an autoencoder or not.
-        last_encoder_layer_index_override : Manual definition of the layer 
-            that is the bottleneck.
-        switch_autoencoder_model : Successive training: When to switch the encoder weights.
-        succ_autoencoder_epoch : Successive training: The weights of which autoencoder 
-            are being used right now.
+        is_autoencoder (bool) : Whether the model is an autoencoder or not.
+        last_encoder_layer_index_override (int or None) : Manual definition 
+            of the layer that is the bottleneck.
+        switch_autoencoder_model (list or None) : Successive training,
+            when to switch the encoder weights.
+        succ_autoencoder_epoch (int or None) : Successive training, 
+            The weights of which autoencoder epoch are being used right now.
     """
     #Setup network:
     #If epoch is 0, a new model is created. Otherwise, the 
@@ -192,9 +193,11 @@ def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss,
         print("\n\nAutoencoder stage 1")
         is_autoencoder=False
         #name of the autoencoder model file that the encoder part is taken from:
-        autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(epoch) + '.h5'
+        autoencoder_model = model_folder + "trained_" + modeltag \
+            + "_autoencoder_epoch" + str(epoch) + '.h5'
         #name of the supervised model:
-        modelname = modeltag + "_autoencoder_epoch" + str(epoch) +  "_supervised_" + class_type[1] + encoder_version
+        modelname = modeltag + "_autoencoder_epoch" + str(epoch) \
+            +  "_supervised_" + class_type[1] + encoder_version
         
         model = setup_encoder_dense_model(
                 modeltag, encoder_epoch, modelname, autoencoder_stage,
@@ -225,7 +228,8 @@ def build_model(autoencoder_stage, modeltag, epoch, optimizer, ae_loss,
          last_encoder_layer_index_override) = setup_successive_training(
                               modeltag, encoder_epoch)
         #name of the autoencoder model file that the encoder part is taken from:
-        autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(succ_autoencoder_epoch) + '.h5'
+        autoencoder_model = model_folder + "trained_" + modeltag \
+            + "_autoencoder_epoch" + str(succ_autoencoder_epoch) + '.h5'
         #name of the supervised model:
         modelname = modeltag + "_autoencoder_supervised_parallel_" + class_type[1] + encoder_version
     
@@ -257,6 +261,7 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
                 verbose, is_AE_adevers_training, is_autoencoder, epoch,
                 encoder_epoch):
     """ Train, test and save the model and logfiles. """
+    
     #Get infos about the dataset
     dataset_info_dict = get_dataset_info(dataset)
     train_file=dataset_info_dict["train_file"]
@@ -318,7 +323,8 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
         if autoencoder_stage==3:
             if current_epoch in switch_autoencoder_model:
                 succ_autoencoder_epoch+=1
-                autoencoder_model = model_folder + "trained_" + modeltag + "_autoencoder_epoch" + str(succ_autoencoder_epoch) + '.h5'
+                autoencoder_model = model_folder + "trained_" + modeltag \
+                    + "_autoencoder_epoch" + str(succ_autoencoder_epoch) + '.h5'
                 print("Changing weights before epoch ",current_epoch+1," to ",autoencoder_model)
                 switch_encoder_weights(model, load_model(autoencoder_model, 
                                                 custom_objects=custom_objects), 
@@ -359,6 +365,7 @@ def train_model(model, dataset, zero_center, modelname, autoencoder_model,
 def execute_network_training():
     """ Main function for training autoencoder-based networks. """
     params = unpack_parsed_args()
+    # see submit.sh for a documentation of these variables
     modeltag = params["modeltag"]
     runs=params["runs"]
     autoencoder_stage=params["autoencoder_stage"]
@@ -413,6 +420,7 @@ def execute_network_training():
                                         encoder_epoch, model_folder, modeltag, 
                                         class_type, encoder_version)
     #Setup learning rate for the start of the training
+    #learning_rate and learning_rate_decay is the input from the parser
     lr, lr_decay, lr_schedule_number = setup_learning_rate(learning_rate, 
                                         learning_rate_decay, autoencoder_stage, 
                                         epoch, encoder_epoch)
