@@ -770,7 +770,8 @@ def norm_columns_of_2d_hist_data(z):
     
     return z
 
-def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_columns=False):
+def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, 
+                      normalize_columns=False):
     """
     Takes a numpy 2d histogramm of mc-energy vs reco-energy and returns
     a plot.
@@ -798,6 +799,9 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         fig, ax = plt.subplots()
         plot = ax.pcolormesh(x,y,z, norm=colors.LogNorm(vmin=1, vmax=z.max()))
         
+        #Add a line with slope 1 through the origin
+        ax.plot((np.min(x), np.max(x)), (np.min(y), np.max(y)),c="black", lw=0.5)
+        
         fig.suptitle(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -820,11 +824,15 @@ def make_2d_hist_plot(hist_2d_data, seperate_track_shower=True, normalize_column
         ax1.set_title("Track like events")
         cbar1 = fig.colorbar(plot1, ax=ax1, )
         cbar1.ax.set_ylabel(cbar_label)
+        #Add a line with slope 1 through the origin
+        ax1.plot((np.min(x), np.max(x)), (np.min(y), np.max(y)),c="black", lw=0.5)
+        
         
         plot2 = ax2.pcolormesh(x,y,z2, norm=colors.LogNorm(vmin=1, vmax=z2.max()))
         ax2.set_title("Shower like events")
         cbar2 = fig.colorbar(plot2, ax=ax2)
         cbar2.ax.set_ylabel(cbar_label)
+        ax2.plot((np.min(x), np.max(x)), (np.min(y), np.max(y)),c="black", lw=0.5)
         
         
         ax1.set_xlabel(xlabel)
