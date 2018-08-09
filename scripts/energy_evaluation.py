@@ -45,12 +45,28 @@ def get_saved_plots_info(tag, apply_precuts=False):
     is_a_set=False
     #For sets: Which type of plot to generate
     which_plot="mean"
+    #Should track and shower be seperated for the 2d hist plot
+    seperate_track_shower=True
+    #Path of where to save the plots. The histogram and the MRE plot will get 
+    #different endings appended. None for auto generate.
+    save_as_base=None
     
     #------------------------------Special single files---------------------
     if tag == "energy_12_enc":
         model_path = "vgg_3/trained_vgg_3_autoencoder_epoch8_supervised_energy_broken12_epoch48.h5"
         dataset_tag="xzt"
-    
+    elif tag == "energy_15_enc_sim":
+        model_path = "models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
+        dataset_tag="xzt"
+        seperate_track_shower=False
+        energy_bins_2d=np.arange(3,101,1)
+        save_as_base = home_path+"results/plots/energy_evaluation/broken15_on_normal"
+    elif tag == "energy_15_enc_meas":
+        model_path = "models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
+        dataset_tag="xzt_broken15"
+        seperate_track_shower=False
+        energy_bins_2d=np.arange(3,101,1)
+        save_as_base = home_path+"results/plots/energy_evaluation/broken15_on_broken15"
     #------------------------------Sets for mae comparison---------------------
     elif tag == "2000":
         tags = ["2000_unf_E", "2000_unf_mse_E"]
@@ -142,13 +158,15 @@ def get_saved_plots_info(tag, apply_precuts=False):
     else:
         print("Working on model", model_path)
         #Where to save the plots to
-        save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
+        if save_as_base is None:
+            save_as_base = home_path+"results/plots/energy_evaluation/"+model_path.split("trained_")[1][:-3]
         if apply_precuts:
             save_as_base+="_precut"
             dataset_tag="xzt_precut"
         
         model_path=home_path+"models/"+model_path
-        return [model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], save_as_base
+        return ([model_path, dataset_tag, zero_center, energy_bins_2d, energy_bins_1d], 
+                save_as_base, seperate_track_shower)
 
 
 def get_dump_name_arr(model_path, dataset_tag):
@@ -196,7 +214,8 @@ def make_or_load_hist_data(model_path, dataset_tag, zero_center, energy_bins_2d,
 
 def save_and_show_plots(tag, apply_precuts=False, show_plot=True):
     #Main function. Generate or load the data for the plots, and make them.
-    input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
+    (input_for_make_hist_data, save_as_base, 
+     seperate_track_shower) = get_saved_plots_info(tag, apply_precuts)
     
     #Can also compare multiple already generated mae plots
     if len(input_for_make_hist_data)==3:
@@ -219,7 +238,7 @@ def save_and_show_plots(tag, apply_precuts=False, show_plot=True):
         hist_data_2d, energy_mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data, samples=samples)
         
         print("Generating hist2d plot...")
-        fig_hist2d = make_2d_hist_plot(hist_data_2d)
+        fig_hist2d = make_2d_hist_plot(hist_data_2d, seperate_track_shower=seperate_track_shower)
         if show_plot:
             plt.show(fig_hist2d)
         if save_as_2d != None:

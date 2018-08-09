@@ -490,7 +490,29 @@ def get_info(which_one, extra_name="", y_lims_override=None):
         plot_file_name = "vgg_5_200_broken14_enc"+extra_name+".pdf" 
         plot_type = "mre"
         y_lims=(0.08,0.68)
-        
+    
+    elif which_one=="energy_14_200_large_enc" or which_one==36:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch??_supervised_energy_broken14_nodrop_epoch??.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_large_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_large_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.08,0.68)
+    elif which_one=="energy_14_200_small_enc" or which_one==37:
+        brokendata_tag = "xzt_broken14"
+        realdata_tag   = "xzt"
+        broken_model = "vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch??_supervised_energy_broken14_nodrop_epoch??.h5"
+        real_model   = get_path_best_epoch("vgg_5_200_small_E_nodrop", full_path=False)
+        modelidents, dataset_array = get_procedure(broken_model, real_model, 
+                                                   brokendata_tag, realdata_tag)
+        folder_in_the_plots_path = "broken_study_energy/"
+        plot_file_name = "vgg_5_200_small_broken14_enc"+extra_name+".pdf" 
+        plot_type = "mre"
+        y_lims=(0.08,0.68)
     # ----------------------------- Other tests -----------------------------
 
     elif which_one=="energy_2_2000_unf" or which_one==32:

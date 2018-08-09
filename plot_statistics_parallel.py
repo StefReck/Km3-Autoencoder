@@ -9,12 +9,16 @@ plotted over the epoch for both.
 import argparse
 
 def parse_input():
-    parser = argparse.ArgumentParser(description='Make overview plots of model training. Can also enter "saved" and a tag to restore saved plot properties.')
-    parser.add_argument('autoencoder_model', type=str, help='name of _test.txt files to plot (or "saved")')
-    parser.add_argument('parallel_model', type=str, help='name of _test.txt files to plot. (or a tag)')
-    
-    parser.add_argument('-c', '--channel', action="store_true", help='Use the channel parallel schedule (1 enc epoch per AE epoch)')
-    parser.add_argument('-s', '--save', action="store_true", help='Save the plot to the path defined in the file.')
+    parser = argparse.ArgumentParser(
+        description='Make overview plots of model training. Can also enter "saved" and a tag to restore saved plot properties.')
+    parser.add_argument('autoencoder_model', type=str, 
+                        help='name of _test.txt files to plot (or "saved")')
+    parser.add_argument('parallel_model', type=str, 
+                        help='name of _test.txt files to plot. (or a tag)')
+    parser.add_argument('-c', '--channel', action="store_true", 
+                        help='Use the channel parallel schedule (1 enc epoch per AE epoch)')
+    parser.add_argument('-s', '--save', action="store_true", 
+                        help='Save the plot to the path defined in the file or tag.')
     args = parser.parse_args()
     params = vars(args)
     return params
@@ -96,12 +100,14 @@ def make_parallel_statistics(test_files, title, labels_override, save_as,
         plt.savefig(save_as)
         print("Saved plot as",save_as,"\n")
     else:
+        if save_as is None and save_it==True:
+            print("Can only save a plot if a path is given!")
         print("Plot was not saved.")
     
     return fig
 
-def make_parallel_plot_for_saved_setup(tag):
-    """ Use a saved tag to load all info, then plot it. """
+def make_parallel_plot_for_saved_setup(tag, save_it):
+    """ Use a saved tag to load all info, then plot it. Can also save it. """
     
     if tag == "all":
         #make and save all the plots whose setup is saved, without displaying them.
@@ -124,7 +130,8 @@ def make_parallel_plot_for_saved_setup(tag):
     else:
         #make, save and show a single plot whose setup is saved
         (test_files, title, labels_override, save_as, epoch_schedule, 
-         style, ylims, AE_yticks) = get_props_for_plot_parallel(tag)
+         style, ylims, AE_yticks, xlabel, colors, legend_locations, xticks
+         ) = get_props_for_plot_parallel(tag)
         fig = make_parallel_statistics(
             test_files, title, labels_override, save_as, 
             epoch_schedule, save_it, style, ylims, AE_yticks,
@@ -135,7 +142,7 @@ def make_parallel_plot_for_saved_setup(tag):
 if test_files[0]=="saved":
     #overwrite some of the above options from a saved setup
     tag = test_files[1]
-    make_parallel_plot_for_saved_setup(tag)
+    make_parallel_plot_for_saved_setup(tag, save_it)
 else:
     #Plot the files that were given to the parser directly
     fig = make_parallel_statistics(
