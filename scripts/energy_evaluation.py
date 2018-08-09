@@ -59,14 +59,28 @@ def get_saved_plots_info(tag, apply_precuts=False):
         model_path = "models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
         dataset_tag="xzt"
         seperate_track_shower=False
-        energy_bins_2d=np.arange(3,101,1)
+        energy_bins_2d=np.arange(3,20,0.5)
         save_as_base = home_path+"results/plots/energy_evaluation/broken15_on_normal"
     elif tag == "energy_15_enc_meas":
         model_path = "models/vgg_5_64-broken15/trained_vgg_5_64-broken15_autoencoder_epoch83_supervised_energynodrop_epoch67.h5"
         dataset_tag="xzt_broken15"
         seperate_track_shower=False
-        energy_bins_2d=np.arange(3,101,1)
+        energy_bins_2d=np.arange(3,20,0.5)
         save_as_base = home_path+"results/plots/energy_evaluation/broken15_on_broken15"
+    elif tag == "energy_15_unf_sim":
+        model_path = "models/vgg_5_2000-broken15/trained_vgg_5_2000-broken15_supervised_energy_epoch12.h5"
+        dataset_tag="xzt"
+        seperate_track_shower=False
+        energy_bins_2d=np.arange(3,20,0.5)
+        save_as_base = home_path+"results/plots/energy_evaluation/broken15_unf_on_normal"
+    elif tag == "energy_15_unf_meas":
+        model_path = "models/vgg_5_2000-broken15/trained_vgg_5_2000-broken15_supervised_energy_epoch12.h5"
+        dataset_tag="xzt_broken15"
+        seperate_track_shower=False
+        energy_bins_2d=np.arange(3,20,0.5)
+        save_as_base = home_path+"results/plots/energy_evaluation/broken15_unf_on_broken15"
+        
+        
     #------------------------------Sets for mae comparison---------------------
     elif tag == "2000":
         tags = ["2000_unf_E", "2000_unf_mse_E"]
@@ -154,7 +168,7 @@ def get_saved_plots_info(tag, apply_precuts=False):
                 raise ValueError
 
     if is_a_set:
-        return [tags, label_array, which_plot], save_plot_as
+        return [tags, label_array, which_plot], save_plot_as, seperate_track_shower
     else:
         print("Working on model", model_path)
         #Where to save the plots to
@@ -263,7 +277,8 @@ def compare_plots(tags, label_array, which_plot, apply_precuts=False):
     mae_plot_data_list = []
     print("Loading the saved files of the following models:")
     for tag in tags:
-        input_for_make_hist_data, save_as_base = get_saved_plots_info(tag, apply_precuts)
+        (input_for_make_hist_data, save_as_base, 
+         seperate_track_shower) = get_saved_plots_info(tag, apply_precuts)
         hist_data_2d, mae_plot_data = make_or_load_hist_data(*input_for_make_hist_data)
         mae_plot_data_list.append(mae_plot_data)
 
