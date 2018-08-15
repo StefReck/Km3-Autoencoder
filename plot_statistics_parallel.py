@@ -5,6 +5,7 @@ Plot the successive training history of a model.
 The progress of two models will be plotted: An autoencoder, and an encoder+dense
 network that was trained successively (stage 3). Test and train loss will be 
 plotted over the epoch for both.
+Designed for matplotlib v2.0.1.
 """
 import argparse
 

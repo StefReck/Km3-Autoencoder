@@ -494,7 +494,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     elif which_one=="energy_14_200_large_enc" or which_one==36:
         brokendata_tag = "xzt_broken14"
         realdata_tag   = "xzt"
-        broken_model = "vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch??_supervised_energy_broken14_nodrop_epoch??.h5"
+        broken_model = "vgg_5_200_large/trained_vgg_5_200_large_autoencoder_epoch45_supervised_energy_broken14_drop035_epoch14.h5"
         real_model   = get_path_best_epoch("vgg_5_200_large_E_nodrop", full_path=False)
         modelidents, dataset_array = get_procedure(broken_model, real_model, 
                                                    brokendata_tag, realdata_tag)
@@ -505,7 +505,7 @@ def get_info(which_one, extra_name="", y_lims_override=None):
     elif which_one=="energy_14_200_small_enc" or which_one==37:
         brokendata_tag = "xzt_broken14"
         realdata_tag   = "xzt"
-        broken_model = "vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch??_supervised_energy_broken14_nodrop_epoch??.h5"
+        broken_model = "vgg_5_200_small/trained_vgg_5_200_small_autoencoder_epoch89_supervised_energy_broken14_nodrop_epoch11.h5"
         real_model   = get_path_best_epoch("vgg_5_200_small_E_nodrop", full_path=False)
         modelidents, dataset_array = get_procedure(broken_model, real_model, 
                                                    brokendata_tag, realdata_tag)

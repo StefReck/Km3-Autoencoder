@@ -5,6 +5,7 @@ Plot the training history of a model.
 
 This will look up the logfiles of the model, and plot train and test loss over
 the epoch.
+Designed for matplotlib v2.0.1.
 """
 
 import argparse

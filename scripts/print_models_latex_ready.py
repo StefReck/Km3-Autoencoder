@@ -20,7 +20,7 @@ models_to_print=[ #modeltag, display name
                  ["vgg_4_10c_triple", "triple"],
                  ["vgg_4_10c_triple_same_structure", "triple variation"],
                  
-                 "\\clearpage \n \\newpage \n \\section{For chapter 5} ",
+                 "\\clearpage \n \\section{For chapter 5} ",
                  ["vgg_5_channel", "600-20 filters"], 
                  ["vgg_5_picture", "600-50 filters"], 
                  ["vgg_5_morefilter_double", "600-75 filters"],
@@ -33,9 +33,9 @@ models_to_print=[ #modeltag, display name
                  ["vgg_5_200_large", "model-200 wide"],
                  ["vgg_5_200_deep", "model-200 deep"],
                  ["vgg_5_200_small", "model-200 small"], 
-                 ["vgg_5_200_shallow", "model-200 shallow"],
+                 ["vgg_5_200_shallow", "model-200 shallower"],
                  
-                 "\\clearpage \n \\newpage \n \\section{For chapter 6}",
+                 "\\clearpage \n  \\section{For chapter 7}",
                  ["channel_5n", "channel-5"], 
                  ["channel_3n_m3", "channel-3"],
                 ]

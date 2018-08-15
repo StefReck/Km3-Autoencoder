@@ -125,7 +125,7 @@ def make_options_dict(additional_options):
             pretrained_critic_path = additional_options.split("=")[1]
             options_dict["pretrained_critic_path"]=pretrained_critic_path
         
-        elif "None" in additional_options or None in additional_options:
+        elif additional_options=="None" or additional_options is None:
             pass
         
         else:
