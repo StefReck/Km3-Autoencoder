@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Compare weights of two models layer wise.
+The stats are printed in the terminal.
 """
 
 from keras.models import load_model, Model
@@ -27,6 +28,7 @@ model_path_2 = params["model_path_2"]
 #model_path_2 = "models/vgg_3_small/trained_vgg_3_small_autoencoder_epoch6_supervised_up_down_epoch1.h5"
 
 def print_layer_stats(layer_1, layer_2):
+   """ For two layers, print the names and whether the weights are equal."""
     print("Layer Names:")
     print("\t", layer_1.name, "\t", layer_2.name)
     weights_1 = np.array(layer_1.get_weights())
